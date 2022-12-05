@@ -1,13 +1,17 @@
 #include "ServerManager.hpp"
 #include "ConfigParser.hpp"
+#include "exception/ConfigParserException.hpp"
 
-int	main(int argc, char **argv, char **envp)
+int	main(int argc, char **argv)
 {
-	ConfigParser	configParser;
 	ServerManager	serverManager;
 
 	if (argc != 2)
 		return 1;
-	(void)argv;
-	(void)envp;
+	try {
+	serverManager.run(argv[1]);
+	} catch (ConfigParserException& e) {
+
+	}
+	return (0);
 }

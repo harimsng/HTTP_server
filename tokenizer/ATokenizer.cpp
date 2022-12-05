@@ -16,15 +16,3 @@ void	ATokenizer::eat(const std::string& target)
 		// throw exception
 	}
 }
-
-/*
-ATokenizer::ATokenizer(ATokenizer const& aTokenizer)
-{
-}
-
-// operators
-ATokenizer&	ATokenizer::operator=(ATokenizer const& aTokenizer)
-{
-	return *this;
-}
-*/

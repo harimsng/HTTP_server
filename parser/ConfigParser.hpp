@@ -8,7 +8,9 @@
 #include "FileTokenizer.hpp"
 #include "Server.hpp"
 
-class	ConfigParser: public AParser<FileTokenizer, std::vector<Server> >
+using namespace std;
+
+class	ConfigParser: public AParser<FileTokenizer, vector<Server> >
 {
 // deleted
 	ConfigParser(ConfigParser const& configParser);
@@ -22,17 +24,19 @@ public:
 	virtual ~ConfigParser();
 
 // member functions
-	void			init(std::string configPath);
+	void			init(const string& configPath);
 
-	virtual void	parse(std::vector<Server>& output);
+	virtual void	parse(vector<Server>& output);
 
-	void		parseServer(std::vector<Server>& output);
+// static members
+	static int		toInt(const string& str);
+
+private:
+	void			parseServer(vector<Server>& output);
 
 // member variables
 	FileTokenizer	tokenizer;
 
-// static members
-	static int		toInt(const std::string& str);
 };
 
 #endif

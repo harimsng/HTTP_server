@@ -29,9 +29,9 @@ public:
 	std::string		m_errorCode;
 	std::string		m_root;
 	std::string		m_errorPath;
-	int32_t		m_listen;
-	int32_t		m_clientMaxBodySize;
-	int32_t		m_uriBufferSize;
+	int32_t			m_listen;
+	int32_t			m_clientMaxBodySize;
+	int32_t			m_uriBufferSize;
 
 	std::vector<Location>	m_locationList;
 };

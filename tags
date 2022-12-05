@@ -1,0 +1,214 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+APARSER_HPP	parser/AParser.hpp	/^#define APARSER_HPP$/;"	d
+AParser	parser/AParser.hpp	/^	AParser() {};$/;"	f	class:AParser
+AParser	parser/AParser.hpp	/^class	AParser$/;"	c
+ATOKENIZER_HPP	tokenizer/ATokenizer.hpp	/^#define ATOKENIZER_HPP$/;"	d
+ATokenizer	tokenizer/ATokenizer.cpp	/^ATokenizer::ATokenizer()$/;"	f	class:ATokenizer
+ATokenizer	tokenizer/ATokenizer.hpp	/^class	ATokenizer$/;"	c
+CLIENT_HPP	test/Connection.hpp	/^#define CLIENT_HPP$/;"	d
+COMPILE_MODE	Makefile	/^COMPILE_MODE=	DEBUG.mode$/;"	m
+COMPILE_MODE	Makefile	/^COMPILE_MODE=	RELEASE.mode$/;"	m
+CONFIGPARSEREXCEPTION_HPP	exception/ConfigParserException.hpp	/^#define CONFIGPARSEREXCEPTION_HPP$/;"	d
+CONFIGPARSER_HPP	parser/ConfigParser.hpp	/^#define CONFIGPARSER_HPP$/;"	d
+CXX	Makefile	/^CXX			=	c++$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98$/;"	m
+ConfigParser	parser/ConfigParser.cpp	/^ConfigParser::ConfigParser()$/;"	f	class:ConfigParser
+ConfigParser	parser/ConfigParser.hpp	/^class	ConfigParser: public AParser<FileTokenizer, vector<Server> >$/;"	c
+ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::ConfigParserException(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
+ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::ConfigParserException(const string& errMsg)$/;"	f	class:ConfigParserException
+ConfigParserException	exception/ConfigParserException.hpp	/^class	ConfigParserException : public exception$/;"	c
+Connection	test/Connection.cpp	/^Connection::Connection(Connection const& connection)$/;"	f	class:Connection
+Connection	test/Connection.cpp	/^Connection::Connection(int socket)$/;"	f	class:Connection
+Connection	test/Connection.hpp	/^class	Connection$/;"	c
+DEBUGFLAGS	Makefile	/^DEBUGFLAGS	=	-g -fsanitize=address$/;"	m
+FDMANAGER_HPP	test/FdManager.hpp	/^#define FDMANAGER_HPP$/;"	d
+FILETOKENIZER_HPP	tokenizer/FileTokenizer.hpp	/^#define FILETOKENIZER_HPP$/;"	d
+FdManager	test/FdManager.cpp	/^FdManager::FdManager()$/;"	f	class:FdManager
+FdManager	test/FdManager.cpp	/^FdManager::FdManager(FdManager const& fdManager)$/;"	f	class:FdManager
+FdManager	test/FdManager.hpp	/^class	FdManager$/;"	c
+FileTokenizer	tokenizer/FileTokenizer.cpp	/^FileTokenizer::FileTokenizer()$/;"	f	class:FileTokenizer
+FileTokenizer	tokenizer/FileTokenizer.hpp	/^class	FileTokenizer: public ATokenizer$/;"	c
+GET_SOCKADDR_IN	test/ServerManager.cpp	/^#define GET_SOCKADDR_IN(/;"	d	file:
+GET_SOCKADDR_IN	test/ServerManager.cpp	/^#undef GET_SOCKADDR_IN$/;"	d	file:
+HTTPREQUESTPARSEREXCEPTION_HPP	exception/HttpRequestParserException.hpp	/^#define HTTPREQUESTPARSEREXCEPTION_HPP$/;"	d
+HTTPREQUESTPARSER_HPP	parser/HttpRequestParser.hpp	/^#define HTTPREQUESTPARSER_HPP$/;"	d
+HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::HttpRequestParser()$/;"	f	class:HttpRequestParser
+HttpRequestParser	parser/HttpRequestParser.hpp	/^class	HttpRequestParser$/;"	c
+HttpRequestParserException	exception/HttpRequestParserException.cpp	/^HttpRequestParserException::HttpRequestParserException()$/;"	f	class:HttpRequestParserException
+HttpRequestParserException	exception/HttpRequestParserException.cpp	/^HttpRequestParserException::HttpRequestParserException(HttpRequestParserException const& httpRequestParserException)$/;"	f	class:HttpRequestParserException
+HttpRequestParserException	exception/HttpRequestParserException.hpp	/^class	HttpRequestParserException$/;"	c
+INCL_PATH	Makefile	/^INCL_PATH	=	-I.\/\\$/;"	m
+IOmultiplex	test/ServerManager.cpp	/^void	ServerManager::IOmultiplex()$/;"	f	class:ServerManager
+IREQUEST_HPP	test/IRequest.hpp	/^#define IREQUEST_HPP$/;"	d
+IRESPONSE_HPP	test/IResponse.hpp	/^#define IRESPONSE_HPP$/;"	d
+IRequest	test/IRequest.hpp	/^class	IRequest$/;"	c
+IResponse	test/IResponse.hpp	/^class	IResponse$/;"	c
+LOCATIONPARSER_HPP	parser/LocationParser.hpp	/^#define LOCATIONPARSER_HPP$/;"	d
+LOCATION_HPP	Location.hpp	/^#define LOCATION_HPP$/;"	d
+Location	Location.cpp	/^Location::Location()$/;"	f	class:Location
+Location	Location.hpp	/^	Location(Location const& location) {(void)location;};$/;"	f	class:Location
+Location	Location.hpp	/^class	Location$/;"	c
+LocationParser	parser/LocationParser.cpp	/^LocationParser::LocationParser(FileTokenizer& tokenizer)$/;"	f	class:LocationParser
+LocationParser	parser/LocationParser.hpp	/^class	LocationParser: public AParser<FileTokenizer, Location>$/;"	c
+MaxFd	test/general_socket_tests.cpp	/^struct	MaxFd$/;"	s	file:
+NAME	Makefile	/^NAME		=	webserv$/;"	m
+OBJ	Makefile	/^OBJ			=	$(SRC:%.cpp=%.o)$/;"	m
+RM	Makefile	/^RM			=	rm -f$/;"	m
+SERVERMANAGER_HPP	ServerManager.hpp	/^#define SERVERMANAGER_HPP$/;"	d
+SERVERMANAGER_HPP	test/ServerManager.hpp	/^#define SERVERMANAGER_HPP$/;"	d
+SERVERPARSER_HPP	parser/ServerParser.hpp	/^#define SERVERPARSER_HPP$/;"	d
+SERVER_HPP	Server.hpp	/^#define SERVER_HPP$/;"	d
+SERVER_HPP	test/Server.hpp	/^#define SERVER_HPP$/;"	d
+SOCKETTOKENIZER_HPP	tokenizer/SocketTokenizer.hpp	/^#define SOCKETTOKENIZER_HPP$/;"	d
+SPECIAL	tokenizer/FileTokenizer.hpp	/^		SPECIAL$/;"	e	enum:FileTokenizer::e_tokenType
+SRC	Makefile	/^SRC			=	main.cpp\\$/;"	m
+Server	Server.cpp	/^Server::Server()$/;"	f	class:Server
+Server	Server.hpp	/^	Server(Server const& server) {(void)server;};$/;"	f	class:Server
+Server	Server.hpp	/^class	Server$/;"	c
+Server	test/Server.cpp	/^Server::Server(Server const& server)$/;"	f	class:Server
+Server	test/Server.cpp	/^Server::Server(int listenSocket)$/;"	f	class:Server
+Server	test/Server.hpp	/^class	Server$/;"	c
+ServerManager	ServerManager.cpp	/^ServerManager::ServerManager()$/;"	f	class:ServerManager
+ServerManager	ServerManager.hpp	/^class	ServerManager$/;"	c
+ServerManager	test/ServerManager.cpp	/^ServerManager::ServerManager()$/;"	f	class:ServerManager
+ServerManager	test/ServerManager.hpp	/^class	ServerManager$/;"	c
+ServerParser	parser/ServerParser.cpp	/^ServerParser::ServerParser(FileTokenizer& tokenizer)$/;"	f	class:ServerParser
+ServerParser	parser/ServerParser.hpp	/^class	ServerParser: public AParser<FileTokenizer, Server>$/;"	c
+SocketTokenizer	tokenizer/SocketTokenizer.cpp	/^SocketTokenizer::SocketTokenizer()$/;"	f	class:SocketTokenizer
+SocketTokenizer	tokenizer/SocketTokenizer.hpp	/^class	SocketTokenizer$/;"	c
+WORD	tokenizer/FileTokenizer.hpp	/^		WORD = 1,$/;"	e	enum:FileTokenizer::e_tokenType
+acceptConnection	test/Server.cpp	/^int	Server::acceptConnection(fd_set* readSet)$/;"	f	class:Server
+addNewServer	test/ServerManager.cpp	/^void	ServerManager::addNewServer()$/;"	f	class:ServerManager
+addServer	test/ServerManager.cpp	/^void	ServerManager::addServer(Server const& server)$/;"	f	class:ServerManager
+e_tokenType	tokenizer/FileTokenizer.hpp	/^	enum e_tokenType {$/;"	g	class:FileTokenizer
+eat	tokenizer/ATokenizer.cpp	/^void	ATokenizer::eat(const std::string& target)$/;"	f	class:ATokenizer
+empty	tokenizer/FileTokenizer.cpp	/^FileTokenizer::empty() const$/;"	f	class:FileTokenizer
+get	tokenizer/FileTokenizer.cpp	/^FileTokenizer::get()$/;"	f	class:FileTokenizer
+getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
+getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog()$/;"	f	class:FileTokenizer
+getListenSocket	test/ServerManager.cpp	/^int	ServerManager::getListenSocket()$/;"	f	class:ServerManager
+init	parser/ConfigParser.cpp	/^ConfigParser::init(const string& configPath)$/;"	f	class:ConfigParser
+init	test/FdManager.cpp	/^void	FdManager::init()$/;"	f	class:FdManager
+init	test/Server.cpp	/^void	Server::init()$/;"	f	class:Server
+init	tokenizer/FileTokenizer.cpp	/^FileTokenizer::init(const string& path)$/;"	f	class:FileTokenizer
+isValidFileName	tokenizer/FileTokenizer.cpp	/^FileTokenizer::isValidFileName(const string& path)$/;"	f	class:FileTokenizer
+m_alias	Location.hpp	/^	std::string		m_alias;$/;"	m	class:Location
+m_buffer	tokenizer/ATokenizer.hpp	/^	char				m_buffer[1024];$/;"	m	class:ATokenizer
+m_cgiPass	Location.hpp	/^	std::string		m_cgiPass;$/;"	m	class:Location
+m_clientMaxBodySize	Location.hpp	/^	std::string		m_clientMaxBodySize;$/;"	m	class:Location
+m_clientMaxBodySize	Server.hpp	/^	int32_t			m_clientMaxBodySize;$/;"	m	class:Server
+m_configParser	ServerManager.hpp	/^	ConfigParser	m_configParser;$/;"	m	class:ServerManager
+m_connectionVec	test/Server.hpp	/^	std::vector<std::pair<int, Connection>>	m_connectionVec;$/;"	m	class:Server
+m_errMsg	exception/ConfigParserException.hpp	/^	string m_errMsg;$/;"	m	class:ConfigParserException
+m_errorCode	Server.hpp	/^	std::string		m_errorCode;$/;"	m	class:Server
+m_errorPath	Server.hpp	/^	std::string		m_errorPath;$/;"	m	class:Server
+m_exceptionSet	test/FdManager.hpp	/^	fd_set		m_exceptionSet;$/;"	m	class:FdManager
+m_expires	Location.hpp	/^	std::string		m_expires;$/;"	m	class:Location
+m_fdManager	test/ServerManager.hpp	/^	FdManager			m_fdManager;$/;"	m	class:ServerManager
+m_idx	tokenizer/FileTokenizer.hpp	/^	unsigned int	m_idx;$/;"	m	class:FileTokenizer
+m_index	Location.hpp	/^	std::string		m_index;$/;"	m	class:Location
+m_index	Server.hpp	/^	std::string		m_index;$/;"	m	class:Server
+m_limitExcept	Location.hpp	/^	std::string		m_limitExcept;$/;"	m	class:Location
+m_listen	Server.hpp	/^	int32_t			m_listen;$/;"	m	class:Server
+m_listenSocket	test/Server.hpp	/^	int 									m_listenSocket;$/;"	m	class:Server
+m_locationList	Server.hpp	/^	std::vector<Location>	m_locationList;$/;"	m	class:Server
+m_maxFd	test/FdManager.hpp	/^	int			m_maxFd;$/;"	m	class:FdManager
+m_path	Location.hpp	/^	std::string		m_path;$/;"	m	class:Location
+m_pos	test/Connection.hpp	/^	std::size_t		m_pos;$/;"	m	class:Connection
+m_proxyPass	Location.hpp	/^	std::string		m_proxyPass;$/;"	m	class:Location
+m_readSet	test/FdManager.hpp	/^	fd_set		m_readSet;$/;"	m	class:FdManager
+m_request	test/Connection.hpp	/^	IRequest*		m_request;$/;"	m	class:Connection
+m_response	test/Connection.hpp	/^	IResponse*		m_response;$/;"	m	class:Connection
+m_root	Location.hpp	/^	std::string		m_root;$/;"	m	class:Location
+m_root	Server.hpp	/^	std::string		m_root;$/;"	m	class:Server
+m_serverList	ServerManager.hpp	/^	vector<Server>	m_serverList;$/;"	m	class:ServerManager
+m_serverName	Server.hpp	/^	std::string		m_serverName;$/;"	m	class:Server
+m_serverVec	test/ServerManager.hpp	/^	std::vector<Server>	m_serverVec;$/;"	m	class:ServerManager
+m_size	test/Connection.hpp	/^	std::size_t		m_size;$/;"	m	class:Connection
+m_size	tokenizer/ATokenizer.hpp	/^	unsigned int		m_size;$/;"	m	class:ATokenizer
+m_socket	test/Connection.hpp	/^	int const		m_socket;$/;"	m	class:Connection
+m_tokenArr	tokenizer/FileTokenizer.hpp	/^	vector<string>	m_tokenArr;$/;"	m	class:FileTokenizer
+m_tokenizer	parser/LocationParser.hpp	/^	FileTokenizer&		m_tokenizer;$/;"	m	class:LocationParser
+m_tokenizer	parser/ServerParser.hpp	/^	FileTokenizer&		m_tokenizer;$/;"	m	class:ServerParser
+m_uriBufferSize	Server.hpp	/^	int32_t			m_uriBufferSize;$/;"	m	class:Server
+m_writeSet	test/FdManager.hpp	/^	fd_set		m_writeSet;$/;"	m	class:FdManager
+main	main.cpp	/^int	main(int argc, char **argv)$/;"	f
+main	test.cpp	/^int main(void)$/;"	f
+main	test/general_socket_tests.cpp	/^int	main()$/;"	f
+main	test/syscall_test/getsocketopt_nonblock.cpp	/^int	main()$/;"	f
+operator =	exception/ConfigParserException.cpp	/^ConfigParserException::operator=(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
+operator =	exception/HttpRequestParserException.cpp	/^HttpRequestParserException&	HttpRequestParserException::operator=(HttpRequestParserException const& httpRequestParserException)$/;"	f	class:HttpRequestParserException
+operator =	test/Connection.cpp	/^Connection&	Connection::operator=(Connection const& connection)$/;"	f	class:Connection
+operator =	test/FdManager.cpp	/^FdManager&	FdManager::operator=(FdManager const& fdManager)$/;"	f	class:FdManager
+operator =	test/Server.cpp	/^Server&	Server::operator=(Server const& server)$/;"	f	class:Server
+parse	parser/ConfigParser.cpp	/^ConfigParser::parse(vector<Server>& output)$/;"	f	class:ConfigParser
+parse	parser/LocationParser.cpp	/^LocationParser::parse(Location& location)$/;"	f	class:LocationParser
+parse	parser/ServerParser.cpp	/^ServerParser::parse(Server& server)$/;"	f	class:ServerParser
+parseLocation	parser/ServerParser.cpp	/^ServerParser::parseLocation(Server& server)$/;"	f	class:ServerParser
+parseServer	parser/ConfigParser.cpp	/^ConfigParser::parseServer(vector<Server>& output)$/;"	f	class:ConfigParser
+peek	tokenizer/FileTokenizer.cpp	/^FileTokenizer::peek()$/;"	f	class:FileTokenizer
+readData	test/Connection.cpp	/^int	Connection::readData()$/;"	f	class:Connection
+readOperation	test/Server.cpp	/^void	Server::readOperation(fd_set* fdSet)$/;"	f	class:Server
+receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
+run	ServerManager.cpp	/^ServerManager::run(const string& path)$/;"	f	class:ServerManager
+s_bufferSize	test/Connection.hpp	/^	static std::size_t const	s_bufferSize = 1024;$/;"	m	class:Connection::std
+s_locationSetterMap	parser/LocationParser.hpp	/^	static std::map<std::string, t_setter>	s_locationSetterMap;$/;"	m	class:LocationParser
+s_maxFd	test/general_socket_tests.cpp	/^	static int	s_maxFd;$/;"	m	struct:MaxFd	file:
+s_serverSetterMap	parser/ServerParser.hpp	/^	static std::map<std::string, t_setter>	s_serverSetterMap;$/;"	m	class:ServerParser
+s_writeSetPtr	test/Connection.hpp	/^	static fd_set*				s_writeSetPtr;$/;"	m	class:Connection
+sender	test/syscall_test/getsocketopt_nonblock.cpp	/^void	sender() try$/;"	f
+setAlias	parser/LocationParser.cpp	/^LocationParser::setAlias(Location& location)$/;"	f	class:LocationParser
+setCgiPass	parser/LocationParser.cpp	/^LocationParser::setCgiPass(Location& location)$/;"	f	class:LocationParser
+setClientMaxBodySize	parser/LocationParser.cpp	/^LocationParser::setClientMaxBodySize(Location& location)$/;"	f	class:LocationParser
+setClientMaxBodySize	parser/ServerParser.cpp	/^ServerParser::setClientMaxBodySize(Server& server)$/;"	f	class:ServerParser
+setErrorCode	parser/ServerParser.cpp	/^ServerParser::setErrorCode(Server& server)$/;"	f	class:ServerParser
+setErrorPath	parser/ServerParser.cpp	/^ServerParser::setErrorPath(Server& server)$/;"	f	class:ServerParser
+setExpires	parser/LocationParser.cpp	/^LocationParser::setExpires(Location& location)$/;"	f	class:LocationParser
+setIndex	parser/LocationParser.cpp	/^LocationParser::setIndex(Location& location)$/;"	f	class:LocationParser
+setIndex	parser/ServerParser.cpp	/^ServerParser::setIndex(Server& server)$/;"	f	class:ServerParser
+setLimitExcept	parser/LocationParser.cpp	/^LocationParser::setLimitExcept(Location& location)$/;"	f	class:LocationParser
+setListenPort	parser/ServerParser.cpp	/^ServerParser::setListenPort(Server& server)$/;"	f	class:ServerParser
+setLocationSetterMap	parser/LocationParser.cpp	/^void	LocationParser::setLocationSetterMap()$/;"	f	class:LocationParser
+setPath	parser/LocationParser.cpp	/^LocationParser::setPath(Location& location)$/;"	f	class:LocationParser
+setProxyPass	parser/LocationParser.cpp	/^LocationParser::setProxyPass(Location& location)$/;"	f	class:LocationParser
+setRoot	parser/LocationParser.cpp	/^LocationParser::setRoot(Location& location)$/;"	f	class:LocationParser
+setRoot	parser/ServerParser.cpp	/^ServerParser::setRoot(Server& server)$/;"	f	class:ServerParser
+setServerName	parser/ServerParser.cpp	/^ServerParser::setServerName(Server& server)$/;"	f	class:ServerParser
+setServerSetterMap	parser/ServerParser.cpp	/^void	ServerParser::setServerSetterMap()$/;"	f	class:ServerParser
+setUriBufferSize	parser/ServerParser.cpp	/^ServerParser::setUriBufferSize(Server& server)$/;"	f	class:ServerParser
+t_setter	parser/LocationParser.hpp	/^	typedef void	(LocationParser::*t_setter)(Location&);$/;"	t	class:LocationParser
+t_setter	parser/ServerParser.hpp	/^	typedef void	(ServerParser::*t_setter)(Server&);$/;"	t	class:ServerParser
+tasMaxFd	test/general_socket_tests.cpp	/^	static int	tasMaxFd(int fd)$/;"	f	struct:MaxFd
+toInt	parser/ConfigParser.cpp	/^ConfigParser::toInt(const string& str)$/;"	f	class:ConfigParser
+tokenize	tokenizer/FileTokenizer.cpp	/^FileTokenizer::tokenize(const string& chunk)$/;"	f	class:FileTokenizer
+tokenizer	parser/AParser.hpp	/^	Tokenizer	tokenizer;$/;"	m	class:AParser
+tokenizer	parser/ConfigParser.hpp	/^	FileTokenizer	tokenizer;$/;"	m	class:ConfigParser
+webserv	webserv.hpp	/^class webserv$/;"	c
+webserv_hpp	webserv.hpp	/^#define webserv_hpp$/;"	d
+what	exception/ConfigParserException.cpp	/^ConfigParserException::what() const throw()$/;"	f	class:ConfigParserException
+writeData	test/Connection.cpp	/^int	Connection::writeData()$/;"	f	class:Connection
+writeOperation	test/Server.cpp	/^void	Server::writeOperation(fd_set* fdSet)$/;"	f	class:Server
+~AParser	parser/AParser.hpp	/^	virtual ~AParser() {};$/;"	f	class:AParser
+~ATokenizer	tokenizer/ATokenizer.cpp	/^ATokenizer::~ATokenizer()$/;"	f	class:ATokenizer
+~ConfigParser	parser/ConfigParser.cpp	/^ConfigParser::~ConfigParser()$/;"	f	class:ConfigParser
+~ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::~ConfigParserException() throw()$/;"	f	class:ConfigParserException
+~Connection	test/Connection.cpp	/^Connection::~Connection()$/;"	f	class:Connection
+~FdManager	test/FdManager.cpp	/^FdManager::~FdManager()$/;"	f	class:FdManager
+~FileTokenizer	tokenizer/FileTokenizer.cpp	/^FileTokenizer::~FileTokenizer()$/;"	f	class:FileTokenizer
+~HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::~HttpRequestParser()$/;"	f	class:HttpRequestParser
+~HttpRequestParserException	exception/HttpRequestParserException.cpp	/^HttpRequestParserException::~HttpRequestParserException()$/;"	f	class:HttpRequestParserException
+~IRequest	test/IRequest.hpp	/^	virtual ~IRequest() {};$/;"	f	class:IRequest
+~IResponse	test/IResponse.hpp	/^	virtual ~IResponse() {};$/;"	f	class:IResponse
+~Location	Location.cpp	/^Location::~Location()$/;"	f	class:Location
+~LocationParser	parser/LocationParser.cpp	/^LocationParser::~LocationParser()$/;"	f	class:LocationParser
+~Server	Server.cpp	/^Server::~Server()$/;"	f	class:Server
+~Server	test/Server.cpp	/^Server::~Server()$/;"	f	class:Server
+~ServerManager	ServerManager.cpp	/^ServerManager::~ServerManager()$/;"	f	class:ServerManager
+~ServerManager	test/ServerManager.cpp	/^ServerManager::~ServerManager()$/;"	f	class:ServerManager
+~ServerParser	parser/ServerParser.cpp	/^ServerParser::~ServerParser()$/;"	f	class:ServerParser
+~SocketTokenizer	tokenizer/SocketTokenizer.cpp	/^SocketTokenizer::~SocketTokenizer()$/;"	f	class:SocketTokenizer

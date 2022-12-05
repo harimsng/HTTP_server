@@ -1,10 +1,14 @@
 #ifndef FILETOKENIZER_HPP
 #define FILETOKENIZER_HPP
 
+#include <sys/stat.h>
+
 #include <fstream>
 #include <stdexcept>
 
 #include "ATokenizer.hpp"
+
+using namespace std;
 
 class	FileTokenizer: public ATokenizer
 {
@@ -12,6 +16,12 @@ class	FileTokenizer: public ATokenizer
 		WORD = 1,
 		SPECIAL
 	};
+
+	// need token struct?
+	// struct token {
+	//     e_tokenType type;
+	//     string		token;
+	// };
 // deleted
 	FileTokenizer(FileTokenizer const& fileTokenizer);
 	FileTokenizer	&operator=(FileTokenizer const& fileTokenizer);
@@ -22,19 +32,20 @@ public:
 	~FileTokenizer();
 
 // member functions
-	void				init(std::string const path);
+	void					init(const string& path);
 
-	virtual std::string const&	peek();
-	virtual std::string const&	get();
-	virtual bool				empty() const;
+	virtual const string&	peek();
+	virtual const string&	get();
+	virtual bool			empty() const;
 
 private:
-	std::string&	getErrorLog();
-	void			tokenize(const std::string& chunk);
+	string&			getErrorLog();
+	void			tokenize(const string& chunk);
+	bool			isValidFileName(const string& path);
 
 // member variables
-	std::vector<std::string>	m_tokenArr;
-	unsigned int				m_idx;
+	vector<string>	m_tokenArr;
+	unsigned int	m_idx;
 };
 
 #endif

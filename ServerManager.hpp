@@ -4,6 +4,9 @@
 #include <vector>
 
 #include "Server.hpp"
+#include "ConfigParser.hpp"
+
+using namespace std;
 
 class	ServerManager
 {
@@ -17,10 +20,11 @@ public:
 	ServerManager	&operator=(ServerManager const& serverManager);
 
 // member functions
-	void	run();
+	void			run(const string& path);
 
 // member variables
-	std::vector<Server>	m_serverList;
+	vector<Server>	m_serverList;
+	ConfigParser	m_configParser;
 };
 
 #endif

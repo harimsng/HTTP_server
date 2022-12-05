@@ -1,7 +1,5 @@
 #include "FileTokenizer.hpp"
 
-using namespace std;
-
 // constructors & destructor
 FileTokenizer::FileTokenizer()
 {
@@ -11,62 +9,57 @@ FileTokenizer::~FileTokenizer()
 {
 }
 
-const std::string&
+const string&
 FileTokenizer::peek()
 {
 	return (m_tokenArr[m_idx]);
 }
 
-const std::string&
+const string&
 FileTokenizer::get()
 {
 	if (peek() == "")
 	{
 		// throw exception
 	}
-	return (m_tokenArr[m_idx++]);
+	m_idx++;
+	return (m_tokenArr[m_idx - 1]);
 }
 
 bool
 FileTokenizer::empty() const
 {
-	return m_idx >= m_tokenArr.size() - 1;
+	return (m_idx >= m_tokenArr.size() - 1);
 }
 
-std::string&
+string&
 FileTokenizer::getErrorLog()
 {
 	return m_tokenArr[m_idx];
 }
 
 void
-FileTokenizer::tokenize(const std::string& chunk)
+FileTokenizer::tokenize(const string& chunk)
 {
-	std::string	token;
-	
-	for (int i = 0; i < chunk.size(); ++i)
-	{
-		
-	}
+	// string	token;
+
+	m_tokenArr.push_back(chunk);
+	// for (size_t i = 0; i < chunk.size(); ++i)
+	// {
+    //
+	// }
 }
 
 void
-FileTokenizer::init(const std::string path)
+FileTokenizer::init(const string& path)
 {
-	size_t extPos = path.find(".");
-	if (extPos == std::string::npos)
+	if (!isValidFileName(path))
 	{
 		// throw exception;
 	}
 
-	std::string extension = path.substr(path.find_last_of("."));
-	if (extension != ".conf")
-	{
-		//throw exception;
-	}
-
-	std::fstream	fileStream(path.c_str());
-	std::string		chunk;
+	fstream	fileStream(path.c_str());
+	string	chunk;
 	while (fileStream.good() == true)
 	{
 		fileStream >> chunk;
@@ -77,5 +70,25 @@ FileTokenizer::init(const std::string path)
 		// throw exception;
 	}
 	m_idx = 0;
+	m_tokenArr.push_back("");
 }
 
+bool
+FileTokenizer::isValidFileName(const string& path)
+{
+	struct stat	buffer;
+	string		extension;
+	size_t		extPos;
+	int			exist;
+
+	extPos = path.find(".");
+	if (extPos == string::npos)
+		return (false);
+	extension = path.substr(path.find_last_of("."));
+	if (extension != ".conf")
+		return (false);
+	exist = stat(path.c_str(), &buffer);
+	if (exist == 0 && ((buffer.st_mode & S_IFMT) == S_IFREG))
+		return (true);
+	return (false);
+}

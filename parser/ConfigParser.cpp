@@ -16,7 +16,7 @@ ConfigParser::~ConfigParser()
 }
 
 void
-ConfigParser::init(string configPath)
+ConfigParser::init(const string& configPath)
 {
 	tokenizer.init(configPath);
 }
@@ -34,7 +34,7 @@ void
 ConfigParser::parseServer(vector<Server>& output)
 {
 	tokenizer.eat("{");
-	
+
 	ServerParser	serverParser(tokenizer);
 
 	output.push_back(Server());
