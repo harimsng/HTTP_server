@@ -1,0 +1,211 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "main.o",
+      "main.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/main.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "ServerManager.o",
+      "ServerManager.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/ServerManager.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/ServerManager.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "Server.o",
+      "Server.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/Server.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/Server.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "Location.o",
+      "Location.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/Location.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/Location.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/ConfigParser.o",
+      "parser/ConfigParser.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/ConfigParser.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/ConfigParser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/ServerParser.o",
+      "parser/ServerParser.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/ServerParser.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/ServerParser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/LocationParser.o",
+      "parser/LocationParser.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/LocationParser.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/LocationParser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/HttpRequestParser.o",
+      "parser/HttpRequestParser.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/HttpRequestParser.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/HttpRequestParser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/tokenizer/SocketTokenizer.o",
+      "parser/tokenizer/SocketTokenizer.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/SocketTokenizer.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/SocketTokenizer.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/tokenizer/FileTokenizer.o",
+      "parser/tokenizer/FileTokenizer.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/FileTokenizer.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/FileTokenizer.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-Iparser/",
+      "-Iparser/tokenizer/",
+      "-o",
+      "parser/tokenizer/ATokenizer.o",
+      "parser/tokenizer/ATokenizer.cpp"
+    ],
+    "directory": "/home/hseong/ft-project-repo/core5/webserv",
+    "file": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/ATokenizer.cpp",
+    "output": "/home/hseong/ft-project-repo/core5/webserv/parser/tokenizer/ATokenizer.o"
+  }
+]
