@@ -23,12 +23,25 @@ SRC			=	main.cpp\
 \
 				exception/ConfigParserException.cpp\
 				exception/HttpRequestParserException.cpp\
+\
+				socket/ClientSocket.cpp\
+				socket/ServerSocket.cpp\
+\
+				communicator/Communicator.cpp\
+				communicator/Request.cpp\
+				communicator/Response.cpp\
+\
+				cgi/cgi.cpp\
+
 
 OBJ			=	$(SRC:%.cpp=%.o)
 
 INCL_PATH	=	-I./\
 				-Iparser/\
-				-Itokenizer/
+				-Itokenizer/\
+				-Isocket/\
+				-Icommunicator/\
+				-Icgi/
 
 ifeq ($(DEBUG_MODE), 1)
 CXXFLAGS	+=	$(DEBUGFLAGS)
