@@ -11,13 +11,13 @@ FileTokenizer::~FileTokenizer()
 {
 }
 
-const std::string&
+const string&
 FileTokenizer::peek()
 {
 	return (m_tokenArr[m_idx]);
 }
 
-const std::string&
+const string&
 FileTokenizer::get()
 {
 	if (peek() == "")
@@ -33,7 +33,7 @@ FileTokenizer::empty() const
 	return m_idx >= m_tokenArr.size() - 1;
 }
 
-std::string&
+string&
 FileTokenizer::getErrorLog()
 {
 	return m_tokenArr[m_idx];
@@ -42,9 +42,9 @@ FileTokenizer::getErrorLog()
 void
 FileTokenizer::tokenize(const std::string& chunk)
 {
-	std::string	token;
+	string	token;
 	
-	for (int i = 0; i < chunk.size(); ++i)
+	for (string::size_type i = 0; i < chunk.size(); ++i)
 	{
 		
 	}

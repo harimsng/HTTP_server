@@ -68,4 +68,4 @@ $(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCL_PATH)
 
 $(OBJ): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $< $(INC_OPTOIN)
+	$(CXX) $(CXXFLAGS) -c -o $@ $< $(INCL_PATH)
