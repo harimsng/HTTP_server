@@ -23,16 +23,14 @@ public:
 
 // member functions
 	void			init(std::string configPath);
+	bool			checkFileStat(const char* path);
 
 	virtual void	parse(std::vector<Server>& output);
-
-	void		parseServer(std::vector<Server>& output);
-
-// member variables
-	FileTokenizer	tokenizer;
+	void			parseServer(std::vector<Server>& output);
 
 // static members
 	static int		toInt(const std::string& str);
+	static std::string		toString(int num);
 };
 
 #endif

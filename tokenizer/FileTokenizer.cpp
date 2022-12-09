@@ -1,6 +1,13 @@
+#include <sstream>
+#include <iostream>
+
+#include "ConfigParser.hpp"
 #include "FileTokenizer.hpp"
+#include "FileTokenizerException.hpp"
 
 using namespace std;
+
+const std::string	FileTokenizer::s_eot = "";
 
 // constructors & destructor
 FileTokenizer::FileTokenizer()
@@ -14,68 +21,139 @@ FileTokenizer::~FileTokenizer()
 const string&
 FileTokenizer::peek()
 {
-	return (m_tokenArr[m_idx]);
+	if (empty() == true)
+		return s_eot;
+	return (m_tokenArr[m_idx].first);
 }
 
 const string&
 FileTokenizer::get()
 {
-	if (peek() == "")
-	{
-		// throw exception
-	}
-	return (m_tokenArr[m_idx++]);
+	if (empty() == true)
+		throw FileTokenizerException("consumed every tokens");
+	return (m_tokenArr[m_idx++].first);
+}
+
+void
+FileTokenizer::eat(const string& target)
+{
+	if (get() != target)
+		throw m_idx > 1 ? m_idx - 2 : 0;
+}
+
+unsigned int
+FileTokenizer::size()
+{
+	return m_tokenArr.size();
 }
 
 bool
 FileTokenizer::empty() const
 {
-	return m_idx >= m_tokenArr.size() - 1;
+	return m_idx >= m_tokenArr.size();
 }
 
-string&
-FileTokenizer::getErrorLog()
+string
+FileTokenizer::getErrorLog(int idx)
 {
-	return m_tokenArr[m_idx];
+	int		errorLineNumber = m_tokenArr[idx].second;
+	string	errorLine;
+	string	errorLog;
+
+	m_fstream.clear();
+	m_fstream.seekg(ios_base::beg);
+	cout << "parse error\n";
+	for (int i = 1; i < errorLineNumber - 2; ++i)
+		getline(m_fstream, errorLine);
+
+	if (errorLineNumber >= 3)
+	{
+		getline(m_fstream, errorLine);
+		errorLine = "line " + ConfigParser::toString(errorLineNumber - 2) + ": " + errorLine;
+		errorLog += errorLine + "\n";
+	}
+	if (errorLineNumber >= 2)
+	{
+		getline(m_fstream, errorLine);
+		errorLine = "line " + ConfigParser::toString(errorLineNumber - 1) + ": " + errorLine;
+		errorLog += errorLine + "\n";
+	}
+	getline(m_fstream, errorLine);
+	errorLine = "line " + ConfigParser::toString(errorLineNumber) + ": " + errorLine;
+	errorLog += errorLine + "        << error line\n";
+	return errorLog;
 }
 
 void
-FileTokenizer::tokenize(const std::string& chunk)
+FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 {
-	string	token;
-	
-	for (string::size_type i = 0; i < chunk.size(); ++i)
+	for (string::size_type start = 0, end = 0; end < chunk.size(); ++end)
 	{
-		
+		if (chunk[end] == ';' || chunk[end] == '{' || chunk[end] == '}')
+		{
+			if (start != end)
+				m_tokenArr.push_back(make_pair(chunk.substr(start, end - start), lineNumber));
+			m_tokenArr.push_back(make_pair(string(1, chunk[end]), lineNumber));
+			start = end + 1;
+		}
+		else if (chunk[end] == '\0')
+		{
+			if (start != end)
+				m_tokenArr.push_back(make_pair(chunk.substr(start, end - start), lineNumber));
+		}
 	}
 }
 
 void
 FileTokenizer::init(const std::string path)
 {
-	size_t extPos = path.find(".");
-	if (extPos == std::string::npos)
-	{
-		// throw exception;
-	}
+	string		line;
 
-	std::string extension = path.substr(path.find_last_of("."));
-	if (extension != ".conf")
+	m_fstream.open(path);
+	for (int lineNumber = 1; m_fstream.good() == true; ++lineNumber)
 	{
-		//throw exception;
-	}
+		if (std::getline(m_fstream, line).good() == false)
+			break;
+		if (line == "")
+			continue;
 
-	std::fstream	fileStream(path.c_str());
-	std::string		chunk;
-	while (fileStream.good() == true)
-	{
-		fileStream >> chunk;
-		tokenize(chunk);
+		stringstream	ss(line);
+		string			chunk;
+
+		while (ss.good())
+		{
+			ss >> chunk;
+			chunk.push_back('\0');
+			tokenize(chunk, lineNumber);
+		}
 	}
-	if (fileStream.fail())
-	{
-		// throw exception;
-	}
+	if (m_fstream.eof() == false && m_fstream.fail())
+		throw FileTokenizerException("file read error");
 	m_idx = 0;
+	printTokens();
 }
 
+void
+FileTokenizer::printTokens() const
+{
+	for (unsigned int i = 0; i < m_tokenArr.size(); ++i)
+		cout << "\'" << m_tokenArr[i].first << "'\n";
+}
+
+void
+FileTokenizer::printTokensByLine() const
+{
+	int		line = 1;
+
+	cout << "line 1: ";
+	for (unsigned int i = 0; i < m_tokenArr.size(); ++i)
+	{
+		if (line != m_tokenArr[i].second)
+		{
+			++line;
+			cout << "\nline " + ConfigParser::toString(line) + ": ";
+		}
+		cout << m_tokenArr[i].first << ' ';
+	}
+	cout << "\n";
+}

@@ -6,6 +6,7 @@
 class	Location
 {
 	friend class	LocationParser;
+	friend class	ServerParser;
 
 // deleted
 	Location	&operator=(Location const& location);
@@ -18,6 +19,7 @@ public:
 
 // member functions
 
+private:
 // member variables
 	std::string		m_index;
 	std::string		m_expires;

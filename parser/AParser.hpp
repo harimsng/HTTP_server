@@ -10,6 +10,8 @@ class	AParser
 	AParser	&operator=(AParser const& aParser);
 
 protected:
+	typedef OutputClass		output_type;
+
 // constructors & destructor
 	AParser() {};
 	virtual ~AParser() {};
@@ -18,7 +20,7 @@ protected:
 	virtual void	parse(OutputClass& outputClass) = 0;
 
 // member variables
-	Tokenizer	tokenizer;
+	Tokenizer	m_tokenizer;
 };
 
 #endif

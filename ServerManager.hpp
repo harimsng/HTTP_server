@@ -17,8 +17,10 @@ public:
 	ServerManager	&operator=(ServerManager const& serverManager);
 
 // member functions
+	void	parse(const char* path);
 	void	run();
 
+private:
 // member variables
 	std::vector<Server>	m_serverList;
 };

@@ -17,7 +17,6 @@ public:
 // member functions
 	virtual std::string const&	peek() = 0;
 	virtual std::string const&	get() = 0;
-	virtual void				eat(const std::string& target);
 	virtual bool				empty() const = 0;
 
 private:

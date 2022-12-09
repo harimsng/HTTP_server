@@ -1,18 +1,25 @@
 #ifndef CONFIGPARSEREXCEPTION_HPP
 #define CONFIGPARSEREXCEPTION_HPP
 
-class	ConfigParserException
+#include <stdexcept>
+#include <string>
+
+#include "ConfigParser.hpp"
+
+class	ConfigParser::ConfigParserException: public std::exception
 {
 public:
-// constructors & destructor
-	ConfigParserException();
-	~ConfigParserException();
-	ConfigParserException(ConfigParserException const& configParserException);
+	ConfigParserException(const std::string& message): m_message("ConfigParserException: " + message) {};
 
-// operators
-	ConfigParserException	&operator=(ConfigParserException const& configParserException);
+	virtual ~ConfigParserException() throw() {};
 
-// member functions
+	virtual const char*	what() const throw()
+	{
+		return m_message.c_str();
+	}
+
+private:
+	std::string	m_message;
 };
 
 #endif

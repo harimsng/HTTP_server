@@ -8,10 +8,10 @@
 
 class	FileTokenizer: public ATokenizer
 {
-	enum e_tokenType {
-		WORD = 1,
-		SPECIAL
-	};
+	class	FileTokenizerException;
+
+	typedef std::pair<std::string, int>	t_tokenInfo;
+
 // deleted
 	FileTokenizer(FileTokenizer const& fileTokenizer);
 	FileTokenizer	&operator=(FileTokenizer const& fileTokenizer);
@@ -24,17 +24,25 @@ public:
 // member functions
 	void				init(std::string const path);
 
-	virtual std::string const&	peek();
-	virtual std::string const&	get();
+	virtual const std::string&	peek();
+	virtual const std::string&	get();
 	virtual bool				empty() const;
+	void						eat(const std::string& target);
+	unsigned int				size();
+
+	std::string		getErrorLog(int idx);
+	void			printTokensByLine() const;
+	void			printTokens() const;
 
 private:
-	std::string&	getErrorLog();
-	void			tokenize(const std::string& chunk);
+	void			tokenize(const std::string& chunk, int lineNumber);
 
 // member variables
-	std::vector<std::string>	m_tokenArr;
+	std::fstream				m_fstream;
+	std::vector<t_tokenInfo>	m_tokenArr;
 	unsigned int				m_idx;
+
+	static const std::string	s_eot;
 };
 
 #endif

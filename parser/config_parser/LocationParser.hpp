@@ -15,6 +15,12 @@ class	LocationParser: public AParser<FileTokenizer, Location>
 	LocationParser	&operator=(LocationParser const& locationParser);
 
 public:
+// static members
+	typedef void	(LocationParser::*t_setter)(Location&);
+
+	static std::map<std::string, t_setter>	s_locationSetterMap;
+	static void								setLocationSetterMap();
+
 // constructors & destructor
 	LocationParser(FileTokenizer& tokenizer);
 	virtual ~LocationParser();
@@ -32,14 +38,9 @@ public:
 	void		setAlias(Location& location);
 	void		setClientMaxBodySize(Location& location);
 
+private:
 // member variables
 	FileTokenizer&		m_tokenizer;
-
-// static members
-	typedef void	(LocationParser::*t_setter)(Location&);
-
-	static std::map<std::string, t_setter>	s_locationSetterMap;
-	static void								setLocationSetterMap();
 };
 
 #endif

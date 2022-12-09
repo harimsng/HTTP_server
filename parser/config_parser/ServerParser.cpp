@@ -21,8 +21,8 @@ void	ServerParser::setServerSetterMap()
 }
 
 // constructors & destructor
-ServerParser::ServerParser(FileTokenizer& tokenizer)
-:	m_tokenizer(tokenizer)
+ServerParser::ServerParser(FileTokenizer& m_tokenizer)
+:	m_tokenizer(m_tokenizer)
 {
 }
 
@@ -36,20 +36,23 @@ ServerParser::parse(Server& server)
 {
 	while (s_serverSetterMap.count(m_tokenizer.peek()) == 1)
 	{
-		(this->*s_serverSetterMap[m_tokenizer.peek()])(server);
+		(this->*s_serverSetterMap[m_tokenizer.get()])(server);
 	}
 }
 
 void
 ServerParser::parseLocation(Server& server)
 {
-	tokenizer.eat("{");
+	string	locationPath = m_tokenizer.get();
 
-	LocationParser	locationParser(tokenizer);
+	m_tokenizer.eat("{");
+
+	LocationParser	locationParser(m_tokenizer);
 
 	server.m_locationList.push_back(Location());
+	server.m_locationList.back().m_path = locationPath;
 	locationParser.parse(server.m_locationList.back());
-	tokenizer.eat("}");
+	m_tokenizer.eat("}");
 }
 
 // setters
@@ -57,46 +60,54 @@ void
 ServerParser::setIndex(Server& server)
 {
 	server.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setServerName(Server& server)
 {
 	server.m_serverName = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setListenPort(Server& server)
 {
 	server.m_listen = ConfigParser::toInt(m_tokenizer.get());
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setRoot(Server& server)
 {
 	server.m_root = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setErrorPath(Server& server)
 {
 	server.m_errorPath = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setErrorCode(Server& server)
 {
 	server.m_errorCode = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setClientMaxBodySize(Server& server)
 {
 	server.m_clientMaxBodySize = ConfigParser::toInt(m_tokenizer.get());
+	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setUriBufferSize(Server& server)
 {
 	server.m_uriBufferSize = ConfigParser::toInt(m_tokenizer.get());
+	m_tokenizer.eat(";");
 }
