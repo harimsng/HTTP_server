@@ -58,6 +58,10 @@ compile_commands.json
 tags
 *.DS_Store
 .vimspector.json
+<<<<<<< HEAD
 webserv
 errlog.txt
 *.bla
+=======
+.cache
+>>>>>>> 9564924c78fa52e46b464c20f41bbc8001b921cd

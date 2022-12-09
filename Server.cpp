@@ -96,7 +96,6 @@ Server::readEventHandler(struct kevent* curEvent)
 
 		clientSocket.createSocket(m_serverSocket);
 		m_clientSocket.insert(make_pair(clientSocket.m_SocketFd, clientSocket));
-		m_communicator.insert(make_pair(curEvent->ident, Communicator(curEvent->ident)));
 		addEvents(clientSocket.m_SocketFd, EVFILT_READ,
 				EV_ADD | EV_ENABLE, 0, 0, NULL);
 		return (1);
@@ -104,7 +103,8 @@ Server::readEventHandler(struct kevent* curEvent)
 	else
 	{
 		// request class가 ClientSocket의 fd를 가지고와서 read 실행?
-		m_communicator[curEvent->ident].readSocket(curEvent->data + 1);
+		//
+		
 	}
 	return (0);
 }
@@ -112,6 +112,6 @@ Server::readEventHandler(struct kevent* curEvent)
 int
 Server::writeEventHandler(struct kevent* curEvent)
 {
-	m_communicator[curEvent->ident].writeSocket();
+	(void)curEvent;
 	return (0);
 }

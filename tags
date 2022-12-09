@@ -30,8 +30,6 @@ ClientSocket_hpp	socket/ClientSocket.hpp	/^#define ClientSocket_hpp$/;"	d
 Communicator	communicator/Communicator.cpp	/^Communicator::Communicator(const Communicator& copy)$/;"	f	class:Communicator
 Communicator	communicator/Communicator.cpp	/^Communicator::Communicator(int socketFd)$/;"	f	class:Communicator
 Communicator	communicator/Communicator.hpp	/^class Communicator$/;"	c
-Communicator	communicator/communicator.cpp	/^Communicator::Communicator(const Communicator& copy)$/;"	f	class:Communicator
-Communicator	communicator/communicator.cpp	/^Communicator::Communicator(int socketFd)$/;"	f	class:Communicator
 Communicator_hpp	communicator/Communicator.hpp	/^#define Communicator_hpp$/;"	d
 ConfigParser	parser/ConfigParser.cpp	/^ConfigParser::ConfigParser()$/;"	f	class:ConfigParser
 ConfigParser	parser/ConfigParser.hpp	/^class	ConfigParser: public AParser<FileTokenizer, vector<Server> >$/;"	c
@@ -210,7 +208,6 @@ makeReqeustBody	communicator/Request.cpp	/^Request::makeReqeustBody(const string
 makeRequestHeader	communicator/Request.cpp	/^Request::makeRequestHeader(const string& buffer, requestHeaderMap& requestHeaderMap)$/;"	f	class:Request
 makeRequestLine	communicator/Request.cpp	/^Request::makeRequestLine(const string& buffer)$/;"	f	class:Request
 operator =	communicator/Communicator.cpp	/^Communicator::operator=(const Communicator &copy)$/;"	f	class:Communicator
-operator =	communicator/communicator.cpp	/^Communicator::operator=(const Communicator &copy)$/;"	f	class:Communicator
 operator =	exception/ConfigParserException.cpp	/^ConfigParserException::operator=(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
 operator =	exception/HttpRequestParserException.cpp	/^HttpRequestParserException&	HttpRequestParserException::operator=(HttpRequestParserException const& httpRequestParserException)$/;"	f	class:HttpRequestParserException
 operator =	socket/ClientSocket.cpp	/^ClientSocket::operator=(const ClientSocket &copy)$/;"	f	class:ClientSocket
@@ -232,7 +229,6 @@ readData	test/Connection.cpp	/^int	Connection::readData()$/;"	f	class:Connection
 readEventHandler	Server.cpp	/^Server::readEventHandler(struct kevent* curEvent)$/;"	f	class:Server
 readOperation	test/Server.cpp	/^void	Server::readOperation(fd_set* fdSet)$/;"	f	class:Server
 readSocket	communicator/Communicator.cpp	/^Communicator::readSocket(int messageSize)$/;"	f	class:Communicator
-readSocket	communicator/communicator.cpp	/^Communicator::readSocket(int messageSize)$/;"	f	class:Communicator
 receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
 requestHeaderMap	communicator/Communicator.hpp	/^	typedef Request::requestHeaderMap requestHeaderMap;$/;"	t	class:Communicator
 requestHeaderMap	communicator/Request.hpp	/^	typedef map<string, vector<string> > requestHeaderMap;$/;"	t	class:Request
@@ -281,13 +277,11 @@ writeData	test/Connection.cpp	/^int	Connection::writeData()$/;"	f	class:Connecti
 writeEventHandler	Server.cpp	/^Server::writeEventHandler(struct kevent* curEvent)$/;"	f	class:Server
 writeOperation	test/Server.cpp	/^void	Server::writeOperation(fd_set* fdSet)$/;"	f	class:Server
 writeSocket	communicator/Communicator.cpp	/^Communicator::writeSocket()$/;"	f	class:Communicator
-writeSocket	communicator/communicator.cpp	/^Communicator::writeSocket()$/;"	f	class:Communicator
 ~AParser	parser/AParser.hpp	/^	virtual ~AParser() {};$/;"	f	class:AParser
 ~ASocket	socket/ASocket.hpp	/^	virtual ~ASocket() {};$/;"	f	class:ASocket
 ~ATokenizer	tokenizer/ATokenizer.cpp	/^ATokenizer::~ATokenizer()$/;"	f	class:ATokenizer
 ~ClientSocket	socket/ClientSocket.cpp	/^ClientSocket::~ClientSocket()$/;"	f	class:ClientSocket
 ~Communicator	communicator/Communicator.cpp	/^Communicator::~Communicator()$/;"	f	class:Communicator
-~Communicator	communicator/communicator.cpp	/^Communicator::~Communicator()$/;"	f	class:Communicator
 ~ConfigParser	parser/ConfigParser.cpp	/^ConfigParser::~ConfigParser()$/;"	f	class:ConfigParser
 ~ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::~ConfigParserException() throw()$/;"	f	class:ConfigParserException
 ~Connection	test/Connection.cpp	/^Connection::~Connection()$/;"	f	class:Connection
