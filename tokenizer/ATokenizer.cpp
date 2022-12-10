@@ -9,10 +9,14 @@ ATokenizer::~ATokenizer()
 {
 }
 
-void	ATokenizer::eat(const std::string& target)
+/*
+ATokenizer::ATokenizer(ATokenizer const& aTokenizer)
 {
-	if (get() != target)
-	{
-		// throw exception
-	}
 }
+
+// operators
+ATokenizer&	ATokenizer::operator=(ATokenizer const& aTokenizer)
+{
+	return *this;
+}
+*/

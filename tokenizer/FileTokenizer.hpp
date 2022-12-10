@@ -1,27 +1,17 @@
 #ifndef FILETOKENIZER_HPP
 #define FILETOKENIZER_HPP
 
-#include <sys/stat.h>
-
 #include <fstream>
 #include <stdexcept>
 
 #include "ATokenizer.hpp"
 
-using namespace std;
-
 class	FileTokenizer: public ATokenizer
 {
-	enum e_tokenType {
-		WORD = 1,
-		SPECIAL
-	};
+	class	FileTokenizerException;
 
-	// need token struct?
-	// struct token {
-	//     e_tokenType type;
-	//     string		token;
-	// };
+	typedef std::pair<std::string, int>	t_tokenInfo;
+
 // deleted
 	FileTokenizer(FileTokenizer const& fileTokenizer);
 	FileTokenizer	&operator=(FileTokenizer const& fileTokenizer);
@@ -32,20 +22,27 @@ public:
 	~FileTokenizer();
 
 // member functions
-	void					init(const string& path);
+	void				init(std::string const path);
 
-	virtual const string&	peek();
-	virtual const string&	get();
-	virtual bool			empty() const;
+	virtual const std::string&	peek();
+	virtual const std::string&	get();
+	virtual bool				empty() const;
+	void						eat(const std::string& target);
+	unsigned int				size();
+
+	std::string		getErrorLog(int idx);
+	void			printTokensByLine() const;
+	void			printTokens() const;
 
 private:
-	string&			getErrorLog();
-	void			tokenize(const string& chunk);
-	bool			isValidFileName(const string& path);
+	void			tokenize(const std::string& chunk, int lineNumber);
 
 // member variables
-	vector<string>	m_tokenArr;
-	unsigned int	m_idx;
+	std::fstream				m_fstream;
+	std::vector<t_tokenInfo>	m_tokenArr;
+	unsigned int				m_idx;
+
+	static const std::string	s_eot;
 };
 
 #endif

@@ -34,7 +34,7 @@ LocationParser::parse(Location& location)
 {
 	while (s_locationSetterMap.count(m_tokenizer.peek()) == 1)
 	{
-		(this->*s_locationSetterMap[m_tokenizer.peek()])(location);
+		(this->*s_locationSetterMap[m_tokenizer.get()])(location);
 	}
 }
 
@@ -43,52 +43,61 @@ void
 LocationParser::setIndex(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setExpires(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setProxyPass(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setLimitExcept(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setPath(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setRoot(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setCgiPass(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setAlias(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setClientMaxBodySize(Location& location)
 {
 	location.m_index = m_tokenizer.get();
+	m_tokenizer.eat(";");
 }

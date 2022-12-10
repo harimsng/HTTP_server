@@ -15,6 +15,12 @@ class	ServerParser: public AParser<FileTokenizer, Server>
 	ServerParser	&operator=(ServerParser const& serverParser);
 
 public:
+// static members
+	typedef void	(ServerParser::*t_setter)(Server&);
+
+	static std::map<std::string, t_setter>	s_serverSetterMap;
+	static void								setServerSetterMap();
+
 // constructors & destructor
 	ServerParser(FileTokenizer& tokenizer);
 	virtual ~ServerParser();
@@ -32,14 +38,10 @@ public:
 	void		setClientMaxBodySize(Server& server);
 	void		setUriBufferSize(Server& server);
 
+private:
 // member variables
 	FileTokenizer&		m_tokenizer;
 
-// static members
-	typedef void	(ServerParser::*t_setter)(Server&);
-
-	static std::map<std::string, t_setter>	s_serverSetterMap;
-	static void								setServerSetterMap();
 };
 
 #endif

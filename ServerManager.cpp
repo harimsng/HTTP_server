@@ -1,4 +1,9 @@
+#include <iostream>
+
 #include "ServerManager.hpp"
+#include "ConfigParser.hpp"
+#include "ServerParser.hpp"
+#include "LocationParser.hpp"
 
 using namespace std;
 
@@ -12,15 +17,22 @@ ServerManager::~ServerManager()
 }
 
 void
-ServerManager::run(const string& path)
+ServerManager::parse(const char* path) try
 {
-	m_configParser.init(path);
-	m_configParser.parse(m_serverList);
-	for (size_t i = 0; i < m_serverList.size(); i++)
-		m_serverList[i].initServer();
-	while (1)
-	{
-		for (size_t i = 0; i < m_serverList.size(); i++)
-			m_serverList[i].run();
-	}
+	ConfigParser	configParser;
+
+	configParser.init(path);
+	configParser.parse(m_serverList);
+}
+catch (std::exception& e)
+{
+	cout << e.what() << '\n';
+}
+
+void
+ServerManager::run() try
+{
+}
+catch (...)
+{
 }

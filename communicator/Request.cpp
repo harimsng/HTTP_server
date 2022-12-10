@@ -44,7 +44,7 @@ Request::makeRequestLine(const string& buffer)
 			else if (m_uri == "")
 			{
 				m_uri = token;
-				checkUri();
+				// checkUri();
 			}
 			else
 			{

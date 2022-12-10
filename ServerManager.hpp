@@ -20,8 +20,10 @@ public:
 	ServerManager	&operator=(ServerManager const& serverManager);
 
 // member functions
-	void			run(const string& path);
+	void	parse(const char* path);
+	void	run();
 
+private:
 // member variables
 	vector<Server>	m_serverList;
 	ConfigParser	m_configParser;

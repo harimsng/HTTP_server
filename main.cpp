@@ -1,17 +1,30 @@
+#include <iostream>
+
 #include "ServerManager.hpp"
 #include "ConfigParser.hpp"
 #include "exception/ConfigParserException.hpp"
 
-int	main(int argc, char **argv)
+bool	parseArgument(int argc, char **argv);
+
+int	main(int argc, char **argv, char **envp)
 {
 	ServerManager	serverManager;
 
-	if (argc != 2)
+	if (parseArgument(argc, argv) == false)
 		return 1;
-	try {
-	serverManager.run(argv[1]);
-	} catch (ConfigParserException& e) {
+	serverManager.parse(argv[1]);
+	serverManager.run();
+	(void)argv;
+	(void)envp;
+}
 
+bool	parseArgument(int argc, char **argv)
+{
+	(void)argv;
+	if (argc != 2)
+	{
+		std::cout << "usage: webserv  config_path\n";
+		return false;
 	}
-	return (0);
+	return true;
 }
