@@ -43,6 +43,7 @@ DEBUGFLAGS	Makefile	/^DEBUGFLAGS	=	-g -fsanitize=address$/;"	m
 EVENT_SIZE	Server.hpp	/^#define EVENT_SIZE /;"	d
 FDMANAGER_HPP	test/FdManager.hpp	/^#define FDMANAGER_HPP$/;"	d
 FILETOKENIZER_HPP	tokenizer/FileTokenizer.hpp	/^#define FILETOKENIZER_HPP$/;"	d
+FdGetFileSize	test/readFunctionUsingString.cpp	/^long FdGetFileSize(int fd)$/;"	f
 FdManager	test/FdManager.cpp	/^FdManager::FdManager()$/;"	f	class:FdManager
 FdManager	test/FdManager.cpp	/^FdManager::FdManager(FdManager const& fdManager)$/;"	f	class:FdManager
 FdManager	test/FdManager.hpp	/^class	FdManager$/;"	c
@@ -174,6 +175,7 @@ m_maxFd	test/FdManager.hpp	/^	int			m_maxFd;$/;"	m	class:FdManager
 m_methodType	communicator/Request.hpp	/^	string	m_methodType;$/;"	m	class:Request
 m_path	Location.hpp	/^	std::string		m_path;$/;"	m	class:Location
 m_pos	test/Connection.hpp	/^	std::size_t		m_pos;$/;"	m	class:Connection
+m_preBufferSize	communicator/Communicator.hpp	/^	int					m_preBufferSize;$/;"	m	class:Communicator
 m_proxyPass	Location.hpp	/^	std::string		m_proxyPass;$/;"	m	class:Location
 m_readSet	test/FdManager.hpp	/^	fd_set		m_readSet;$/;"	m	class:FdManager
 m_request	communicator/Communicator.hpp	/^	Request				m_request;$/;"	m	class:Communicator
@@ -228,7 +230,7 @@ putMethod_hpp	method/putMethod.hpp	/^#define putMethod_hpp$/;"	d
 readData	test/Connection.cpp	/^int	Connection::readData()$/;"	f	class:Connection
 readEventHandler	Server.cpp	/^Server::readEventHandler(struct kevent* curEvent)$/;"	f	class:Server
 readOperation	test/Server.cpp	/^void	Server::readOperation(fd_set* fdSet)$/;"	f	class:Server
-readSocket	communicator/Communicator.cpp	/^Communicator::readSocket(int messageSize)$/;"	f	class:Communicator
+readSocket	communicator/Communicator.cpp	/^Communicator::readSocket(int messageSize) try$/;"	f	class:Communicator
 receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
 requestHeaderMap	communicator/Communicator.hpp	/^	typedef Request::requestHeaderMap requestHeaderMap;$/;"	t	class:Communicator
 requestHeaderMap	communicator/Request.hpp	/^	typedef map<string, vector<string> > requestHeaderMap;$/;"	t	class:Request
@@ -263,7 +265,7 @@ setServerSetterMap	parser/ServerParser.cpp	/^void	ServerParser::setServerSetterM
 setSocketFd	socket/ServerSocket.cpp	/^ServerSocket::setSocketFd(int domain, int type, int protocol)$/;"	f	class:ServerSocket
 setUriBufferSize	parser/ServerParser.cpp	/^ServerParser::setUriBufferSize(Server& server)$/;"	f	class:ServerParser
 splitString	test/stringstream.cpp	/^std::vector<std::string> splitString(const std::string& str)$/;"	f
-ssTest	test/readFunctionUsingString.cpp	/^void ssTest(string& buffer, string path, size_t readSize)$/;"	f
+ssTest	test/readFunctionUsingString.cpp	/^int ssTest(string& buffer, string path, int preBufferSize)$/;"	f
 t_setter	parser/LocationParser.hpp	/^	typedef void	(LocationParser::*t_setter)(Location&);$/;"	t	class:LocationParser
 t_setter	parser/ServerParser.hpp	/^	typedef void	(ServerParser::*t_setter)(Server&);$/;"	t	class:ServerParser
 tasMaxFd	test/general_socket_tests.cpp	/^	static int	tasMaxFd(int fd)$/;"	f	struct:MaxFd

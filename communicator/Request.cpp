@@ -26,31 +26,34 @@ Request::makeRequestLine(const string& buffer)
 	int				retVal;
 
 	retVal = 0;
-	getline(ss, requestLine, '\r');
-	if (ss.fail())
-		return (retVal) ;
-	if (requestLine == "\n")
+	while (getline(ss, requestLine, '\n'))
 	{
-		m_requestSection = REQUEST_BODY;
-		return (1);
-	}
-	stringstream requestLineStream(requestLine);
-	while (requestLineStream >> token)
-	{
-		if (requestLineStream.fail())
-			return (retVal);
-		retVal += token.size() + 1;
-		if (m_methodType == "")
-			m_methodType = token;
-		else if (m_uri == "")
-			m_uri = token;
-		else
+		if (requestLine[requestLine.size() - 1] != '\r')
+			return (retVal) ;
+		if (requestLine == "\r")
 		{
-			if (token != "HTTP/1.1")
+			m_requestSection = REQUEST_HEADER;
+			return (retVal + 2);
+		}
+		stringstream requestLineStream(requestLine);
+		retVal = requestLine.size() + 1;
+		while (requestLineStream >> token)
+		{
+			if (m_methodType == "")
+				m_methodType = token;
+			else if (m_uri == "")
 			{
-				// throw exception;
+				m_uri = token;
+				checkUri();
 			}
-		};
+			else
+			{
+				if (token != "HTTP/1.1")
+				{
+					// throw exception;
+				}
+			};
+		}
 	}
 	return (retVal);
 }
@@ -60,18 +63,29 @@ Request::makeRequestHeader(const string& buffer, requestHeaderMap& requestHeader
 {
 	stringstream	ss(buffer);
 	string			requestLine;
+	string			requestHeaderField;
 	string			token;
 	int				retVal;
 
 	retVal = 0;
 	while (getline(ss, requestLine, '\r'))
 	{
-		if (ss.fail())
-			return (retVal);
-		if (requestLine == "\n")
+		if (requestLine[requestLine.size() - 1] != '\r')
+			return (retVal) ;
+		if (requestLine == "\r")
 		{
 			m_requestSection = REQUEST_BODY;
-			return (1);
+			return (retVal + 2);
+		}
+		stringstream requestLineStream(requestLine);
+		retVal = requestLine.size() + 1;
+		requestLineStream >> requestHeaderField;
+		requestHeaderField.pop_back();
+		while (requestLineStream >> token)
+		{
+			if (token[token.size() - 1] == ',')
+				token.pop_back();
+			requestHeaderMap[requestHeaderField].push_back(token);
 		}
 	}
 	return (retVal);

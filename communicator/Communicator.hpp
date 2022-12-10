@@ -23,7 +23,7 @@ private:
 	Request				m_request;
 	string				m_stringBuffer;
 	int					m_socketFd;
-
+	int					m_preBufferSize;
 
 public:
 // constructors & destructor

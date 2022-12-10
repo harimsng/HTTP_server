@@ -41,22 +41,12 @@ FileTokenizer::getErrorLog()
 void
 FileTokenizer::tokenize(const string& chunk)
 {
-<<<<<<< HEAD
-	// string	token;
-
-	m_tokenArr.push_back(chunk);
-	// for (size_t i = 0; i < chunk.size(); ++i)
-	// {
-    //
-	// }
-=======
 	string	token;
 	
 	for (string::size_type i = 0; i < chunk.size(); ++i)
 	{
 		
 	}
->>>>>>> 9564924c78fa52e46b464c20f41bbc8001b921cd
 }
 
 void

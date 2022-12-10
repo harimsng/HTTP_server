@@ -38,6 +38,7 @@ public:
 	int		makeRequestLine(const string& buffer);
 	int		makeRequestHeader(const string& buffer, requestHeaderMap& requestHeaderMap);
 	void	makeReqeustBody(const string& buffer);
+	bool	checkUri(void);
 
 };
 #endif //Request_hpp

@@ -96,6 +96,7 @@ Server::readEventHandler(struct kevent* curEvent)
 
 		clientSocket.createSocket(m_serverSocket);
 		m_clientSocket.insert(make_pair(clientSocket.m_SocketFd, clientSocket));
+		m_communicator.insert(make_pair(clientSocket.m_SocketFd, Communicator(clientSocket.m_SocketFd)));
 		addEvents(clientSocket.m_SocketFd, EVFILT_READ,
 				EV_ADD | EV_ENABLE, 0, 0, NULL);
 		return (1);
@@ -103,8 +104,9 @@ Server::readEventHandler(struct kevent* curEvent)
 	else
 	{
 		// request class가 ClientSocket의 fd를 가지고와서 read 실행?
-		//
-		
+		Communicator& communicator = m_communicator.find(curEvent->ident)->second;
+
+		communicator.readSocket(curEvent->data);
 	}
 	return (0);
 }
