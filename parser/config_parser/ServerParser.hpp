@@ -30,10 +30,10 @@ public:
 
 	void		parseLocation(Server& server);
 	void		setIndex(Server& server);
-	void		setServerName(Server& server);
+	void		setServerNames(Server& server);
 	void		setListenPort(Server& server);
 	void		setRoot(Server& server);
-	void		setErrorPath(Server& server);
+	void		setErrorPages(Server& server);
 	void		setErrorCode(Server& server);
 	void		setClientMaxBodySize(Server& server);
 	void		setUriBufferSize(Server& server);

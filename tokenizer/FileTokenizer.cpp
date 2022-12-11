@@ -54,15 +54,15 @@ FileTokenizer::empty() const
 }
 
 string
-FileTokenizer::getErrorLog(int idx)
+FileTokenizer::getErrorLog(const char* message)
 {
-	int		errorLineNumber = m_tokenArr[idx].second;
+	int		errorLineNumber = m_tokenArr[m_idx].second;
 	string	errorLine;
 	string	errorLog;
 
 	m_fstream.clear();
 	m_fstream.seekg(ios_base::beg);
-	cout << "parse error\n";
+	cout << message << '\n';
 	for (int i = 1; i < errorLineNumber - 2; ++i)
 		getline(m_fstream, errorLine);
 
@@ -80,7 +80,7 @@ FileTokenizer::getErrorLog(int idx)
 	}
 	getline(m_fstream, errorLine);
 	errorLine = "line " + ConfigParser::toString(errorLineNumber) + ": " + errorLine;
-	errorLog += errorLine + "        << error line\n";
+	errorLog += errorLine + "  <<\n";
 	return errorLog;
 }
 
@@ -130,7 +130,6 @@ FileTokenizer::init(const std::string path)
 	if (m_fstream.eof() == false && m_fstream.fail())
 		throw FileTokenizerException("file read error");
 	m_idx = 0;
-	printTokens();
 }
 
 void

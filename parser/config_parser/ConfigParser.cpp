@@ -56,9 +56,9 @@ ConfigParser::parse(vector<Server>& output) try
 	if (m_tokenizer.empty() == false)
 		m_tokenizer.eat("server");
 }
-catch (unsigned int idx)
+catch (std::exception& e)
 {
-	cout << m_tokenizer.getErrorLog(idx);
+	cout << m_tokenizer.getErrorLog(e.what());
 }
 
 void
