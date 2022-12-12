@@ -3,10 +3,8 @@
 
 #include <string>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <vector>
-
-using namespace std;
 
 class HttpRequestParser;
 class Communicator;
@@ -15,30 +13,33 @@ class Request
 {
 public:
 
-	typedef map<string, vector<string> > requestHeaderMap;
+	typedef std::unordered_map<std::string, std::vector<std::string> > requestHeaderMap;
 
 	enum requestSection
 	{
 		REQUEST_LINE = 0,
 		REQUEST_HEADER,
+		REQUEST_HEADER_END,
 		REQUEST_BODY,
 		REQUEST_END
 	};
-private:
-	string	m_methodType;
-	string	m_uri;
-	int		m_requestSection;
 
 public:
 	Request();
 	~Request();
 
-	int		getRequestSection() const;
-
-	int		makeRequestLine(const string& buffer);
-	int		makeRequestHeader(const string& buffer, requestHeaderMap& requestHeaderMap);
-	void	makeReqeustBody(const string& buffer);
+	int		makeRequestLine(const std::string& buffer);
+	int		makeRequestHeader(const std::string& buffer);
+	void	makeReqeustBody(const std::string& buffer);
+	int		makeRequest(std::string& buffer);
 	bool	checkUri(void);
+	void	printRequestMessage(requestHeaderMap& requestHeaderMap) const;
+
+	requestHeaderMap	m_requestHeaderMap;
+	std::string			m_methodType;
+	std::string			m_uri;
+	int					m_requestSection;
+	int					m_preBuffersize;
 
 };
 #endif //Request_hpp

@@ -9,33 +9,34 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
-
-using namespace std;
+#include "Location.hpp"
 
 class Communicator
 {
+	friend class ClientSocket;
+
 public:
 	typedef Request::requestHeaderMap requestHeaderMap;
 
 private:
 // memver variales
-	requestHeaderMap	m_requestHeader;
-	Request				m_request;
-	string				m_stringBuffer;
-	int					m_socketFd;
-	int					m_preBufferSize;
+	requestHeaderMap		m_requestHeader;
+	std::string				m_methodType;
+	std::string				m_uri;
+	Response				m_response;
+	Request					m_request;
+	int						m_preBufferSize;
 
+	Communicator(const Communicator& copy);
+	Communicator& operator=(const Communicator& copy);
 public:
 // constructors & destructor
-	Communicator(int socketFd);
-	Communicator(const Communicator& copy);
+	Communicator();
 	~Communicator();
 
-// operator
-	Communicator& operator=(const Communicator& copy);
-
 // member functions
-	void	readSocket(int messageSize);
-	void	writeSocket();
+	int		readRequestHeader(std::string& requestMessageBuffer);
+	int		readRequestBody(std::string& requestMessageBuffer);
+	void	writeSocket(int fd);
 };
 #endif //Communicator_hpp

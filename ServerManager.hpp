@@ -6,8 +6,6 @@
 #include "Server.hpp"
 #include "ConfigParser.hpp"
 
-using namespace std;
-
 class	ServerManager
 {
 public:
@@ -25,8 +23,8 @@ public:
 
 private:
 // member variables
-	vector<Server>	m_serverList;
-	ConfigParser	m_configParser;
+	std::vector<Server>	m_serverList;
+	ConfigParser		m_configParser;
 };
 
 #endif

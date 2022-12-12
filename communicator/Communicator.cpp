@@ -1,11 +1,13 @@
 #include "Communicator.hpp"
 #include "Request.hpp"
+#include "Server.hpp"
+
+#include <iostream>
 
 using namespace std;
 
-Communicator::Communicator(int socketFd)
+Communicator::Communicator()
 {
-	m_socketFd = socketFd;
 	m_preBufferSize = 0;
 }
 
@@ -13,40 +15,32 @@ Communicator::~Communicator()
 {
 }
 
-Communicator::Communicator(const Communicator& copy)
+int
+Communicator::readRequestHeader(string& requestMessageBuffer) try
 {
-	*this = copy;
-}
-
-Communicator&
-Communicator::operator=(const Communicator &copy)
-{
-	m_socketFd = copy.m_socketFd;
-	return (*this);
-}
-
-void
-Communicator::readSocket(int messageSize) try
-{
-	int 	readRet;
-
-	m_stringBuffer.resize(messageSize + m_preBufferSize, 0);
-	readRet = read(m_socketFd, &m_stringBuffer[m_preBufferSize], messageSize - 1);
-	if (m_request.getRequestSection() == Request::REQUEST_LINE)
-		m_stringBuffer.erase(0, m_request.makeRequestLine(m_stringBuffer));
-	if (m_request.getRequestSection() == Request::REQUEST_HEADER)
-		m_stringBuffer.erase(0, m_request.makeRequestHeader(m_stringBuffer, m_requestHeader));
-	if (m_request.getRequestSection() == Request::REQUEST_BODY)
-		m_request.makeReqeustBody(m_stringBuffer);
-	m_preBufferSize = m_stringBuffer.size() - 1;
+	if (m_request.m_requestSection == Request::REQUEST_LINE)
+		requestMessageBuffer.erase(0, m_request.makeRequestLine(requestMessageBuffer, m_methodType, m_uri));
+	if (m_request.m_requestSection == Request::REQUEST_HEADER)
+		requestMessageBuffer.erase(0, m_request.makeRequestHeader(requestMessageBuffer, m_requestHeader));
+	if (m_request.m_requestSection == Request::REQUEST_HEADER_END)
+		return (m_request.m_requestSection);
+	m_preBufferSize = requestMessageBuffer.size();
+	return (m_request.m_requestSection);
 }
 catch(exception& e)
 {
-
+	return (m_request.m_requestSection);
 }
 
 void
-Communicator::writeSocket()
+Communicator::writeSocket(int fd)
 {
+	(void)fd;
+	// wirte(fd, );
+}
 
+int	 Communicator::readRequestBody(std::string& requestMessageBuffer)
+{
+	m_request.makeReqeustBody(requestMessageBuffer);
+	return (1);
 }

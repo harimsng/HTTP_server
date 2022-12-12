@@ -17,8 +17,6 @@
 
 #define EVENT_SIZE 8
 
-using namespace std;
-
 class	Server
 {
 	friend class	ServerParser;
@@ -47,24 +45,23 @@ private:
 	int		writeEventHandler(struct kevent* curEvent);
 
 // member variales - config
-	string						m_index;
-	string						m_serverName;
-	string						m_errorCode;
-	string						m_root;
-	string						m_errorPath;
+	std::string					m_index;
+	std::string					m_serverName;
+	std::string					m_errorCode;
+	std::string					m_root;
+	std::string					m_errorPath;
 	int32_t						m_listen;
 	int32_t						m_clientMaxBodySize;
 	int32_t						m_uriBufferSize;
-	vector<Location>			m_locationList;
+	std::vector<Location>		m_locationList;
 
 // member variables - kevent
-	vector<struct kevent>		m_changeList;
+	std::vector<struct kevent>	m_changeList;
 	struct kevent				m_eventList[EVENT_SIZE];
 	int							m_kq;
 
 // member variables - socket
-	map<int, ClientSocket>		m_clientSocket;
-	map<int, Communicator>		m_communicator;
+	std::map<int, ClientSocket>	m_clientSocket;
 	ServerSocket				m_serverSocket;
 };
 
