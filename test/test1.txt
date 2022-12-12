@@ -1,3 +1,2 @@
-GET www.naver.com HTTP/1.1
-
-dddd aaaaaaaa
+GET www.naver.com HTTP/1.1
+Host : s

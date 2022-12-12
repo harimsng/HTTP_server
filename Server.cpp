@@ -1,17 +1,21 @@
 #include "Server.hpp"
 #include "socket/ClientSocket.hpp"
+#include <sys/event.h>
+
+#include <iostream>
 
 using namespace std;
+
 
 // constructors & destructor
 Server::Server()
 {
+	setToDefault();
 }
 
 Server::~Server()
 {
 }
-
 Server&
 Server::operator=(const Server& server)
 {
@@ -26,6 +30,18 @@ Server::operator=(const Server& server)
 	return *this;
 }
 
+void	Server::setToDefault()
+{
+//	m_index;
+	m_serverNames = "";
+//	m_errorCode;
+//	m_root;
+//	m_errorPages;
+	m_listen = GET_SOCKADDR_IN(INADDR_ANY, 8000);
+	m_clientMaxBodySize = 1 << 13; // 8kb
+//	m_uriBufferSize;
+}
+
 void
 Server::initServer()
 {
@@ -34,7 +50,7 @@ Server::initServer()
 	{
 		// throw exception;
 	}
-	m_serverSocket.createSocket(*this);
+	m_serverSocket.createSocket(m_listen);
 	addEvents(m_serverSocket.m_SocketFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 }
 
@@ -44,6 +60,8 @@ Server::run()
 	int newEventCnt;
 
 	newEventCnt = waitEvent();
+	if (newEventCnt == -1)
+		return;
 	eventSocket(newEventCnt);
 }
 
@@ -64,6 +82,7 @@ Server::waitEvent()
 
 	newEvents = kevent(m_kq, &m_changeList[0], m_changeList.size(),
 			m_eventList, EVENT_SIZE, NULL);
+	cout << "new event occured : " << newEvents << endl;
 	if (newEvents == -1)
 	{
 		// throw exception;
@@ -108,17 +127,21 @@ Server::readEventHandler(struct kevent* curEvent)
 	{
 		ClientSocket clientSocket;
 
+		cout << "server socket read" << endl;
 		clientSocket.createSocket(m_serverSocket);
 		m_clientSocket.insert(make_pair(clientSocket.m_SocketFd, clientSocket));
 		addEvents(clientSocket.m_SocketFd, EVFILT_READ,
 				EV_ADD | EV_ENABLE, 0, 0, NULL);
+		// addEvents(clientSocket.m_SocketFd, EVFILT_WRITE,
+		//         EV_ADD | EV_ENABLE, 0, 0, NULL);
 		return (1);
 	}
 	else
 	{
-		// request class가 ClientSocket의 fd를 가지고와서 read 실행?
-		//
+		ClientSocket& clientSocket = m_clientSocket.find(curEvent->ident)->second;
 
+		cout << "client socket read" << endl;
+		clientSocket.readSocket(curEvent->data, *this);
 	}
 	return (0);
 }

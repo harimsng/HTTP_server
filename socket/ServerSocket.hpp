@@ -7,7 +7,7 @@ class Server;
 
 #define BACKLOG 256
 
-class ServerSocket : public ASocket<Server>
+class ServerSocket : public ASocket<sockaddr_in>
 {
 	friend class ClientSocket;
 	friend class Server;
@@ -27,8 +27,7 @@ public:
 
 private:
 	void			setSocketFd(int domain, int type, int protocol);
-	void			initAddr(sa_family_t sin_family, in_port_t sin_port,
-							 in_addr_t s_addr);
+	void			initAddr(const initType& initClass);
 	void			bindSocket();
 	void			listenSocket();
 

@@ -14,6 +14,7 @@ class ClientSocket : public ASocket<ServerSocket>
 	friend class Server;
 
 	std::string		m_requestBuffer;
+	std::string		m_responseBuffer;
 
 	Request			m_request;
 	Response		m_response;
@@ -30,6 +31,7 @@ public:
 	virtual void	createSocket(const initType& initClass);
 	void			readSocket(int messagesize, Server& server);
 	void			writeSocket();
+	void			checkUri(Server& server);
 
 };
 #endif //ClientSocket_hpp

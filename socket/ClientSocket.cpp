@@ -1,8 +1,12 @@
 #include "ClientSocket.hpp"
 #include <unistd.h>
 
+// after use it delete it
+#include <iostream>
+
 ClientSocket::ClientSocket()
 {
+	m_response.setStatusCode();
 }
 
 
@@ -40,39 +44,42 @@ ClientSocket::createSocket(const initType& initClass)
 	}
 }
 
-// void
-// ClientSocket::readSocket(int messageSize)
-// {
-//     int ret;
-//
-//     m_requestBuffer.resize(messageSize + m_communicator.m_preBufferSize + 1, 0);
-//     read(m_SocketFd, &m_requestBuffer[m_communicator.m_preBufferSize], messageSize);
-//
-//
-//     ret = m_communicator.readRequestHeader(m_requestBuffer);
-//     if (ret == Request::REQUEST_HEADER_END)
-//         m_communicator.readRequestBody(m_requestBuffer);
-// }
-//
-// void
-// ClientSocket::writeSocket()
-// {
-//     m_communicator.writeSocket(m_SocketFd);
-// }
-
 void
 ClientSocket::readSocket(int messageSize, Server& server)
 {
 	(void)server;
-	m_requestBuffer.resize(messageSize + m_request.m_preBuffersize + 1, 0);
-	read(m_SocketFd, &m_requestBuffer[m_request.m_preBuffersize], messageSize);
-	if (m_request.makeRequest(m_requestBuffer) == Request::REQUEST_HEADER_END)
-	{
+	int& requestSection = m_request.getRequestSection();
 
+	m_requestBuffer.resize(messageSize + m_request.m_preBufferSize + 1, 0);
+	read(m_SocketFd, &m_requestBuffer[m_request.m_preBufferSize], messageSize);
+	if (requestSection < Request::REQUEST_HEADER_END)
+		m_request.makeRequest(m_requestBuffer);
+	if (requestSection == Request::REQUEST_HEADER_END)
+	{
+		// checkUri(server);
+		m_response.makeResponseHeader(m_responseBuffer);
+		requestSection = Request::REQUEST_BODY;
+	}
+	if (requestSection == Request::REQUEST_BODY)
+	{
+		// m_request.makeRequest(m_requestBuffer);
 	}
 }
 
-void		 ClientSocket::writeSocket()
+void
+ClientSocket::writeSocket()
 {
+	int writeRet;
 
+	writeRet = write(m_SocketFd, &m_responseBuffer[0], m_responseBuffer.size());
+	m_responseBuffer.erase(0, writeRet);
+}
+
+void
+ClientSocket::checkUri(Server& server)
+{
+	string uri;
+	(void)server;
+
+	uri = m_request.m_uri;
 }

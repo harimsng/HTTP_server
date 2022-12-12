@@ -13,7 +13,8 @@ void
 ServerSocket::createSocket(const initType& initClass)
 {
 	setSocketFd(AF_INET, SOCK_STREAM, 0);
-	initAddr(AF_INET, initClass.m_listen.sin_port, INADDR_ANY);
+	// m_SocketAddr = initClass;
+	initAddr(initClass);
 	bindSocket();
 	listenSocket();
 }
@@ -35,12 +36,12 @@ ServerSocket::setSocketFd(int domain, int type, int protocol)
 }
 
 void
-ServerSocket::initAddr(sa_family_t sin_family, in_port_t sin_port, in_addr_t s_addr)
+ServerSocket::initAddr(const initType& initClass)
 {
 	std::memset(&m_SocketAddr, 0, sizeof(m_SocketAddr));
-	m_SocketAddr.sin_family = sin_family;
-	m_SocketAddr.sin_port = htons(sin_port);
-	m_SocketAddr.sin_addr.s_addr = htonl(s_addr);
+	m_SocketAddr.sin_family = initClass.sin_family;
+	m_SocketAddr.sin_port = initClass.sin_port;
+	m_SocketAddr.sin_addr.s_addr = INADDR_ANY;
 }
 
 void

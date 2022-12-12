@@ -111,7 +111,7 @@ ServerManager	test/ServerManager.hpp	/^class	ServerManager$/;"	c
 ServerParser	parser/config_parser/ServerParser.cpp	/^ServerParser::ServerParser(FileTokenizer& m_tokenizer)$/;"	f	class:ServerParser
 ServerParser	parser/config_parser/ServerParser.hpp	/^class	ServerParser: public AParser<FileTokenizer, Server>$/;"	c
 ServerSocket	socket/ServerSocket.cpp	/^ServerSocket::ServerSocket()$/;"	f	class:ServerSocket
-ServerSocket	socket/ServerSocket.hpp	/^class ServerSocket : public ASocket<Server>$/;"	c
+ServerSocket	socket/ServerSocket.hpp	/^class ServerSocket : public ASocket<sockaddr_in>$/;"	c
 ServerSocket_hpp	socket/ServerSocket.hpp	/^#define ServerSocket_hpp$/;"	d
 SocketTokenizer	tokenizer/SocketTokenizer.cpp	/^SocketTokenizer::SocketTokenizer()$/;"	f	class:SocketTokenizer
 SocketTokenizer	tokenizer/SocketTokenizer.hpp	/^class	SocketTokenizer$/;"	c
@@ -123,6 +123,7 @@ bindSocket	socket/ServerSocket.cpp	/^ServerSocket::bindSocket()$/;"	f	class:Serv
 cgi	cgi/cgi.hpp	/^class cgi$/;"	c
 cgi_hpp	cgi/cgi.hpp	/^#define cgi_hpp$/;"	d
 checkFileStat	parser/config_parser/ConfigParser.cpp	/^ConfigParser::checkFileStat(const char* path)$/;"	f	class:ConfigParser
+checkUri	socket/ClientSocket.cpp	/^ClientSocket::checkUri(Server& server)$/;"	f	class:ClientSocket
 createSocket	socket/ClientSocket.cpp	/^ClientSocket::createSocket(const initType& initClass)$/;"	f	class:ClientSocket
 createSocket	socket/ServerSocket.cpp	/^ServerSocket::createSocket(const initType& initClass)$/;"	f	class:ServerSocket
 deleteMethod	method/deleteMethod.hpp	/^class deleteMethod$/;"	c
@@ -132,16 +133,19 @@ empty	tokenizer/FileTokenizer.cpp	/^FileTokenizer::empty() const$/;"	f	class:Fil
 eventSocket	Server.cpp	/^Server::eventSocket(int newEventCnt)$/;"	f	class:Server
 get	tokenizer/FileTokenizer.cpp	/^FileTokenizer::get()$/;"	f	class:FileTokenizer
 getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
+getDate	communicator/Response.cpp	/^Response::getDate(void) const$/;"	f	class:Response
 getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog(const char* message)$/;"	f	class:FileTokenizer
 getListenSocket	test/ServerManager.cpp	/^int	ServerManager::getListenSocket()$/;"	f	class:ServerManager
 getMethod	method/getMethod.hpp	/^class getMethod$/;"	c
 getMethod_hpp	method/getMethod.hpp	/^#define getMethod_hpp$/;"	d
+getRequestSection	communicator/Request.cpp	/^Request::getRequestSection()$/;"	f	class:Request
+getStatusCode	communicator/Response.cpp	/^Response::getStatusCode(int statusCode)$/;"	f	class:Response
 init	parser/ConfigParser.cpp	/^ConfigParser::init(const string& configPath)$/;"	f	class:ConfigParser
 init	parser/config_parser/ConfigParser.cpp	/^ConfigParser::init(string configPath)$/;"	f	class:ConfigParser
 init	test/FdManager.cpp	/^void	FdManager::init()$/;"	f	class:FdManager
 init	test/Server.cpp	/^void	Server::init()$/;"	f	class:Server
 init	tokenizer/FileTokenizer.cpp	/^FileTokenizer::init(const string path)$/;"	f	class:FileTokenizer
-initAddr	socket/ServerSocket.cpp	/^ServerSocket::initAddr(sa_family_t sin_family, in_port_t sin_port, in_addr_t s_addr)$/;"	f	class:ServerSocket
+initAddr	socket/ServerSocket.cpp	/^ServerSocket::initAddr(const initType& initClass)$/;"	f	class:ServerSocket
 initServer	Server.cpp	/^Server::initServer()$/;"	f	class:Server
 initType	socket/ASocket.hpp	/^	typedef T initType;$/;"	t	class:ASocket
 listenSocket	socket/ServerSocket.cpp	/^ServerSocket::listenSocket()$/;"	f	class:ServerSocket
@@ -181,7 +185,7 @@ m_methodType	communicator/Request.hpp	/^	std::string			m_methodType;$/;"	m	class
 m_path	Location.hpp	/^	std::string		m_path;$/;"	m	class:Location
 m_pos	test/Connection.hpp	/^	std::size_t		m_pos;$/;"	m	class:Connection
 m_preBufferSize	communicator/Communicator.hpp	/^	int						m_preBufferSize;$/;"	m	class:Communicator
-m_preBuffersize	communicator/Request.hpp	/^	int					m_preBuffersize;$/;"	m	class:Request
+m_preBufferSize	communicator/Request.hpp	/^	int					m_preBufferSize;$/;"	m	class:Request
 m_proxyPass	Location.hpp	/^	std::string		m_proxyPass;$/;"	m	class:Location
 m_readSet	test/FdManager.hpp	/^	fd_set		m_readSet;$/;"	m	class:FdManager
 m_request	communicator/Communicator.hpp	/^	Request					m_request;$/;"	m	class:Communicator
@@ -194,7 +198,7 @@ m_requestSection	communicator/Request.hpp	/^	int					m_requestSection;$/;"	m	cla
 m_response	communicator/Communicator.hpp	/^	Response				m_response;$/;"	m	class:Communicator
 m_response	socket/ClientSocket.hpp	/^	Response		m_response;$/;"	m	class:ClientSocket
 m_response	test/Connection.hpp	/^	IResponse*		m_response;$/;"	m	class:Connection
-m_responseMessage	communicator/Response.hpp	/^			std::string	m_responseMessage;$/;"	m	class:Response
+m_responseBuffer	socket/ClientSocket.hpp	/^	std::string		m_responseBuffer;$/;"	m	class:ClientSocket
 m_root	Location.hpp	/^	std::string		m_root;$/;"	m	class:Location
 m_root	Server.hpp	/^	std::string					m_root;$/;"	m	class:Server
 m_serverList	ServerManager.hpp	/^	std::vector<Server>	m_serverList;$/;"	m	class:ServerManager
@@ -222,6 +226,7 @@ makeReqeustBody	communicator/Request.cpp	/^Request::makeReqeustBody(const string
 makeRequest	communicator/Request.cpp	/^Request::makeRequest(std::string& buffer)$/;"	f	class:Request
 makeRequestHeader	communicator/Request.cpp	/^Request::makeRequestHeader(const string& buffer)$/;"	f	class:Request
 makeRequestLine	communicator/Request.cpp	/^Request::makeRequestLine(const string& buffer)$/;"	f	class:Request
+makeResponseHeader	communicator/Response.cpp	/^Response::makeResponseHeader(string& buffer)$/;"	f	class:Response
 operator =	Server.cpp	/^Server::operator=(const Server& server)$/;"	f	class:Server
 operator =	exception/ConfigParserException.cpp	/^ConfigParserException::operator=(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
 operator =	socket/ClientSocket.cpp	/^ClientSocket::operator=(const ClientSocket &copy)$/;"	f	class:ClientSocket
@@ -242,7 +247,7 @@ parseServer	parser/config_parser/ConfigParser.cpp	/^ConfigParser::parseServer(ve
 peek	tokenizer/FileTokenizer.cpp	/^FileTokenizer::peek()$/;"	f	class:FileTokenizer
 postMethod	method/postMethod.hpp	/^class postMethod$/;"	c
 postMethod_hpp	method/postMethod.hpp	/^#define postMethod_hpp$/;"	d
-printRequestMessage	communicator/Request.cpp	/^void Request::printRequestMessage(requestHeaderMap& requestHeaderMap) const$/;"	f	class:Request
+printRequestMessage	communicator/Request.cpp	/^Request::printRequestMessage() const$/;"	f	class:Request
 printTokens	tokenizer/FileTokenizer.cpp	/^FileTokenizer::printTokens() const$/;"	f	class:FileTokenizer
 printTokensByLine	tokenizer/FileTokenizer.cpp	/^FileTokenizer::printTokensByLine() const$/;"	f	class:FileTokenizer
 putMethod	method/putMethod.hpp	/^class putMethod$/;"	c
@@ -265,6 +270,7 @@ s_eot	tokenizer/FileTokenizer.hpp	/^	static const std::string	s_eot;$/;"	m	class
 s_locationSetterMap	parser/config_parser/LocationParser.hpp	/^	static std::map<std::string, t_setter>	s_locationSetterMap;$/;"	m	class:LocationParser
 s_maxFd	test/general_socket_tests.cpp	/^	static int	s_maxFd;$/;"	m	struct:MaxFd	file:
 s_serverSetterMap	parser/config_parser/ServerParser.hpp	/^	static std::map<std::string, t_setter>	s_serverSetterMap;$/;"	m	class:ServerParser
+s_statusCode	communicator/Response.hpp	/^	static std::unordered_map<int, std::string>	s_statusCode;$/;"	m	class:Response
 s_writeSetPtr	test/Connection.hpp	/^	static fd_set*				s_writeSetPtr;$/;"	m	class:Connection
 sender	test/syscall_test/getsocketopt_nonblock.cpp	/^void	sender() try$/;"	f
 setAlias	parser/config_parser/LocationParser.cpp	/^LocationParser::setAlias(Location& location)$/;"	f	class:LocationParser
@@ -286,6 +292,8 @@ setRoot	parser/config_parser/ServerParser.cpp	/^ServerParser::setRoot(Server& se
 setServerNames	parser/config_parser/ServerParser.cpp	/^ServerParser::setServerNames(Server& server)$/;"	f	class:ServerParser
 setServerSetterMap	parser/config_parser/ServerParser.cpp	/^void	ServerParser::setServerSetterMap()$/;"	f	class:ServerParser
 setSocketFd	socket/ServerSocket.cpp	/^ServerSocket::setSocketFd(int domain, int type, int protocol)$/;"	f	class:ServerSocket
+setStatusCode	communicator/Response.cpp	/^Response::setStatusCode(void)$/;"	f	class:Response
+setToDefault	Server.cpp	/^void	Server::setToDefault()$/;"	f	class:Server
 setUriBufferSize	parser/config_parser/ServerParser.cpp	/^ServerParser::setUriBufferSize(Server& server)$/;"	f	class:ServerParser
 size	tokenizer/FileTokenizer.cpp	/^FileTokenizer::size()$/;"	f	class:FileTokenizer
 splitString	test/stringstream.cpp	/^std::vector<std::string> splitString(const std::string& str)$/;"	f
@@ -306,7 +314,7 @@ writeData	test/Connection.cpp	/^int	Connection::writeData()$/;"	f	class:Connecti
 writeEventHandler	Server.cpp	/^Server::writeEventHandler(struct kevent* curEvent)$/;"	f	class:Server
 writeOperation	test/Server.cpp	/^void	Server::writeOperation(fd_set* fdSet)$/;"	f	class:Server
 writeSocket	communicator/Communicator.cpp	/^Communicator::writeSocket(int fd)$/;"	f	class:Communicator
-writeSocket	socket/ClientSocket.cpp	/^void		 ClientSocket::writeSocket()$/;"	f	class:ClientSocket
+writeSocket	socket/ClientSocket.cpp	/^ClientSocket::writeSocket()$/;"	f	class:ClientSocket
 ~AParser	parser/AParser.hpp	/^	virtual ~AParser() {};$/;"	f	class:AParser
 ~ASocket	socket/ASocket.hpp	/^	virtual ~ASocket() {};$/;"	f	class:ASocket
 ~ATokenizer	tokenizer/ATokenizer.cpp	/^ATokenizer::~ATokenizer()$/;"	f	class:ATokenizer

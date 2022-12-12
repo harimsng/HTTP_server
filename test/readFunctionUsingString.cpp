@@ -27,6 +27,7 @@ int ssTest(string& buffer, string path, int preBufferSize)
 	fd = open(path.c_str(), O_RDONLY);
 	readSize = FdGetFileSize(fd);
 	buffer.resize(preBufferSize + readSize + 1, 0);
+
 	read(fd, &buffer[preBufferSize], readSize);
 
 	stringstream ss(buffer);
