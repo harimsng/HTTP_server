@@ -2,6 +2,7 @@
 
 #include "ServerManager.hpp"
 #include "ConfigParser.hpp"
+#include "exception/ConfigParserException.hpp"
 
 bool	parseArgument(int argc, char **argv);
 

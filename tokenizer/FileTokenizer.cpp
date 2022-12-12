@@ -105,7 +105,7 @@ FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 }
 
 void
-FileTokenizer::init(const std::string path)
+FileTokenizer::init(const string path)
 {
 	string		line;
 

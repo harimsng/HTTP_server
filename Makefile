@@ -1,11 +1,9 @@
 NAME		=	webserv
 
-
 CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 DEBUGFLAGS	=	-g -fsanitize=address
 RM			=	rm -f
-
 
 SRC			=	main.cpp\
 				ServerManager.cpp\
@@ -20,15 +18,29 @@ SRC			=	main.cpp\
 				tokenizer/ATokenizer.cpp\
 				tokenizer/SocketTokenizer.cpp\
 				tokenizer/FileTokenizer.cpp\
-				
+\
+				socket/ClientSocket.cpp\
+				socket/ServerSocket.cpp\
+\
+				communicator/Communicator.cpp\
+				communicator/Request.cpp\
+				communicator/Response.cpp\
+\
+				cgi/cgi.cpp\
+
+
 OBJ			=	$(SRC:%.cpp=%.o)
 
 INCL_PATH	=	-I./\
 				-Iparser/\
-				-Iparser/config_parser\
-				-Iparser/http_request_parser\
 				-Itokenizer/\
-				-Iexception\
+				-Isocket/\
+				-Icommunicator/\
+				-Icgi/\
+				-Iparser/config_parser/\
+				-Iparser/http_request_parser/\
+				-Itokenizer/\
+				-Iexception/\
 
 ifeq ($(DEBUG_MODE), 1)
 CXXFLAGS	+=	$(DEBUGFLAGS)

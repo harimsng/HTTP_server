@@ -32,6 +32,13 @@ catch (std::exception& e)
 void
 ServerManager::run() try
 {
+	for (size_t i = 0; i < m_serverList.size(); i++)
+		m_serverList[i].initServer();
+	while (1)
+	{
+		for (size_t i = 0; i < m_serverList.size(); i++)
+			m_serverList[i].run();
+	}
 }
 catch (...)
 {

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Server.hpp"
+#include "ConfigParser.hpp"
 
 class	ServerManager
 {
@@ -23,6 +24,7 @@ public:
 private:
 // member variables
 	std::vector<Server>	m_serverList;
+	ConfigParser		m_configParser;
 };
 
 #endif

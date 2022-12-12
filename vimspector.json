@@ -1,0 +1,23 @@
+{
+  "configurations": {
+  "C - Launch": {
+    "adapter": "CodeLLDB",
+    "configuration": {
+      "name": "Cpp: Launch current file",
+      "type": "lldb",
+      "request": "launch",
+      "externalConsole": false,
+      "logging": {
+        "engineLogging": true
+      },
+      "stopOnEntry": true,
+      "stopAtEntry": true,
+      "debugOptions": [],
+      "MIMode": "lldb",
+      "cwd" : "${cwd}",
+	  "args" : [],
+	  "program": "filename"
+    }
+  }
+  }
+}
