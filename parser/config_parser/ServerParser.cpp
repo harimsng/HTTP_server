@@ -18,7 +18,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["error_code"] = &ServerParser::setErrorCode;
 	s_serverSetterMap["error_pages"] = &ServerParser::setErrorPages;
 	s_serverSetterMap["root"] = &ServerParser::setRoot;
-	s_serverSetterMap["listen"] = &ServerParser::setListenPort;
+	s_serverSetterMap["listen"] = &ServerParser::setListenAddress;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["uri_buffer_size"] = &ServerParser::setUriBufferSize;
 	s_serverSetterMap["location"] = &ServerParser::parseLocation;
@@ -33,6 +33,8 @@ ServerParser::ServerParser(FileTokenizer& m_tokenizer)
 ServerParser::~ServerParser()
 {
 }
+
+#include <iostream>
 
 // member functions
 void
@@ -75,7 +77,7 @@ ServerParser::setServerNames(Server& server)
 }
 
 void
-ServerParser::setListenPort(Server& server)
+ServerParser::setListenAddress(Server& server)
 {
 	string				listenField = m_tokenizer.get();
 	stringstream		ss;

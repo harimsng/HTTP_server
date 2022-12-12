@@ -31,7 +31,7 @@ public:
 	void		parseLocation(Server& server);
 	void		setIndex(Server& server);
 	void		setServerNames(Server& server);
-	void		setListenPort(Server& server);
+	void		setListenAddress(Server& server);
 	void		setRoot(Server& server);
 	void		setErrorPages(Server& server);
 	void		setErrorCode(Server& server);

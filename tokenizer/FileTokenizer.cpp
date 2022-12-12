@@ -38,7 +38,7 @@ void
 FileTokenizer::eat(const string& target)
 {
 	if (get() != target)
-		throw m_idx > 1 ? m_idx - 2 : 0;
+		throw FileTokenizerException("unexpected token");
 }
 
 unsigned int
@@ -56,7 +56,7 @@ FileTokenizer::empty() const
 string
 FileTokenizer::getErrorLog(const char* message)
 {
-	int		errorLineNumber = m_tokenArr[m_idx].second;
+	int		errorLineNumber = m_tokenArr[m_idx - 1].second;
 	string	errorLine;
 	string	errorLog;
 

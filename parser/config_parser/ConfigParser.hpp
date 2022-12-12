@@ -25,12 +25,14 @@ public:
 	void			init(std::string configPath);
 	bool			checkFileStat(const char* path);
 
-	virtual void	parse(std::vector<Server>& output);
-	void			parseServer(std::vector<Server>& output);
+	virtual void	parse(std::vector<Server>& servers);
+	void			parseServer(std::vector<Server>& servers);
+
+	void			printParsedData(std::vector<Server>& servers) const;
 
 // static members
-	static int		toInt(const std::string& str);
-	static std::string		toString(int num);
+	static int			toInt(const std::string& str);
+	static std::string	toString(int num);
 };
 
 #endif

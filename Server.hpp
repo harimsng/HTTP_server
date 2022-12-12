@@ -9,6 +9,7 @@
 // for gnu c portability and c++98 standard. should be removed later
 #include <stdint.h>
 
+#include "Location.hpp"
 
 #define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\
 /*sin_len*/		INET_ADDRSTRLEN,\
@@ -18,17 +19,16 @@
 /*sin_zero*/	{0, }\
 })
 
-#include "Location.hpp"
-
 class	Server
 {
 	friend class	ServerParser;
+	friend class	ConfigParser;
 
 public:
 // constructors & destructor
 	Server();
 	~Server();
-	Server(Server const& server) {*this = server;};
+	Server(Server const& server);
 	Server	&operator=(Server const& server);
 
 // member functions
@@ -48,6 +48,8 @@ private:
 	int32_t		m_uriBufferSize; // it correspond to what option in nginx config?
 
 	std::vector<Location>	m_locationList;
+
+	friend std::ostream&	operator<<(std::ostream& os, const Server& server);
 };
 
 #endif

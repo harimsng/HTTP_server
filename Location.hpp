@@ -9,13 +9,13 @@ class	Location
 	friend class	ServerParser;
 
 // deleted
-	Location	&operator=(Location const& location);
 
 public:
 // constructors & destructor
 	Location();
 	~Location();
-	Location(Location const& location) {(void)location;};
+	Location(const Location& location);
+	Location&	operator=(const Location& location);
 
 // member functions
 
@@ -30,6 +30,8 @@ private:
 	std::string		m_cgiPass;
 	std::string		m_alias;
 	std::string		m_clientMaxBodySize;
+
+	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };
 
 #endif
