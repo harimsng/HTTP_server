@@ -12,6 +12,20 @@ Server::~Server()
 {
 }
 
+Server&
+Server::operator=(const Server& server)
+{
+	m_index = server.m_index;
+	m_serverNames = server.m_serverNames;
+	m_errorCode = server.m_errorCode;
+	m_root = server.m_root;
+	m_errorPages = server.m_errorPages;
+	m_listen = server.m_listen;
+	m_clientMaxBodySize = server.m_clientMaxBodySize;
+	m_uriBufferSize = server.m_uriBufferSize;
+	return *this;
+}
+
 void
 Server::initServer()
 {
@@ -104,7 +118,7 @@ Server::readEventHandler(struct kevent* curEvent)
 	{
 		// request class가 ClientSocket의 fd를 가지고와서 read 실행?
 		//
-		
+
 	}
 	return (0);
 }

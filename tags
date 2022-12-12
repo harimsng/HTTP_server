@@ -35,7 +35,7 @@ ConfigParser	parser/config_parser/ConfigParser.cpp	/^ConfigParser::ConfigParser(
 ConfigParser	parser/config_parser/ConfigParser.hpp	/^class	ConfigParser: public AParser<FileTokenizer, vector<Server> >$/;"	c
 ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::ConfigParserException(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
 ConfigParserException	exception/ConfigParserException.cpp	/^ConfigParserException::ConfigParserException(const string& errMsg)$/;"	f	class:ConfigParserException
-ConfigParserException	exception/ConfigParserException.hpp	/^	ConfigParserException(const std::string& message): m_message("ConfigParserException: " + message) {};$/;"	f	class:ConfigParser::ConfigParserException
+ConfigParserException	exception/ConfigParserException.hpp	/^	ConfigParserException(const std::string& message): m_message("parse error: " + message) {};$/;"	f	class:ConfigParser::ConfigParserException
 ConfigParserException	exception/ConfigParserException.hpp	/^class	ConfigParser::ConfigParserException: public std::exception$/;"	c	class:ConfigParser
 Connection	test/Connection.cpp	/^Connection::Connection(Connection const& connection)$/;"	f	class:Connection
 Connection	test/Connection.cpp	/^Connection::Connection(int socket)$/;"	f	class:Connection
@@ -53,6 +53,7 @@ FileTokenizer	tokenizer/FileTokenizer.cpp	/^FileTokenizer::FileTokenizer()$/;"	f
 FileTokenizer	tokenizer/FileTokenizer.hpp	/^class	FileTokenizer: public ATokenizer$/;"	c
 FileTokenizerException	exception/FileTokenizerException.hpp	/^	FileTokenizerException(const std::string& message): m_message("FileTokenizerException: " + message) {};$/;"	f	class:FileTokenizer::FileTokenizerException
 FileTokenizerException	exception/FileTokenizerException.hpp	/^class	FileTokenizer::FileTokenizerException: public std::exception$/;"	c	class:FileTokenizer
+GET_SOCKADDR_IN	Server.hpp	/^#define GET_SOCKADDR_IN(/;"	d
 GET_SOCKADDR_IN	test/ServerManager.cpp	/^#define GET_SOCKADDR_IN(/;"	d	file:
 GET_SOCKADDR_IN	test/ServerManager.cpp	/^#undef GET_SOCKADDR_IN$/;"	d	file:
 HTTPREQUESTPARSEREXCEPTION_HPP	exception/HttpRequestParserException.hpp	/^#define HTTPREQUESTPARSEREXCEPTION_HPP$/;"	d
@@ -98,7 +99,7 @@ SERVER_HPP	test/Server.hpp	/^#define SERVER_HPP$/;"	d
 SOCKETTOKENIZER_HPP	tokenizer/SocketTokenizer.hpp	/^#define SOCKETTOKENIZER_HPP$/;"	d
 SRC	Makefile	/^SRC			=	main.cpp\\$/;"	m
 Server	Server.cpp	/^Server::Server()$/;"	f	class:Server
-Server	Server.hpp	/^	Server(const Server& copy) {(void)copy;};$/;"	f	class:Server
+Server	Server.hpp	/^	Server(Server const& server) {*this = server;};$/;"	f	class:Server
 Server	Server.hpp	/^class	Server$/;"	c
 Server	test/Server.cpp	/^Server::Server(Server const& server)$/;"	f	class:Server
 Server	test/Server.cpp	/^Server::Server(int listenSocket)$/;"	f	class:Server
@@ -131,7 +132,7 @@ empty	tokenizer/FileTokenizer.cpp	/^FileTokenizer::empty() const$/;"	f	class:Fil
 eventSocket	Server.cpp	/^Server::eventSocket(int newEventCnt)$/;"	f	class:Server
 get	tokenizer/FileTokenizer.cpp	/^FileTokenizer::get()$/;"	f	class:FileTokenizer
 getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
-getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog(int idx)$/;"	f	class:FileTokenizer
+getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog(const char* message)$/;"	f	class:FileTokenizer
 getListenSocket	test/ServerManager.cpp	/^int	ServerManager::getListenSocket()$/;"	f	class:ServerManager
 getMethod	method/getMethod.hpp	/^class getMethod$/;"	c
 getMethod_hpp	method/getMethod.hpp	/^#define getMethod_hpp$/;"	d
@@ -157,6 +158,7 @@ m_clientSocket	Server.hpp	/^	std::map<int, ClientSocket>	m_clientSocket;$/;"	m	c
 m_configParser	ServerManager.hpp	/^	ConfigParser		m_configParser;$/;"	m	class:ServerManager
 m_connectionVec	test/Server.hpp	/^	std::vector<std::pair<int, Connection>>	m_connectionVec;$/;"	m	class:Server
 m_errorCode	Server.hpp	/^	std::string					m_errorCode;$/;"	m	class:Server
+m_errorPages	Server.hpp	/^	std::string					m_errorPages;$/;"	m	class:Server
 m_errorPath	Server.hpp	/^	std::string					m_errorPath;$/;"	m	class:Server
 m_eventList	Server.hpp	/^	struct kevent				m_eventList[EVENT_SIZE];$/;"	m	class:Server	typeref:struct:Server::kevent
 m_exceptionSet	test/FdManager.hpp	/^	fd_set		m_exceptionSet;$/;"	m	class:FdManager
@@ -168,7 +170,7 @@ m_index	Location.hpp	/^	std::string		m_index;$/;"	m	class:Location
 m_index	Server.hpp	/^	std::string					m_index;$/;"	m	class:Server
 m_kq	Server.hpp	/^	int							m_kq;$/;"	m	class:Server
 m_limitExcept	Location.hpp	/^	std::string		m_limitExcept;$/;"	m	class:Location
-m_listen	Server.hpp	/^	int32_t						m_listen;$/;"	m	class:Server
+m_listen	Server.hpp	/^	sockaddr_in					m_listen;$/;"	m	class:Server
 m_listenSocket	test/Server.hpp	/^	int 									m_listenSocket;$/;"	m	class:Server
 m_locationList	Server.hpp	/^	std::vector<Location>		m_locationList;$/;"	m	class:Server
 m_maxFd	test/FdManager.hpp	/^	int			m_maxFd;$/;"	m	class:FdManager
@@ -196,7 +198,7 @@ m_responseMessage	communicator/Response.hpp	/^			std::string	m_responseMessage;$
 m_root	Location.hpp	/^	std::string		m_root;$/;"	m	class:Location
 m_root	Server.hpp	/^	std::string					m_root;$/;"	m	class:Server
 m_serverList	ServerManager.hpp	/^	std::vector<Server>	m_serverList;$/;"	m	class:ServerManager
-m_serverName	Server.hpp	/^	std::string					m_serverName;$/;"	m	class:Server
+m_serverNames	Server.hpp	/^	std::string					m_serverNames;$/;"	m	class:Server
 m_serverSocket	Server.hpp	/^	ServerSocket				m_serverSocket;$/;"	m	class:Server
 m_serverVec	test/ServerManager.hpp	/^	std::vector<Server>	m_serverVec;$/;"	m	class:ServerManager
 m_size	test/Connection.hpp	/^	std::size_t		m_size;$/;"	m	class:Connection
@@ -220,6 +222,7 @@ makeReqeustBody	communicator/Request.cpp	/^Request::makeReqeustBody(const string
 makeRequest	communicator/Request.cpp	/^Request::makeRequest(std::string& buffer)$/;"	f	class:Request
 makeRequestHeader	communicator/Request.cpp	/^Request::makeRequestHeader(const string& buffer)$/;"	f	class:Request
 makeRequestLine	communicator/Request.cpp	/^Request::makeRequestLine(const string& buffer)$/;"	f	class:Request
+operator =	Server.cpp	/^Server::operator=(const Server& server)$/;"	f	class:Server
 operator =	exception/ConfigParserException.cpp	/^ConfigParserException::operator=(ConfigParserException const& configParserException)$/;"	f	class:ConfigParserException
 operator =	socket/ClientSocket.cpp	/^ClientSocket::operator=(const ClientSocket &copy)$/;"	f	class:ClientSocket
 operator =	test/Connection.cpp	/^Connection&	Connection::operator=(Connection const& connection)$/;"	f	class:Connection
@@ -248,7 +251,6 @@ readData	test/Connection.cpp	/^int	Connection::readData()$/;"	f	class:Connection
 readEventHandler	Server.cpp	/^Server::readEventHandler(struct kevent* curEvent)$/;"	f	class:Server
 readOperation	test/Server.cpp	/^void	Server::readOperation(fd_set* fdSet)$/;"	f	class:Server
 readRequestBody	communicator/Communicator.cpp	/^int	 Communicator::readRequestBody(std::string& requestMessageBuffer)$/;"	f	class:Communicator
-readRequestHeader	communicator/Communicator.cpp	/^Communicator::readRequestHeader(string& requestMessageBuffer) try$/;"	f	class:Communicator
 readSocket	socket/ClientSocket.cpp	/^ClientSocket::readSocket(int messageSize, Server& server)$/;"	f	class:ClientSocket
 receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
 requestHeaderMap	communicator/Communicator.hpp	/^	typedef Request::requestHeaderMap requestHeaderMap;$/;"	t	class:Communicator
@@ -270,7 +272,7 @@ setCgiPass	parser/config_parser/LocationParser.cpp	/^LocationParser::setCgiPass(
 setClientMaxBodySize	parser/config_parser/LocationParser.cpp	/^LocationParser::setClientMaxBodySize(Location& location)$/;"	f	class:LocationParser
 setClientMaxBodySize	parser/config_parser/ServerParser.cpp	/^ServerParser::setClientMaxBodySize(Server& server)$/;"	f	class:ServerParser
 setErrorCode	parser/config_parser/ServerParser.cpp	/^ServerParser::setErrorCode(Server& server)$/;"	f	class:ServerParser
-setErrorPath	parser/config_parser/ServerParser.cpp	/^ServerParser::setErrorPath(Server& server)$/;"	f	class:ServerParser
+setErrorPages	parser/config_parser/ServerParser.cpp	/^ServerParser::setErrorPages(Server& server)$/;"	f	class:ServerParser
 setExpires	parser/config_parser/LocationParser.cpp	/^LocationParser::setExpires(Location& location)$/;"	f	class:LocationParser
 setIndex	parser/config_parser/LocationParser.cpp	/^LocationParser::setIndex(Location& location)$/;"	f	class:LocationParser
 setIndex	parser/config_parser/ServerParser.cpp	/^ServerParser::setIndex(Server& server)$/;"	f	class:ServerParser
@@ -281,7 +283,7 @@ setPath	parser/config_parser/LocationParser.cpp	/^LocationParser::setPath(Locati
 setProxyPass	parser/config_parser/LocationParser.cpp	/^LocationParser::setProxyPass(Location& location)$/;"	f	class:LocationParser
 setRoot	parser/config_parser/LocationParser.cpp	/^LocationParser::setRoot(Location& location)$/;"	f	class:LocationParser
 setRoot	parser/config_parser/ServerParser.cpp	/^ServerParser::setRoot(Server& server)$/;"	f	class:ServerParser
-setServerName	parser/config_parser/ServerParser.cpp	/^ServerParser::setServerName(Server& server)$/;"	f	class:ServerParser
+setServerNames	parser/config_parser/ServerParser.cpp	/^ServerParser::setServerNames(Server& server)$/;"	f	class:ServerParser
 setServerSetterMap	parser/config_parser/ServerParser.cpp	/^void	ServerParser::setServerSetterMap()$/;"	f	class:ServerParser
 setSocketFd	socket/ServerSocket.cpp	/^ServerSocket::setSocketFd(int domain, int type, int protocol)$/;"	f	class:ServerSocket
 setUriBufferSize	parser/config_parser/ServerParser.cpp	/^ServerParser::setUriBufferSize(Server& server)$/;"	f	class:ServerParser

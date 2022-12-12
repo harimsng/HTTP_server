@@ -30,7 +30,7 @@ public:
 	void						eat(const std::string& target);
 	unsigned int				size();
 
-	std::string		getErrorLog(int idx);
+	std::string		getErrorLog(const char* message);
 	void			printTokensByLine() const;
 	void			printTokens() const;
 

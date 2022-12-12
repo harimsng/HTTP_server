@@ -13,7 +13,7 @@ void
 ServerSocket::createSocket(const initType& initClass)
 {
 	setSocketFd(AF_INET, SOCK_STREAM, 0);
-	initAddr(AF_INET, initClass.m_listen, INADDR_ANY);
+	initAddr(AF_INET, initClass.m_listen.sin_port, INADDR_ANY);
 	bindSocket();
 	listenSocket();
 }

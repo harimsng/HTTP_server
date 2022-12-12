@@ -9,7 +9,7 @@
 class	ConfigParser::ConfigParserException: public std::exception
 {
 public:
-	ConfigParserException(const std::string& message): m_message("ConfigParserException: " + message) {};
+	ConfigParserException(const std::string& message): m_message("parse error: " + message) {};
 
 	virtual ~ConfigParserException() throw() {};
 

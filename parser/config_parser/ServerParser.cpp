@@ -1,7 +1,11 @@
+#include <sstream>
+#include <algorithm>
+
 #include "ConfigParser.hpp"
+#include "ConfigParserException.hpp"
+#include "LocationParser.hpp"
 #include "Server.hpp"
 #include "ServerParser.hpp"
-#include "LocationParser.hpp"
 
 using namespace std;
 
@@ -10,9 +14,9 @@ map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;
 void	ServerParser::setServerSetterMap()
 {
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
-	s_serverSetterMap["server_name"] = &ServerParser::setServerName;
+	s_serverSetterMap["server_names"] = &ServerParser::setServerNames;
 	s_serverSetterMap["error_code"] = &ServerParser::setErrorCode;
-	s_serverSetterMap["error_path"] = &ServerParser::setErrorPath;
+	s_serverSetterMap["error_pages"] = &ServerParser::setErrorPages;
 	s_serverSetterMap["root"] = &ServerParser::setRoot;
 	s_serverSetterMap["listen"] = &ServerParser::setListenPort;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
@@ -64,16 +68,52 @@ ServerParser::setIndex(Server& server)
 }
 
 void
-ServerParser::setServerName(Server& server)
+ServerParser::setServerNames(Server& server)
 {
-	server.m_serverName = m_tokenizer.get();
+	server.m_serverNames = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setListenPort(Server& server)
 {
-	server.m_listen = ConfigParser::toInt(m_tokenizer.get());
+	string				listenField = m_tokenizer.get();
+	stringstream		ss;
+	string::size_type	colonPos = listenField.find(":");
+	uint32_t			addr = 0;
+	uint16_t			port = 0;
+
+	if (colonPos != string::npos || count(listenField.begin(), listenField.end(), '.') > 0)
+	{
+		uint16_t	addrPart = 0;
+		char		period;
+
+		ss.str(listenField.substr(0, colonPos));
+		for (int i = 0; i < 3; ++i)
+		{
+			ss >> addrPart >> period;
+			if (period != '.' || ss.fail() || addrPart > 255)
+				throw ConfigParser::ConfigParserException("invalid listen address");
+			addr = (addr << 8) | addrPart;
+		}
+		ss >> addrPart;
+		addr = (addr << 8) | addrPart;
+		if (ss.eof() == false || ss.fail() == true)
+			throw ConfigParser::ConfigParserException("invalid listen address");
+	}
+
+	if (!(colonPos == string::npos && ss.eof() == true))
+	{
+
+		if (listenField.rfind(":") != colonPos)
+			throw ConfigParser::ConfigParserException("invalid listen address");
+		ss.clear();
+		ss.str(colonPos != string::npos ? listenField.substr(colonPos + 1, string::npos) : listenField);
+		ss >> port;
+		if (ss.eof() == false || ss.fail() == true)
+			throw ConfigParser::ConfigParserException("invalid listen address");
+	}
+	server.m_listen = GET_SOCKADDR_IN(addr, port);
 	m_tokenizer.eat(";");
 }
 
@@ -85,9 +125,9 @@ ServerParser::setRoot(Server& server)
 }
 
 void
-ServerParser::setErrorPath(Server& server)
+ServerParser::setErrorPages(Server& server)
 {
-	server.m_errorPath = m_tokenizer.get();
+	server.m_errorPages = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 

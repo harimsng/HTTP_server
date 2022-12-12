@@ -16,9 +16,9 @@ class	ConfigParser: public AParser<FileTokenizer, vector<Server> >
 	ConfigParser(ConfigParser const& configParser);
 	ConfigParser	&operator=(ConfigParser const& configParser);
 
+public:
 	class	ConfigParserException;
 
-public:
 // constructors & destructor
 	ConfigParser();
 	virtual ~ConfigParser();
