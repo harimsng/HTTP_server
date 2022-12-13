@@ -79,9 +79,10 @@ int
 Server::waitEvent()
 {
 	int newEvents;
+	static const struct timespec tout = { 1, 0 };
 
 	newEvents = kevent(m_kq, &m_changeList[0], m_changeList.size(),
-			m_eventList, EVENT_SIZE, NULL);
+			m_eventList, EVENT_SIZE, &tout);
 	cout << "new event occured : " << newEvents << endl;
 	if (newEvents == -1)
 	{
