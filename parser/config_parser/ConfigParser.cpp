@@ -46,15 +46,16 @@ ConfigParser::checkFileStat(const char* path)
 }
 
 void
-ConfigParser::parse(vector<Server>& output) try
+ConfigParser::parse(vector<Server>& servers) try
 {
 	while (m_tokenizer.peek() == "server")
 	{
 		m_tokenizer.get();
-		parseServer(output);
+		parseServer(servers);
 	}
 	if (m_tokenizer.empty() == false)
 		m_tokenizer.eat("server");
+	printParsedData(servers);
 }
 catch (std::exception& e)
 {
@@ -62,15 +63,22 @@ catch (std::exception& e)
 }
 
 void
-ConfigParser::parseServer(vector<Server>& output)
+ConfigParser::parseServer(vector<Server>& servers)
 {
 	m_tokenizer.eat("{");
 	
 	ServerParser	serverParser(m_tokenizer);
 
-	output.push_back(Server());
-	serverParser.parse(output.back());
+	servers.push_back(Server());
+	serverParser.parse(servers.back());
 	m_tokenizer.eat("}");
+}
+
+void
+ConfigParser::printParsedData(vector<Server>& servers) const
+{
+	for (uint32_t i = 0; i < servers.size(); ++i)
+		cout << servers[i] << '\n';
 }
 
 int

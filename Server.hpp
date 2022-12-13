@@ -11,6 +11,12 @@
 #include <string>
 #include <utility>
 
+#include "Location.hpp"
+#include "ServerSocket.hpp"
+#include "ClientSocket.hpp"
+#include "Communicator.hpp"
+
+#define EVENT_SIZE 8
 
 #define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\
 /*sin_len*/		INET_ADDRSTRLEN,\
@@ -19,13 +25,6 @@
 /*sin_addr*/	(in_addr){htonl(addr)},\
 /*sin_zero*/	{0, }\
 })
-
-#include "Location.hpp"
-#include "ServerSocket.hpp"
-#include "ClientSocket.hpp"
-#include "Communicator.hpp"
-
-#define EVENT_SIZE 8
 
 class	Server
 {
@@ -36,8 +35,8 @@ public:
 // constructors & destructor
 	Server();
 	~Server();
-	Server(Server const& server) {*this = server;};
-	Server&	operator=(Server const& server);
+	Server(Server const& server);
+	Server	&operator=(Server const& server);
 
 // member functions
 	void	initServer();
@@ -73,6 +72,8 @@ private:
 // member variables - socket
 	std::map<int, ClientSocket>	m_clientSocket;
 	ServerSocket				m_serverSocket;
+
+	friend std::ostream&	operator<<(std::ostream& os, const Server& server);
 };
 
 #endif
