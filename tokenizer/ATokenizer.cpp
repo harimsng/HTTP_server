@@ -1,4 +1,4 @@
-#include "ATokenizer.hpp"
+#include "tokenizer/ATokenizer.hpp"
 
 // constructors & destructor
 ATokenizer::ATokenizer()

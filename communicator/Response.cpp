@@ -1,4 +1,4 @@
-#include "Response.hpp"
+#include "communicator/Response.hpp"
 
 using namespace std;
 
@@ -54,7 +54,7 @@ Response::setStatusCode(void)
 }
 
 const string
-Response::getDate(void) const
+Response::getDate(const char* format)
 {
 	time_t		curTime;
 	struct tm*	curTimeInfo;
@@ -62,7 +62,7 @@ Response::getDate(void) const
 
 	time(&curTime);
 	curTimeInfo = localtime(&curTime);
-	strftime(timeBuf, 1024, "%a, %d %b %Y %X %Z", curTimeInfo);
+	strftime(timeBuf, 1024, format, curTimeInfo);
 	return (timeBuf);
 }
 

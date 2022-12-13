@@ -1,13 +1,12 @@
-#include <ostream>
-
-#include "Server.hpp"
-#include "socket/ClientSocket.hpp"
 #include <sys/event.h>
 
 #include <iostream>
 
-using namespace std;
+#include "Logger.hpp"
+#include "Server.hpp"
+#include "socket/ClientSocket.hpp"
 
+using namespace std;
 
 // constructors & destructor
 Server::Server()
@@ -52,12 +51,15 @@ void	Server::setToDefault()
 
 std::ostream&	operator<<(std::ostream& os, const Server& server)
 {
+	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
+
 	os << "server\n{\n";
 	os << "\tserver_name " << server.m_serverNames << '\n';
-
-	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
-	os << "\tlisten " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.'
-		<< ((addr & 0xff00) >> 8) << '.' << (addr & 0xff) << ':' << ntohs(server.m_listen.sin_port) << '\n';
+	os << "\tlisten " << ((addr & 0xff000000) >> 24) << '.'
+	   << ((addr & 0xff0000) >> 16) << '.'
+	   << ((addr & 0xff00) >> 8) << '.'
+	   << (addr & 0xff) << ':'
+	   << ntohs(server.m_listen.sin_port) << '\n';
 	os << "\tindex " << server.m_index << '\n';
 	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
 	for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
@@ -107,7 +109,7 @@ Server::waitEvent()
 
 	newEvents = kevent(m_kq, &m_changeList[0], m_changeList.size(),
 			m_eventList, EVENT_SIZE, &tout);
-	cout << "new event occured : " << newEvents << endl;
+	Logger::log(Logger::INFO, "new event occured");
 	if (newEvents == -1)
 	{
 		// throw exception;
@@ -152,7 +154,7 @@ Server::readEventHandler(struct kevent* curEvent)
 	{
 		ClientSocket clientSocket;
 
-		cout << "server socket read" << endl;
+		Logger::log(Logger::INFO, "server socket read");
 		clientSocket.createSocket(m_serverSocket);
 		m_clientSocket.insert(make_pair(clientSocket.m_SocketFd, clientSocket));
 		addEvents(clientSocket.m_SocketFd, EVFILT_READ,
@@ -165,7 +167,7 @@ Server::readEventHandler(struct kevent* curEvent)
 	{
 		ClientSocket& clientSocket = m_clientSocket.find(curEvent->ident)->second;
 
-		cout << "client socket read" << endl;
+		Logger::log(Logger::INFO, "client socket read");
 		clientSocket.readSocket(curEvent->data, *this);
 	}
 	return (0);

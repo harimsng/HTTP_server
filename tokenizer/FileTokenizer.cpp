@@ -1,9 +1,9 @@
 #include <sstream>
 #include <iostream>
 
-#include "ConfigParser.hpp"
-#include "FileTokenizer.hpp"
-#include "FileTokenizerException.hpp"
+#include "parser/config_parser/ConfigParser.hpp"
+#include "tokenizer/FileTokenizer.hpp"
+#include "exception/FileTokenizerException.hpp"
 
 using namespace std;
 

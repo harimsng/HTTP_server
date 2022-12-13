@@ -4,8 +4,8 @@
 #include <map>
 #include <string>
 
-#include "AParser.hpp"
-#include "FileTokenizer.hpp"
+#include "parser/AParser.hpp"
+#include "tokenizer/FileTokenizer.hpp"
 
 class	Server;
 

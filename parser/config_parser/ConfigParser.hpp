@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "AParser.hpp"
-#include "FileTokenizer.hpp"
+#include "parser/AParser.hpp"
+#include "tokenizer/FileTokenizer.hpp"
 #include "Server.hpp"
 
 using namespace std;
@@ -29,8 +29,6 @@ public:
 
 	virtual void	parse(std::vector<Server>& servers);
 	void			parseServer(std::vector<Server>& servers);
-
-	void			printParsedData(std::vector<Server>& servers) const;
 
 // static members
 	static int			toInt(const std::string& str);

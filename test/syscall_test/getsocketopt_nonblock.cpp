@@ -29,8 +29,7 @@ int	main()
 void	sender() try
 {
 	int	sndSock = socket(PF_INET, SOCK_STREAM, 0);
-	sockaddr_in	sockAddr = {0, };
-	socklen_t	sockLen = 0;
+	sockaddr_in	sockAddr;
 	unsigned char	buffer[128] = {0, };
 
 	sockAddr.sin_family = AF_INET;
@@ -63,9 +62,9 @@ catch (std::exception& e)
 void	receiver() try
 {
 	fd_set	readSet;
-	int		listenSock= socket(PF_INET, SOCK_STREAM, 0);
+	int		listenSock = socket(PF_INET, SOCK_STREAM, 0);
 	int		rcvSock;
-	sockaddr_in	sockAddr = {0, };
+	sockaddr_in	sockAddr;
 	socklen_t	sockLen = 0;
 	unsigned char	buffer[1024] = {0, };
 	ssize_t			readLen = 0;

@@ -1,9 +1,9 @@
 #ifndef HTTPREQUESTPARSER_HPP
 #define HTTPREQUESTPARSER_HPP
 
-#include "AParser.hpp"
-#include "RequestTokenizer.hpp"
-#include "Communicator.hpp"
+#include "parser/AParser.hpp"
+#include "tokenizer/RequestTokenizer.hpp"
+#include "communicator/Communicator.hpp"
 
 class	HttpRequestParser : AParser<RequestTokenizer, Communicator::requestHeaderMap>
 {

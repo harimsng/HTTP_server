@@ -12,9 +12,9 @@
 #include <utility>
 
 #include "Location.hpp"
-#include "ServerSocket.hpp"
-#include "ClientSocket.hpp"
-#include "Communicator.hpp"
+#include "socket/ServerSocket.hpp"
+#include "socket/ClientSocket.hpp"
+#include "communicator/Communicator.hpp"
 
 #define EVENT_SIZE 8
 

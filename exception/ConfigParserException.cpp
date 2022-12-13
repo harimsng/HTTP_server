@@ -1,4 +1,4 @@
-#include "ConfigParserException.hpp"
+#include "exception/ConfigParserException.hpp"
 
 // constructors & destructor
 ConfigParserException::ConfigParserException(const string& errMsg)

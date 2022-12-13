@@ -3,11 +3,11 @@
 #include <sstream>
 #include <iostream>
 
-#include "ServerParser.hpp"
-#include "LocationParser.hpp"
-#include "FileTokenizer.hpp"
-#include "ConfigParserException.hpp"
-#include "ConfigParser.hpp"
+#include "tokenizer/FileTokenizer.hpp"
+#include "exception/ConfigParserException.hpp"
+#include "parser/config_parser/ServerParser.hpp"
+#include "parser/config_parser/LocationParser.hpp"
+#include "parser/config_parser/ConfigParser.hpp"
 
 using namespace std;
 
@@ -55,7 +55,6 @@ ConfigParser::parse(vector<Server>& servers) try
 	}
 	if (m_tokenizer.empty() == false)
 		m_tokenizer.eat("server");
-	printParsedData(servers);
 }
 catch (std::exception& e)
 {
@@ -72,13 +71,6 @@ ConfigParser::parseServer(vector<Server>& servers)
 	servers.push_back(Server());
 	serverParser.parse(servers.back());
 	m_tokenizer.eat("}");
-}
-
-void
-ConfigParser::printParsedData(vector<Server>& servers) const
-{
-	for (uint32_t i = 0; i < servers.size(); ++i)
-		cout << servers[i] << '\n';
 }
 
 int

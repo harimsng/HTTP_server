@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "ConfigParser.hpp"
+#include "parser/config_parser/ConfigParser.hpp"
 
 class	ConfigParser::ConfigParserException: public std::exception
 {

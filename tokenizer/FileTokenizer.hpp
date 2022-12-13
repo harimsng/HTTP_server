@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "ATokenizer.hpp"
+#include "tokenizer/ATokenizer.hpp"
 
 class	FileTokenizer: public ATokenizer
 {

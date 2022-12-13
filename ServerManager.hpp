@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Server.hpp"
-#include "ConfigParser.hpp"
+#include "parser/config_parser/ConfigParser.hpp"
 
 class	ServerManager
 {
@@ -25,6 +25,8 @@ private:
 // member variables
 	std::vector<Server>	m_serverList;
 	ConfigParser		m_configParser;
+
+	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
 };
 
 #endif

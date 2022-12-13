@@ -1,7 +1,7 @@
 #ifndef ServerSocket_hpp
 #define ServerSocket_hpp
 
-#include "ASocket.hpp"
+#include "socket/ASocket.hpp"
 
 class Server;
 

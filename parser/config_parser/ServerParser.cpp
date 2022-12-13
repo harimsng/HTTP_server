@@ -1,11 +1,11 @@
 #include <sstream>
 #include <algorithm>
 
-#include "ConfigParser.hpp"
-#include "ConfigParserException.hpp"
-#include "LocationParser.hpp"
+#include "exception/ConfigParserException.hpp"
 #include "Server.hpp"
-#include "ServerParser.hpp"
+#include "parser/config_parser/ConfigParser.hpp"
+#include "parser/config_parser/LocationParser.hpp"
+#include "parser/config_parser/ServerParser.hpp"
 
 using namespace std;
 

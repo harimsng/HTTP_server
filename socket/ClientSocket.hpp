@@ -3,10 +3,10 @@
 
 #include <fcntl.h>
 
-#include "ASocket.hpp"
-#include "ServerSocket.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
+#include "socket/ASocket.hpp"
+#include "socket/ServerSocket.hpp"
+#include "communicator/Request.hpp"
+#include "communicator/Response.hpp"
 // #include "Communicator.hpp"
 
 class ClientSocket : public ASocket<ServerSocket>

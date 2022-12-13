@@ -1,7 +1,7 @@
 NAME		=	webserv
 
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
 DEBUGFLAGS	=	-g -fsanitize=address
 RM			=	rm -f
 
@@ -9,6 +9,7 @@ SRC			=	main.cpp\
 				ServerManager.cpp\
 				Server.cpp\
 				Location.cpp\
+				Logger.cpp\
 \
 				parser/config_parser/ConfigParser.cpp\
 				parser/config_parser/LocationParser.cpp\
@@ -29,18 +30,10 @@ SRC			=	main.cpp\
 				cgi/cgi.cpp\
 
 
-OBJ			=	$(SRC:%.cpp=%.o)
+OBJ			:=	$(SRC:%.cpp=%.o)
+DEP			:=	$(OBJ:%.o=%.d)
 
 INCL_PATH	=	-I./\
-				-Iparser/\
-				-Itokenizer/\
-				-Isocket/\
-				-Icommunicator/\
-				-Icgi/\
-				-Iparser/config_parser/\
-				-Iparser/http_request_parser/\
-				-Itokenizer/\
-				-Iexception/\
 
 ifeq ($(DEBUG_MODE), 1)
 CXXFLAGS	+=	$(DEBUGFLAGS)
@@ -81,3 +74,5 @@ $(NAME): $(OBJ)
 
 $(OBJ): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $< $(INCL_PATH)
+
+-include $(DEP)

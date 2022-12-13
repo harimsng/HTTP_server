@@ -6,11 +6,11 @@
 /*   By: soum <soum@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/12 16:26:53 by soum              #+#    #+#             */
-/*   Updated: 2022/12/12 16:55:07 by soum             ###   ########.fr       */
+/*   Updated: 2022/12/13 21:43:05 by hseong           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Request.hpp"
+#include "communicator/Request.hpp"
 
 #include <iostream>
 using namespace std;

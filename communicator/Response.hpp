@@ -16,7 +16,7 @@ public:
 
 	void				makeResponseHeader(std::string& uffer);
 	static void			setStatusCode(void);
-	const std::string	getDate() const;
+	static const std::string	getDate(const char* format = "%a, %d %b %Y %X %Z");
 	const std::string	getStatusCode(int statusCode);
 
 	static std::unordered_map<int, std::string>	s_statusCode;

@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "FileTokenizer.hpp"
+#include "tokenizer/FileTokenizer.hpp"
 
 class	FileTokenizer::FileTokenizerException: public std::exception
 {

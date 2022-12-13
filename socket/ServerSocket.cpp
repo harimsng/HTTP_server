@@ -1,5 +1,5 @@
-#include "ServerSocket.hpp"
 #include "Server.hpp"
+#include "socket/ServerSocket.hpp"
 
 ServerSocket::ServerSocket()
 {
