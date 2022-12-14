@@ -5,8 +5,6 @@
 
 class Server;
 
-#define BACKLOG 256
-
 class ServerSocket : public ASocket<sockaddr_in>
 {
 	friend class ClientSocket;
@@ -23,13 +21,12 @@ public:
 	~ServerSocket();
 
 // member functions
-	virtual void	createSocket(const initType& initClass);
+	virtual void	createSocket(const sockaddr_in& sockaddrInet);
 
 private:
 	void			setSocketFd(int domain, int type, int protocol);
-	void			initAddr(const initType& initClass);
+	void			initAddr(const initType& sockaddrInet);
 	void			bindSocket();
 	void			listenSocket();
-
 };
 #endif //ServerSocket_hpp

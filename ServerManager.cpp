@@ -34,9 +34,10 @@ catch (std::exception& e)
 void
 ServerManager::run() try
 {
-	Logger::log(Logger::INFO, "server running");
 	for (size_t i = 0; i < m_serverList.size(); i++)
 		m_serverList[i].initServer();
+	m_kqueueFd = kqueue();
+	Logger::log(Logger::INFO, "%zu servers running", m_serverList.size());
 	while (1)
 	{
 		for (size_t i = 0; i < m_serverList.size(); i++)

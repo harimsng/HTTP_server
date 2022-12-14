@@ -71,13 +71,8 @@ std::ostream&	operator<<(std::ostream& os, const Server& server)
 void
 Server::initServer()
 {
-	m_kq = kqueue();
-	if (m_kq < 0)
-	{
-		// throw exception;
-	}
 	m_serverSocket.createSocket(m_listen);
-	addEvents(m_serverSocket.m_SocketFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+	addEvents(m_serverSocket.m_socketFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 }
 
 void
@@ -91,16 +86,6 @@ Server::run()
 	eventSocket(newEventCnt);
 }
 
-void
-Server::addEvents(uintptr_t ident, int16_t filter, uint16_t flags,
-		uint32_t fflags, intptr_t data, void* udata)
-{
-	struct kevent tempEvent;
-
-	EV_SET(&tempEvent, ident, filter, flags, fflags, data, udata);
-	m_changeList.push_back(tempEvent);
-}
-
 int
 Server::waitEvent()
 {
@@ -109,7 +94,7 @@ Server::waitEvent()
 
 	newEvents = kevent(m_kq, &m_changeList[0], m_changeList.size(),
 			m_eventList, EVENT_SIZE, &tout);
-	Logger::log(Logger::INFO, "new event occured");
+	Logger::log(Logger::INFO, "%d new event occured", newEvents);
 	if (newEvents == -1)
 	{
 		// throw exception;
@@ -128,7 +113,7 @@ Server::eventSocket(int newEventCnt)
 		curEvent = &m_eventList[i];
 		if (curEvent->flags & EV_ERROR)
 		{
-			if (m_serverSocket.m_SocketFd == (int)curEvent->ident)
+			if (m_serverSocket.m_socketFd == (int)curEvent->ident)
 			{
 				// throw exception("server socket fail");
 			}
@@ -150,14 +135,14 @@ Server::eventSocket(int newEventCnt)
 int
 Server::readEventHandler(struct kevent* curEvent)
 {
-	if (m_serverSocket.m_SocketFd == (int)curEvent->ident)
+	if (m_serverSocket.m_socketFd == (int)curEvent->ident)
 	{
 		ClientSocket clientSocket;
 
 		Logger::log(Logger::INFO, "server socket read");
 		clientSocket.createSocket(m_serverSocket);
-		m_clientSocket.insert(make_pair(clientSocket.m_SocketFd, clientSocket));
-		addEvents(clientSocket.m_SocketFd, EVFILT_READ,
+		m_clientSocket.insert(make_pair(clientSocket.m_socketFd, clientSocket));
+		addEvents(clientSocket.m_socketFd, EVFILT_READ,
 				EV_ADD | EV_ENABLE, 0, 0, NULL);
 		// addEvents(clientSocket.m_SocketFd, EVFILT_WRITE,
 		//         EV_ADD | EV_ENABLE, 0, 0, NULL);

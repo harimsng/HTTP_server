@@ -29,6 +29,7 @@ public:
 // member functions
 	template <typename T>
 	static void	log(e_types type, const T& object);
+	static void	log(e_types type, const char* format, ...);
 	static void	initLogger(const std::string& type, std::ostream& os = std::cerr);
 
 	static e_types			s_type;
@@ -37,7 +38,7 @@ public:
 
 template <typename T>
 void
-Logger::log(e_types type, const T& message)
+Logger::log(e_types type, const T& object)
 {
 	std::string	prefix;
 
@@ -61,7 +62,7 @@ Logger::log(e_types type, const T& message)
 			break;
 	}
 	prefix.append(Response::getDate("%F %T "));
-	*s_ostream << prefix << message << '\n';
+	*s_ostream << prefix << object << '\n';
 }
 
 #endif

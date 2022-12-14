@@ -32,9 +32,9 @@ public:
 
 protected:
 // member variales
-	struct sockaddr_in	m_SocketAddr;
-	socklen_t			m_SocketAddrSize;
-	int					m_SocketFd;
+	struct sockaddr_in	m_socketAddr;
+	socklen_t			m_socketAddrSize;
+	int					m_socketFd;
 };
 
 #endif //ASocket_hpp

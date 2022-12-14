@@ -64,11 +64,6 @@ private:
 	int32_t						m_uriBufferSize;
 	std::vector<Location>		m_locationList;
 
-// member variables - kevent
-	std::vector<struct kevent>	m_changeList;
-	struct kevent				m_eventList[EVENT_SIZE];
-	int							m_kq;
-
 // member variables - socket
 	std::map<int, ClientSocket>	m_clientSocket;
 	ServerSocket				m_serverSocket;

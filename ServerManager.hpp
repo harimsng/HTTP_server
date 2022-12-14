@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Server.hpp"
-#include "parser/config_parser/ConfigParser.hpp"
 
 class	ServerManager
 {
@@ -19,12 +18,14 @@ public:
 
 // member functions
 	void	parse(const char* path);
+	void	initServers();
 	void	run();
 
 private:
 // member variables
 	std::vector<Server>	m_serverList;
-	ConfigParser		m_configParser;
+	int					m_kqueueFd;
+
 
 	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
 };
