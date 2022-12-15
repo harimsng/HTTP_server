@@ -3,7 +3,6 @@
 
 // for gnu c portability and c++98 standard. should be removed later
 #include <stdint.h>
-#include <sys/event.h>
 #include <netinet/in.h>
 
 #include <map>
@@ -40,14 +39,11 @@ public:
 
 // member functions
 	void	initServer();
-	void	run();
 
 private:
-// member functions - kqueue
+	void	handleEvent(struct kevent& event);
 	void	addEvents(uintptr_t ident, int16_t filter, uint16_t flags,
 			uint32_t fflags, intptr_t data, void* udata);
-	int		waitEvent();
-	void	eventSocket(int newEventCnt);
 	int		readEventHandler(struct kevent* curEvent);
 	int		writeEventHandler(struct kevent* curEvent);
 	void	setToDefault();
@@ -65,7 +61,6 @@ private:
 	std::vector<Location>		m_locationList;
 
 // member variables - socket
-	std::map<int, ClientSocket>	m_clientSocket;
 	ServerSocket				m_serverSocket;
 
 	friend std::ostream&	operator<<(std::ostream& os, const Server& server);

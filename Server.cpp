@@ -75,63 +75,6 @@ Server::initServer()
 	addEvents(m_serverSocket.m_socketFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 }
 
-void
-Server::run()
-{
-	int newEventCnt;
-
-	newEventCnt = waitEvent();
-	if (newEventCnt == -1)
-		return;
-	eventSocket(newEventCnt);
-}
-
-int
-Server::waitEvent()
-{
-	int newEvents;
-	static const struct timespec tout = { 1, 0 };
-
-	newEvents = kevent(m_kq, &m_changeList[0], m_changeList.size(),
-			m_eventList, EVENT_SIZE, &tout);
-	Logger::log(Logger::INFO, "%d new event occured", newEvents);
-	if (newEvents == -1)
-	{
-		// throw exception;
-	}
-	m_changeList.clear();
-	return (newEvents);
-}
-
-void
-Server::eventSocket(int newEventCnt)
-{
-	for (int i = 0; i < newEventCnt; i++)
-	{
-		struct kevent* curEvent;
-
-		curEvent = &m_eventList[i];
-		if (curEvent->flags & EV_ERROR)
-		{
-			if (m_serverSocket.m_socketFd == (int)curEvent->ident)
-			{
-				// throw exception("server socket fail");
-			}
-			else
-			{
-				// throw exception("client socket fail");
-			}
-		}
-		else if (curEvent->filter == EVFILT_READ)
-		{
-			if (readEventHandler(curEvent))
-					return ;
-		}
-		else if (curEvent->filter == EVFILT_WRITE)
-			writeEventHandler(curEvent);
-	}
-}
-
 int
 Server::readEventHandler(struct kevent* curEvent)
 {
@@ -141,6 +84,7 @@ Server::readEventHandler(struct kevent* curEvent)
 
 		Logger::log(Logger::INFO, "server socket read");
 		clientSocket.createSocket(m_serverSocket);
+		m_clientSocket[ccur
 		m_clientSocket.insert(make_pair(clientSocket.m_socketFd, clientSocket));
 		addEvents(clientSocket.m_socketFd, EVFILT_READ,
 				EV_ADD | EV_ENABLE, 0, 0, NULL);

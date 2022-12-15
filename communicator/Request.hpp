@@ -40,6 +40,6 @@ public:
 	std::string			m_uri;
 	int					m_requestSection;
 	int					m_preBufferSize;
-
 };
+
 #endif //Request_hpp

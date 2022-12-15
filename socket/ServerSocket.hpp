@@ -3,8 +3,6 @@
 
 #include "socket/ASocket.hpp"
 
-class Server;
-
 class ServerSocket : public ASocket<sockaddr_in>
 {
 	friend class ClientSocket;
@@ -25,7 +23,7 @@ public:
 
 private:
 	void			setSocketFd(int domain, int type, int protocol);
-	void			initAddr(const initType& sockaddrInet);
+	void			initAddr(const sockType& sockaddrInet);
 	void			bindSocket();
 	void			listenSocket();
 };

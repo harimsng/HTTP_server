@@ -9,6 +9,8 @@
 #include "communicator/Response.hpp"
 // #include "Communicator.hpp"
 
+class	Server;
+
 class ClientSocket : public ASocket<ServerSocket>
 {
 	friend class Server;
@@ -28,8 +30,8 @@ public:
 // operator
 	ClientSocket& operator=(const ClientSocket& copy);
 // member functions
-	virtual void	createSocket(const initType& initClass);
-	void			readSocket(int messagesize, Server& server);
+	virtual void	createSocket(const sockType& initClass);
+	virtual void	readSocket(int messagesize);
 	void			writeSocket();
 	void			checkUri(Server& server);
 

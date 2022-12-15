@@ -6,7 +6,7 @@
 /*   By: soum <soum@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/12 16:26:53 by soum              #+#    #+#             */
-/*   Updated: 2022/12/13 21:43:05 by hseong           ###   ########.fr       */
+/*   Updated: 2022/12/15 19:57:14 by hseong           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,7 @@ Request::makeRequest(std::string& buffer)
 		buffer.erase(0, makeRequestHeader(buffer));
 	if (m_requestSection == REQUEST_HEADER_END)
 		return;
+
 	if (m_requestSection == REQUEST_BODY)
 		makeReqeustBody(buffer);
 	m_preBufferSize = buffer.size();

@@ -7,7 +7,8 @@
 
 ClientSocket::ClientSocket()
 {
-	m_response.setStatusCode();
+	if (m_response.s_statusMessageTable.size() == 0)
+		m_response.setStatusMessageTable();
 }
 
 
@@ -23,23 +24,23 @@ ClientSocket::~ClientSocket()
 ClientSocket&
 ClientSocket::operator=(const ClientSocket &copy)
 {
-	m_SocketAddr = copy.m_SocketAddr;
-	m_SocketAddrSize = copy.m_SocketAddrSize;
-	m_SocketFd = copy.m_SocketFd;
+	m_socketAddr = copy.m_socketAddr;
+	m_socketAddrSize = copy.m_socketAddrSize;
+	m_socketFd = copy.m_socketFd;
 	return (*this);
 }
 
 void
-ClientSocket::createSocket(const initType& initClass)
+ClientSocket::createSocket(const sockType& initClass)
 {
 	int opts;
 
-	m_SocketFd = accept(initClass.m_SocketFd, (struct sockaddr*)&m_SocketAddr,
-			&m_SocketAddrSize);
-	opts = fcntl(m_SocketFd, F_SETFL);
+	m_socketFd = accept(initClass.m_socketFd, (struct sockaddr*)&m_socketAddr,
+			&m_socketAddrSize);
+	opts = fcntl(m_socketFd, F_SETFL);
 	opts = (opts | O_NONBLOCK);
-	fcntl(m_SocketFd, F_SETFL, opts);
-	if (m_SocketFd < 0)
+	fcntl(m_socketFd, F_SETFL, opts);
+	if (m_socketFd < 0)
 	{
 		// throw exception;
 	}
@@ -52,7 +53,7 @@ ClientSocket::readSocket(int messageSize, Server& server)
 	int& requestSection = m_request.getRequestSection();
 
 	m_requestBuffer.resize(messageSize + m_request.m_preBufferSize + 1, 0);
-	read(m_SocketFd, &m_requestBuffer[m_request.m_preBufferSize], messageSize);
+	read(m_socketFd, &m_requestBuffer[m_request.m_preBufferSize], messageSize);
 	if (requestSection < Request::REQUEST_HEADER_END)
 		m_request.makeRequest(m_requestBuffer);
 	if (requestSection == Request::REQUEST_HEADER_END)

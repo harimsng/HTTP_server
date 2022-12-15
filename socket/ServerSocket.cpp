@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include "socket/ServerSocket.hpp"
 
-#define BACKLOG 256
+#define BACKLOG (256)
 
 ServerSocket::ServerSocket()
 {

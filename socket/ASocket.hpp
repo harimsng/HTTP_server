@@ -15,7 +15,7 @@ class ASocket
 
 // type define
 protected:
-	typedef T initType;
+	typedef T sockType;
 
 // deleted
 private:
@@ -28,7 +28,7 @@ public:
 	virtual ~ASocket() {};
 
 // member functions
-	virtual void	createSocket(const initType& initClass) = 0;
+	virtual void	createSocket(const sockType& sockaddr) = 0;
 
 protected:
 // member variales

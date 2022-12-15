@@ -43,3 +43,16 @@ bool	parseArgument(int argc, char **argv)
 	}
 	return true;
 }
+
+const string
+getDate(const char* format)
+{
+	time_t		curTime;
+	struct tm*	curTimeInfo;
+	char		timeBuf[1024];
+
+	time(&curTime);
+	curTimeInfo = localtime(&curTime);
+	strftime(timeBuf, 1024, format, curTimeInfo);
+	return (timeBuf);
+}
