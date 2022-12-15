@@ -10,7 +10,18 @@
 
 class	ServerManager
 {
-	struct	EventTarget;
+	struct	EventTarget
+	{
+		enum	e_type
+		{
+			SERVER = 1,
+			CLIENT = 2,
+			CGI = 3
+		};
+
+		e_type	type;
+		void*	target;
+	};
 
 public:
 // constructors & destructor
@@ -26,8 +37,7 @@ public:
 	void	initServers();
 	void	run();
 	void	processEvents(struct kevent& event);
-	void	handleClientEvent(const struct kevent& event);
-	void	handleServerEvent(const struct kevent& event);
+	void	addEventTarget(int fd, EventTarget::e_type type, void* target);
 
 private:
 // member variables

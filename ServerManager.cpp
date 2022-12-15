@@ -1,26 +1,13 @@
 #include <iostream>
 
 #include "Logger.hpp"
-#include "ServerManager.hpp"
 #include "parser/config_parser/ConfigParser.hpp"
 #include "parser/config_parser/ServerParser.hpp"
 #include "parser/config_parser/LocationParser.hpp"
 #include "socket/ServerSocket.hpp"
+#include "ServerManager.hpp"
 
 using namespace std;
-
-struct	ServerManager::EventTarget
-{
-	enum	e_type
-	{
-		SERVER = 1,
-		CLIENT = 2,
-		CGI = 3
-	};
-
-	e_type	type;
-	void*	target;
-};
 
 // constructors & destructor
 ServerManager::ServerManager()
@@ -38,11 +25,23 @@ ServerManager::parse(const char* path) try
 
 	configParser.init(path);
 	configParser.parse(m_serverList);
-	Logger::log(Logger::INFO, "parse complete");
+	Logger::log(Logger::INFO, "configuration file parsing finished");
 }
 catch (std::exception& e)
 {
 	cout << e.what() << '\n';
+}
+
+void
+ServerManager::initServers()
+{
+	for (size_t i = 0; i < m_serverList.size(); i++)
+	{
+		Server& server = m_serverList[i];
+		int		fd = server.initServer();
+
+		addEventTarget(fd, EventTarget::SERVER, &server);
+	}
 }
 
 void
@@ -51,11 +50,7 @@ ServerManager::run() try
 	static const timespec	timeout = {0, 100};
 	int						eventCount;
 
-	for (size_t i = 0; i < m_serverList.size(); i++)
-		m_serverList[i].initServer();
-
 	m_kqueue = kqueue();
-	m_eventList.reserve(1 << 13);
 	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 	while (1)
 	{
@@ -99,37 +94,13 @@ ServerManager::processEvents(struct kevent& event)
 }
 
 void
-ServerManager::handleClientEvent(const struct kevent& event)
+ServerManager::addEventTarget(int fd, EventTarget::e_type type, void* target)
 {
-	int16_t			eventFilter = event.filter;
-	ClientSocket&	clientSocket = m_clientSocketMap[event.ident];
+	EventTarget	et;
 
-	switch (eventFilter)
-	{
-		case EVFILT_READ:
-			clientSocket.readSocket();
-			break;
-		case EVFILT_READ:
-			clientSocket.writeSocket();
-			break;
-		default:
-			throw runtime_error("invalid kevent filter");
-	}
-}
-
-void
-ServerManager::handleServerEvent(const struct kevent& event)
-{
-	int16_t	eventFilter = event.filter;
-	Server&	server = m_serverMap[event.ident];
-
-	switch (eventFilter)
-	{
-		case EVFILT_READ:
-			server.
-			break;
-		default:
-			throw runtime_error("invalid kevent filter");
+	et.type = type;
+	et.target = target;
+	m_eventTargetMap[fd] = et;
 }
 
 std::ostream&	operator<<(std::ostream& os, const ServerManager& manager)

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sstream>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 class HttpRequestParser;
@@ -13,7 +13,7 @@ class Request
 {
 public:
 
-	typedef std::unordered_map<std::string, std::vector<std::string> > requestHeaderMap;
+	typedef std::map<std::string, std::vector<std::string> > requestHeaderMap;
 
 	enum requestSection
 	{
