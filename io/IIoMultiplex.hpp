@@ -6,11 +6,11 @@
 template <typename Attr>
 class	IIoMultiplex
 {
-protected:
+public:
 	typedef typename Attr::EventData	EventData;
 	typedef typename Attr::EventList	EventList;
 
-	enum	e_flags
+	enum	e_operation
 	{
 		ADD = 1,
 		DELETE = 2,
@@ -24,14 +24,15 @@ protected:
 		ERROR = 0x4
 	};
 
+protected:
 // constructors & destructor
 	IIoMultiplex() {};
 	virtual ~IIoMultiplex() {};
 
 public:
 // member functions
-	virtual void				set(int fd, const EventData& event) = 0;
-	virtual void				set(int fd, e_flags flag, e_filters filter) = 0;
+	virtual void				add(int fd, const EventData& event) = 0;
+	virtual void				add(int fd, e_operation flag, e_filters filter) = 0;
 	virtual const EventList&	poll() = 0;
 };
 

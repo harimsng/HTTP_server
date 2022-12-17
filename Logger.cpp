@@ -5,7 +5,10 @@
 
 using namespace std;
 
-Logger::e_types		Logger::s_type = NONE;
+const string
+getDate(const char* format);
+
+Logger::e_types		Logger::s_type = ERROR;
 ostream*			Logger::s_ostream = NULL;
 
 // constructors & destructor
@@ -36,7 +39,7 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 	int	temp;
 
 	s_ostream = &os;
-	temp = NONE
+	temp = DISABLED
 		+ INFO * (type == "INFO")
 		+ WARNING * (type == "WARNING")
 		+ ERROR * (type == "ERROR")
@@ -52,7 +55,7 @@ Logger::log(e_types type, const char* format, ...)
 	char		buffer[MAX_BUFFER_LEN] = {0, };
 	va_list		ap;
 
-	if (s_type == NONE || s_type < type)
+	if (s_type == DISABLED || s_type < type)
 		return;
 	va_start(ap, format);
 	vsnprintf(buffer, MAX_BUFFER_LEN, format, ap);
@@ -73,6 +76,6 @@ Logger::log(e_types type, const char* format, ...)
 		default:
 			break;
 	}
-	prefix.append(Response::getDate("%F %T "));
+	prefix.append(::getDate("%F %T "));
 	*s_ostream << prefix << buffer << '\n';
 }

@@ -27,7 +27,7 @@ SRC			=	main.cpp\
 				communicator/Request.cpp\
 				communicator/Response.cpp\
 \
-				cgi/cgi.cpp\
+				cgi/Cgi.cpp\
 
 
 OBJ			:=	$(SRC:%.cpp=%.o)

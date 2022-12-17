@@ -8,9 +8,7 @@
 #include "tokenizer/FileTokenizer.hpp"
 #include "Server.hpp"
 
-using namespace std;
-
-class	ConfigParser: public AParser<FileTokenizer, vector<Server> >
+class	ConfigParser: public AParser<FileTokenizer, std::vector<Server> >
 {
 // deleted
 	ConfigParser(ConfigParser const& configParser);

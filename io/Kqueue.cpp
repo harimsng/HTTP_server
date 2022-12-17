@@ -31,14 +31,14 @@ Kqueue::operator=(Kqueue const& kqueue)
 }
 
 void
-Kqueue::set(int fd, const Kevent& event)
+Kqueue::add(int fd, const Kevent& event)
 {
 	(void)fd;
-	m_eventList.push_back(event);
+	m_changeList.push_back(event);
 }
 
 void
-Kqueue::set(int fd, e_flags flag, e_filters filter)
+Kqueue::add(int fd, e_operation flag, e_filters filter)
 {
 	static int16_t	filterTable[3] = {EVFILT_READ, EVFILT_WRITE, EVFILT_EXCEPT};
 	static uint16_t	flagTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
@@ -51,7 +51,7 @@ Kqueue::set(int fd, e_flags flag, e_filters filter)
 		if ((filter & bitmask) != 0)
 		{
 			newEvent.filter = filterTable[count];
-			m_eventList.push_back(newEvent);
+			m_changeList.push_back(newEvent);
 		}
 	}
 }
@@ -72,8 +72,12 @@ Kqueue::poll()
 	int						count = 0;
 	static const timespec	timeSpec = {0, 0};
 
-	count = kevent(m_kqueue, m_eventList.data(), m_eventList.size(), m_eventList.data(), m_eventList.size(), &timeSpec);
+	m_eventList.resize(m_registeredEventSize);
+	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
+				   m_changeList.data(), m_changeList.size(), &timeSpec);
+	m_changeList.clear();
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
+	m_eventList.resize(count);
 	return m_eventList;
 }

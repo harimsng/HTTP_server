@@ -1,3 +1,4 @@
+#ifdef __APPLE__
 #ifndef KQUEUE_HPP
 #define KQUEUE_HPP
 
@@ -29,8 +30,8 @@ public:
 	virtual ~Kqueue();
 
 // member functions
-	virtual void	set(int fd, const EventData& event);
-	virtual void	set(int fd, e_flags flag, e_filters filter);
+	virtual void	add(int fd, const EventData& event);
+	virtual void	add(int fd, e_operation flag, e_filters filter);
 	EventData		createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags = 0,
 								intptr_t data = 0, void* udata = NULL);
 	virtual const EventList&	poll();
@@ -38,6 +39,10 @@ public:
 private:
 // member variables
 	int					m_kqueue;
+	std::vector<Kevent>	m_changeList;
 	std::vector<Kevent>	m_eventList;
+	size_t				m_registeredEventSize;
 };
+
+#endif
 #endif

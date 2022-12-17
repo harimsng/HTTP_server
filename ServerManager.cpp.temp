@@ -38,10 +38,11 @@ ServerManager::initServers()
 	for (size_t i = 0; i < m_serverList.size(); i++)
 	{
 		Server& server = m_serverList[i];
-		int		fd = server.initServer();
+		server.initServer();
 
-		addEventTarget(fd, EventTarget::SERVER, &server);
+		addEventTarget(EventTarget::SERVER, server.m_fd, &server);
 	}
+	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 }
 
 void
@@ -50,51 +51,57 @@ ServerManager::run() try
 	static const timespec	timeout = {0, 100};
 	int						eventCount;
 
-	m_kqueue = kqueue();
-	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 	while (1)
 	{
 		m_eventList.resize(m_eventTargetMap.size());
+		vector
 		eventCount = kevent(m_kqueue, &m_changeList[0], m_changeList.size(),
 							&m_eventList[0], m_eventList.size(), &timeout);
 		m_changeList.clear();
 		if (eventCount < 0)
 			throw runtime_error("kevent error");
 
-		for (int i = 0; i < eventCount; ++i)
-			processEvents(m_eventList[i]);
+		processEvents(m_eventList.data(), eventCount);
 	}
+}
+catch (runtime_error& e)
+{
+	Logger::log(Logger::ERROR, "%s", e.what());
 }
 catch (...)
 {
 }
 
 void
-ServerManager::processEvents(struct kevent& event)
+ServerManager::processEvents(const struct kevent* events, int eventCount)
 {
-	EventTarget&	target = m_eventTargetMap[event.ident];
-
-	switch (target.type)
+	for (int i = 0; i < eventCount; ++i)
 	{
-		case EventTarget::SERVER:
-			Server*	server = reinterpret_cast<Server*>(target.target);
-			server->handleEvent(event);
-			break;
-		case EventTarget::CLIENT:
-			Client*	client = reinterpret_cast<Client*>(target.target);
-			client->handleEvent(event);
-			break;
-		case EventTarget::CGI:
-			Cgi*	cgi = reinterpret_cast<Cgi*>(target.target);
-			cgi->handleEvent(event);
-			break;
-		default:
-			throw logic_error("invalid EventTarget::target member variable");
+		const struct kevent&	event = events[i];
+		EventTarget&			target = m_eventTargetMap[event.ident];
+
+		switch (target.type)
+		{
+			case EventTarget::SERVER:
+				Server*	server = reinterpret_cast<Server*>(target.target);
+				server->handleEvent(event);
+				break;
+			case EventTarget::CLIENT:
+				Client*	client = reinterpret_cast<Client*>(target.target);
+				client->handleEvent(event);
+				break;
+			case EventTarget::CGI:
+				Cgi*	cgi = reinterpret_cast<Cgi*>(target.target);
+				cgi->handleEvent(event);
+				break;
+			default:
+				throw logic_error("unhandled event type in ServerManager::processEvents");
+		}
 	}
 }
 
 void
-ServerManager::addEventTarget(int fd, EventTarget::e_type type, void* target)
+ServerManager::addEventTarget(EventTarget::e_type type, int fd, void* target)
 {
 	EventTarget	et;
 

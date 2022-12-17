@@ -1,11 +1,18 @@
-#ifndef cgi_hpp
-#define cgi_hpp
+#ifndef CGI_HPP
+#define CGI_HPP
 
-
-class cgi
+class	Cgi
 {
-		private:
+public:
+// constructors & destructor
+	Cgi();
+	~Cgi();
+	Cgi(Cgi const& cgi);
 
-		public:
+// operators
+	Cgi	&operator=(Cgi const& cgi);
+
+// member functions
 };
-#endif //cgi_hpp
+
+#endif

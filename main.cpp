@@ -1,3 +1,11 @@
+#ifdef __APPLE__
+# define IO_EVENT_HANDLER Kqueue
+# define KQUEUE_IO
+#elif __linux__
+# define IO_EVENT_HANDLER Epoll
+# define EPOLL_IO
+#endif
+
 #include <iostream>
 #include <string>
 
@@ -6,14 +14,19 @@
 #include "parser/config_parser/ConfigParser.hpp"
 #include "exception/ConfigParserException.hpp"
 
+using namespace	std;
+
 bool	parseArgument(int argc, char **argv);
 
 int	main(int argc, char **argv, char **envp)
 {
-	ServerManager	serverManager;
+	ServerManager<IO_EVENT_HANDLER>	serverManager;
 
 	if (parseArgument(argc, argv) == false)
+	{
+		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return 1;
+	}
 	serverManager.parse(argv[argc - 1]);
 	Logger::log(Logger::DEBUG, serverManager);
 	serverManager.run();
@@ -24,10 +37,7 @@ int	main(int argc, char **argv, char **envp)
 bool	parseArgument(int argc, char **argv)
 {
 	if (argc == 1)
-	{
-		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return false;
-	}
 	for (int i = 1; i < argc - 1; ++i)
 	{
 		string				arg(argv[i]);

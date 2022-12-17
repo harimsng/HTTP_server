@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-#include "communicator/Response.hpp"
+const std::string	getDate(const char* format);
 
 class	Logger
 {
@@ -16,10 +16,10 @@ class	Logger
 public:
 	enum	e_types
 	{
-		NONE = 0,
-		INFO = 1,
+		DISABLED = 0,
+		ERROR = 1,
 		WARNING = 2,
-		ERROR = 3,
+		INFO = 3,
 		DEBUG = 4
 	};
 
@@ -42,7 +42,7 @@ Logger::log(e_types type, const T& object)
 {
 	std::string	prefix;
 
-	if (s_type == NONE || s_type < type)
+	if (s_type == DISABLED || s_type < type)
 		return;
 	switch (type)
 	{
@@ -61,7 +61,7 @@ Logger::log(e_types type, const T& object)
 		default:
 			break;
 	}
-	prefix.append(Response::getDate("%F %T "));
+	prefix.append(::getDate("%F %T "));
 	*s_ostream << prefix << object << '\n';
 }
 

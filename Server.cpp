@@ -1,27 +1,7 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hseong <hseong@student.42seoul.kr>         +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/16 04:18:28 by hseong            #+#    #+#             */
-/*   Updated: 2022/12/16 04:21:03 by hseong           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include <sys/event.h>
-
-#include <iostream>
-
-#include "Logger.hpp"
 #include "Server.hpp"
-#include "socket/ClientSocket.hpp"
 
-using namespace std;
-
-// constructors & destructor
 Server::Server()
+:	m_fd(m_socket.m_fd)
 {
 	setToDefault();
 }
@@ -29,7 +9,10 @@ Server::Server()
 Server::~Server()
 {
 }
+
 Server::Server(Server const& server)
+:	m_socket(server.m_socket),
+	m_fd(m_socket.m_fd)
 {
 	*this = server;
 }
@@ -49,7 +32,8 @@ Server::operator=(const Server& server)
 	return *this;
 }
 
-void	Server::setToDefault()
+void
+Server::setToDefault()
 {
 //	m_index;
 	m_serverNames = "";
@@ -61,7 +45,8 @@ void	Server::setToDefault()
 //	m_uriBufferSize;
 }
 
-std::ostream&	operator<<(std::ostream& os, const Server& server)
+std::ostream&
+operator<<(std::ostream& os, const Server& server)
 {
 	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
 
@@ -78,45 +63,4 @@ std::ostream&	operator<<(std::ostream& os, const Server& server)
 		os << server.m_locationList[i];
 	os << "}\n";
 	return os;
-}
-
-void
-Server::initServer()
-{
-	m_serverSocket.createSocket(m_listen);
-	addEvents(m_serverSocket.m_socketFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-}
-
-int
-Server::readEventHandler(struct kevent* curEvent)
-{
-	if (m_serverSocket.m_socketFd == (int)curEvent->ident)
-	{
-		ClientSocket clientSocket;
-
-		Logger::log(Logger::INFO, "server socket read");
-		clientSocket.createSocket(m_serverSocket);
-		m_clientSocket[ccur
-		m_clientSocket.insert(make_pair(clientSocket.m_socketFd, clientSocket));
-		addEvents(clientSocket.m_socketFd, EVFILT_READ,
-				EV_ADD | EV_ENABLE, 0, 0, NULL);
-		// addEvents(clientSocket.m_SocketFd, EVFILT_WRITE,
-		//         EV_ADD | EV_ENABLE, 0, 0, NULL);
-		return (1);
-	}
-	else
-	{
-		ClientSocket& clientSocket = m_clientSocket.find(curEvent->ident)->second;
-
-		Logger::log(Logger::INFO, "client socket read");
-		clientSocket.readSocket(curEvent->data, *this);
-	}
-	return (0);
-}
-
-int
-Server::writeEventHandler(struct kevent* curEvent)
-{
-	(void)curEvent;
-	return (0);
 }
