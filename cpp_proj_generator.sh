@@ -36,10 +36,10 @@ public:
 // constructors & destructor
 	$CLASS();
 	~$CLASS();
-	$CLASS($CLASS const& $LOWCAMELCASE_CLASS);
+	$CLASS(const $CLASS& $LOWCAMELCASE_CLASS);
 
 // operators
-	$CLASS\t&operator=($CLASS const& $LOWCAMELCASE_CLASS);
+	$CLASS\t&operator=(const $CLASS& $LOWCAMELCASE_CLASS);
 
 // member functions
 };
@@ -56,12 +56,13 @@ $CLASS::~$CLASS()
 {
 }
 
-$CLASS::$CLASS($CLASS const& $LOWCAMELCASE_CLASS)
+$CLASS::$CLASS(const $CLASS& $LOWCAMELCASE_CLASS)
 {
 }
 
 // operators
-$CLASS&	$CLASS::operator=($CLASS const& $LOWCAMELCASE_CLASS)
+$CLASS&
+$CLASS::operator=(const $CLASS& $LOWCAMELCASE_CLASS)
 {
 	return *this;
 }"
@@ -82,6 +83,7 @@ RM			=	rm -f
 
 SRC			=	main.cpp$SRC_LIST
 OBJ			=	\$(SRC:%.cpp=%.o)
+DEP			=	\$(OBJ:%.o=%.d)
 
 ifeq (\$(DEBUG_MODE), 1)
 CXXFLAGS	+=	\$(DEBUGFLAGS)
@@ -121,7 +123,9 @@ re: fclean
 	\$(CXX) \$(CXXFLAGS) -o \$@ \$^
 
 \$(OBJ): %.o: %.cpp
-	\$(CXX) \$(CXXFLAGS) -c -o \$@ \$<"
+	\$(CXX) \$(CXXFLAGS) -c -o \$@ \$<
+
+-include \$(DEP)"
 
 VIMSPECTOR="{
   \"configurations\": {

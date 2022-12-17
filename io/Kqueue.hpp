@@ -6,10 +6,13 @@
 
 #include "IIoMultiplex.hpp"
 
-struct	Kevent: public kevent
+struct	Kevent
 {
-	int	getFd() const {return ident;}
-	int	getFilter() const {return filter;}
+	int	getFd() const {return m_kevent.ident;}
+	int	getFilter() const {return m_kevent.filter;}
+	int	getInfo() const {return m_kevent.data;}
+
+	struct kevent	m_kevent;
 };
 
 struct	KqueueAttr

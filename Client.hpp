@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include "communicator/Request.hpp"
+#include "communicator/Response.hpp"
 #include "socket_/Socket.hpp"
 
 class	Server;
@@ -24,8 +26,10 @@ public:
 // member functions
 
 // member variables
-	const Server*		m_server;
-	Socket<TcpSocket>	m_socket;
+	Request			m_request;
+	Response		m_response;
+	const Server*	m_server;
+	Socket<Tcp>		m_socket;
 };
 
 template <typename IoEventHandler>
@@ -37,12 +41,13 @@ Client::handleEvent(const typename IoEventHandler::EventData& event)
 	switch (filter)
 	{
 		case IoEventHandler::READ:
-			read
+			receiveData(event.getInfo());
 			break;
 		case IoEventHandler::WRITE:
+			sendData(event.getInfo());
 			break;
-		case IoEventHandler::EXCEPT:
-			break;
+//		case IoEventHandler::EXCEPT:
+//			break;
 		default:
 			throw std::runtime_error("not handled event filter in Client::handleEvent()");
 	}

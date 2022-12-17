@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 
 #include <netinet/in.h>
-struct	TcpSocket
+struct	Tcp
 {
 	typedef sockaddr_in	socketAddr;
 

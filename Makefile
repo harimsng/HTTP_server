@@ -6,14 +6,15 @@ DEBUGFLAGS	=	-g -fsanitize=address
 RM			=	rm -f
 
 SRC			=	main.cpp\
+				Logger.cpp\
 				ServerManager.cpp\
 				Server.cpp\
 				Location.cpp\
-				Logger.cpp\
+				Client.cpp\
 \
-				parser/config_parser/ConfigParser.cpp\
-				parser/config_parser/LocationParser.cpp\
-				parser/config_parser/ServerParser.cpp\
+				parser/ConfigParser.cpp\
+				parser/LocationParser.cpp\
+				parser/ServerParser.cpp\
 				parser/HttpRequestParser.cpp\
 \
 				tokenizer/ATokenizer.cpp\

@@ -10,9 +10,9 @@
 #include "Logger.hpp"
 #include "cgi/Cgi.hpp"
 #include "io/Kqueue.hpp"
-#include "parser/config_parser/ConfigParser.hpp"
-#include "parser/config_parser/ServerParser.hpp"
-#include "parser/config_parser/LocationParser.hpp"
+#include "parser/ConfigParser.hpp"
+#include "parser/ServerParser.hpp"
+#include "parser/LocationParser.hpp"
 #include "socket/ServerSocket.hpp"
 
 // IoEventHandler is class to encapsulate IO multiplexing system calls and associated types.

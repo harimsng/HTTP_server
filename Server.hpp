@@ -69,7 +69,7 @@ private:
 	std::vector<Location>		m_locationList;
 
 // member variables - socket
-	Socket<TcpSocket>			m_socket;
+	Socket<Tcp>			m_socket;
 
 public:
 	const int					m_fd;
@@ -102,8 +102,8 @@ Server::handleEvent(const typename IoEventHandler::EventData& event)
 	switch (filter)
 	{
 		case IoEventHandler::READ:
-			int	clientFd;
-			clientFd = m_socket.accept(NULL);
+			int		clientFd;
+			clientFd = m_socket.accept();
 
 			if (clientFd < 0)
 				throw std::runtime_error("accept error in Server::handleEvent()");

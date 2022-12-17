@@ -1,5 +1,5 @@
-#ifndef Request_hpp
-#define Request_hpp
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include <string>
 #include <sstream>
@@ -35,11 +35,12 @@ public:
 	void	printRequestMessage() const;
 	int&	getRequestSection();
 
-	requestHeaderMap	m_requestHeaderMap;
 	std::string			m_methodType;
 	std::string			m_uri;
 	int					m_requestSection;
 	int					m_preBufferSize;
+
+	static requestHeaderMap	s_requestHeaderMap;
 };
 
 #endif //Request_hpp
