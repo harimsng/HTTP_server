@@ -1,11 +1,11 @@
-#ifndef RequestTokenizer_hpp
-#define RequestTokenizer_hpp
-
+#ifndef REQUESTTOKENIZER_HPP
+#define REQUESTTOKENIZER_HPP
 
 class RequestTokenizer
 {
-		private:
+private:
 
-		public:
+public:
 };
+
 #endif //RequestTokenizer_hpp

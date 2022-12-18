@@ -24,7 +24,7 @@ public:
 // member functions
 	int	listen(int backlog = 16) throw();
 	int	bind(socketAddr* raddr) throw();
-	int	accept(socketAddr* raddr = NULL) throw();
+	int	accept(socketAddr* raddr = NULL) const throw();
 	int	connect(socketAddr* addr) throw();
 
 // member variables
@@ -75,7 +75,7 @@ Socket<SocketType>::listen(int backlog) throw()
 
 template <typename SocketType>
 int
-Socket<SocketType>::accept(socketAddr* raddr) throw()
+Socket<SocketType>::accept(socketAddr* raddr) const throw()
 {
 	return accept(m_fd, raddr, SocketType::socketAddrLen);
 }

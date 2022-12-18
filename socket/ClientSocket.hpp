@@ -36,4 +36,5 @@ public:
 	void			checkUri(Server& server);
 
 };
+
 #endif //ClientSocket_hpp

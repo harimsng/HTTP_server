@@ -7,7 +7,8 @@
 
 class	HttpRequestParser : AParser<RequestTokenizer, Communicator::requestHeaderMap>
 {
-	typedef Communicator::requestHeaderMap requestHeaderMap ;
+	typedef Communicator::requestHeaderMap	requestHeaderMap;
+
 public:
 // constructors & destructor
 	HttpRequestParser();

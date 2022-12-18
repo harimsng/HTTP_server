@@ -40,7 +40,7 @@ public:
 	int					m_requestSection;
 	int					m_preBufferSize;
 
-	static requestHeaderMap	s_requestHeaderMap;
+	requestHeaderMap	m_requestHeaderMap;
 };
 
 #endif //Request_hpp

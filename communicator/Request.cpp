@@ -6,7 +6,7 @@
 /*   By: soum <soum@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/12 16:26:53 by soum              #+#    #+#             */
-/*   Updated: 2022/12/18 03:48:01 by hseong           ###   ########.fr       */
+/*   Updated: 2022/12/18 10:09:30 by hseong           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ Request::makeRequestHeader(const string& buffer)
 		{
 			if (token[token.size() - 1] == ',')
 				token.pop_back();
-			s_requestHeaderMap[requestHeaderField].push_back(token);
+			m_requestHeaderMap[requestHeaderField].push_back(token);
 		}
 	}
 	return (retVal);
@@ -105,8 +105,8 @@ void
 Request::printRequestMessage() const
 {
 	requestHeaderMap::const_iterator mapIt;
-	mapIt = s_requestHeaderMap.begin();
-	for (; mapIt != s_requestHeaderMap.end(); mapIt++)
+	mapIt = m_requestHeaderMap.begin();
+	for (; mapIt != m_requestHeaderMap.end(); mapIt++)
 	{
 		cout << "field :" << mapIt->first << endl;
 		for (size_t i = 0; i < mapIt->second.size(); i++)

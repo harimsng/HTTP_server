@@ -2,6 +2,8 @@
 #define CLIENT_HPP
 
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 #include "communicator/Request.hpp"
 #include "communicator/Response.hpp"
@@ -13,23 +15,25 @@ class	Client
 {
 // deleted
 	Client	&operator=(Client const& client);
-	Client(Client const& client);
 
 public:
 // constructors & destructor
 	Client(Server& server, int fd);
 	~Client();
-
-	template <typename IoEventHandler>
-	void	handleEvent(const typename IoEventHandler::EventData& event);
+	Client(Client const& client);
 
 // member functions
+	template <typename IoEventHandler>
+	void	handleEvent(const typename IoEventHandler::EventData& event);
+	void	receiveData(int eventInfo);
+	void	sendData(int eventInfo);
 
 // member variables
-	Request			m_request;
-	Response		m_response;
-	const Server*	m_server;
-	Socket<Tcp>		m_socket;
+	const Server*		m_server;
+	Socket<Tcp>			m_socket;
+	Request				m_request;
+	Response			m_response;
+	std::iostream		m_stream;
 };
 
 template <typename IoEventHandler>

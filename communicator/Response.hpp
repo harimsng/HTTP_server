@@ -15,9 +15,11 @@ public:
 	~Response();
 
 	void				makeResponseHeader(std::string& uffer);
-	static void			setStatusMessageTable(void);
 	const std::string	getStatusMessage(int statusCode);
+
+	static void			setStatusMessageTable(void);
 
 	static std::map<int, std::string>	s_statusMessageTable;
 };
+
 #endif //Response_hpp
