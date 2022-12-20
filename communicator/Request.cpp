@@ -6,7 +6,7 @@
 /*   By: soum <soum@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/12 16:26:53 by soum              #+#    #+#             */
-/*   Updated: 2022/12/18 10:09:30 by hseong           ###   ########.fr       */
+/*   Updated: 2022/12/19 04:23:47 by hseong           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,4 +134,9 @@ int&
 Request::getRequestSection()
 {
 	return (m_requestSection);
+}
+
+void
+Request::readRequest(int eventInfo)
+{
 }

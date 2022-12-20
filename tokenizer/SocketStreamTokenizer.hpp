@@ -3,16 +3,17 @@
 
 class	SocketStreamTokenizer
 {
+// deleted
+	SocketStreamTokenizer(const SocketStreamTokenizer& tokenizer);
+	SocketStreamTokenizer	&operator=(const SocketStreamTokenizer& tokenizer);
+
 public:
 // constructors & destructor
 	SocketStreamTokenizer();
 	~SocketStreamTokenizer();
-	SocketStreamTokenizer(const SocketStreamTokenizer& socketStreamTokenizer);
-
-// operators
-	SocketStreamTokenizer	&operator=(const SocketStreamTokenizer& socketStreamTokenizer);
 
 // member functions
+
 };
 
 #endif

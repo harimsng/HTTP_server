@@ -5,9 +5,9 @@
 
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/ConfigParserException.hpp"
-#include "parser/config_parser/ServerParser.hpp"
-#include "parser/config_parser/LocationParser.hpp"
-#include "parser/config_parser/ConfigParser.hpp"
+#include "parser/ServerParser.hpp"
+#include "parser/LocationParser.hpp"
+#include "parser/ConfigParser.hpp"
 
 using namespace std;
 

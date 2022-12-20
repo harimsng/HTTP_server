@@ -25,15 +25,16 @@ public:
 // member functions
 	template <typename IoEventHandler>
 	void	handleEvent(const typename IoEventHandler::EventData& event);
+
+private:
 	void	receiveData(int eventInfo);
 	void	sendData(int eventInfo);
 
 // member variables
-	const Server*		m_server;
-	Socket<Tcp>			m_socket;
-	Request				m_request;
-	Response			m_response;
-	std::iostream		m_stream;
+	const Server*	m_server;
+	Socket<Tcp>		m_socket;
+	Request			m_request;
+	Response		m_response;
 };
 
 template <typename IoEventHandler>

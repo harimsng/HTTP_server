@@ -1,5 +1,5 @@
 #include "Location.hpp"
-#include "parser/config_parser/LocationParser.hpp"
+#include "parser/LocationParser.hpp"
 
 using namespace std;
 

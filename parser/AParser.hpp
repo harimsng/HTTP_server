@@ -3,21 +3,19 @@
 
 #include <stdexcept>
 
-template <typename Tokenizer, typename OutputClass>
+template <typename Tokenizer, typename OutputType>
 class	AParser
 {
 	AParser(AParser const& aParser);
 	AParser	&operator=(AParser const& aParser);
 
 protected:
-	typedef OutputClass		output_type;
-
 // constructors & destructor
 	AParser() {};
 	virtual ~AParser() {};
 
 // member functions
-	virtual void	parse(OutputClass& outputClass) = 0;
+	virtual void	parse(OutputType& output) = 0;
 
 // member variables
 	Tokenizer	m_tokenizer;

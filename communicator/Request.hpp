@@ -34,6 +34,7 @@ public:
 	void	makeRequest(std::string& buffer);
 	void	printRequestMessage() const;
 	int&	getRequestSection();
+	void	readRequest(int eventInfo);
 
 	std::string			m_methodType;
 	std::string			m_uri;
