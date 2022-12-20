@@ -1,5 +1,7 @@
 #include "parser/HttpRequestParser.hpp"
 
+using namespace std;
+
 // deleted
 HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)
 {
@@ -14,10 +16,9 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 }
 
 // constructors & destructor
-HttpRequestParser::HttpRequestParser(std::istringstream& stream)
+HttpRequestParser::HttpRequestParser()
 : m_readStatus(STATUS_LINE)
 {
-    m_stream.basic_ios::rdbuf(buffer.rdbuf());
 }
 
 HttpRequestParser::~HttpRequestParser()
@@ -29,26 +30,24 @@ HttpRequestParser::parse(HeaderFields& headerFields)
 {
     switch (m_readStatus)
     {
-    case STATUS_LINE:
-        readStatusLine();
-    case HEADER_FIELDS:
-        break;
-    case MESSAGE_BODY:
-        break;
-    case FINISHED:
-        break;
-    default:
-        throw std::logic_error("unhandled read status in \
+        case STATUS_LINE:
+            readStatusLine();
+        case HEADER_FIELDS:
+            break;
+        case MESSAGE_BODY:
+            break;
+        case FINISHED:
+            break;
+        default:
+            throw std::logic_error("unhandled read status in \
 HttpRequestParser::preprocess()");
     }
 }
 
-int
-HttpRequestParser::checkBuffer(std::string& buffer)
+void
+HttpRequestParser::push(const std::string& buffer)
 {
-    switch (m_readStatus)
-    {
-    }
+    m_tokenizer.
 }
 
 void
@@ -64,4 +63,10 @@ HttpRequestParser::readHeaderFields(std::string& buffer)
 void
 HttpRequestParser::readMessageBody(std::string& buffer)
 {
+}
+
+HttpRequestParser::e_readStatus
+HttpRequestParser::getReadStatus() const
+{
+    return m_readStatus;
 }

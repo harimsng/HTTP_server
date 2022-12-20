@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <istream>
 
 #include "parser/HttpRequestParser.hpp"
+#include "socket_/Socket.hpp"
 
 /*
  * RFC 9112 HTTP/1.1
@@ -32,23 +32,22 @@ class	Request
 
 public:
 // constructors & destructor
-	Request();
+	Request(const Socket<Tcp>& socket);
 	~Request();
 
-// operators
-
 // member functions
-	void	receiveData(int fd, int eventInfo);
-	bool	checkStream(std::string& buffer);
+	int						receiveData(int eventInfo);
+	std::string::size_type	checkBuffer(std::string& buffer);
 
 // member variables
-	std::istringstream	m_stream;
+	const Socket<Tcp>*	m_socket;
+	std::string			m_buffer;
 	HttpRequestParser	m_parser;
 
 	int					m_method;
 	std::string			m_target;
 	std::string			m_protocol;
-	std::map<std::string, std::vector<std::string> >	m_headerFieldsMap;
+	HeaderFieldsMap		m_headerFieldsMap;
 };
 
 #endif

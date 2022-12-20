@@ -15,21 +15,14 @@
 
 #define EVENT_SIZE 8
 
-#define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\
-/*sin_len*/		INET_ADDRSTRLEN,\
-/*sin_family*/	AF_INET,\
-/*sin_port*/	htons(port),\
-/*sin_addr*/	(in_addr){htonl(addr)},\
-/*sin_zero*/	{0, }\
-})
-
 template <typename IoEventHandler>
 class	ServerManager;
 
-struct	EventTarget
+struct	EventObject
 {
 	enum	e_type
 	{
+		EMPTY = 0,
 		SERVER = 1,
 		CLIENT = 2,
 		CGI = 3
@@ -92,8 +85,9 @@ Server::initServer()
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
-	ServerManager<IoEventHandler>::addEventTarget(EventTarget::SERVER, m_fd, this);
-	ServerManager<IoEventHandler>::s_ioEventHandler.add(m_fd, IoEventHandler::ADD, IoEventHandler::READ);
+	ServerManager<IoEventHandler>::addEventTarget(EventObject::SERVER, m_fd, this);
+	ServerManager<IoEventHandler>::s_ioEventHandler.add(m_fd,
+			IoEventHandler::ADD, IoEventHandler::READ);
 }
 
 template <typename IoEventHandler>
@@ -111,8 +105,10 @@ Server::handleEvent(const typename IoEventHandler::EventData& event)
 			if (clientFd < 0)
 				throw std::runtime_error("accept error in Server::handleEvent()");
 
-			ServerManager<IoEventHandler>::addEventTarget(EventTarget::CLIENT, clientFd, new Client(*this, clientFd));
-			ServerManager<IoEventHandler>::s_ioEventHandler.add(clientFd, IoEventHandler::ADD, filter);
+			ServerManager<IoEventHandler>::addEventTarget(EventObject::CLIENT,
+					clientFd, this);
+			ServerManager<IoEventHandler>::s_ioEventHandler.add(clientFd,
+					IoEventHandler::ADD, filter);
 			break;
 		default:
 			throw std::logic_error("unhandled event filter in Server::handleEvent()");

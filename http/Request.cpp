@@ -1,19 +1,25 @@
+#include <unistd.h>
 #include <stdexcept>
 
 #include "Request.hpp"
 
+#define REQUEST_BUFFER_SIZE (8192)
+
+using namespace	std;
+
 // constructors & destructor
-Request::Request()
+Request::Request(const Socket<Tcp>& socket)
+:	m_socket(&socket),
+	m_buffer(REQUEST_BUFFER_SIZE, 0)
 {
-	m_stream.basic_ios::rdbuf(const_cast<char*>(m_buffer.data()));
 }
 
 Request::~Request()
 {
-	awf
 }
 
 Request::Request(const Request& request)
+:	m_socket(NULL)
 {
 	(void)request;
 }
@@ -26,14 +32,42 @@ Request::operator=(const Request& request)
 	return *this;
 }
 
-void
-Request::receiveData(int fd, int eventInfo)
+int
+Request::receiveData(int eventInfo)
 {
-	
+	int			count = 0;
+	std::size_t	endPos = 0;
+
+	m_buffer.resize(m_buffer.capacity());
+	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + endPos,
+			m_buffer.size() - endPos);
+	m_buffer.resize(endPos + count + 1, 0);
+	if (count == 0)
+		return 0;
+
+	endPos = checkBuffer(m_buffer);
+	if (endPos == string::npos)
+		throw HttpErrorHandler(501);
+
+	m_parser.push(m_buffer);
+	m_parser.parse(m_headerFieldsMap);
+	(void)eventInfo;
+	return count;
 }
 
-/*
-	if (m_parser.checkStream(buffer) == false)
-		return;
-	m_parser.parse(m_headerFieldsMap);
-	*/
+string::size_type
+Request::checkBuffer(std::string& buffer)
+{
+    switch (m_parser.getReadStatus())
+    {
+		case HttpRequestParser::STATUS_LINE:
+        case HttpRequestParser::HEADER_FIELDS:
+            return buffer.find("\r\n");
+		case HttpRequestParser::MESSAGE_BODY:
+            return buffer.size() - 1;
+		case HttpRequestParser::FINISHED:
+			throw HttpErrorHandler(413);
+        default:
+			;
+    }
+}

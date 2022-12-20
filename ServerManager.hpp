@@ -15,6 +15,8 @@
 #include "parser/LocationParser.hpp"
 #include "socket/ServerSocket.hpp"
 
+#define ALLOC_SIZE (std::max(sizeof(Client), sizeof(Cgi)))
+
 // IoEventHandler is class to encapsulate IO multiplexing system calls and associated types.
 template <typename IoEventHandler>
 class	ServerManager
@@ -40,16 +42,18 @@ public:
 private:
 	void	initServers();
 	void	processEvents(const EventList& events);
+	template <typename TargetType>
+	void	processEventObject(const EventData& event, TargetType* target);
 
 // member variables
 	std::vector<Server>		m_serverList;
 
 public:
 // static members
-	static void	addEventTarget(typename EventTarget::e_type type, int fd, void* target);
-	static void	removeEventTarget(int fd);
+	static void	addEventObject(typename EventObject::e_type type, int fd, Server* target);
+	static void	removeEventObject(int fd);
 
-	static std::map<int, EventTarget>		s_eventTargetMap;
+	static std::map<int, EventObject>		s_eventTargetMap;
 	static IoEventHandler					s_ioEventHandler;
 
 // friends
@@ -61,7 +65,7 @@ public:
  */
 
 template <typename IoEventHandler>
-std::map<int, EventTarget>	ServerManager<IoEventHandler>::s_eventTargetMap;
+std::map<int, EventObject>	ServerManager<IoEventHandler>::s_eventTargetMap;
 
 template <typename IoEventHandler>
 IoEventHandler	ServerManager<IoEventHandler>::s_ioEventHandler;
@@ -74,10 +78,10 @@ ServerManager<IoEventHandler>::ServerManager()
 template <typename IoEventHandler>
 ServerManager<IoEventHandler>::~ServerManager()
 {
-	for (std::map<int, EventTarget>::iterator itr = s_eventTargetMap.begin();
+	for (std::map<int, EventObject>::iterator itr = s_eventTargetMap.begin();
 		 itr != s_eventTargetMap.end();
 		 ++itr)
-		removeEventTarget(itr->first);
+		removeEventObject(itr->first);
 }
 
 template <typename IoEventHandler>
@@ -133,64 +137,97 @@ ServerManager<IoEventHandler>::processEvents(const EventList& events)
 	for (int i = 0; i < events.size(); ++i)
 	{
 		const EventData&	event = events[i];
-		EventTarget&		target = s_eventTargetMap[event.getFd()];
+		EventObject&		target = s_eventTargetMap[event.getFd()];
+		int					result = 0;
 
 		switch (target.type)
 		{
-			case EventTarget::SERVER:
-				// declaration with initialization is forbidden inside switch case
-				Server* server;
-
-				server = reinterpret_cast<Server*>(target.target);
-				server->handleEvent(event);
+			case EventObject::SERVER:
+				result = processTargetEvent(event, reinterpret_cast<Server*>(target.target));
 				break;
-			case EventTarget::CLIENT:
-				Client*	client;
-
-				client = reinterpret_cast<Client*>(target.target);
-				client->handleEvent(event);
+			case EventObject::CLIENT:
+				result = processTargetEvent(event, reinterpret_cast<Client*>(target.target));
 				break;
-			case EventTarget::CGI:
-				Cgi*	cgi;
-
-				cgi = reinterpret_cast<Cgi*>(target.target);
-				cgi->handleEvent(event);
+			case EventObject::CGI:
+				result = processTargetEvent(event, reinterpret_cast<Cgi*>(target.target));
 				break;
 			default:
 				throw std::logic_error("unhandled event type in ServerManager::processEvents");
 		}
+		if (result == -1)
+			target.type = EventObject::EMPTY;
 	}
 }
 
 template <typename IoEventHandler>
+template <typename TargetType>
 void
-ServerManager<IoEventHandler>::addEventTarget(typename EventTarget::e_type type, int fd, void* target)
+ServerManager<IoEventHandler>::processTargetEvent(const EventData& event, TargetType* target)
 {
-	EventTarget	et;
+	if (target->handleEvent(event) == EventStatus::EOF)
+	{
+		target->~TargetType();
+		return -1;
+	}
+	return 0;
+}
+
+template <typename IoEventHandler>
+void
+ServerManager<IoEventHandler>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
+{
+	EventObject			et;
 
 	et.type = type;
-	et.target = target;
+	switch (type)
+	{
+		case EventObject::SERVER:
+			et.target = reinterpret_cast<void*>(server);
+			break;
+		case EventObject::CLIENT:
+			if (s_eventTargetMap.count(fd) == 0)
+				et.target = operator new(ALLOC_SIZE);
+			else if (type != s_eventTargetMap[fd].type)
+				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
+			new (et.target) Client(*server, fd);
+			break;
+		case EventObject::CGI:
+			if (s_eventTargetMap.count(fd) == 0)
+				et.target = operator new(ALLOC_SIZE);
+			else if (type != s_eventTargetMap[fd].type)
+				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
+			new (et.target) Cgi(*server, fd);
+			break;
+		default:
+			;
+	}
 	s_eventTargetMap[fd] = et;
 }
 
 template <typename IoEventHandler>
 void
-ServerManager<IoEventHandler>::removeEventTarget(int fd)
+ServerManager<IoEventHandler>::removeEventObject(int fd)
 {
-	EventTarget&	target = s_eventTargetMap[fd];
+	EventObject&	target = s_eventTargetMap[fd];
 
 	switch (target.type)
 	{
-		case EventTarget::CLIENT:
-			delete reinterpret_cast<Client*>(target.target);
+		case EventObject::CLIENT:
+			Client* client;
+
+			client = reinterpret_cast<Client*>(target.target);
+			client->~Client();
 			break;
-		case EventTarget::CGI:
-			delete reinterpret_cast<Cgi*>(target.target);
+		case EventObject::CGI:
+			Cgi*	cgi;
+
+			cgi = reinterpret_cast<Cgi*>(target.target);
+			cgi->~Cgi();
 			break;
 		default:
 			;
 	}
-	s_eventTargetMap.erase(fd);
+	target.type = EventObject::EMPTY;
 }
 
 template <typename IoEventHandler>
