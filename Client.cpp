@@ -31,20 +31,3 @@ Client&	Client::operator=(Client const& client)
 	throw logic_error("operator=(Client const&) must not be used");
 	return *this;
 }
-
-void
-Client::receiveData(int eventInfo)
-{
-	size_t	residue;
-
-	(void)eventInfo;
-	residue = m_receiveBuffer.size();
-	m_receiveBuffer.resize(m_receiveBuffer.capacity());
-	read(m_socket.m_fd, &m_receiveBuffer[0] + residue, m_receiveBuffer.size() - residue);
-	m_request.readRequest(m_receiveBuffer);
-}
-
-void
-Client::sendData(int eventInfo)
-{
-}

@@ -72,12 +72,13 @@ private:
 	Socket<Tcp>			m_socket;
 
 public:
-	const int					m_fd;
+	const int				m_fd;
 
 	friend class			ServerParser;
 	friend class			ServerSocket;
 	friend std::ostream&	operator<<(std::ostream& os, const Server& server);
 
+	static const int		s_defaultPort = 8000;
 };
 
 template <typename IoEventHandler>
@@ -85,6 +86,8 @@ void
 Server::initServer()
 {
 	// TODO: what if fd pool is full?
+	if (m_socket.m_fd < 0)
+		throw std::runtime_error("server socket() error");
 	if (m_socket.bind(&m_listen) < 0)
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
@@ -109,7 +112,7 @@ Server::handleEvent(const typename IoEventHandler::EventData& event)
 				throw std::runtime_error("accept error in Server::handleEvent()");
 
 			ServerManager<IoEventHandler>::addEventTarget(EventTarget::CLIENT, clientFd, new Client(*this, clientFd));
-			ServerManager<IoEventHandler>::s_ioEventHandler.add(clientFd, IoEventHandler::ADD, IoEventHandler::READ);
+			ServerManager<IoEventHandler>::s_ioEventHandler.add(clientFd, IoEventHandler::ADD, filter);
 			break;
 		default:
 			throw std::logic_error("unhandled event filter in Server::handleEvent()");

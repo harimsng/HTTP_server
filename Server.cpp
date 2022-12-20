@@ -40,7 +40,7 @@ Server::setToDefault()
 //	m_errorCode;
 //	m_root;
 //	m_errorPages;
-	m_listen = GET_SOCKADDR_IN(INADDR_ANY, 8000);
+	m_listen = GET_SOCKADDR_IN(INADDR_ANY, s_defaultPort);
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
 }

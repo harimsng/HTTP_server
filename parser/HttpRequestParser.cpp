@@ -14,7 +14,7 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 }
 
 // constructors & destructor
-HttpRequestParser::HttpRequestParser(std::stringstream& buffer)
+HttpRequestParser::HttpRequestParser(std::istringstream& stream)
 : m_readStatus(STATUS_LINE)
 {
     m_stream.basic_ios::rdbuf(buffer.rdbuf());

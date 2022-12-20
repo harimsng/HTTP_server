@@ -29,7 +29,7 @@ class	HttpRequestParser
 
 public:
 // constructors & destructor
-	HttpRequestParser(std::stringstream& buffer);
+	HttpRequestParser(std::istringstream& stream);
 	~HttpRequestParser();
 
 // member functions
@@ -42,7 +42,7 @@ public:
 
 // member variables
 	e_readStatus		m_readStatus;
-	std::stringstream	m_stream;
+	std::istringstream	m_stream;
 };
 
 #endif

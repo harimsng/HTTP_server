@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <istream>
 
 #include "parser/HttpRequestParser.hpp"
 
@@ -37,15 +38,17 @@ public:
 // operators
 
 // member functions
-	void	readRequest(std::string& buffer);
+	void	receiveData(int fd, int eventInfo);
+	bool	checkStream(std::string& buffer);
 
 // member variables
+	std::istringstream	m_stream;
+	HttpRequestParser	m_parser;
+
 	int					m_method;
 	std::string			m_target;
 	std::string			m_protocol;
 	std::map<std::string, std::vector<std::string> >	m_headerFieldsMap;
-
-	HttpRequestParser	m_parser;
 };
 
 #endif

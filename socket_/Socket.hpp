@@ -2,6 +2,7 @@
 #define SOCKET_HPP
 
 #include <unistd.h>
+#include <ostream>
 
 #include "SocketTypes.hpp"
 
@@ -22,13 +23,15 @@ public:
 	Socket(int fd, const socketAddr* addr = NULL) throw();
 
 // member functions
-	int	listen(int backlog = 16) throw();
-	int	bind(socketAddr* raddr) throw();
-	int	accept(socketAddr* raddr = NULL) const throw();
-	int	connect(socketAddr* addr) throw();
+	int		listen(int backlog = 16) throw();
+	int		bind(socketAddr* raddr) throw();
+	int		accept(socketAddr* raddr = NULL) const throw();
+	int		connect(socketAddr* addr) throw();
+	const std::string&	getAddressString() const throw();
 
 // member variables
 	const int	m_fd;
+private:
 	socketAddr	m_addr;
 };
 
@@ -36,6 +39,7 @@ template <typename SocketType>
 Socket<SocketType>::Socket() throw()
 :	m_fd(socket(SocketType::domain, SocketType::type, SocketType::protocol))
 {
+	std::ios_base::Init();
 }
 
 template <typename SocketType>
@@ -88,5 +92,10 @@ Socket<SocketType>::connect(socketAddr* addr) throw()
 }
 
 // operators
+template <typename SocketType>
+const std::string&
+Socket<SocketType>::getAddressString() const throw()
+{
+}
 
 #endif

@@ -26,12 +26,8 @@ public:
 	template <typename IoEventHandler>
 	void	handleEvent(const typename IoEventHandler::EventData& event);
 
-private:
-	void	receiveData(int eventInfo);
-	void	sendData(int eventInfo);
-
 // member variables
-	const Server*	m_server;
+	const Server*	m_server; // is entire Server information is needed? or root directory is enough?
 	Socket<Tcp>		m_socket;
 	Request			m_request;
 	Response		m_response;
@@ -46,10 +42,10 @@ Client::handleEvent(const typename IoEventHandler::EventData& event)
 	switch (filter)
 	{
 		case IoEventHandler::READ:
-			receiveData(event.getInfo());
+			m_request.receiveData(m_socket.m_fd, event.getInfo());
 			break;
 		case IoEventHandler::WRITE:
-			sendData(event.getInfo());
+			m_response.sendData(m_socket.m_fd, event.getInfo());
 			break;
 //		case IoEventHandler::EXCEPT:
 //			break;
