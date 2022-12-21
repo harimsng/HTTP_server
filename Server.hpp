@@ -86,8 +86,8 @@ Server::initServer()
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
 	ServerManager<IoEventHandler>::addEventTarget(EventObject::SERVER, m_fd, this);
-	ServerManager<IoEventHandler>::s_ioEventHandler.add(m_fd,
-			IoEventHandler::ADD, IoEventHandler::READ);
+	ServerManager<IoEventHandler>::registerEvent(m_fd, IoEventHandler::ADD,
+			IoEventHandler::READ);
 }
 
 template <typename IoEventHandler>
@@ -107,7 +107,7 @@ Server::handleEvent(const typename IoEventHandler::EventData& event)
 
 			ServerManager<IoEventHandler>::addEventTarget(EventObject::CLIENT,
 					clientFd, this);
-			ServerManager<IoEventHandler>::s_ioEventHandler.add(clientFd,
+			ServerManager<IoEventHandler>::registerEvent(clientFd,
 					IoEventHandler::ADD, filter);
 			break;
 		default:

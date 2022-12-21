@@ -17,13 +17,13 @@
 
 #define ALLOC_SIZE (std::max(sizeof(Client), sizeof(Cgi)))
 
-// IoEventHandler is class to encapsulate IO multiplexing system calls and associated types.
-template <typename IoEventHandler>
+// IoEventPoller is class to encapsulate IO multiplexing system calls and associated types.
+template <typename IoEventPoller>
 class	ServerManager
 {
 // types
-	typedef typename IoEventHandler::EventData	EventData;
-	typedef typename IoEventHandler::EventList	EventList;
+	typedef typename IoEventPoller::EventData	EventData;
+	typedef typename IoEventPoller::EventList	EventList;
 
 // deleted
 	ServerManager(ServerManager const& serverManager) {(void)serverManager;}
@@ -50,11 +50,15 @@ private:
 
 public:
 // static members
-	static void	addEventObject(typename EventObject::e_type type, int fd, Server* target);
+	static void registerEvent(int fd,
+			typename IoEventPoller::e_operation op,
+			typename IoEventPoller::e_filters filter);
+	static void	addEventObject(typename EventObject::e_type type,
+			int fd, Server* target);
 	static void	removeEventObject(int fd);
 
 	static std::map<int, EventObject>		s_eventTargetMap;
-	static IoEventHandler					s_ioEventHandler;
+	static IoEventPoller					s_ioEventPoller;
 
 // friends
 	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
@@ -64,19 +68,19 @@ public:
  * Definitions
  */
 
-template <typename IoEventHandler>
-std::map<int, EventObject>	ServerManager<IoEventHandler>::s_eventTargetMap;
+template <typename IoEventPoller>
+std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventTargetMap;
 
-template <typename IoEventHandler>
-IoEventHandler	ServerManager<IoEventHandler>::s_ioEventHandler;
+template <typename IoEventPoller>
+IoEventPoller	ServerManager<IoEventPoller>::s_ioEventPoller;
 
-template <typename IoEventHandler>
-ServerManager<IoEventHandler>::ServerManager()
+template <typename IoEventPoller>
+ServerManager<IoEventPoller>::ServerManager()
 {
 }
 
-template <typename IoEventHandler>
-ServerManager<IoEventHandler>::~ServerManager()
+template <typename IoEventPoller>
+ServerManager<IoEventPoller>::~ServerManager()
 {
 	for (std::map<int, EventObject>::iterator itr = s_eventTargetMap.begin();
 		 itr != s_eventTargetMap.end();
@@ -84,9 +88,9 @@ ServerManager<IoEventHandler>::~ServerManager()
 		removeEventObject(itr->first);
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::parse(const char* path) try
+ServerManager<IoEventPoller>::parse(const char* path) try
 {
 	ConfigParser	configParser;
 
@@ -99,25 +103,25 @@ catch (std::exception& e)
 	std::cout << e.what() << '\n';
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::initServers()
+ServerManager<IoEventPoller>::initServers()
 {
 	for (size_t i = 0; i < m_serverList.size(); i++)
-		m_serverList[i].initServer<IoEventHandler>();
+		m_serverList[i].initServer<IoEventPoller>();
 
 	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::run() try
+ServerManager<IoEventPoller>::run() try
 {
 	initServers();
 
 	while (1)
 	{
-		EventList&	eventList = s_ioEventHandler.poll();
+		EventList&	eventList = s_ioEventPoller.poll();
 		processEvents(eventList);
 	}
 	Logger::log(Logger::INFO, "%zu servers are exiting", m_serverList.size());
@@ -130,9 +134,9 @@ catch (...)
 {
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::processEvents(const EventList& events)
+ServerManager<IoEventPoller>::processEvents(const EventList& events)
 {
 	for (int i = 0; i < events.size(); ++i)
 	{
@@ -159,10 +163,10 @@ ServerManager<IoEventHandler>::processEvents(const EventList& events)
 	}
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 template <typename TargetType>
 void
-ServerManager<IoEventHandler>::processTargetEvent(const EventData& event, TargetType* target)
+ServerManager<IoEventPoller>::processEventObject(const EventData& event, TargetType* target)
 {
 	if (target->handleEvent(event) == EventStatus::EOF)
 	{
@@ -172,9 +176,18 @@ ServerManager<IoEventHandler>::processTargetEvent(const EventData& event, Target
 	return 0;
 }
 
-template <typename IoEventHandler>
+
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
+ServerManager<IoEventPoller>::registerEvent(int fd, typename IoEventPoller::e_operation op,
+		typename IoEventPoller::e_filters filter)
+{
+	s_ioEventPoller.add(fd, op, filter);
+}
+
+template <typename IoEventPoller>
+void
+ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
 {
 	EventObject			et;
 
@@ -204,9 +217,9 @@ ServerManager<IoEventHandler>::addEventObject(typename EventObject::e_type type,
 	s_eventTargetMap[fd] = et;
 }
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
-ServerManager<IoEventHandler>::removeEventObject(int fd)
+ServerManager<IoEventPoller>::removeEventObject(int fd)
 {
 	EventObject&	target = s_eventTargetMap[fd];
 
@@ -230,8 +243,8 @@ ServerManager<IoEventHandler>::removeEventObject(int fd)
 	target.type = EventObject::EMPTY;
 }
 
-template <typename IoEventHandler>
-std::ostream&	operator<<(std::ostream& os, const ServerManager<IoEventHandler>& manager)
+template <typename IoEventPoller>
+std::ostream&	operator<<(std::ostream& os, const ServerManager<IoEventPoller>& manager)
 {
 	for (uint32_t i = 0; i < manager.m_serverList.size(); ++i)
 		os << manager.m_serverList[i] << '\n';
