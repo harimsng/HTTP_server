@@ -36,8 +36,9 @@ public:
 	~Request();
 
 // member functions
-	int						receiveData(int eventInfo);
-	std::string::size_type	checkBuffer(std::string& buffer);
+	int		receiveRequest(int eventInfo);
+private:
+	int		receiveRawData(int eventInfo);
 
 // member variables
 	const Socket<Tcp>*	m_socket;

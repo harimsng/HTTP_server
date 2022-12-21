@@ -4,9 +4,9 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "tokenizer/ATokenizer.hpp"
+#include "tokenizer/ITokenizer.hpp"
 
-class	FileTokenizer: public ATokenizer
+class	FileTokenizer: public ITokenizer
 {
 	class	FileTokenizerException;
 

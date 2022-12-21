@@ -17,8 +17,7 @@ SRC			=	main.cpp\
 				parser/ServerParser.cpp\
 				parser/HttpRequestParser.cpp\
 \
-				tokenizer/ATokenizer.cpp\
-				tokenizer/SocketTokenizer.cpp\
+				tokenizer/SocketStreamTokenizer.cpp\
 				tokenizer/FileTokenizer.cpp\
 \
 				socket/ClientSocket.cpp\

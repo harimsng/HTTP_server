@@ -2,8 +2,8 @@
 #define HTTPREQUESTPARSER_HPP
 
 #include <vector>
-#include <sstream>
 #include <map>
+#include <sstream>
 
 #include "parser/AParser.hpp"
 #include "tokenizer/SocketStreamTokenizer.hpp"
@@ -31,22 +31,23 @@ public:
 	};
 
 // constructors & destructor
-	HttpRequestParser();
+	HttpRequestParser(std::string& buffer);
 	~HttpRequestParser();
 
 // member functions
-	virtual void	parse(HeaderFieldsMap& headerFields);
-	void			push(const std::string& buffer);
+	virtual void			parse(HeaderFieldsMap& headerFields);
+	std::string::size_type	checkBuffer(std::string* buffer);
 
-	void	readStatusLine(std::string& buffer);
-	void	readHeaderFields(std::string& buffer);
-	void	readMessageBody(std::string& buffer);
+	void	readStatusLine();
+	void	readHeaderFields();
+	void	readMessageBody();
 
 	e_readStatus	getReadStatus() const;
 
 // member variables
 private:
 	e_readStatus		m_readStatus;
+	std::string*		m_buffer;
 };
 
 #endif

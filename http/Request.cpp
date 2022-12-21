@@ -10,7 +10,8 @@ using namespace	std;
 // constructors & destructor
 Request::Request(const Socket<Tcp>& socket)
 :	m_socket(&socket),
-	m_buffer(REQUEST_BUFFER_SIZE, 0)
+	m_buffer(REQUEST_BUFFER_SIZE, 0),
+	m_parser(m_buffer)
 {
 }
 
@@ -19,7 +20,8 @@ Request::~Request()
 }
 
 Request::Request(const Request& request)
-:	m_socket(NULL)
+:	m_socket(NULL),
+	m_parser(m_buffer)
 {
 	(void)request;
 }
@@ -33,41 +35,27 @@ Request::operator=(const Request& request)
 }
 
 int
-Request::receiveData(int eventInfo)
+Request::receiveRequest(int eventInfo)
 {
-	int			count = 0;
-	std::size_t	endPos = 0;
+	int			count;
 
-	m_buffer.resize(m_buffer.capacity());
-	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + endPos,
-			m_buffer.size() - endPos);
-	m_buffer.resize(endPos + count + 1, 0);
+	count = receiveRawData(eventInfo);
 	if (count == 0)
 		return 0;
-
-	endPos = checkBuffer(m_buffer);
-	if (endPos == string::npos)
-		throw HttpErrorHandler(501);
-
-	m_parser.push(m_buffer);
 	m_parser.parse(m_headerFieldsMap);
-	(void)eventInfo;
 	return count;
 }
 
-string::size_type
-Request::checkBuffer(std::string& buffer)
+int
+Request::receiveRawData(int eventInfo)
 {
-    switch (m_parser.getReadStatus())
-    {
-		case HttpRequestParser::STATUS_LINE:
-        case HttpRequestParser::HEADER_FIELDS:
-            return buffer.find("\r\n");
-		case HttpRequestParser::MESSAGE_BODY:
-            return buffer.size() - 1;
-		case HttpRequestParser::FINISHED:
-			throw HttpErrorHandler(413);
-        default:
-			;
-    }
+	int			count = 0;
+	std::size_t	residue = m_buffer.size();
+
+	m_buffer.resize(m_buffer.capacity());
+	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
+			m_buffer.size() - residue - 1);
+	m_buffer.resize(residue + count + 1, 0);
+	(void)eventInfo;
+	return count;
 }

@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "parser/config_parser/ConfigParser.hpp"
+#include "parser/ConfigParser.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/FileTokenizerException.hpp"
 
@@ -109,7 +109,7 @@ FileTokenizer::init(const string path)
 {
 	string		line;
 
-	m_fstream.open(path);
+	m_fstream.open(path.data());
 	for (int lineNumber = 1; m_fstream.good() == true; ++lineNumber)
 	{
 		if (std::getline(m_fstream, line).good() == false)

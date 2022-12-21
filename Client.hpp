@@ -42,7 +42,7 @@ Client::handleEvent(const typename IoEventHandler::EventData& event)
 	switch (filter)
 	{
 		case IoEventHandler::READ:
-			m_request.receiveData(event.getInfo());
+			m_request.receiveRequest(event.getInfo());
 			break;
 		case IoEventHandler::WRITE:
 			m_response.sendData(event.getInfo());

@@ -1,7 +1,8 @@
 #include "SocketStreamTokenizer.hpp"
 
 // constructors & destructor
-SocketStreamTokenizer::SocketStreamTokenizer()
+SocketStreamTokenizer::SocketStreamTokenizer(std::string& buffer)
+:	m_buffer(&buffer)
 {
 }
 
@@ -20,4 +21,10 @@ SocketStreamTokenizer::operator=(const SocketStreamTokenizer& tokenizer)
 {
 	(void)tokenizer;
 	return *this;
+}
+
+void
+SocketStreamTokenizer::init(std::string* buffer)
+{
+	m_buffer = buffer;
 }
