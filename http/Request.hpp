@@ -13,6 +13,8 @@
  */
 class	Request
 {
+	friend class	HttpRequestParser;
+
 // deleted
 	Request(const Request& request);
 	Request	&operator=(const Request& request);

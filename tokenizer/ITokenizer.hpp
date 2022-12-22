@@ -9,7 +9,7 @@ class	ITokenizer
 	ITokenizer(ITokenizer const& tokenizer);
 	ITokenizer	&operator=(ITokenizer const& tokenizer);
 
-public:
+protected:
 // constructors & destructor
 	ITokenizer() {};
 	virtual ~ITokenizer() {};

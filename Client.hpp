@@ -5,8 +5,10 @@
 #include <sstream>
 #include <iostream>
 
-#include "communicator/Request.hpp"
-#include "communicator/Response.hpp"
+//#include "communicator/Request.hpp"
+//#include "communicator/Response.hpp"
+#include "http/Request.hpp"
+#include "http/Reponse.hpp"
 #include "socket_/Socket.hpp"
 
 class	Server;
@@ -45,7 +47,7 @@ Client::handleEvent(const typename IoEventHandler::EventData& event)
 			m_request.receiveRequest(event.getInfo());
 			break;
 		case IoEventHandler::WRITE:
-			m_response.sendData(event.getInfo());
+			m_response.sendResponse(event.getInfo());
 			break;
 //		case IoEventHandler::EXCEPT:
 //			break;

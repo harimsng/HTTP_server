@@ -15,13 +15,20 @@ public:
 	virtual ~SocketStreamTokenizer();
 
 // member functions
-	void	init(std::string* buffer);
+	void	init(std::string& buffer);
+	bool	initBuffer(size_t start = 0);
 	virtual const std::string&	peek();
 	virtual const std::string&	get();
-	virtual bool				empty() const;
+	char			getc();
+	virtual bool	empty() const;
 
 private:
 	std::string*	m_buffer;
+	std::string		m_token;
+	std::string		m_prevToken;
+	std::string::size_type	m_start;
+	std::string::size_type	m_cur;
+	std::string::size_type	m_end;
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include "http/Request.hpp"
 #include "parser/HttpRequestParser.hpp"
 
 using namespace std;
@@ -17,10 +18,9 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 
 // constructors & destructor
 HttpRequestParser::HttpRequestParser(std::string& buffer)
-:	m_readStatus(STATUS_LINE),
-	m_buffer(&buffer)
+:	m_readStatus(REQUEST_LINE)
 {
-	m_tokenizer.init(&buffer);
+	m_tokenizer.init(buffer);
 }
 
 HttpRequestParser::~HttpRequestParser()
@@ -28,20 +28,19 @@ HttpRequestParser::~HttpRequestParser()
 }
 
 void
-HttpRequestParser::parse(HeaderFields& headerFields)
+HttpRequestParser::parse(Request& request)
 {
 	std::size_t	pos;
 
-	pos = checkBuffer(m_buffer);
-	if (pos == string::npos)
+	if (m_tokenizer.initBuffer() == false)
 		throw HttpErrorHandler(501);
-
-	while (pos != string::npos)
+	
+	while (m_tokenizer.empty() == false)
 	{
 		switch (m_readStatus)
 		{
-			case STATUS_LINE:
-				readStatusLine();
+			case REQUEST_LINE:
+				readStatusLine(request);
 			case HEADER_FIELDS:
 				break;
 			case MESSAGE_BODY:
@@ -50,20 +49,21 @@ HttpRequestParser::parse(HeaderFields& headerFields)
 				break;
 			default:
 				throw std::logic_error("unhandled read status in \
-	HttpRequestParser::preprocess()");
+HttpRequestParser::preprocess()");
 		}
-		pos = checkBuffer(m_buffer);
 	}
-	m_buffer->erase(0, pos + 2);
 }
 
 void
-HttpRequestParser::readStatusLine()
+HttpRequestParser::readStatusLine(Request& request)
 {
+	while (m_tokenizer.getc() != '\n')
+	{
+	}
 }
 
 void
-HttpRequestParser::readHeaderFields()
+HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
 }
 
@@ -83,7 +83,7 @@ HttpRequestParser::checkBuffer(std::string* buffer)
 {
 	switch (m_readStatus)
 	{
-		case STATUS_LINE:
+		case REQUEST_LINE:
 		case HEADER_FIELDS:
 			return buffer.find("\r\n");
 		case MESSAGE_BODY:

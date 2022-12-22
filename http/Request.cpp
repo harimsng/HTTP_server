@@ -42,7 +42,7 @@ Request::receiveRequest(int eventInfo)
 	count = receiveRawData(eventInfo);
 	if (count == 0)
 		return 0;
-	m_parser.parse(m_headerFieldsMap);
+	m_parser.parse(*this);
 	return count;
 }
 

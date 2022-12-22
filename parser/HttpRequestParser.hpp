@@ -14,7 +14,7 @@ class	Server;
 typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 
 class	HttpRequestParser
-:	public AParser<SocketStreamTokenizer, HeaderFieldsMap>
+:	public AParser<SocketStreamTokenizer, Request>
 {
 // deleted
 	HttpRequestParser(const HttpRequestParser& parser);
@@ -24,7 +24,7 @@ class	HttpRequestParser
 public:
 	enum	e_readStatus
 	{
-		STATUS_LINE = 0,
+		REQUEST_LINE = 0,
 		HEADER_FIELDS,
 		MESSAGE_BODY,
 		FINISHED
@@ -35,11 +35,11 @@ public:
 	~HttpRequestParser();
 
 // member functions
-	virtual void			parse(HeaderFieldsMap& headerFields);
+	virtual void			parse(Request& request);
 	std::string::size_type	checkBuffer(std::string* buffer);
 
-	void	readStatusLine();
-	void	readHeaderFields();
+	void	readStatusLine(Request& request);
+	void	readHeaderFields(HeaderFieldsMap& headerFieldsMap);
 	void	readMessageBody();
 
 	e_readStatus	getReadStatus() const;
@@ -47,7 +47,6 @@ public:
 // member variables
 private:
 	e_readStatus		m_readStatus;
-	std::string*		m_buffer;
 };
 
 #endif
