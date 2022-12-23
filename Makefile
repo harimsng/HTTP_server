@@ -7,10 +7,10 @@ RM			=	rm -f
 
 SRC			=	main.cpp\
 				Logger.cpp\
-				ServerManager.cpp\
 				Server.cpp\
 				Location.cpp\
 				Client.cpp\
+				cgi/Cgi.cpp\
 \
 				parser/ConfigParser.cpp\
 				parser/LocationParser.cpp\
@@ -20,14 +20,19 @@ SRC			=	main.cpp\
 				tokenizer/SocketStreamTokenizer.cpp\
 				tokenizer/FileTokenizer.cpp\
 \
-				socket/ClientSocket.cpp\
-				socket/ServerSocket.cpp\
+				exception/ConfigParserException.cpp\
+				exception/HttpErrorHandler.cpp\
 \
-				communicator/Communicator.cpp\
-				communicator/Request.cpp\
-				communicator/Response.cpp\
+				http/Request.cpp\
+				http/Response.cpp\
 \
-				cgi/Cgi.cpp\
+				io/Kqueue.cpp\
+#				communicator/Communicator.cpp\
+#				communicator/Request.cpp\
+#				communicator/Response.cpp\
+#\
+#				socket/ClientSocket.cpp\
+#				socket/ServerSocket.cpp\
 
 
 OBJ			:=	$(SRC:%.cpp=%.o)
@@ -61,6 +66,7 @@ debug:
 
 clean:
 	$(RM) $(OBJ)
+	$(RM) $(DEP)
 	$(RM) RELEASE.mode DEBUG.mode
 
 fclean: clean

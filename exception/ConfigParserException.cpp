@@ -1,30 +1,32 @@
 #include "exception/ConfigParserException.hpp"
 
+using namespace	std;
+
 // constructors & destructor
-ConfigParserException::ConfigParserException(const string& errMsg)
+ConfigParser::ConfigParserException::ConfigParserException(const string& message)
 {
-	m_errMsg = errMsg;
+	m_message = message;
 }
 
-ConfigParserException::~ConfigParserException() throw()
+ConfigParser::ConfigParserException::~ConfigParserException() throw()
 {
 }
 
-ConfigParserException::ConfigParserException(ConfigParserException const& configParserException)
+ConfigParser::ConfigParserException::ConfigParserException(ConfigParserException const& configParserException)
 {
-	(void)configParserException;
+	*this = configParserException;
 }
 
 // operators
-ConfigParserException&
-ConfigParserException::operator=(ConfigParserException const& configParserException)
+ConfigParser::ConfigParserException&
+ConfigParser::ConfigParserException::operator=(ConfigParserException const& configParserException)
 {
-	(void)configParserException;
+	m_message = configParserException.m_message;
 	return *this;
 }
 
 const char*
-ConfigParserException::what() const throw()
+ConfigParser::ConfigParserException::what() const throw()
 {
-	return (m_errMsg.c_str());
+	return (m_message.c_str());
 }

@@ -1,9 +1,11 @@
 #ifdef __APPLE__
-# define IO_EVENT_HANDLER Kqueue
+# define IO_EVENT_POLLER Kqueue
 # define KQUEUE_IO
+# include "io/Kqueue.hpp"
 #elif __linux__
-# define IO_EVENT_HANDLER Epoll
+# define IO_EVENT_POLLER Epoll
 # define EPOLL_IO
+# include "io/Epoll.hpp"
 #endif
 
 #include <iostream>
@@ -11,7 +13,7 @@
 
 #include "Logger.hpp"
 #include "ServerManager.hpp"
-#include "parser/config_parser/ConfigParser.hpp"
+#include "parser/ConfigParser.hpp"
 #include "exception/ConfigParserException.hpp"
 
 using namespace	std;
@@ -20,7 +22,7 @@ bool	parseArgument(int argc, char **argv);
 
 int	main(int argc, char **argv, char **envp)
 {
-	ServerManager<IO_EVENT_HANDLER>	serverManager;
+	ServerManager<IO_EVENT_POLLER>	serverManager;
 
 	if (parseArgument(argc, argv) == false)
 	{
@@ -28,7 +30,6 @@ int	main(int argc, char **argv, char **envp)
 		return 1;
 	}
 	serverManager.parse(argv[argc - 1]);
-	Logger::log(Logger::DEBUG, serverManager);
 	serverManager.run();
 	(void)argv;
 	(void)envp;

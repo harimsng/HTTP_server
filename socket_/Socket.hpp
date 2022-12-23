@@ -25,7 +25,7 @@ public:
 // member functions
 	int		listen(int backlog = 16) throw();
 	int		bind(socketAddr* raddr) throw();
-	int		accept(socketAddr* raddr = NULL) const throw();
+	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(socketAddr* addr) throw();
 	const std::string&	getAddressString() const throw();
 
@@ -45,7 +45,7 @@ Socket<SocketType>::Socket() throw()
 template <typename SocketType>
 Socket<SocketType>::~Socket() throw()
 {
-	close(m_fd);
+	::close(m_fd);
 }
 
 template <typename SocketType>
@@ -59,36 +59,36 @@ Socket<SocketType>::Socket(int fd, const socketAddr* addr) throw()
 :	m_fd(fd)
 {
 	if (addr != NULL)
-		m_addr = *addr;
+		::memcpy(&m_addr, addr, sizeof(*addr));
 }
 
 template <typename SocketType>
 int
 Socket<SocketType>::bind(socketAddr* addr) throw()
 {
-	m_addr = addr;
-	return bind(m_fd, addr, SocketType::socketAddrLen);
+	::memcpy(&m_addr, addr, sizeof(*addr));
+	return ::bind(m_fd, reinterpret_cast<sockaddr*>(addr), SocketType::socketAddrLen);
 }
 
 template <typename SocketType>
 int
 Socket<SocketType>::listen(int backlog) throw()
 {
-	return listen(m_fd, backlog);
+	return ::listen(m_fd, backlog);
 }
 
 template <typename SocketType>
 int
-Socket<SocketType>::accept(socketAddr* raddr) const throw()
+Socket<SocketType>::accept(sockaddr* raddr, socklen_t* sockLen) const throw()
 {
-	return accept(m_fd, raddr, SocketType::socketAddrLen);
+	return ::accept(m_fd, raddr, sockLen);
 }
 
 template <typename SocketType>
 int
 Socket<SocketType>::connect(socketAddr* addr) throw()
 {
-	return connect(m_fd, addr, SocketType::socketAddrLen);
+	return ::connect(m_fd, addr, SocketType::socketAddrLen);
 }
 
 // operators

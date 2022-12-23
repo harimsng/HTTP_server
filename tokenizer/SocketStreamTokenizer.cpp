@@ -25,13 +25,13 @@ SocketStreamTokenizer::~SocketStreamTokenizer()
 }
 
 void
-SocketStreamTokenizer::init(std::string& buffer)
+SocketStreamTokenizer::init(string& buffer)
 {
 	m_buffer = &buffer;
 }
 
 bool
-SocketStreamTokenizer::initBuffer(size_type start)
+SocketStreamTokenizer::initBuffer(string::size_type start)
 {
 	string::size_type	pos;
 
@@ -57,7 +57,7 @@ SocketStreamTokenizer::get()
 
 	if (m_start == m_cur)
 	{
-		m_token = m_buffer.substr(m_start, pos - m_start);
+		m_token = m_buffer->substr(m_start, pos - m_start);
 		m_cur = pos + 2;
 	}
 	else
@@ -73,7 +73,7 @@ SocketStreamTokenizer::get()
 char
 SocketStreamTokenizer::getc()
 {
-	return empty() == false ? *m_cur++ : '\0';
+	return empty() == false ? (*m_buffer)[m_cur++] : '\0';
 }
 
 bool

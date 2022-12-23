@@ -1,3 +1,4 @@
+#include "exception/HttpErrorHandler.hpp"
 #include "http/Request.hpp"
 #include "parser/HttpRequestParser.hpp"
 
@@ -32,6 +33,7 @@ HttpRequestParser::parse(Request& request)
 {
 	std::size_t	pos;
 
+	(void)pos;
 	if (m_tokenizer.initBuffer() == false)
 		throw HttpErrorHandler(501);
 	
@@ -57,6 +59,7 @@ HttpRequestParser::preprocess()");
 void
 HttpRequestParser::readStatusLine(Request& request)
 {
+	(void)request;
 	while (m_tokenizer.getc() != '\n')
 	{
 	}
@@ -65,6 +68,7 @@ HttpRequestParser::readStatusLine(Request& request)
 void
 HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
+	(void)headerFieldsMap;
 }
 
 void
@@ -85,9 +89,9 @@ HttpRequestParser::checkBuffer(std::string* buffer)
 	{
 		case REQUEST_LINE:
 		case HEADER_FIELDS:
-			return buffer.find("\r\n");
+			return buffer->find("\r\n");
 		case MESSAGE_BODY:
-			return buffer.size() - 1;
+			return buffer->size() - 1;
 		case FINISHED:
 			throw HttpErrorHandler(413);
 		default:

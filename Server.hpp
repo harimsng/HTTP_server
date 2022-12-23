@@ -11,11 +11,10 @@
 #include "Client.hpp"
 #include "Location.hpp"
 #include "socket_/Socket.hpp"
-#include "communicator/Communicator.hpp"
 
 #define EVENT_SIZE 8
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 class	ServerManager;
 
 struct	EventObject
@@ -28,7 +27,7 @@ struct	EventObject
 		CGI = 3
 	};
 	e_type	type;
-	void*	target;
+	void*	object;
 };
 
 class	Server
@@ -41,10 +40,10 @@ public:
 	Server	&operator=(Server const& server);
 
 // member functions
-	template <typename IoEventHandler>
+	template <typename IoEventPoller>
 	void	initServer();
-	template <typename IoEventHandler>
-	void	handleEvent(const typename IoEventHandler::EventData& event);
+	template <typename IoEventPoller>
+	typename IoEventPoller::EventStatus	handleEvent(const typename IoEventPoller::EventData& event);
 
 private:
 	void	setToDefault();
@@ -74,7 +73,7 @@ public:
 	static const int		s_defaultPort = 8000;
 };
 
-template <typename IoEventHandler>
+template <typename IoEventPoller>
 void
 Server::initServer()
 {
@@ -85,34 +84,35 @@ Server::initServer()
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
-	ServerManager<IoEventHandler>::addEventTarget(EventObject::SERVER, m_fd, this);
-	ServerManager<IoEventHandler>::registerEvent(m_fd, IoEventHandler::ADD,
-			IoEventHandler::READ);
+	ServerManager<IoEventPoller>::addEventObject(EventObject::SERVER, m_fd, this);
+	ServerManager<IoEventPoller>::registerEvent(m_fd, IoEventPoller::ADD,
+			IoEventPoller::READ);
 }
 
-template <typename IoEventHandler>
-void
-Server::handleEvent(const typename IoEventHandler::EventData& event)
+template <typename IoEventPoller>
+typename IoEventPoller::EventStatus
+Server::handleEvent(const typename IoEventPoller::EventData& event)
 {
-	typename IoEventHandler::e_filters	filter = event.getFilter();
+	typename IoEventPoller::e_filters	filter = event.getFilter();
 
 	switch (filter)
 	{
-		case IoEventHandler::READ:
+		case IoEventPoller::READ:
 			int		clientFd;
 			clientFd = m_socket.accept();
 
 			if (clientFd < 0)
 				throw std::runtime_error("accept error in Server::handleEvent()");
 
-			ServerManager<IoEventHandler>::addEventTarget(EventObject::CLIENT,
+			ServerManager<IoEventPoller>::addEventObject(EventObject::CLIENT,
 					clientFd, this);
-			ServerManager<IoEventHandler>::registerEvent(clientFd,
-					IoEventHandler::ADD, filter);
+			ServerManager<IoEventPoller>::registerEvent(clientFd,
+					IoEventPoller::ADD, filter);
 			break;
 		default:
 			throw std::logic_error("unhandled event filter in Server::handleEvent()");
 	}
+	return IoEventPoller::NORMAL;
 }
 
 #endif

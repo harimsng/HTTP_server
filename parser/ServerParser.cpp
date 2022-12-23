@@ -3,9 +3,9 @@
 
 #include "exception/ConfigParserException.hpp"
 #include "Server.hpp"
-#include "parser/config_parser/ConfigParser.hpp"
-#include "parser/config_parser/LocationParser.hpp"
-#include "parser/config_parser/ServerParser.hpp"
+#include "parser/ConfigParser.hpp"
+#include "parser/LocationParser.hpp"
+#include "parser/ServerParser.hpp"
 
 using namespace std;
 

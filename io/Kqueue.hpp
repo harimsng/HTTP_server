@@ -1,18 +1,31 @@
+#include "Server.hpp"
+
 #ifdef __APPLE__
-#ifndef KQUEUE_HPP
-#define KQUEUE_HPP
+# ifndef KQUEUE_HPP
+# define KQUEUE_HPP
 
-#include <sys/event.h>
+# include <sys/event.h>
 
-#include "IIoMultiplex.hpp"
+# include <vector>
 
-struct	Kevent
+# include "IIoMultiplex.hpp"
+
+struct	Kevent: public kevent
 {
-	int	getFd() const {return m_kevent.ident;}
-	int	getFilter() const {return m_kevent.filter;}
-	int	getInfo() const {return m_kevent.data;}
-
-	struct kevent	m_kevent;
+	int	getFd() const {return ident;}
+	int	getInfo() const {return data;}
+	IoMultiplexEnum::e_filters	getFilter() const
+	{
+		switch (filter)
+		{
+			case EVFILT_READ:
+				return IoMultiplexEnum::READ;
+			case EVFILT_WRITE:
+				return IoMultiplexEnum::WRITE;
+			default:
+				return IoMultiplexEnum::FILT_ERROR;
+		}
+	}
 };
 
 struct	KqueueAttr
@@ -26,6 +39,8 @@ class	Kqueue: public IIoMultiplex<KqueueAttr>
 // deleted
 	Kqueue(Kqueue const& kqueue);
 	Kqueue	&operator=(Kqueue const& kqueue);
+
+// types
 
 public:
 // constructors & destructor

@@ -5,15 +5,12 @@
 #include <map>
 #include <iostream>
 
+#include "Logger.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
-#include "Logger.hpp"
 #include "cgi/Cgi.hpp"
-#include "io/Kqueue.hpp"
 #include "parser/ConfigParser.hpp"
-#include "parser/ServerParser.hpp"
-#include "parser/LocationParser.hpp"
-#include "socket/ServerSocket.hpp"
+//#include "socket/ServerSocket.hpp"
 
 #define ALLOC_SIZE (std::max(sizeof(Client), sizeof(Cgi)))
 
@@ -42,8 +39,8 @@ public:
 private:
 	void	initServers();
 	void	processEvents(const EventList& events);
-	template <typename TargetType>
-	void	processEventObject(const EventData& event, TargetType* target);
+	template <typename ObjectType>
+	void	processEventObject(const EventData& event, EventObject& eventObject);
 
 // member variables
 	std::vector<Server>		m_serverList;
@@ -57,7 +54,7 @@ public:
 			int fd, Server* target);
 	static void	removeEventObject(int fd);
 
-	static std::map<int, EventObject>		s_eventTargetMap;
+	static std::map<int, EventObject>		s_eventObjectMap;
 	static IoEventPoller					s_ioEventPoller;
 
 // friends
@@ -69,7 +66,7 @@ public:
  */
 
 template <typename IoEventPoller>
-std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventTargetMap;
+std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventObjectMap;
 
 template <typename IoEventPoller>
 IoEventPoller	ServerManager<IoEventPoller>::s_ioEventPoller;
@@ -82,8 +79,8 @@ ServerManager<IoEventPoller>::ServerManager()
 template <typename IoEventPoller>
 ServerManager<IoEventPoller>::~ServerManager()
 {
-	for (std::map<int, EventObject>::iterator itr = s_eventTargetMap.begin();
-		 itr != s_eventTargetMap.end();
+	for (std::map<int, EventObject>::iterator itr = s_eventObjectMap.begin();
+		 itr != s_eventObjectMap.end();
 		 ++itr)
 		removeEventObject(itr->first);
 }
@@ -108,7 +105,7 @@ void
 ServerManager<IoEventPoller>::initServers()
 {
 	for (size_t i = 0; i < m_serverList.size(); i++)
-		m_serverList[i].initServer<IoEventPoller>();
+		m_serverList[i].template initServer<IoEventPoller>();
 
 	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 }
@@ -121,10 +118,10 @@ ServerManager<IoEventPoller>::run() try
 
 	while (1)
 	{
-		EventList&	eventList = s_ioEventPoller.poll();
+		const EventList&	eventList = s_ioEventPoller.poll();
 		processEvents(eventList);
 	}
-	Logger::log(Logger::INFO, "%zu servers are exiting", m_serverList.size());
+	Logger::log(Logger::INFO, "%zu servers exited", m_serverList.size());
 }
 catch (std::runtime_error& e)
 {
@@ -138,42 +135,40 @@ template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::processEvents(const EventList& events)
 {
-	for (int i = 0; i < events.size(); ++i)
+	for (size_t i = 0; i < events.size(); ++i)
 	{
 		const EventData&	event = events[i];
-		EventObject&		target = s_eventTargetMap[event.getFd()];
-		int					result = 0;
+		EventObject&		eventObject = s_eventObjectMap[event.getFd()];
 
-		switch (target.type)
+		switch (eventObject.type)
 		{
 			case EventObject::SERVER:
-				result = processTargetEvent(event, reinterpret_cast<Server*>(target.target));
+				processEventObject<Server>(event, eventObject);
 				break;
 			case EventObject::CLIENT:
-				result = processTargetEvent(event, reinterpret_cast<Client*>(target.target));
+				processEventObject<Client>(event, eventObject);
 				break;
 			case EventObject::CGI:
-				result = processTargetEvent(event, reinterpret_cast<Cgi*>(target.target));
+				processEventObject<Cgi>(event, eventObject);
 				break;
 			default:
 				throw std::logic_error("unhandled event type in ServerManager::processEvents");
 		}
-		if (result == -1)
-			target.type = EventObject::EMPTY;
 	}
 }
 
 template <typename IoEventPoller>
-template <typename TargetType>
+template <typename ObjectType>
 void
-ServerManager<IoEventPoller>::processEventObject(const EventData& event, TargetType* target)
+ServerManager<IoEventPoller>::processEventObject(const EventData& event, EventObject& eventObject)
 {
-	if (target->handleEvent(event) == EventStatus::EOF)
+	ObjectType*	object = reinterpret_cast<ObjectType*>(eventObject.object);
+
+	if (object->template handleEvent<IoEventPoller>(event) == IoEventPoller::END)
 	{
-		target->~TargetType();
-		return -1;
+		object->~ObjectType();
+		eventObject.type = EventObject::EMPTY;
 	}
-	return 0;
 }
 
 
@@ -195,46 +190,51 @@ ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, 
 	switch (type)
 	{
 		case EventObject::SERVER:
-			et.target = reinterpret_cast<void*>(server);
+			et.object = reinterpret_cast<void*>(server);
 			break;
 		case EventObject::CLIENT:
-			if (s_eventTargetMap.count(fd) == 0)
-				et.target = operator new(ALLOC_SIZE);
-			else if (type != s_eventTargetMap[fd].type)
+			if (s_eventObjectMap.count(fd) == 0)
+				et.object = operator new(ALLOC_SIZE);
+
+			else if (type != s_eventObjectMap[fd].type)
 				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
-			new (et.target) Client(*server, fd);
+
+			new (et.object) Client(*server, fd);
 			break;
 		case EventObject::CGI:
-			if (s_eventTargetMap.count(fd) == 0)
-				et.target = operator new(ALLOC_SIZE);
-			else if (type != s_eventTargetMap[fd].type)
+			if (s_eventObjectMap.count(fd) == 0)
+				et.object = operator new(ALLOC_SIZE);
+
+			else if (type != s_eventObjectMap[fd].type)
 				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
-			new (et.target) Cgi(*server, fd);
+
+			new (et.object) Cgi();
 			break;
+
 		default:
 			;
 	}
-	s_eventTargetMap[fd] = et;
+	s_eventObjectMap[fd] = et;
 }
 
 template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::removeEventObject(int fd)
 {
-	EventObject&	target = s_eventTargetMap[fd];
+	EventObject&	target = s_eventObjectMap[fd];
 
 	switch (target.type)
 	{
 		case EventObject::CLIENT:
 			Client* client;
 
-			client = reinterpret_cast<Client*>(target.target);
+			client = reinterpret_cast<Client*>(target.object);
 			client->~Client();
 			break;
 		case EventObject::CGI:
 			Cgi*	cgi;
 
-			cgi = reinterpret_cast<Cgi*>(target.target);
+			cgi = reinterpret_cast<Cgi*>(target.object);
 			cgi->~Cgi();
 			break;
 		default:

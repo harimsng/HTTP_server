@@ -1,28 +1,38 @@
 #ifndef IIOMULTIPLEX_HPP
 #define IIOMULTIPLEX_HPP
 
-#include <vector>
-
-template <typename Attr>
-class	IIoMultiplex
+struct	IoMultiplexEnum
 {
-public:
-	typedef typename Attr::EventData	EventData;
-	typedef typename Attr::EventList	EventList;
+	enum	e_eventStatus
+	{
+		NORMAL = 1,
+		END = 2,
+		STAT_ERROR = 3
+	};
 
 	enum	e_operation
 	{
 		ADD = 1,
 		DELETE = 2,
-		MODIFY = 3 
+		MODIFY = 3,
+		OP_ERROR = 4
 	};
 
 	enum	e_filters
 	{
 		READ = 0x1,
 		WRITE = 0x2,
-		ERROR = 0x4
+		FILT_ERROR = 0x4
 	};
+};
+
+template <typename Attr>
+class	IIoMultiplex: public IoMultiplexEnum
+{
+public:
+	typedef typename Attr::EventData	EventData;
+	typedef typename Attr::EventList	EventList;
+	typedef enum e_eventStatus			EventStatus;
 
 protected:
 // constructors & destructor

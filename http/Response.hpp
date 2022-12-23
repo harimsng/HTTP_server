@@ -13,6 +13,7 @@ public:
 	Response	&operator=(const Response& response);
 
 // member functions
+	void		sendResponse(int eventInfo);
 };
 
 #endif

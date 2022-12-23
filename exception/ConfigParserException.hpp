@@ -9,14 +9,12 @@
 class	ConfigParser::ConfigParserException: public std::exception
 {
 public:
-	ConfigParserException(const std::string& message): m_message("parse error: " + message) {};
+	ConfigParserException(const std::string& message);
+	virtual ~ConfigParserException() throw();
+	ConfigParserException(ConfigParserException const& configParserException);
+	ConfigParserException&	operator=(ConfigParserException const& configParserException);
 
-	virtual ~ConfigParserException() throw() {};
-
-	virtual const char*	what() const throw()
-	{
-		return m_message.c_str();
-	}
+	virtual const char*	what() const throw();
 
 private:
 	std::string	m_message;
