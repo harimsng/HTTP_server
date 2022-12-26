@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const string
-getDate(const char* format);
+// const string
+// Util::getDate(const char* format);
 
 Logger::e_types		Logger::s_type = ERROR;
 ostream*			Logger::s_ostream = NULL;
@@ -78,6 +78,6 @@ Logger::log(e_types type, const char* format, ...)
 		default:
 			break;
 	}
-	prefix.append(::getDate("%F %T "));
+	prefix.append(Util::getDate("%F %T "));
 	*s_ostream << prefix << buffer << '\n';
 }
