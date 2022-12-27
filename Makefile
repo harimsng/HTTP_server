@@ -27,6 +27,9 @@ SRC			=	main.cpp\
 				http/Response.cpp\
 \
 				io/Kqueue.cpp\
+\
+				util/Util.cpp\
+
 #				communicator/Communicator.cpp\
 #				communicator/Request.cpp\
 #				communicator/Response.cpp\
