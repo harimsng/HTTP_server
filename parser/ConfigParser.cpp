@@ -28,7 +28,7 @@ ConfigParser::init(string configPath)
 
 	if (checkFileStat(configPath.data()) == false)
 		throw ConfigParserException("invalid file type");
-			
+
 	if (configPath.rfind(".conf") != configPath.size() - 5)
 		throw ConfigParserException("invalid filename");
 

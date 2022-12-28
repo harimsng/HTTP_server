@@ -36,7 +36,7 @@ HttpRequestParser::parse(Request& request)
 	(void)pos;
 	if (m_tokenizer.initBuffer() == false)
 		throw HttpErrorHandler(501);
-	
+
 	while (m_tokenizer.empty() == false)
 	{
 		switch (m_readStatus)
@@ -63,6 +63,12 @@ HttpRequestParser::readStatusLine(Request& request)
 	while (m_tokenizer.getc() != '\n')
 	{
 	}
+
+	// int spacePos;
+	// string token = m_tokenizer.get();
+    //
+	// spacePos = token.find(" ", 0);
+	// token.substr(0, spacePos);
 }
 
 void

@@ -26,7 +26,7 @@ class	Request
 		HEAD,
 		POST,
 		PUT,
-		DELETE,
+		DELETE
 //		CONNECT,
 //		OPTION,
 //		TRACE

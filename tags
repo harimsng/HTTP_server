@@ -17,7 +17,7 @@ ASocket_hpp	socket/ASocket.hpp	/^#define ASocket_hpp$/;"	d
 BACKLOG	socket/ServerSocket.cpp	/^#define BACKLOG /;"	d	file:
 BUFFER_SIZE	Client.cpp	/^#define BUFFER_SIZE /;"	d	file:
 CGI	Server.hpp	/^		CGI = 3$/;"	e	enum:EventObject::e_type
-CGI_HPP	cgi/cgi.hpp	/^#define CGI_HPP$/;"	d
+CGI_HPP	cgi/Cgi.hpp	/^#define CGI_HPP$/;"	d
 CLIENT	Server.hpp	/^		CLIENT = 2,$/;"	e	enum:EventObject::e_type
 CLIENT_HPP	Client.hpp	/^#define CLIENT_HPP$/;"	d
 CLIENT_HPP	test/Connection.hpp	/^#define CLIENT_HPP$/;"	d
@@ -27,9 +27,9 @@ CONFIGPARSEREXCEPTION_HPP	exception/ConfigParserException.hpp	/^#define CONFIGPA
 CONFIGPARSER_HPP	parser/ConfigParser.hpp	/^#define CONFIGPARSER_HPP$/;"	d
 CXX	Makefile	/^CXX			=	c++$/;"	m
 CXXFLAGS	Makefile	/^CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD$/;"	m
-Cgi	cgi/cgi.cpp	/^Cgi::Cgi()$/;"	f	class:Cgi
-Cgi	cgi/cgi.cpp	/^Cgi::Cgi(Cgi const& cgi)$/;"	f	class:Cgi
-Cgi	cgi/cgi.hpp	/^class	Cgi$/;"	c
+Cgi	cgi/Cgi.cpp	/^Cgi::Cgi()$/;"	f	class:Cgi
+Cgi	cgi/Cgi.cpp	/^Cgi::Cgi(Cgi const& cgi)$/;"	f	class:Cgi
+Cgi	cgi/Cgi.hpp	/^class	Cgi$/;"	c
 Client	Client.cpp	/^Client::Client(Client const& client)$/;"	f	class:Client
 Client	Client.cpp	/^Client::Client(Server& server, int fd)$/;"	f	class:Client
 Client	Client.hpp	/^class	Client$/;"	c
@@ -50,7 +50,7 @@ Connection	test/Connection.cpp	/^Connection::Connection(int socket)$/;"	f	class:
 Connection	test/Connection.hpp	/^class	Connection$/;"	c
 DEBUG	Logger.hpp	/^		DEBUG = 4$/;"	e	enum:Logger::e_types
 DEBUGFLAGS	Makefile	/^DEBUGFLAGS	=	-g -fsanitize=address$/;"	m
-DELETE	http/Request.hpp	/^		DELETE,$/;"	e	enum:Request::e_method
+DELETE	http/Request.hpp	/^		DELETE$/;"	e	enum:Request::e_method
 DELETE	io/IIoMultiplex.hpp	/^		DELETE = 2,$/;"	e	enum:IoMultiplexEnum::e_operation
 DEP	Makefile	/^DEP			:=	$(OBJ:%.o=%.d)$/;"	m
 DEP	test/Makefile	/^DEP = 	$(OBJ:%.o=%.d)$/;"	m
@@ -266,7 +266,7 @@ getc	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::getc()$/;"	f	c
 handleEvent	Client.hpp	/^Client::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Client
 handleEvent	Server.hpp	/^Server::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Server
 handleEvent	Server_template.hpp	/^Server<IoEventHandler>::handleEvent(const EventData& event)$/;"	f	class:Server
-handleEvent	cgi/cgi.hpp	/^typename IoEventPoller::EventStatus	Cgi::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Cgi
+handleEvent	cgi/Cgi.hpp	/^typename IoEventPoller::EventStatus	Cgi::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Cgi
 init	parser/ConfigParser.cpp	/^ConfigParser::init(string configPath)$/;"	f	class:ConfigParser
 init	test/FdManager.cpp	/^void	FdManager::init()$/;"	f	class:FdManager
 init	test/Server.cpp	/^void	Server::init()$/;"	f	class:Server
@@ -405,7 +405,7 @@ operator =	Logger.cpp	/^Logger::operator=(Logger const& logger)$/;"	f	class:Logg
 operator =	Server.cpp	/^Server::operator=(const Server& server)$/;"	f	class:Server
 operator =	ServerManager.hpp	/^	ServerManager	&operator=(ServerManager const& serverManager) {(void)serverManager; return *this;}$/;"	f	class:ServerManager
 operator =	Server_template.hpp	/^Server<IoEventHandler>::operator=(const Server& server)$/;"	f	class:Server
-operator =	cgi/cgi.cpp	/^Cgi&	Cgi::operator=(Cgi const& cgi)$/;"	f	class:Cgi
+operator =	cgi/Cgi.cpp	/^Cgi&	Cgi::operator=(Cgi const& cgi)$/;"	f	class:Cgi
 operator =	exception/ConfigParserException.cpp	/^ConfigParser::ConfigParserException::operator=(ConfigParserException const& configParserException)$/;"	f	class:ConfigParser::ConfigParserException
 operator =	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::operator=(const HttpErrorHandler& httpErrorHandler)$/;"	f	class:HttpErrorHandler
 operator =	http/Request.cpp	/^Request::operator=(const Request& request)$/;"	f	class:Request
@@ -525,7 +525,7 @@ writeSocket	communicator/Communicator.cpp	/^Communicator::writeSocket(int fd)$/;
 writeSocket	socket/ClientSocket.cpp	/^ClientSocket::writeSocket()$/;"	f	class:ClientSocket
 ~AParser	parser/AParser.hpp	/^	virtual ~AParser() {};$/;"	f	class:AParser
 ~ASocket	socket/ASocket.hpp	/^	virtual ~ASocket() {};$/;"	f	class:ASocket
-~Cgi	cgi/cgi.cpp	/^Cgi::~Cgi()$/;"	f	class:Cgi
+~Cgi	cgi/Cgi.cpp	/^Cgi::~Cgi()$/;"	f	class:Cgi
 ~Client	Client.cpp	/^Client::~Client()$/;"	f	class:Client
 ~ClientSocket	socket/ClientSocket.cpp	/^ClientSocket::~ClientSocket()$/;"	f	class:ClientSocket
 ~Communicator	communicator/Communicator.cpp	/^Communicator::~Communicator()$/;"	f	class:Communicator

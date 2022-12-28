@@ -41,7 +41,7 @@ SocketStreamTokenizer::initBuffer(string::size_type start)
 	m_start = start;
 	m_cur = m_start;
 	m_end = m_start + pos + 2;
-	return true; 
+	return true;
 }
 
 const std::string&
