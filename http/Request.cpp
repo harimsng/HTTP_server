@@ -52,10 +52,11 @@ Request::receiveRawData(int eventInfo)
 	int			count = 0;
 	std::size_t	residue = m_buffer.size();
 
-	m_buffer.resize(m_buffer.capacity());
+	(void)eventInfo;
+	// read data from the socket to make zero-terminated buffer.
+	m_buffer.resize(m_buffer.capacity(), 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
 			m_buffer.size() - residue - 1);
 	m_buffer.resize(residue + count + 1, 0);
-	(void)eventInfo;
 	return count;
 }
