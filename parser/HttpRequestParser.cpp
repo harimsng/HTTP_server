@@ -75,6 +75,7 @@ HttpRequestParser::readStatusLine(Request& request)
 {
 	const string&	line = m_tokenizer.getline();
 
+	(void)line;
 	(void)request;
 }
 

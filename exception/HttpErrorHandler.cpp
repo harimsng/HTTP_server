@@ -2,7 +2,7 @@
 
 #include "HttpErrorHandler.hpp"
 
-std::string	HttpErrorHandler::s_errorMessageTable[1024] = {0, };
+std::string	HttpErrorHandler::s_errorMessageTable[1024] = {"", };
 
 void	HttpErrorHandler::setErrorMessageTable()
 {

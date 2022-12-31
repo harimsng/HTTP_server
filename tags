@@ -469,7 +469,7 @@ s_bufferSize	test/Connection.hpp	/^	static std::size_t const	s_bufferSize = 1024
 s_defaultPort	Server.hpp	/^	static const int		s_defaultPort = 8000;$/;"	m	class:Server
 s_eot	tokenizer/FileTokenizer.cpp	/^const std::string	FileTokenizer::s_eot = "";$/;"	m	class:FileTokenizer	file:
 s_eot	tokenizer/FileTokenizer.hpp	/^	static const std::string	s_eot;$/;"	m	class:FileTokenizer
-s_errorMessageTable	exception/HttpErrorHandler.cpp	/^std::string	HttpErrorHandler::s_errorMessageTable[1024] = {0, };$/;"	m	class:HttpErrorHandler	file:
+s_errorMessageTable	exception/HttpErrorHandler.cpp	/^std::string	HttpErrorHandler::s_errorMessageTable[1024] = {"", };$/;"	m	class:HttpErrorHandler	file:
 s_errorMessageTable	exception/HttpErrorHandler.hpp	/^	static std::string			s_errorMessageTable[1024];$/;"	m	class:HttpErrorHandler
 s_eventObjectMap	ServerManager.hpp	/^	static std::map<int, EventObject>		s_eventObjectMap;$/;"	m	class:ServerManager
 s_eventObjectMap	ServerManager.hpp	/^std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventObjectMap;$/;"	m	class:ServerManager
