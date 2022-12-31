@@ -3,6 +3,9 @@
 
 using namespace	std;
 
+// for test
+#include <iostream>
+
 // deleted
 HttpStreamTokenizer::HttpStreamTokenizer(const HttpStreamTokenizer& tokenizer)
 {
@@ -42,7 +45,8 @@ HttpStreamTokenizer::updateBufferForHeader()
 	if (m_cur > m_start)
 		m_start = m_cur;
 
-	pos = m_buffer->rfind("\r\n", m_start);
+	pos = m_buffer->rfind("\r\n");
+	cout << pos << endl;
 	if (pos == string::npos)
 	{
 		if (m_buffer->size() == m_buffer->capacity())
