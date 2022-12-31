@@ -7,7 +7,8 @@ struct	IoMultiplexEnum
 	{
 		NORMAL = 1,
 		END = 2,
-		STAT_ERROR = 3
+		STAT_ERROR = 3,
+		NON_BLOCK = 4
 	};
 
 	enum	e_operation

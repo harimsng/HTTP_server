@@ -2,6 +2,9 @@
 #include "http/Request.hpp"
 #include "parser/HttpRequestParser.hpp"
 
+// for test
+#include "Logger.hpp"
+
 using namespace std;
 
 // deleted
@@ -77,11 +80,14 @@ HttpRequestParser::readStatusLine(Request& request)
 
 	(void)line;
 	(void)request;
+	// parse status line
+	// check uri and find location block
 }
 
 void
 HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
+	// parse header field to key and value
 	(void)headerFieldsMap;
 }
 

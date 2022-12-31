@@ -147,6 +147,7 @@ MESSAGE_BODY	parser/HttpRequestParser.hpp	/^		MESSAGE_BODY,$/;"	e	enum:HttpReque
 MODIFY	io/IIoMultiplex.hpp	/^		MODIFY = 3,$/;"	e	enum:IoMultiplexEnum::e_operation
 MaxFd	test/general_socket_tests.cpp	/^struct	MaxFd$/;"	s	file:
 NAME	Makefile	/^NAME		=	webserv$/;"	m
+NON_BLOCK	io/IIoMultiplex.hpp	/^		NON_BLOCK = 4$/;"	e	enum:IoMultiplexEnum::e_eventStatus
 NORMAL	io/IIoMultiplex.hpp	/^		NORMAL = 1,$/;"	e	enum:IoMultiplexEnum::e_eventStatus
 OBJ	Makefile	/^OBJ			:=	$(SRC:%.cpp=%.o)$/;"	m
 OBJ	test/Makefile	/^OBJ	=	$(SRC:%.cpp=%.o)$/;"	m
@@ -157,6 +158,7 @@ READ	io/IIoMultiplex.hpp	/^		READ = 0x1,$/;"	e	enum:IoMultiplexEnum::e_filters
 REQUEST_BODY	communicator/Request.hpp	/^		REQUEST_BODY,$/;"	e	enum:Request::requestSection
 REQUEST_BUFFER_SIZE	http/Request.cpp	/^#define REQUEST_BUFFER_SIZE /;"	d	file:
 REQUEST_END	communicator/Request.hpp	/^		REQUEST_END$/;"	e	enum:Request::requestSection
+REQUEST_EOF	http/Request.cpp	/^#define REQUEST_EOF /;"	d	file:
 REQUEST_HEADER	communicator/Request.hpp	/^		REQUEST_HEADER,$/;"	e	enum:Request::requestSection
 REQUEST_HEADER_END	communicator/Request.hpp	/^		REQUEST_HEADER_END,$/;"	e	enum:Request::requestSection
 REQUEST_HPP	communicator/Request.hpp	/^#define REQUEST_HPP$/;"	d
@@ -187,7 +189,7 @@ SOCKETTYPES_HPP	socket_/SocketTypes.hpp	/^#define SOCKETTYPES_HPP$/;"	d
 SOCKET_HPP	socket_/Socket.hpp	/^#define SOCKET_HPP$/;"	d
 SRC	Makefile	/^SRC			=	main.cpp\\$/;"	m
 SRC	test/Makefile	/^SRC	=	syscall_test\/test.cpp$/;"	m
-STAT_ERROR	io/IIoMultiplex.hpp	/^		STAT_ERROR = 3$/;"	e	enum:IoMultiplexEnum::e_eventStatus
+STAT_ERROR	io/IIoMultiplex.hpp	/^		STAT_ERROR = 3,$/;"	e	enum:IoMultiplexEnum::e_eventStatus
 Server	Server.cpp	/^Server::Server()$/;"	f	class:Server
 Server	Server.cpp	/^Server::Server(Server const& server)$/;"	f	class:Server
 Server	Server.hpp	/^class	Server$/;"	c
@@ -352,6 +354,7 @@ m_requestBuffer	socket/ClientSocket.hpp	/^	std::string		m_requestBuffer;$/;"	m	c
 m_requestHeader	communicator/Communicator.hpp	/^	requestHeaderMap		m_requestHeader;$/;"	m	class:Communicator
 m_requestHeaderMap	communicator/Request.hpp	/^	requestHeaderMap	m_requestHeaderMap;$/;"	m	class:Request
 m_requestSection	communicator/Request.hpp	/^	int					m_requestSection;$/;"	m	class:Request
+m_residue	http/Request.hpp	/^	int					m_residue;$/;"	m	class:Request
 m_response	Client.hpp	/^	Response		m_response;$/;"	m	class:Client
 m_response	communicator/Communicator.hpp	/^	Response				m_response;$/;"	m	class:Communicator
 m_response	socket/ClientSocket.hpp	/^	Response		m_response;$/;"	m	class:ClientSocket

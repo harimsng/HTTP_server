@@ -52,7 +52,7 @@ HttpStreamTokenizer::updateBufferForHeader()
 	}
 	m_cur = m_start;
 	m_end = m_start + pos + 2;
-	return m_end; 
+	return m_end;
 }
 
 string::size_type

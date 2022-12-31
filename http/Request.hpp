@@ -46,6 +46,7 @@ private:
 	const Socket<Tcp>*	m_socket;
 	std::string			m_buffer;
 	HttpRequestParser	m_parser;
+	int					m_residue;
 
 	int					m_method;
 	std::string			m_target;

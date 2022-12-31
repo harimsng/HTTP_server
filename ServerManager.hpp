@@ -140,7 +140,6 @@ ServerManager<IoEventPoller>::processEvents(const EventList& events)
 		const EventData&	event = events[i];
 		EventObject&		eventObject = s_eventObjectMap[event.getFd()];
 
-		cout << eventObject.type << endl;
 		switch (eventObject.type)
 		{
 			case EventObject::SERVER:
@@ -185,7 +184,7 @@ template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
 {
-	EventObject			et;
+	EventObject	et;
 
 	et.type = type;
 	switch (type)
