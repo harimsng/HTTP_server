@@ -14,6 +14,8 @@
 
 #define EVENT_SIZE 8
 
+using namespace std;
+
 template <typename IoEventPoller>
 class	ServerManager;
 

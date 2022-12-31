@@ -6,6 +6,8 @@
 Kqueue::Kqueue()
 {
 	m_kqueue = kqueue();
+	m_registeredEventSize = 8;
+	m_eventList.resize(m_registeredEventSize);
 	if (m_kqueue < 0)
 		throw std::runtime_error("kqueue() fail");
 }
@@ -70,11 +72,11 @@ const Kqueue::EventList&
 Kqueue::poll()
 {
 	int						count = 0;
-	static const timespec	timeSpec = {0, 0};
+	// static const timespec	timeSpec = {0, 0};
 
-	m_eventList.resize(m_registeredEventSize);
+	// m_eventList.resize(m_registeredEventSize);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
-				   m_changeList.data(), m_changeList.size(), &timeSpec);
+				   m_eventList.data(), m_eventList.size(), 0);
 	m_changeList.clear();
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
