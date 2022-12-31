@@ -31,44 +31,51 @@ HttpRequestParser::~HttpRequestParser()
 void
 HttpRequestParser::parse(Request& request)
 {
-	std::size_t	pos;
+	string::size_type	pos;
 
-	(void)pos;
-	if (m_tokenizer.initBuffer() == false)
-		throw HttpErrorHandler(501);
-
+	pos = updateBuffer();
+	if (pos == string::npos)
+		return;
 	while (m_tokenizer.empty() == false)
 	{
 		switch (m_readStatus)
 		{
 			case REQUEST_LINE:
 				readStatusLine(request);
+				break;
 			case HEADER_FIELDS:
+				readHeaderFields(request.m_headerFieldsMap);
 				break;
 			case MESSAGE_BODY:
+				// normal transfer or chunked
+				readMessageBody();
 				break;
 			case FINISHED:
+				// trailer section is not implemented
+				throw HttpErrorHandler(501);
 				break;
 			default:
 				throw std::logic_error("unhandled read status in \
-HttpRequestParser::preprocess()");
+HttpRequestParser::parse()");
 		}
 	}
+}
+
+string::size_type
+HttpRequestParser::updateBuffer()
+{
+	if (m_readStatus < MESSAGE_BODY)
+		return m_tokenizer.updateBufferForHeader();
+	else
+	 	return m_tokenizer.updateBufferForBody();
 }
 
 void
 HttpRequestParser::readStatusLine(Request& request)
 {
-	(void)request;
-	while (m_tokenizer.getc() != '\n')
-	{
-	}
+	const string&	line = m_tokenizer.getline();
 
-	// int spacePos;
-	// string token = m_tokenizer.get();
-    //
-	// spacePos = token.find(" ", 0);
-	// token.substr(0, spacePos);
+	(void)request;
 }
 
 void
@@ -86,21 +93,4 @@ HttpRequestParser::e_readStatus
 HttpRequestParser::getReadStatus() const
 {
     return m_readStatus;
-}
-
-string::size_type
-HttpRequestParser::checkBuffer(std::string* buffer)
-{
-	switch (m_readStatus)
-	{
-		case REQUEST_LINE:
-		case HEADER_FIELDS:
-			return buffer->find("\r\n");
-		case MESSAGE_BODY:
-			return buffer->size() - 1;
-		case FINISHED:
-			throw HttpErrorHandler(413);
-		default:
-			;
-	}
 }

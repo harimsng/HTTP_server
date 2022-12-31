@@ -97,6 +97,7 @@ HEAD	http/Request.hpp	/^		HEAD,$/;"	e	enum:Request::e_method
 HEADER_FIELDS	parser/HttpRequestParser.hpp	/^		HEADER_FIELDS,$/;"	e	enum:HttpRequestParser::e_readStatus
 HTTPERRORHANDLER_HPP	exception/HttpErrorHandler.hpp	/^#define HTTPERRORHANDLER_HPP$/;"	d
 HTTPREQUESTPARSER_HPP	parser/HttpRequestParser.hpp	/^#define HTTPREQUESTPARSER_HPP$/;"	d
+HTTPSTREAMTOKENIZER_HPP	tokenizer/HttpStreamTokenizer.hpp	/^#define HTTPSTREAMTOKENIZER_HPP$/;"	d
 HeaderFieldsMap	parser/HttpRequestParser.hpp	/^typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;$/;"	t
 HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::HttpErrorHandler(const HttpErrorHandler& httpErrorHandler)$/;"	f	class:HttpErrorHandler
 HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::HttpErrorHandler(int errorCode)$/;"	f	class:HttpErrorHandler
@@ -104,6 +105,9 @@ HttpErrorHandler	exception/HttpErrorHandler.hpp	/^class	HttpErrorHandler$/;"	c
 HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)$/;"	f	class:HttpRequestParser
 HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::HttpRequestParser(std::string& buffer)$/;"	f	class:HttpRequestParser
 HttpRequestParser	parser/HttpRequestParser.hpp	/^class	HttpRequestParser$/;"	c
+HttpStreamTokenizer	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::HttpStreamTokenizer()$/;"	f	class:HttpStreamTokenizer
+HttpStreamTokenizer	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::HttpStreamTokenizer(const HttpStreamTokenizer& tokenizer)$/;"	f	class:HttpStreamTokenizer
+HttpStreamTokenizer	tokenizer/HttpStreamTokenizer.hpp	/^class	HttpStreamTokenizer: public ITokenizer$/;"	c
 IIOMULTIPLEX_HPP	io/IIoMultiplex.hpp	/^#define IIOMULTIPLEX_HPP$/;"	d
 IIoMultiplex	io/IIoMultiplex.hpp	/^	IIoMultiplex() {};$/;"	f	class:IIoMultiplex
 IIoMultiplex	io/IIoMultiplex.hpp	/^class	IIoMultiplex: public IoMultiplexEnum$/;"	c
@@ -179,7 +183,6 @@ SERVERPARSER_HPP	parser/ServerParser.hpp	/^#define SERVERPARSER_HPP$/;"	d
 SERVER_HPP	Server.hpp	/^#define SERVER_HPP$/;"	d
 SERVER_HPP	Server_template.hpp	/^#define SERVER_HPP$/;"	d
 SERVER_HPP	test/Server.hpp	/^#define SERVER_HPP$/;"	d
-SOCKETSTREAMTOKENIZER_HPP	tokenizer/SocketStreamTokenizer.hpp	/^#define SOCKETSTREAMTOKENIZER_HPP$/;"	d
 SOCKETTYPES_HPP	socket_/SocketTypes.hpp	/^#define SOCKETTYPES_HPP$/;"	d
 SOCKET_HPP	socket_/Socket.hpp	/^#define SOCKET_HPP$/;"	d
 SRC	Makefile	/^SRC			=	main.cpp\\$/;"	m
@@ -210,7 +213,6 @@ Socket	socket_/Socket.hpp	/^Socket<SocketType>::Socket(int fd, const socketAddr*
 Socket	socket_/Socket.hpp	/^class	Socket$/;"	c
 SocketStreamTokenizer	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::SocketStreamTokenizer()$/;"	f	class:SocketStreamTokenizer
 SocketStreamTokenizer	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::SocketStreamTokenizer(const SocketStreamTokenizer& tokenizer)$/;"	f	class:SocketStreamTokenizer
-SocketStreamTokenizer	tokenizer/SocketStreamTokenizer.hpp	/^class	SocketStreamTokenizer: public ITokenizer$/;"	c
 Tcp	socket_/SocketTypes.hpp	/^struct	Tcp$/;"	s
 Util	util/Util.hpp	/^class Util$/;"	c
 Util_hpp	util/Util.hpp	/^#define Util_hpp$/;"	d
@@ -225,7 +227,6 @@ addNewServer	test/ServerManager.cpp	/^void	ServerManager::addNewServer()$/;"	f	c
 addServer	test/ServerManager.cpp	/^void	ServerManager::addServer(Server const& server)$/;"	f	class:ServerManager
 bind	socket_/Socket.hpp	/^Socket<SocketType>::bind(socketAddr* addr) throw()$/;"	f	class:Socket
 bindSocket	socket/ServerSocket.cpp	/^ServerSocket::bindSocket()$/;"	f	class:ServerSocket
-checkBuffer	parser/HttpRequestParser.cpp	/^HttpRequestParser::checkBuffer(std::string* buffer)$/;"	f	class:HttpRequestParser
 checkFileStat	parser/ConfigParser.cpp	/^ConfigParser::checkFileStat(const char* path)$/;"	f	class:ConfigParser
 checkUri	socket/ClientSocket.cpp	/^ClientSocket::checkUri(Server& server)$/;"	f	class:ClientSocket
 connect	socket_/Socket.hpp	/^Socket<SocketType>::connect(socketAddr* addr) throw()$/;"	f	class:Socket
@@ -244,8 +245,10 @@ e_type	Server.hpp	/^	enum	e_type$/;"	g	struct:EventObject
 e_types	Logger.hpp	/^	enum	e_types$/;"	g	class:Logger
 eat	tokenizer/FileTokenizer.cpp	/^FileTokenizer::eat(const string& target)$/;"	f	class:FileTokenizer
 empty	tokenizer/FileTokenizer.cpp	/^FileTokenizer::empty() const$/;"	f	class:FileTokenizer
+empty	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::empty() const$/;"	f	class:HttpStreamTokenizer
 empty	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::empty() const$/;"	f	class:SocketStreamTokenizer
 get	tokenizer/FileTokenizer.cpp	/^FileTokenizer::get()$/;"	f	class:FileTokenizer
+get	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::get()$/;"	f	class:HttpStreamTokenizer
 get	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::get()$/;"	f	class:SocketStreamTokenizer
 getAddressString	socket_/Socket.hpp	/^Socket<SocketType>::getAddressString() const throw()$/;"	f	class:Socket
 getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
@@ -262,7 +265,9 @@ getReadStatus	parser/HttpRequestParser.cpp	/^HttpRequestParser::getReadStatus() 
 getRequestSection	communicator/Request.cpp	/^Request::getRequestSection()$/;"	f	class:Request
 getStatusMessage	communicator/Response.cpp	/^Response::getStatusMessage(int statusCode)$/;"	f	class:Response
 getaddrinfo_wrapper	test/getaddrinfo_test.c	/^void	getaddrinfo_wrapper(const char *hostname, const char *service)$/;"	f
+getc	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::getc()$/;"	f	class:HttpStreamTokenizer
 getc	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::getc()$/;"	f	class:SocketStreamTokenizer
+getline	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::getline()$/;"	f	class:HttpStreamTokenizer
 handleEvent	Client.hpp	/^Client::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Client
 handleEvent	Server.hpp	/^Server::handleEvent(const typename IoEventPoller::EventData& event)$/;"	f	class:Server
 handleEvent	Server_template.hpp	/^Server<IoEventHandler>::handleEvent(const EventData& event)$/;"	f	class:Server
@@ -271,6 +276,7 @@ init	parser/ConfigParser.cpp	/^ConfigParser::init(string configPath)$/;"	f	class
 init	test/FdManager.cpp	/^void	FdManager::init()$/;"	f	class:FdManager
 init	test/Server.cpp	/^void	Server::init()$/;"	f	class:Server
 init	tokenizer/FileTokenizer.cpp	/^FileTokenizer::init(const string path)$/;"	f	class:FileTokenizer
+init	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::init(string& buffer)$/;"	f	class:HttpStreamTokenizer
 init	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::init(string& buffer)$/;"	f	class:SocketStreamTokenizer
 initAddr	socket/ServerSocket.cpp	/^ServerSocket::initAddr(const sockaddr_in& sockaddrInet)$/;"	f	class:ServerSocket
 initBuffer	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::initBuffer(string::size_type start)$/;"	f	class:SocketStreamTokenizer
@@ -283,17 +289,18 @@ listenSocket	socket/ServerSocket.cpp	/^ServerSocket::listenSocket()$/;"	f	class:
 log	Logger.cpp	/^Logger::log(e_types type, const char* format, ...)$/;"	f	class:Logger
 log	Logger.hpp	/^Logger::log(e_types type, const T& object)$/;"	f	class:Logger
 m_addr	socket_/Socket.hpp	/^	socketAddr	m_addr;$/;"	m	class:Socket
+m_aheadToken	tokenizer/HttpStreamTokenizer.hpp	/^	std::string		m_aheadToken;$/;"	m	class:HttpStreamTokenizer
 m_alias	Location.hpp	/^	std::string		m_alias;$/;"	m	class:Location
 m_buffer	http/Request.hpp	/^	std::string			m_buffer;$/;"	m	class:Request
-m_buffer	tokenizer/SocketStreamTokenizer.hpp	/^	std::string*	m_buffer;$/;"	m	class:SocketStreamTokenizer
+m_buffer	tokenizer/HttpStreamTokenizer.hpp	/^	std::string*	m_buffer;$/;"	m	class:HttpStreamTokenizer
 m_cgiPass	Location.hpp	/^	std::string		m_cgiPass;$/;"	m	class:Location
 m_changeList	io/Kqueue.hpp	/^	std::vector<Kevent>	m_changeList;$/;"	m	class:Kqueue
 m_clientMaxBodySize	Location.hpp	/^	std::string		m_clientMaxBodySize;$/;"	m	class:Location
 m_clientMaxBodySize	Server.hpp	/^	int32_t						m_clientMaxBodySize;$/;"	m	class:Server
 m_clientMaxBodySize	Server_template.hpp	/^	int32_t						m_clientMaxBodySize;$/;"	m	class:Server
 m_connectionVec	test/Server.hpp	/^	std::vector<std::pair<int, Connection>>	m_connectionVec;$/;"	m	class:Server
-m_cur	tokenizer/SocketStreamTokenizer.hpp	/^	std::string::size_type	m_cur;$/;"	m	class:SocketStreamTokenizer
-m_end	tokenizer/SocketStreamTokenizer.hpp	/^	std::string::size_type	m_end;$/;"	m	class:SocketStreamTokenizer
+m_cur	tokenizer/HttpStreamTokenizer.hpp	/^	std::string::size_type	m_cur;$/;"	m	class:HttpStreamTokenizer
+m_end	tokenizer/HttpStreamTokenizer.hpp	/^	std::string::size_type	m_end;$/;"	m	class:HttpStreamTokenizer
 m_errorCode	Server.hpp	/^	std::string					m_errorCode;$/;"	m	class:Server
 m_errorCode	Server_template.hpp	/^	std::string					m_errorCode;$/;"	m	class:Server
 m_errorMessage	exception/HttpErrorHandler.hpp	/^	std::string	m_errorMessage;$/;"	m	class:HttpErrorHandler
@@ -332,7 +339,6 @@ m_path	Location.hpp	/^	std::string		m_path;$/;"	m	class:Location
 m_pos	test/Connection.hpp	/^	std::size_t		m_pos;$/;"	m	class:Connection
 m_preBufferSize	communicator/Communicator.hpp	/^	int						m_preBufferSize;$/;"	m	class:Communicator
 m_preBufferSize	communicator/Request.hpp	/^	int					m_preBufferSize;$/;"	m	class:Request
-m_prevToken	tokenizer/SocketStreamTokenizer.hpp	/^	std::string		m_prevToken;$/;"	m	class:SocketStreamTokenizer
 m_protocol	http/Request.hpp	/^	std::string			m_protocol;$/;"	m	class:Request
 m_proxyPass	Location.hpp	/^	std::string		m_proxyPass;$/;"	m	class:Location
 m_readSet	test/FdManager.hpp	/^	fd_set		m_readSet;$/;"	m	class:FdManager
@@ -368,9 +374,9 @@ m_socket	test/Connection.hpp	/^	int const		m_socket;$/;"	m	class:Connection
 m_socketAddr	socket/ASocket.hpp	/^	struct sockaddr_in	m_socketAddr;$/;"	m	class:ASocket	typeref:struct:ASocket::sockaddr_in
 m_socketAddrSize	socket/ASocket.hpp	/^	socklen_t			m_socketAddrSize;$/;"	m	class:ASocket
 m_socketFd	socket/ASocket.hpp	/^	int					m_socketFd;$/;"	m	class:ASocket
-m_start	tokenizer/SocketStreamTokenizer.hpp	/^	std::string::size_type	m_start;$/;"	m	class:SocketStreamTokenizer
+m_start	tokenizer/HttpStreamTokenizer.hpp	/^	std::string::size_type	m_start;$/;"	m	class:HttpStreamTokenizer
 m_target	http/Request.hpp	/^	std::string			m_target;$/;"	m	class:Request
-m_token	tokenizer/SocketStreamTokenizer.hpp	/^	std::string		m_token;$/;"	m	class:SocketStreamTokenizer
+m_token	tokenizer/HttpStreamTokenizer.hpp	/^	std::string		m_token;$/;"	m	class:HttpStreamTokenizer
 m_tokenArr	tokenizer/FileTokenizer.hpp	/^	std::vector<t_tokenInfo>	m_tokenArr;$/;"	m	class:FileTokenizer
 m_tokenizer	parser/AParser.hpp	/^	Tokenizer	m_tokenizer;$/;"	m	class:AParser
 m_tokenizer	parser/LocationParser.hpp	/^	FileTokenizer&		m_tokenizer;$/;"	m	class:LocationParser
@@ -418,6 +424,7 @@ operator =	socket_/Socket.hpp	/^	Socket	&operator=(const Socket& socket) {(void)
 operator =	test/Connection.cpp	/^Connection&	Connection::operator=(Connection const& connection)$/;"	f	class:Connection
 operator =	test/FdManager.cpp	/^FdManager&	FdManager::operator=(FdManager const& fdManager)$/;"	f	class:FdManager
 operator =	test/Server.cpp	/^Server&	Server::operator=(Server const& server)$/;"	f	class:Server
+operator =	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::operator=(const HttpStreamTokenizer& tokenizer)$/;"	f	class:HttpStreamTokenizer
 operator =	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::operator=(const SocketStreamTokenizer& tokenizer)$/;"	f	class:SocketStreamTokenizer
 parse	ServerManager.hpp	/^ServerManager<IoEventPoller>::parse(const char* path) try$/;"	f	class:ServerManager
 parse	parser/ConfigParser.cpp	/^ConfigParser::parse(vector<Server>& servers) try$/;"	f	class:ConfigParser
@@ -428,6 +435,7 @@ parseArgument	util/Util.cpp	/^Util::parseArgument(int argc, char **argv)$/;"	f	c
 parseLocation	parser/ServerParser.cpp	/^ServerParser::parseLocation(Server& server)$/;"	f	class:ServerParser
 parseServer	parser/ConfigParser.cpp	/^ConfigParser::parseServer(vector<Server>& servers)$/;"	f	class:ConfigParser
 peek	tokenizer/FileTokenizer.cpp	/^FileTokenizer::peek()$/;"	f	class:FileTokenizer
+peek	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::peek()$/;"	f	class:HttpStreamTokenizer
 peek	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::peek()$/;"	f	class:SocketStreamTokenizer
 poll	io/Kqueue.cpp	/^Kqueue::poll()$/;"	f	class:Kqueue
 postMethod	method/postMethod.hpp	/^class postMethod$/;"	c
@@ -517,6 +525,9 @@ toString	parser/ConfigParser.cpp	/^ConfigParser::toString(int num)$/;"	f	class:C
 tokenize	tokenizer/FileTokenizer.cpp	/^FileTokenizer::tokenize(const std::string& chunk, int lineNumber)$/;"	f	class:FileTokenizer
 type	Server.hpp	/^	e_type	type;$/;"	m	struct:EventObject
 type	socket_/SocketTypes.hpp	/^	static const int		type = SOCK_STREAM;$/;"	m	struct:Tcp
+updateBuffer	parser/HttpRequestParser.cpp	/^HttpRequestParser::updateBuffer()$/;"	f	class:HttpRequestParser
+updateBufferForBody	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::updateBufferForBody()$/;"	f	class:HttpStreamTokenizer
+updateBufferForHeader	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::updateBufferForHeader()$/;"	f	class:HttpStreamTokenizer
 what	exception/ConfigParserException.cpp	/^ConfigParser::ConfigParserException::what() const throw()$/;"	f	class:ConfigParser::ConfigParserException
 what	exception/FileTokenizerException.hpp	/^	virtual const char*	what() const throw()$/;"	f	class:FileTokenizer::FileTokenizerException
 writeData	test/Connection.cpp	/^int	Connection::writeData()$/;"	f	class:Connection
@@ -538,6 +549,7 @@ writeSocket	socket/ClientSocket.cpp	/^ClientSocket::writeSocket()$/;"	f	class:Cl
 ~FileTokenizerException	exception/FileTokenizerException.hpp	/^	virtual ~FileTokenizerException() throw() {};$/;"	f	class:FileTokenizer::FileTokenizerException
 ~HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::~HttpErrorHandler()$/;"	f	class:HttpErrorHandler
 ~HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::~HttpRequestParser()$/;"	f	class:HttpRequestParser
+~HttpStreamTokenizer	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::~HttpStreamTokenizer()$/;"	f	class:HttpStreamTokenizer
 ~IIoMultiplex	io/IIoMultiplex.hpp	/^	virtual ~IIoMultiplex() {};$/;"	f	class:IIoMultiplex
 ~IRequest	test/IRequest.hpp	/^	virtual ~IRequest() {};$/;"	f	class:IRequest
 ~IResponse	test/IResponse.hpp	/^	virtual ~IResponse() {};$/;"	f	class:IResponse

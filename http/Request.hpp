@@ -9,7 +9,7 @@
 #include "socket_/Socket.hpp"
 
 /*
- * RFC 9112 HTTP/1.1
+ * reference: RFC 9112 HTTP/1.1
  */
 class	Request
 {

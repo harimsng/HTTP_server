@@ -17,7 +17,7 @@ SRC			=	main.cpp\
 				parser/ServerParser.cpp\
 				parser/HttpRequestParser.cpp\
 \
-				tokenizer/SocketStreamTokenizer.cpp\
+				tokenizer/HttpStreamTokenizer.cpp\
 				tokenizer/FileTokenizer.cpp\
 \
 				exception/ConfigParserException.cpp\
