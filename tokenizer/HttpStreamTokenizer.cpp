@@ -46,7 +46,6 @@ HttpStreamTokenizer::updateBufferForHeader()
 		m_start = m_cur;
 
 	pos = m_buffer->rfind("\r\n");
-	cout << pos << endl;
 	if (pos == string::npos)
 	{
 		if (m_buffer->size() == m_buffer->capacity())
@@ -79,13 +78,13 @@ HttpStreamTokenizer::peek()
 	return m_aheadToken;
 }
 
-/*
+/* NOTE
  * this method is supposed to return token,
  * but it's not the one defined in http rfc.
  * @return a line terminated with \r\n.
  */
 const std::string&
-HttpStreamTokenizer::get()
+HttpStreamTokenizer::get()//line()?
 {
 	string::size_type	pos = m_buffer->find("\r\n", m_cur);
 	string::size_type	temp;
@@ -123,3 +122,4 @@ HttpStreamTokenizer::empty() const
 {
 	return m_cur >= m_end;
 }
+

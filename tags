@@ -4,6 +4,10 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+A	test/buffer_resize_pointer.cpp	/^	A(){$/;"	f	class:A
+A	test/buffer_resize_pointer.cpp	/^class A{$/;"	c	file:
+A	test/buffer_resize_reference.cpp	/^	A(){$/;"	f	class:A
+A	test/buffer_resize_reference.cpp	/^class A{$/;"	c	file:
 ADD	io/IIoMultiplex.hpp	/^		ADD = 1,$/;"	e	enum:IoMultiplexEnum::e_operation
 ALLOC_SIZE	ServerManager.hpp	/^#define ALLOC_SIZE /;"	d
 AMethod	method/AMethod.hpp	/^class AMethod$/;"	c
@@ -14,6 +18,10 @@ AParser	parser/AParser.hpp	/^class	AParser$/;"	c
 ASocket	socket/ASocket.hpp	/^	ASocket() {};$/;"	f	class:ASocket
 ASocket	socket/ASocket.hpp	/^class ASocket$/;"	c
 ASocket_hpp	socket/ASocket.hpp	/^#define ASocket_hpp$/;"	d
+B	test/buffer_resize_pointer.cpp	/^		B(string& buffer) : buffer(&buffer)$/;"	f	class:B
+B	test/buffer_resize_pointer.cpp	/^class B$/;"	c	file:
+B	test/buffer_resize_reference.cpp	/^		B(string& buffer) : buffer(&buffer)$/;"	f	class:B
+B	test/buffer_resize_reference.cpp	/^class B$/;"	c	file:
 BACKLOG	socket/ServerSocket.cpp	/^#define BACKLOG /;"	d	file:
 BUFFER_SIZE	Client.cpp	/^#define BUFFER_SIZE /;"	d	file:
 CGI	Server.hpp	/^		CGI = 3$/;"	e	enum:EventObject::e_type
@@ -229,7 +237,12 @@ addNewServer	test/ServerManager.cpp	/^void	ServerManager::addNewServer()$/;"	f	c
 addServer	test/ServerManager.cpp	/^void	ServerManager::addServer(Server const& server)$/;"	f	class:ServerManager
 bind	socket_/Socket.hpp	/^Socket<SocketType>::bind(socketAddr* addr) throw()$/;"	f	class:Socket
 bindSocket	socket/ServerSocket.cpp	/^ServerSocket::bindSocket()$/;"	f	class:ServerSocket
+buffer	test/buffer_resize_pointer.cpp	/^		string* buffer;$/;"	m	class:B	file:
+buffer	test/buffer_resize_pointer.cpp	/^	string buffer;$/;"	m	class:A	file:
+buffer	test/buffer_resize_reference.cpp	/^		string* buffer;$/;"	m	class:B	file:
+buffer	test/buffer_resize_reference.cpp	/^	string buffer;$/;"	m	class:A	file:
 checkFileStat	parser/ConfigParser.cpp	/^ConfigParser::checkFileStat(const char* path)$/;"	f	class:ConfigParser
+checkStatusLine	parser/HttpRequestParser.cpp	/^HttpRequestParser::checkStatusLine(Request &request)$/;"	f	class:HttpRequestParser
 checkUri	socket/ClientSocket.cpp	/^ClientSocket::checkUri(Server& server)$/;"	f	class:ClientSocket
 connect	socket_/Socket.hpp	/^Socket<SocketType>::connect(socketAddr* addr) throw()$/;"	f	class:Socket
 createEvent	io/Kqueue.cpp	/^Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags,$/;"	f	class:Kqueue
@@ -250,9 +263,11 @@ empty	tokenizer/FileTokenizer.cpp	/^FileTokenizer::empty() const$/;"	f	class:Fil
 empty	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::empty() const$/;"	f	class:HttpStreamTokenizer
 empty	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::empty() const$/;"	f	class:SocketStreamTokenizer
 get	tokenizer/FileTokenizer.cpp	/^FileTokenizer::get()$/;"	f	class:FileTokenizer
-get	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::get()$/;"	f	class:HttpStreamTokenizer
+get	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::get()\/\/line()?$/;"	f	class:HttpStreamTokenizer
 get	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::get()$/;"	f	class:SocketStreamTokenizer
 getAddressString	socket_/Socket.hpp	/^Socket<SocketType>::getAddressString() const throw()$/;"	f	class:Socket
+getBuffer	test/buffer_resize_pointer.cpp	/^	string& getBuffer(void)$/;"	f	class:A
+getBuffer	test/buffer_resize_reference.cpp	/^	string& getBuffer(void)$/;"	f	class:A
 getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
 getDate	util/Util.cpp	/^Util::getDate(const char* format)$/;"	f	class:Util
 getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog(const char* message)$/;"	f	class:FileTokenizer
@@ -390,6 +405,8 @@ m_uriBufferSize	Server.hpp	/^	int32_t						m_uriBufferSize;$/;"	m	class:Server
 m_uriBufferSize	Server_template.hpp	/^	int32_t						m_uriBufferSize;$/;"	m	class:Server
 m_writeSet	test/FdManager.hpp	/^	fd_set		m_writeSet;$/;"	m	class:FdManager
 main	main.cpp	/^int	main(int argc, char **argv, char **envp)$/;"	f
+main	test/buffer_resize_pointer.cpp	/^int main(void)$/;"	f
+main	test/buffer_resize_reference.cpp	/^int main(void)$/;"	f
 main	test/general_socket_tests.cpp	/^int	main()$/;"	f
 main	test/getaddrinfo_test.c	/^int	main()$/;"	f
 main	test/poll_test.cpp	/^int main()$/;"	f
@@ -408,6 +425,7 @@ operator <<	Location.cpp	/^ostream&	operator<<(std::ostream& os, const Location&
 operator <<	Server.cpp	/^operator<<(std::ostream& os, const Server& server)$/;"	f
 operator <<	ServerManager.hpp	/^std::ostream&	operator<<(std::ostream& os, const ServerManager<IoEventPoller>& manager)$/;"	f
 operator <<	Server_template.hpp	/^operator<<(std::ostream& os, const Server<IoEventHandler>& server)$/;"	f
+operator <<	http/Request.cpp	/^operator<<(std::ostream& os, const Request& request)$/;"	f
 operator =	Client.cpp	/^Client&	Client::operator=(Client const& client)$/;"	f	class:Client
 operator =	Location.cpp	/^Location&	Location::operator=(const Location& location)$/;"	f	class:Location
 operator =	Logger.cpp	/^Logger::operator=(Logger const& logger)$/;"	f	class:Logger
@@ -435,14 +453,20 @@ parse	parser/HttpRequestParser.cpp	/^HttpRequestParser::parse(Request& request)$
 parse	parser/LocationParser.cpp	/^LocationParser::parse(Location& location)$/;"	f	class:LocationParser
 parse	parser/ServerParser.cpp	/^ServerParser::parse(Server& server)$/;"	f	class:ServerParser
 parseArgument	util/Util.cpp	/^Util::parseArgument(int argc, char **argv)$/;"	f	class:Util
+parseHeaderFields	parser/HttpRequestParser.cpp	/^HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap,$/;"	f	class:HttpRequestParser
 parseLocation	parser/ServerParser.cpp	/^ServerParser::parseLocation(Server& server)$/;"	f	class:ServerParser
 parseServer	parser/ConfigParser.cpp	/^ConfigParser::parseServer(vector<Server>& servers)$/;"	f	class:ConfigParser
+parseStatusLine	parser/HttpRequestParser.cpp	/^HttpRequestParser::parseStatusLine(Request &request, const std::string &statusLine)$/;"	f	class:HttpRequestParser
 peek	tokenizer/FileTokenizer.cpp	/^FileTokenizer::peek()$/;"	f	class:FileTokenizer
 peek	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::peek()$/;"	f	class:HttpStreamTokenizer
 peek	tokenizer/SocketStreamTokenizer.cpp	/^SocketStreamTokenizer::peek()$/;"	f	class:SocketStreamTokenizer
 poll	io/Kqueue.cpp	/^Kqueue::poll()$/;"	f	class:Kqueue
 postMethod	method/postMethod.hpp	/^class postMethod$/;"	c
 postMethod_hpp	method/postMethod.hpp	/^#define postMethod_hpp$/;"	d
+printBuffer	test/buffer_resize_pointer.cpp	/^		void printBuffer(void)$/;"	f	class:B
+printBuffer	test/buffer_resize_pointer.cpp	/^	void	printBuffer(void)$/;"	f	class:A
+printBuffer	test/buffer_resize_reference.cpp	/^		void printBuffer(void)$/;"	f	class:B
+printBuffer	test/buffer_resize_reference.cpp	/^	void	printBuffer(void)$/;"	f	class:A
 printRequestMessage	communicator/Request.cpp	/^Request::printRequestMessage() const$/;"	f	class:Request
 printTokens	tokenizer/FileTokenizer.cpp	/^FileTokenizer::printTokens() const$/;"	f	class:FileTokenizer
 printTokensByLine	tokenizer/FileTokenizer.cpp	/^FileTokenizer::printTokensByLine() const$/;"	f	class:FileTokenizer
@@ -452,13 +476,13 @@ protocol	socket_/SocketTypes.hpp	/^	static const int		protocol = 0;$/;"	m	struct
 putMethod	method/putMethod.hpp	/^class putMethod$/;"	c
 putMethod_hpp	method/putMethod.hpp	/^#define putMethod_hpp$/;"	d
 readData	test/Connection.cpp	/^int	Connection::readData()$/;"	f	class:Connection
-readHeaderFields	parser/HttpRequestParser.cpp	/^HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)$/;"	f	class:HttpRequestParser
+readHeaderFields	parser/HttpRequestParser.cpp	/^HttpRequestParser::readHeaderFields(HeaderFieldsMap &headerFieldsMap)$/;"	f	class:HttpRequestParser
 readMessageBody	parser/HttpRequestParser.cpp	/^HttpRequestParser::readMessageBody()$/;"	f	class:HttpRequestParser
 readOperation	test/Server.cpp	/^void	Server::readOperation(fd_set* fdSet)$/;"	f	class:Server
 readRequest	communicator/Request.cpp	/^Request::readRequest(int eventInfo)$/;"	f	class:Request
 readRequestBody	communicator/Communicator.cpp	/^int	 Communicator::readRequestBody(std::string& requestMessageBuffer)$/;"	f	class:Communicator
 readSocket	socket/ClientSocket.cpp	/^ClientSocket::readSocket(int messageSize, Server& server)$/;"	f	class:ClientSocket
-readStatusLine	parser/HttpRequestParser.cpp	/^HttpRequestParser::readStatusLine(Request& request)$/;"	f	class:HttpRequestParser
+readStatusLine	parser/HttpRequestParser.cpp	/^HttpRequestParser::readStatusLine(Request &request)$/;"	f	class:HttpRequestParser
 receiveRawData	http/Request.cpp	/^Request::receiveRawData(int eventInfo)$/;"	f	class:Request
 receiveRequest	http/Request.cpp	/^Request::receiveRequest(int eventInfo)$/;"	f	class:Request
 receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
@@ -467,6 +491,10 @@ removeEventObject	ServerManager.hpp	/^ServerManager<IoEventPoller>::removeEventO
 requestHeaderMap	communicator/Communicator.hpp	/^	typedef Request::requestHeaderMap requestHeaderMap;$/;"	t	class:Communicator
 requestHeaderMap	communicator/Request.hpp	/^	typedef std::map<std::string, std::vector<std::string> > requestHeaderMap;$/;"	t	class:Request
 requestSection	communicator/Request.hpp	/^	enum requestSection$/;"	g	class:Request
+resize	test/buffer_resize_pointer.cpp	/^		void resize(void)$/;"	f	class:B
+resize	test/buffer_resize_pointer.cpp	/^	void resize(void)$/;"	f	class:A
+resize	test/buffer_resize_reference.cpp	/^		void resize(void)$/;"	f	class:B
+resize	test/buffer_resize_reference.cpp	/^	void resize(void)$/;"	f	class:A
 run	ServerManager.hpp	/^ServerManager<IoEventPoller>::run() try$/;"	f	class:ServerManager
 s_bufferSize	test/Connection.hpp	/^	static std::size_t const	s_bufferSize = 1024;$/;"	m	class:Connection::std
 s_defaultPort	Server.hpp	/^	static const int		s_defaultPort = 8000;$/;"	m	class:Server

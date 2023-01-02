@@ -7,6 +7,7 @@
 
 #include "parser/HttpRequestParser.hpp"
 #include "socket_/Socket.hpp"
+#include "Location.hpp"
 
 /*
  * reference: RFC 9112 HTTP/1.1
@@ -37,6 +38,8 @@ public:
 	Request(const Socket<Tcp>& socket);
 	~Request();
 
+	friend std::ostream&	operator<<(std::ostream& os, const Request& reqeust);
+
 // member functions
 	int		receiveRequest(int eventInfo);
 private:
@@ -52,6 +55,7 @@ private:
 	std::string			m_target;
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
+	// Location			m_location;
 };
 
 #endif

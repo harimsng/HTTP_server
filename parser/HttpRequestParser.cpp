@@ -73,22 +73,108 @@ HttpRequestParser::updateBuffer()
 	 	return m_tokenizer.updateBufferForBody();
 }
 
-void
-HttpRequestParser::readStatusLine(Request& request)
-{
-	const string&	line = m_tokenizer.getline();
+// void
+// HttpRequestParser::readStatusLine(Request& request)
+// {
+//     const string&	line = m_tokenizer.getline();
+//
+//     (void)line;
+//     (void)request;
+// }
 
-	(void)line;
-	(void)request;
-	// parse status line
-	// check uri and find location block
+void
+HttpRequestParser::readStatusLine(Request &request)
+{
+	const string& line = m_tokenizer.getline();
+
+	parseStatusLine(request, line);
+	m_readStatus = checkStatusLine(request);
 }
 
 void
-HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
+HttpRequestParser::parseStatusLine(Request &request, const std::string &statusLine)
 {
-	// parse header field to key and value
-	(void)headerFieldsMap;
+	string method;
+
+	method = statusLine.substr(0, statusLine.find(" "));
+	if (method == "GET")
+		request.m_method = Request::GET;
+	else if (method == "HEAD")
+		request.m_method = Request::HEAD;
+	else if (method == "POST")
+		request.m_method = Request::POST;
+	else if (method == "PUT")
+		request.m_method = Request::PUT;
+	else if (method == "DELETE")
+		request.m_method = Request::DELETE;
+	else
+		throw HttpErrorHandler(405);
+	request.m_target = statusLine.substr(statusLine.find(" ") + 1,
+			statusLine.rfind(" ") - statusLine.find(" "));
+	request.m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
+}
+
+/* TODO
+ * find location block from uri
+ */
+HttpRequestParser::e_readStatus
+HttpRequestParser::checkStatusLine(Request &request)
+{
+//	findLocationBlock(request);
+	if (request.m_protocol != "HTTP/1.1")
+		throw HttpErrorHandler(505);
+	return (HEADER_FIELDS);
+}
+
+
+// void
+// HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
+// {
+//     const string& line = m_tokenizer.getline();
+//
+//     (void)line;
+//     (void)headerFieldsMap;
+// }
+
+void
+HttpRequestParser::readHeaderFields(HeaderFieldsMap &headerFieldsMap)
+{
+	const string& line = m_tokenizer.getline();
+
+	parseHeaderFields(headerFieldsMap, line);
+}
+
+void
+HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap,
+									const std::string &headerLine)
+{
+	string	field;
+	string	value;
+	size_t	pos;
+	size_t	curPos;
+
+	curPos = 0;
+	pos = headerLine.find(": ");
+	field = headerLine.substr(curPos, pos);
+	curPos = pos + 2;
+	while (1)
+	{
+		pos = headerLine.find(") ", curPos);
+		if (pos == string::npos)
+			pos = headerLine.find(",", curPos);
+		if (pos == string::npos)
+		{
+			value = headerLine.substr(curPos);
+			headerFieldsMap[field].push_back(value);
+			break;
+		}
+		pos++;
+		value = headerLine.substr(curPos, pos - curPos);
+		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
+		if (value[value.length() - 1] == ',')
+			value.pop_back();
+		headerFieldsMap[field].push_back(value);
+	}
 }
 
 void

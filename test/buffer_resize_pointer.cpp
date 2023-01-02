@@ -44,7 +44,7 @@ class B
 		void printBuffer(void)
 		{
 			cout << "buffer : " << *buffer << endl;
-			cout << "ptr : " << (void*)buffer << endl;
+			cout << "ptr : " << (void*)&(*buffer)[0] << endl;
 		}
 
 	private:
