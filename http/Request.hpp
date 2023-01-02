@@ -8,6 +8,7 @@
 #include "parser/HttpRequestParser.hpp"
 #include "socket_/Socket.hpp"
 #include "Location.hpp"
+#include "http/HttpInfo.hpp"
 
 /*
  * reference: RFC 9112 HTTP/1.1
@@ -36,8 +37,10 @@ class	Request
 public:
 // constructors & destructor
 	Request(const Socket<Tcp>& socket);
+	Request(const Socket<Tcp>& socket, HttpInfo& httpInfo);
 	~Request();
 
+// operators
 	friend std::ostream&	operator<<(std::ostream& os, const Request& reqeust);
 
 // member functions
@@ -56,6 +59,9 @@ private:
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
 	// Location			m_location;
+
+	HttpInfo*			m_httpInfo;
+
 };
 
 #endif

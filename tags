@@ -86,6 +86,7 @@ FDMANAGER_HPP	test/FdManager.hpp	/^#define FDMANAGER_HPP$/;"	d
 FILETOKENIZEREXCEPTION_HPP	exception/FileTokenizerException.hpp	/^#define FILETOKENIZEREXCEPTION_HPP$/;"	d
 FILETOKENIZER_HPP	tokenizer/FileTokenizer.hpp	/^#define FILETOKENIZER_HPP$/;"	d
 FILT_ERROR	io/IIoMultiplex.hpp	/^		FILT_ERROR = 0x4$/;"	e	enum:IoMultiplexEnum::e_filters
+FINISHED	http/HttpInfo.hpp	/^		FINISHED$/;"	e	enum:HttpInfo::e_requestReadStatus
 FINISHED	parser/HttpRequestParser.hpp	/^		FINISHED$/;"	e	enum:HttpRequestParser::e_readStatus
 FdGetFileSize	test/readFunctionUsingString.cpp	/^long FdGetFileSize(int fd)$/;"	f
 FdManager	test/FdManager.cpp	/^FdManager::FdManager()$/;"	f	class:FdManager
@@ -102,6 +103,7 @@ GET_SOCKADDR_IN	socket_/SocketTypes.hpp	/^#define GET_SOCKADDR_IN(/;"	d
 GET_SOCKADDR_IN	test/ServerManager.cpp	/^#define GET_SOCKADDR_IN(/;"	d	file:
 GET_SOCKADDR_IN	test/ServerManager.cpp	/^#undef GET_SOCKADDR_IN$/;"	d	file:
 HEAD	http/Request.hpp	/^		HEAD,$/;"	e	enum:Request::e_method
+HEADER_FIELDS	http/HttpInfo.hpp	/^		HEADER_FIELDS,$/;"	e	enum:HttpInfo::e_requestReadStatus
 HEADER_FIELDS	parser/HttpRequestParser.hpp	/^		HEADER_FIELDS,$/;"	e	enum:HttpRequestParser::e_readStatus
 HTTPERRORHANDLER_HPP	exception/HttpErrorHandler.hpp	/^#define HTTPERRORHANDLER_HPP$/;"	d
 HTTPREQUESTPARSER_HPP	parser/HttpRequestParser.hpp	/^#define HTTPREQUESTPARSER_HPP$/;"	d
@@ -110,6 +112,9 @@ HeaderFieldsMap	parser/HttpRequestParser.hpp	/^typedef std::map<std::string, std
 HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::HttpErrorHandler(const HttpErrorHandler& httpErrorHandler)$/;"	f	class:HttpErrorHandler
 HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::HttpErrorHandler(int errorCode)$/;"	f	class:HttpErrorHandler
 HttpErrorHandler	exception/HttpErrorHandler.hpp	/^class	HttpErrorHandler$/;"	c
+HttpInfo	http/HttpInfo.cpp	/^HttpInfo::HttpInfo(Server& server)$/;"	f	class:HttpInfo
+HttpInfo	http/HttpInfo.hpp	/^class HttpInfo$/;"	c
+HttpInfo_hpp	http/HttpInfo.hpp	/^#define HttpInfo_hpp$/;"	d
 HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)$/;"	f	class:HttpRequestParser
 HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::HttpRequestParser(std::string& buffer)$/;"	f	class:HttpRequestParser
 HttpRequestParser	parser/HttpRequestParser.hpp	/^class	HttpRequestParser$/;"	c
@@ -151,6 +156,7 @@ Logger	Logger.cpp	/^Logger::Logger(Logger const& logger)$/;"	f	class:Logger
 Logger	Logger.hpp	/^class	Logger$/;"	c
 MAXSOCK	test/getaddrinfo_test.c	/^#define MAXSOCK /;"	d	file:
 MAX_BUFFER_LEN	Logger.cpp	/^#define	MAX_BUFFER_LEN /;"	d	file:
+MESSAGE_BODY	http/HttpInfo.hpp	/^		MESSAGE_BODY,$/;"	e	enum:HttpInfo::e_requestReadStatus
 MESSAGE_BODY	parser/HttpRequestParser.hpp	/^		MESSAGE_BODY,$/;"	e	enum:HttpRequestParser::e_readStatus
 MODIFY	io/IIoMultiplex.hpp	/^		MODIFY = 3,$/;"	e	enum:IoMultiplexEnum::e_operation
 MaxFd	test/general_socket_tests.cpp	/^struct	MaxFd$/;"	s	file:
@@ -172,6 +178,7 @@ REQUEST_HEADER_END	communicator/Request.hpp	/^		REQUEST_HEADER_END,$/;"	e	enum:R
 REQUEST_HPP	communicator/Request.hpp	/^#define REQUEST_HPP$/;"	d
 REQUEST_HPP	http/Request.hpp	/^#define REQUEST_HPP$/;"	d
 REQUEST_LINE	communicator/Request.hpp	/^		REQUEST_LINE = 0,$/;"	e	enum:Request::requestSection
+REQUEST_LINE	http/HttpInfo.hpp	/^		REQUEST_LINE = 0,$/;"	e	enum:HttpInfo::e_requestReadStatus
 REQUEST_LINE	parser/HttpRequestParser.hpp	/^		REQUEST_LINE = 0,$/;"	e	enum:HttpRequestParser::e_readStatus
 RESPONSE_HPP	http/Response.hpp	/^#define RESPONSE_HPP$/;"	d
 RM	Makefile	/^RM			=	rm -f$/;"	m
@@ -179,11 +186,13 @@ Request	communicator/Request.cpp	/^Request::Request()$/;"	f	class:Request
 Request	communicator/Request.hpp	/^class Request$/;"	c
 Request	http/Request.cpp	/^Request::Request(const Request& request)$/;"	f	class:Request
 Request	http/Request.cpp	/^Request::Request(const Socket<Tcp>& socket)$/;"	f	class:Request
+Request	http/Request.cpp	/^Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)$/;"	f	class:Request
 Request	http/Request.hpp	/^class	Request$/;"	c
 Response	communicator/Response.cpp	/^Response::Response()$/;"	f	class:Response
 Response	communicator/Response.hpp	/^class Response$/;"	c
-Response	http/Response.cpp	/^Response::Response()$/;"	f	class:Response
 Response	http/Response.cpp	/^Response::Response(const Response& response)$/;"	f	class:Response
+Response	http/Response.cpp	/^Response::Response(const Socket<Tcp>& socket)$/;"	f	class:Response
+Response	http/Response.cpp	/^Response::Response(const Socket<Tcp>& socket, HttpInfo& httpInfo)$/;"	f	class:Response
 Response	http/Response.hpp	/^class	Response$/;"	c
 Response_hpp	communicator/Response.hpp	/^#define Response_hpp$/;"	d
 SERVER	Server.hpp	/^		SERVER = 1,$/;"	e	enum:EventObject::e_type
@@ -256,6 +265,7 @@ e_filters	io/IIoMultiplex.hpp	/^	enum	e_filters$/;"	g	struct:IoMultiplexEnum
 e_method	http/Request.hpp	/^	enum	e_method$/;"	g	class:Request
 e_operation	io/IIoMultiplex.hpp	/^	enum	e_operation$/;"	g	struct:IoMultiplexEnum
 e_readStatus	parser/HttpRequestParser.hpp	/^	enum	e_readStatus$/;"	g	class:HttpRequestParser
+e_requestReadStatus	http/HttpInfo.hpp	/^	enum e_requestReadStatus$/;"	g	class:HttpInfo
 e_type	Server.hpp	/^	enum	e_type$/;"	g	struct:EventObject
 e_types	Logger.hpp	/^	enum	e_types$/;"	g	class:Logger
 eat	tokenizer/FileTokenizer.cpp	/^FileTokenizer::eat(const string& target)$/;"	f	class:FileTokenizer
@@ -271,6 +281,7 @@ getBuffer	test/buffer_resize_reference.cpp	/^	string& getBuffer(void)$/;"	f	clas
 getConnectionIdx	test/Server.cpp	/^int	Server::getConnectionIdx(fd_set* fdSet)$/;"	f	class:Server
 getDate	util/Util.cpp	/^Util::getDate(const char* format)$/;"	f	class:Util
 getErrorLog	tokenizer/FileTokenizer.cpp	/^FileTokenizer::getErrorLog(const char* message)$/;"	f	class:FileTokenizer
+getErrorMessage	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::getErrorMessage()$/;"	f	class:HttpErrorHandler
 getErrorMessage	exception/HttpErrorHandler.cpp	/^const std::string&	HttpErrorHandler::getErrorMessage(int errorCode)$/;"	f	class:HttpErrorHandler
 getFd	io/Kqueue.hpp	/^	int	getFd() const {return ident;}$/;"	f	struct:Kevent
 getFilter	io/Kqueue.hpp	/^	IoMultiplexEnum::e_filters	getFilter() const$/;"	f	struct:Kevent
@@ -309,6 +320,7 @@ m_addr	socket_/Socket.hpp	/^	socketAddr	m_addr;$/;"	m	class:Socket
 m_aheadToken	tokenizer/HttpStreamTokenizer.hpp	/^	std::string		m_aheadToken;$/;"	m	class:HttpStreamTokenizer
 m_alias	Location.hpp	/^	std::string		m_alias;$/;"	m	class:Location
 m_buffer	http/Request.hpp	/^	std::string			m_buffer;$/;"	m	class:Request
+m_buffer	http/Response.hpp	/^	std::string			m_buffer;$/;"	m	class:Response
 m_buffer	tokenizer/HttpStreamTokenizer.hpp	/^	std::string*	m_buffer;$/;"	m	class:HttpStreamTokenizer
 m_cgiPass	Location.hpp	/^	std::string		m_cgiPass;$/;"	m	class:Location
 m_changeList	io/Kqueue.hpp	/^	std::vector<Kevent>	m_changeList;$/;"	m	class:Kqueue
@@ -334,6 +346,9 @@ m_fd	socket_/Socket.hpp	/^	const int	m_fd;$/;"	m	class:Socket
 m_fdManager	test/ServerManager.hpp	/^	FdManager			m_fdManager;$/;"	m	class:ServerManager
 m_fstream	tokenizer/FileTokenizer.hpp	/^	std::fstream				m_fstream;$/;"	m	class:FileTokenizer
 m_headerFieldsMap	http/Request.hpp	/^	HeaderFieldsMap		m_headerFieldsMap;$/;"	m	class:Request
+m_httpInfo	Client.hpp	/^	HttpInfo		m_httpInfo;$/;"	m	class:Client
+m_httpInfo	http/Request.hpp	/^	HttpInfo*			m_httpInfo;$/;"	m	class:Request
+m_httpInfo	http/Response.hpp	/^	HttpInfo*			m_httpInfo;$/;"	m	class:Response
 m_idx	tokenizer/FileTokenizer.hpp	/^	unsigned int				m_idx;$/;"	m	class:FileTokenizer
 m_index	Location.hpp	/^	std::string		m_index;$/;"	m	class:Location
 m_index	Server.hpp	/^	std::string					m_index;$/;"	m	class:Server
@@ -348,6 +363,7 @@ m_locationList	Server_template.hpp	/^	std::vector<Location>		m_locationList;$/;"
 m_maxFd	test/FdManager.hpp	/^	int			m_maxFd;$/;"	m	class:FdManager
 m_message	exception/ConfigParserException.hpp	/^	std::string	m_message;$/;"	m	class:ConfigParser::ConfigParserException
 m_message	exception/FileTokenizerException.hpp	/^	std::string	m_message;$/;"	m	class:FileTokenizer::FileTokenizerException
+m_method	http/HttpInfo.hpp	/^	std::string				m_method;$/;"	m	class:HttpInfo
 m_method	http/Request.hpp	/^	int					m_method;$/;"	m	class:Request
 m_methodType	communicator/Communicator.hpp	/^	std::string				m_methodType;$/;"	m	class:Communicator
 m_methodType	communicator/Request.hpp	/^	std::string			m_methodType;$/;"	m	class:Request
@@ -356,6 +372,7 @@ m_path	Location.hpp	/^	std::string		m_path;$/;"	m	class:Location
 m_pos	test/Connection.hpp	/^	std::size_t		m_pos;$/;"	m	class:Connection
 m_preBufferSize	communicator/Communicator.hpp	/^	int						m_preBufferSize;$/;"	m	class:Communicator
 m_preBufferSize	communicator/Request.hpp	/^	int					m_preBufferSize;$/;"	m	class:Request
+m_protocol	http/HttpInfo.hpp	/^	std::string				m_protocol;$/;"	m	class:HttpInfo
 m_protocol	http/Request.hpp	/^	std::string			m_protocol;$/;"	m	class:Request
 m_proxyPass	Location.hpp	/^	std::string		m_proxyPass;$/;"	m	class:Location
 m_readSet	test/FdManager.hpp	/^	fd_set		m_readSet;$/;"	m	class:FdManager
@@ -367,7 +384,9 @@ m_request	socket/ClientSocket.hpp	/^	Request			m_request;$/;"	m	class:ClientSock
 m_request	test/Connection.hpp	/^	IRequest*		m_request;$/;"	m	class:Connection
 m_requestBuffer	socket/ClientSocket.hpp	/^	std::string		m_requestBuffer;$/;"	m	class:ClientSocket
 m_requestHeader	communicator/Communicator.hpp	/^	requestHeaderMap		m_requestHeader;$/;"	m	class:Communicator
+m_requestHeaderFields	http/HttpInfo.hpp	/^	requestHeaderFields_t	m_requestHeaderFields;$/;"	m	class:HttpInfo
 m_requestHeaderMap	communicator/Request.hpp	/^	requestHeaderMap	m_requestHeaderMap;$/;"	m	class:Request
+m_requestReadStatus	http/HttpInfo.hpp	/^	int						m_requestReadStatus;$/;"	m	class:HttpInfo
 m_requestSection	communicator/Request.hpp	/^	int					m_requestSection;$/;"	m	class:Request
 m_residue	http/Request.hpp	/^	int					m_residue;$/;"	m	class:Request
 m_response	Client.hpp	/^	Response		m_response;$/;"	m	class:Client
@@ -379,6 +398,7 @@ m_root	Location.hpp	/^	std::string		m_root;$/;"	m	class:Location
 m_root	Server.hpp	/^	std::string					m_root;$/;"	m	class:Server
 m_root	Server_template.hpp	/^	std::string					m_root;$/;"	m	class:Server
 m_server	Client.hpp	/^	const Server*	m_server; \/\/ is entire Server information is needed? or root directory is enough?$/;"	m	class:Client
+m_server	http/HttpInfo.hpp	/^	const Server*			m_server;$/;"	m	class:HttpInfo
 m_serverList	ServerManager.hpp	/^	std::vector<Server>		m_serverList;$/;"	m	class:ServerManager
 m_serverNames	Server.hpp	/^	std::string					m_serverNames;$/;"	m	class:Server
 m_serverNames	Server_template.hpp	/^	std::string					m_serverNames;$/;"	m	class:Server
@@ -388,11 +408,13 @@ m_socket	Client.hpp	/^	Socket<Tcp>		m_socket;$/;"	m	class:Client
 m_socket	Server.hpp	/^	Socket<Tcp>			m_socket;$/;"	m	class:Server
 m_socket	Server_template.hpp	/^	Socket<TcpSocket>			m_socket;$/;"	m	class:Server
 m_socket	http/Request.hpp	/^	const Socket<Tcp>*	m_socket;$/;"	m	class:Request
+m_socket	http/Response.hpp	/^	const Socket<Tcp>*	m_socket;$/;"	m	class:Response
 m_socket	test/Connection.hpp	/^	int const		m_socket;$/;"	m	class:Connection
 m_socketAddr	socket/ASocket.hpp	/^	struct sockaddr_in	m_socketAddr;$/;"	m	class:ASocket	typeref:struct:ASocket::sockaddr_in
 m_socketAddrSize	socket/ASocket.hpp	/^	socklen_t			m_socketAddrSize;$/;"	m	class:ASocket
 m_socketFd	socket/ASocket.hpp	/^	int					m_socketFd;$/;"	m	class:ASocket
 m_start	tokenizer/HttpStreamTokenizer.hpp	/^	std::string::size_type	m_start;$/;"	m	class:HttpStreamTokenizer
+m_target	http/HttpInfo.hpp	/^	std::string				m_target;$/;"	m	class:HttpInfo
 m_target	http/Request.hpp	/^	std::string			m_target;$/;"	m	class:Request
 m_token	tokenizer/HttpStreamTokenizer.hpp	/^	std::string		m_token;$/;"	m	class:HttpStreamTokenizer
 m_tokenArr	tokenizer/FileTokenizer.hpp	/^	std::vector<t_tokenInfo>	m_tokenArr;$/;"	m	class:FileTokenizer
@@ -415,6 +437,7 @@ main	test/socket_fork_test.cpp	/^int	main()$/;"	f
 main	test/stringstream.cpp	/^int main()$/;"	f
 main	test/syscall_test/getsocketopt_nonblock.cpp	/^int	main()$/;"	f
 main	test/syscall_test/test.cpp	/^int	main()$/;"	f
+makeErrorResponse	http/Response.cpp	/^Response::makeErrorResponse(const std::string& errorMessage)$/;"	f	class:Response
 makeReqeustBody	communicator/Request.cpp	/^Request::makeReqeustBody(const string& buffer)$/;"	f	class:Request
 makeRequest	communicator/Request.cpp	/^Request::makeRequest(std::string& buffer)$/;"	f	class:Request
 makeRequestHeader	communicator/Request.cpp	/^Request::makeRequestHeader(const string& buffer)$/;"	f	class:Request
@@ -425,6 +448,7 @@ operator <<	Location.cpp	/^ostream&	operator<<(std::ostream& os, const Location&
 operator <<	Server.cpp	/^operator<<(std::ostream& os, const Server& server)$/;"	f
 operator <<	ServerManager.hpp	/^std::ostream&	operator<<(std::ostream& os, const ServerManager<IoEventPoller>& manager)$/;"	f
 operator <<	Server_template.hpp	/^operator<<(std::ostream& os, const Server<IoEventHandler>& server)$/;"	f
+operator <<	http/HttpInfo.cpp	/^operator<<(std::ostream& os, const HttpInfo& httpInfo)$/;"	f
 operator <<	http/Request.cpp	/^operator<<(std::ostream& os, const Request& request)$/;"	f
 operator =	Client.cpp	/^Client&	Client::operator=(Client const& client)$/;"	f	class:Client
 operator =	Location.cpp	/^Location&	Location::operator=(const Location& location)$/;"	f	class:Location
@@ -488,6 +512,7 @@ receiveRequest	http/Request.cpp	/^Request::receiveRequest(int eventInfo)$/;"	f	c
 receiver	test/syscall_test/getsocketopt_nonblock.cpp	/^void	receiver() try$/;"	f
 registerEvent	ServerManager.hpp	/^ServerManager<IoEventPoller>::registerEvent(int fd, typename IoEventPoller::e_operation op,$/;"	f	class:ServerManager
 removeEventObject	ServerManager.hpp	/^ServerManager<IoEventPoller>::removeEventObject(int fd)$/;"	f	class:ServerManager
+requestHeaderFields_t	http/HttpInfo.hpp	/^typedef std::map<std::string, std::vector<std::string> > requestHeaderFields_t;$/;"	t
 requestHeaderMap	communicator/Communicator.hpp	/^	typedef Request::requestHeaderMap requestHeaderMap;$/;"	t	class:Communicator
 requestHeaderMap	communicator/Request.hpp	/^	typedef std::map<std::string, std::vector<std::string> > requestHeaderMap;$/;"	t	class:Request
 requestSection	communicator/Request.hpp	/^	enum requestSection$/;"	g	class:Request
@@ -514,7 +539,7 @@ s_serverSetterMap	parser/ServerParser.hpp	/^	static std::map<std::string, t_sett
 s_statusMessageTable	communicator/Response.hpp	/^	static std::map<int, std::string>	s_statusMessageTable;$/;"	m	class:Response
 s_type	Logger.hpp	/^	static e_types			s_type;$/;"	m	class:Logger
 s_writeSetPtr	test/Connection.hpp	/^	static fd_set*				s_writeSetPtr;$/;"	m	class:Connection
-sendResponse	http/Response.cpp	/^void	Response::sendResponse(int eventInfo)$/;"	f	class:Response
+sendResponse	http/Response.cpp	/^Response::sendResponse(int eventInfo)$/;"	f	class:Response
 sender	test/syscall_test/getsocketopt_nonblock.cpp	/^void	sender() try$/;"	f
 setAlias	parser/LocationParser.cpp	/^LocationParser::setAlias(Location& location)$/;"	f	class:LocationParser
 setCgiPass	parser/LocationParser.cpp	/^LocationParser::setCgiPass(Location& location)$/;"	f	class:LocationParser
@@ -579,6 +604,7 @@ writeSocket	socket/ClientSocket.cpp	/^ClientSocket::writeSocket()$/;"	f	class:Cl
 ~FileTokenizer	tokenizer/FileTokenizer.cpp	/^FileTokenizer::~FileTokenizer()$/;"	f	class:FileTokenizer
 ~FileTokenizerException	exception/FileTokenizerException.hpp	/^	virtual ~FileTokenizerException() throw() {};$/;"	f	class:FileTokenizer::FileTokenizerException
 ~HttpErrorHandler	exception/HttpErrorHandler.cpp	/^HttpErrorHandler::~HttpErrorHandler()$/;"	f	class:HttpErrorHandler
+~HttpInfo	http/HttpInfo.cpp	/^HttpInfo::~HttpInfo()$/;"	f	class:HttpInfo
 ~HttpRequestParser	parser/HttpRequestParser.cpp	/^HttpRequestParser::~HttpRequestParser()$/;"	f	class:HttpRequestParser
 ~HttpStreamTokenizer	tokenizer/HttpStreamTokenizer.cpp	/^HttpStreamTokenizer::~HttpStreamTokenizer()$/;"	f	class:HttpStreamTokenizer
 ~IIoMultiplex	io/IIoMultiplex.hpp	/^	virtual ~IIoMultiplex() {};$/;"	f	class:IIoMultiplex

@@ -64,6 +64,12 @@ const std::string&	HttpErrorHandler::getErrorMessage(int errorCode)
 	return errorMessage;
 }
 
+const std::string&
+HttpErrorHandler::getErrorMessage()
+{
+	return (m_errorMessage);
+}
+
 // constructors & destructor
 HttpErrorHandler::HttpErrorHandler(int errorCode)
 {

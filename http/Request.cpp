@@ -20,13 +20,23 @@ Request::Request(const Socket<Tcp>& socket)
 	m_residue = 0;
 }
 
+Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
+:	m_socket(&socket),
+	m_buffer(REQUEST_BUFFER_SIZE, 0),
+	m_parser(m_buffer),
+	m_httpInfo(&httpInfo)
+{
+	m_residue = 0;
+}
+
 Request::~Request()
 {
 }
 
 Request::Request(const Request& request)
 :	m_socket(NULL),
-	m_parser(m_buffer)
+	m_parser(m_buffer),
+	m_httpInfo(NULL)
 {
 	(void)request;
 }

@@ -1,7 +1,14 @@
 #include "Response.hpp"
 
 // constructors & destructor
-Response::Response()
+Response::Response(const Socket<Tcp>& socket)
+:	m_socket(&socket)
+{
+}
+
+Response::Response(const Socket<Tcp>& socket, HttpInfo& httpInfo)
+:	m_socket(&socket),
+	m_httpInfo(&httpInfo)
 {
 }
 
@@ -22,7 +29,16 @@ Response::operator=(const Response& response)
 	return *this;
 }
 
-void	Response::sendResponse(int eventInfo)
+void
+Response::sendResponse(int eventInfo)
 {
 	(void)eventInfo;
+}
+
+void
+Response::makeErrorResponse(const std::string& errorMessage)
+{
+	(void)m_socket;
+	(void)m_httpInfo;
+	(void)errorMessage;
 }
