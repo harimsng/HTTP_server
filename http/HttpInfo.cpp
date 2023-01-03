@@ -18,18 +18,18 @@ operator<<(std::ostream& os, const HttpInfo& httpInfo)
 	requestHeaderFields_t::const_iterator mapIt;
 
 	os << "reqeust info\n";
+	os << "status line\n";
 	os << "\tmethod : " << httpInfo.m_method << endl;
 	os << "\ttarget : " << httpInfo.m_target << endl;
 	os << "\tprotocol : " << httpInfo.m_protocol << endl;
-	os << "header field\n";
+	os << "header field";
 	for (mapIt = httpInfo.m_requestHeaderFields.begin();
 			mapIt != httpInfo.m_requestHeaderFields.end(); mapIt++)
 	{
-		os << "\t" << mapIt->first << " : ";
+		os << "\n\t" << mapIt->first << " : ";
 		vector<string>::const_iterator vecIt = mapIt->second.begin();
 		for (; vecIt != mapIt->second.end(); vecIt++)
 			os << *vecIt << " ";
-		os << "\n";
 	}
 	return (os);
 

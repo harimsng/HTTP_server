@@ -13,6 +13,8 @@
 #include "socket_/Socket.hpp"
 
 #include "http/HttpInfo.hpp"
+// for test
+#include "Logger.hpp"
 
 class	Server;
 
@@ -52,9 +54,11 @@ Client::handleEvent(const typename IoEventPoller::EventData& event)
 	switch (filter)
 	{
 		case IoEventPoller::READ:
+			Logger::log(Logger::DEBUG, "read event");
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
 		case IoEventPoller::WRITE:
+			// Logger::log(Logger::DEBUG, "write event");
 			m_response.sendResponse(event.getInfo());
 			return IoEventPoller::NORMAL;
 //		case IoEventPoller::EXCEPT:

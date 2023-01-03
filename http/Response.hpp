@@ -27,12 +27,10 @@ public:
 private:
 
 // member variables
-	// const Server*		m_server;
 	const Socket<Tcp>*	m_socket;
 	std::string			m_buffer;
 
 	HttpInfo*			m_httpInfo;
-
 };
 
 #endif

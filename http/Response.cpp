@@ -1,5 +1,9 @@
 #include "Response.hpp"
 
+// for test
+#include <iostream>
+
+using namespace std;
 // constructors & destructor
 Response::Response(const Socket<Tcp>& socket)
 :	m_socket(&socket)

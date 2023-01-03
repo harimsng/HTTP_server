@@ -22,6 +22,14 @@ public:
 		MESSAGE_BODY,
 		FINISHED
 	};
+	enum e_method
+	{
+		GET = 1,
+		HEAD,
+		POST,
+		PUT,
+		DELETE
+	};
 // constructors & destructor
 	HttpInfo(Server& server);
 	~HttpInfo();
@@ -30,7 +38,7 @@ public:
 	friend std::ostream&	operator<<(std::ostream& os, const HttpInfo& httpInfo);
 
 	const Server*			m_server;
-	std::string				m_method;
+	int						m_method;
 	std::string				m_target;
 	std::string				m_protocol;
 	int						m_requestReadStatus;

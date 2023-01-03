@@ -23,6 +23,7 @@ struct	IoMultiplexEnum
 	{
 		READ = 0x1,
 		WRITE = 0x2,
+		READWRITE = 0x3,
 		FILT_ERROR = 0x4
 	};
 };

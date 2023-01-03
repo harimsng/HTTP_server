@@ -40,9 +40,6 @@ public:
 	Request(const Socket<Tcp>& socket, HttpInfo& httpInfo);
 	~Request();
 
-// operators
-	friend std::ostream&	operator<<(std::ostream& os, const Request& reqeust);
-
 // member functions
 	int		receiveRequest(int eventInfo);
 private:
@@ -54,13 +51,17 @@ private:
 	HttpRequestParser	m_parser;
 	int					m_residue;
 
+	HttpInfo*			m_httpInfo;
+
+	/* NOTE
+	 * 아래의 변수들은 이제 m_httpInfo에 저장되어있음
+	 * */
 	int					m_method;
 	std::string			m_target;
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
 	// Location			m_location;
 
-	HttpInfo*			m_httpInfo;
 
 };
 

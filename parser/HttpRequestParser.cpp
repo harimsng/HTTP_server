@@ -95,6 +95,7 @@ HttpRequestParser::parse(Request& request)
 HttpRequestParser::parse()");
 		}
 	}
+	Logger::log(Logger::DEBUG, *request.m_httpInfo);
 }
 
 string::size_type
@@ -123,7 +124,6 @@ HttpRequestParser::readStatusLine(Request &request)
 	parseStatusLine(request, line);
 
 	request.m_httpInfo->m_requestReadStatus = checkStatusLine(request);
-	// m_readStatus = checkStatusLine(request);
 }
 
 void
@@ -133,15 +133,15 @@ HttpRequestParser::parseStatusLine(Request &request, const std::string &statusLi
 
 	method = statusLine.substr(0, statusLine.find(" "));
 	if (method == "GET")
-		request.m_httpInfo->m_method = Request::GET;
+		request.m_httpInfo->m_method = HttpInfo::GET;
 	else if (method == "HEAD")
-		request.m_httpInfo->m_method = Request::HEAD;
+		request.m_httpInfo->m_method = HttpInfo::HEAD;
 	else if (method == "POST")
-		request.m_httpInfo->m_method = Request::POST;
+		request.m_httpInfo->m_method = HttpInfo::POST;
 	else if (method == "PUT")
-		request.m_httpInfo->m_method = Request::PUT;
+		request.m_httpInfo->m_method = HttpInfo::PUT;
 	else if (method == "DELETE")
-		request.m_httpInfo->m_method = Request::DELETE;
+		request.m_httpInfo->m_method = HttpInfo::DELETE;
 	else
 		throw HttpErrorHandler(405);
 	request.m_httpInfo->m_target = statusLine.substr(statusLine.find(" ") + 1,

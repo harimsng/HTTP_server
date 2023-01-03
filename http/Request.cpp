@@ -87,25 +87,3 @@ Request::receiveRawData(int eventInfo)
 	m_buffer.resize(m_residue + count + 1, 0);
 	return count;
 }
-
-ostream&
-operator<<(std::ostream& os, const Request& request)
-{
-	HeaderFieldsMap::const_iterator mapIt;
-
-	os << "reqeust info\n";
-	os << "\tmethod : " << request.m_method << endl;
-	os << "\ttarget : " << request.m_target << endl;
-	os << "\tprotocol : " << request.m_protocol << endl;
-	os << "header field\n";
-	for (mapIt = request.m_headerFieldsMap.begin();
-			mapIt != request.m_headerFieldsMap.end(); mapIt++)
-	{
-		os << "\t" << mapIt->first << " : ";
-		vector<string>::const_iterator vecIt = mapIt->second.begin();
-		for (; vecIt != mapIt->second.end(); vecIt++)
-			os << *vecIt << " ";
-		os << "\n";
-	}
-	return (os);
-}
