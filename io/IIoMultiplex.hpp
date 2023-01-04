@@ -7,7 +7,8 @@ struct	IoMultiplexEnum
 	{
 		NORMAL = 1,
 		END = 2,
-		STAT_ERROR = 3
+		STAT_ERROR = 3,
+		NON_BLOCK = 4
 	};
 
 	enum	e_operation
@@ -22,6 +23,7 @@ struct	IoMultiplexEnum
 	{
 		READ = 0x1,
 		WRITE = 0x2,
+		READWRITE = 0x3,
 		FILT_ERROR = 0x4
 	};
 };

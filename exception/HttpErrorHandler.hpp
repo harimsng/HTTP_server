@@ -20,6 +20,7 @@ private:
 	static void					setErrorMessageTable();
 public:
 	static const std::string&	getErrorMessage(int errorCode);
+	const std::string&			getErrorMessage();
 };
 
 #endif

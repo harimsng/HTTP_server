@@ -7,6 +7,8 @@
 
 #include "parser/HttpRequestParser.hpp"
 #include "socket_/Socket.hpp"
+#include "Location.hpp"
+#include "http/HttpInfo.hpp"
 
 /*
  * reference: RFC 9112 HTTP/1.1
@@ -26,7 +28,7 @@ class	Request
 		HEAD,
 		POST,
 		PUT,
-		DELETE,
+		DELETE
 //		CONNECT,
 //		OPTION,
 //		TRACE
@@ -35,6 +37,7 @@ class	Request
 public:
 // constructors & destructor
 	Request(const Socket<Tcp>& socket);
+	Request(const Socket<Tcp>& socket, HttpInfo& httpInfo);
 	~Request();
 
 // member functions
@@ -46,11 +49,20 @@ private:
 	const Socket<Tcp>*	m_socket;
 	std::string			m_buffer;
 	HttpRequestParser	m_parser;
+	int					m_residue;
 
+	HttpInfo*			m_httpInfo;
+
+	/* NOTE
+	 * 아래의 변수들은 이제 m_httpInfo에 저장되어있음
+	 * */
 	int					m_method;
 	std::string			m_target;
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
+	// Location			m_location;
+
+
 };
 
 #endif

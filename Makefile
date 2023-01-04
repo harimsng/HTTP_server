@@ -25,6 +25,7 @@ SRC			=	main.cpp\
 \
 				http/Request.cpp\
 				http/Response.cpp\
+				http/HttpInfo.cpp\
 \
 				io/Kqueue.cpp\
 \

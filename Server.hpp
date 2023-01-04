@@ -14,6 +14,8 @@
 
 #define EVENT_SIZE 8
 
+using namespace std;
+
 template <typename IoEventPoller>
 class	ServerManager;
 
@@ -108,6 +110,8 @@ Server::handleEvent(const typename IoEventPoller::EventData& event)
 					clientFd, this);
 			ServerManager<IoEventPoller>::registerEvent(clientFd,
 					IoEventPoller::ADD, filter);
+			// ServerManager<IoEventPoller>::registerEvent(clientFd,
+			//         IoEventPoller::ADD, IoEventPoller::READWRITE);
 			break;
 		default:
 			throw std::logic_error("unhandled event filter in Server::handleEvent()");

@@ -184,7 +184,7 @@ template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
 {
-	EventObject			et;
+	EventObject	et;
 
 	et.type = type;
 	switch (type)

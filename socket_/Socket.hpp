@@ -1,6 +1,7 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
+#include <sys/socket.h>
 #include <unistd.h>
 #include <ostream>
 
@@ -39,7 +40,12 @@ template <typename SocketType>
 Socket<SocketType>::Socket() throw()
 :	m_fd(socket(SocketType::domain, SocketType::type, SocketType::protocol))
 {
+	int socketOption;
+
 	std::ios_base::Init();
+	socketOption = 1;
+	setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
+
 }
 
 template <typename SocketType>
