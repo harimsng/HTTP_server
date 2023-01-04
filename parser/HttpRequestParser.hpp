@@ -6,15 +6,17 @@
 #include <sstream>
 
 #include "parser/AParser.hpp"
-#include "tokenizer/SocketStreamTokenizer.hpp"
+#include "tokenizer/HttpStreamTokenizer.hpp"
 
 class	Request;
 class	Server;
 
+class	StatusLine;
+
 typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 
 class	HttpRequestParser
-:	public AParser<SocketStreamTokenizer, Request>
+:	public AParser<HttpStreamTokenizer, Request>
 {
 // deleted
 	HttpRequestParser(const HttpRequestParser& parser);
@@ -36,11 +38,16 @@ public:
 
 // member functions
 	virtual void			parse(Request& request);
-	std::string::size_type	checkBuffer(std::string* buffer);
+	std::string::size_type	updateBuffer();
 
 	void	readStatusLine(Request& request);
 	void	readHeaderFields(HeaderFieldsMap& headerFieldsMap);
 	void	readMessageBody();
+
+	void	parseStatusLine(Request& request, const std::string& statusLine);
+	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap,
+							const std::string& headerLine);
+	e_readStatus	checkStatusLine(Request& request);
 
 	e_readStatus	getReadStatus() const;
 

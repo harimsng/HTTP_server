@@ -2,7 +2,7 @@
 
 #include "HttpErrorHandler.hpp"
 
-std::string	HttpErrorHandler::s_errorMessageTable[1024] = {0, };
+std::string	HttpErrorHandler::s_errorMessageTable[1024] = {"", };
 
 void	HttpErrorHandler::setErrorMessageTable()
 {
@@ -62,6 +62,12 @@ const std::string&	HttpErrorHandler::getErrorMessage(int errorCode)
 	if (errorMessage.size() == 0)
 		throw std::runtime_error("undefined http error code in HttpErrorHandler::HttpErrorHandler(int)");
 	return errorMessage;
+}
+
+const std::string&
+HttpErrorHandler::getErrorMessage()
+{
+	return (m_errorMessage);
 }
 
 // constructors & destructor

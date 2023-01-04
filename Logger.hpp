@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-const std::string	getDate(const char* format);
+#include "util/Util.hpp"
 
 class	Logger
 {
@@ -61,7 +61,7 @@ Logger::log(e_types type, const T& object)
 		default:
 			break;
 	}
-	prefix.append(::getDate("%F %T "));
+	prefix.append(Util::getDate("%F %T "));
 	*s_ostream << prefix << object << '\n';
 }
 
