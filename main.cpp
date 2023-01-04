@@ -39,6 +39,7 @@ bool	parseArgument(int argc, char **argv)
 {
 	if (argc == 1)
 		return false;
+
 	for (int i = 1; i < argc - 1; ++i)
 	{
 		string				arg(argv[i]);
