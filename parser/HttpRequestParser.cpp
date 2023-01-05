@@ -10,14 +10,14 @@ using namespace std;
 // deleted
 HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)
 {
-    (void)parser;
+	(void)parser;
 }
 
 HttpRequestParser&
 HttpRequestParser::operator=(const HttpRequestParser& parser)
 {
-    (void)parser;
-    return *this;
+	(void)parser;
+	return *this;
 }
 
 // constructors & destructor
@@ -77,14 +77,14 @@ HttpRequestParser::parse(Request& request)
 		switch (request.m_httpInfo->m_requestReadStatus)
 		{
 			case REQUEST_LINE:
-				readStatusLine(request);
+				parseStatusLine(request);
 				break;
 			case HEADER_FIELDS:
-				readHeaderFields(request.m_httpInfo->m_requestHeaderFields);
+				parseHeaderFields(request.m_httpInfo->m_requestHeaderFields);
 				break;
 			case MESSAGE_BODY:
 				// normal transfer or chunked
-				readMessageBody();
+				parseMessageBody();
 				break;
 			case FINISHED:
 				// trailer section is not implemented
@@ -104,32 +104,14 @@ HttpRequestParser::updateBuffer()
 	if (m_readStatus < MESSAGE_BODY)
 		return m_tokenizer.updateBufferForHeader();
 	else
-	 	return m_tokenizer.updateBufferForBody();
-}
-
-// void
-// HttpRequestParser::readStatusLine(Request& request)
-// {
-//     const string&	line = m_tokenizer.getline();
-//
-//     (void)line;
-//     (void)request;
-// }
-
-void
-HttpRequestParser::readStatusLine(Request &request)
-{
-	const string& line = m_tokenizer.getline();
-
-	parseStatusLine(request, line);
-
-	request.m_httpInfo->m_requestReadStatus = checkStatusLine(request);
+		return m_tokenizer.updateBufferForBody();
 }
 
 void
-HttpRequestParser::parseStatusLine(Request &request, const std::string &statusLine)
+HttpRequestParser::parseStatusLine(Request &request)
 {
-	string method;
+	const string	statusLine = m_tokenizer.getline();
+	string			method;
 
 	method = statusLine.substr(0, statusLine.find(" "));
 	if (method == "GET")
@@ -147,6 +129,7 @@ HttpRequestParser::parseStatusLine(Request &request, const std::string &statusLi
 	request.m_httpInfo->m_target = statusLine.substr(statusLine.find(" ") + 1,
 			statusLine.rfind(" ") - statusLine.find(" "));
 	request.m_httpInfo->m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
+	request.m_httpInfo->m_requestReadStatus = checkStatusLine(request);
 }
 
 /* TODO
@@ -161,27 +144,10 @@ HttpRequestParser::checkStatusLine(Request &request)
 	return (HEADER_FIELDS);
 }
 
-// void
-// HttpRequestParser::readHeaderFields(HeaderFieldsMap& headerFieldsMap)
-// {
-//     const string& line = m_tokenizer.getline();
-//
-//     (void)line;
-//     (void)headerFieldsMap;
-// }
-
 void
-HttpRequestParser::readHeaderFields(HeaderFieldsMap &headerFieldsMap)
+HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
-	const string& line = m_tokenizer.getline();
-
-	parseHeaderFields(headerFieldsMap, line);
-}
-
-void
-HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap,
-									const std::string &headerLine)
-{
+	const string headerLine = m_tokenizer.getline();
 	string	field;
 	string	value;
 	size_t	pos;
@@ -212,12 +178,12 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap,
 }
 
 void
-HttpRequestParser::readMessageBody()
+HttpRequestParser::parseMessageBody()
 {
 }
 
 HttpRequestParser::e_readStatus
 HttpRequestParser::getReadStatus() const
 {
-    return m_readStatus;
+	return m_readStatus;
 }

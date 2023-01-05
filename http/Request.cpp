@@ -1,10 +1,9 @@
 #include <unistd.h>
 #include <stdexcept>
 
-#include "Request.hpp"
-
 // for test
 #include "Logger.hpp"
+#include "Request.hpp"
 
 #define REQUEST_BUFFER_SIZE (8192)
 #define REQUEST_EOF (0)
@@ -79,11 +78,22 @@ Request::receiveRequest(int eventInfo)
 int
 Request::receiveRawData(int eventInfo)
 {
-	int			count = 0;
+	int	count = 0;
 
+#ifdef __APPLE__
+	m_residue = m_buffer.size();
 	m_buffer.resize(m_buffer.capacity(), 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + m_residue,
 			eventInfo);
+	// if evenInfo + residue is bigger than buffer size read() will make buffer overflow.
 	m_buffer.resize(m_residue + count + 1, 0);
+#elif __linux__
+	const int residue = m_buffer.size();
+
+	m_buffer.resize(m_buffer.capacity(), 0);
+	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
+			m_buffer.size() - residue - 1);
+	m_buffer.resize(residue + count + 1, 0);
+#endif
 	return count;
 }

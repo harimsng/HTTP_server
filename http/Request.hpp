@@ -60,9 +60,6 @@ private:
 	std::string			m_target;
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
-	// Location			m_location;
-
-
 };
 
 #endif

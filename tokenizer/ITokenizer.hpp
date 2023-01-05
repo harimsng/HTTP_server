@@ -15,9 +15,9 @@ protected:
 	virtual ~ITokenizer() {};
 
 // member functions
-	virtual const std::string&	peek() = 0;
-	virtual const std::string&	get() = 0;
-	virtual bool				empty() const = 0;
+	virtual std::string	peek() = 0;
+	virtual std::string	get() = 0;
+	virtual bool		empty() const = 0;
 };
 
 #endif
