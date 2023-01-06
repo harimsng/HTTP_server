@@ -18,7 +18,7 @@ FileTokenizer::~FileTokenizer()
 {
 }
 
-const string&
+string
 FileTokenizer::peek()
 {
 	if (empty() == true)
@@ -26,7 +26,7 @@ FileTokenizer::peek()
 	return (m_tokenArr[m_idx].first);
 }
 
-const string&
+string
 FileTokenizer::get()
 {
 	if (empty() == true)
@@ -105,7 +105,7 @@ FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 }
 
 void
-FileTokenizer::init(const string path)
+FileTokenizer::init(const string& path)
 {
 	string		line;
 

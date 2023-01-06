@@ -1,5 +1,5 @@
-#ifndef HttpInfo_hpp
-#define HttpInfo_hpp
+#ifndef HTTPINFO_HPP
+#define HTTPINFO_HPP
 
 #include <string>
 #include <vector>
@@ -31,7 +31,7 @@ public:
 		DELETE
 	};
 // constructors & destructor
-	HttpInfo(Server& server);
+	HttpInfo(const Server& server);
 	~HttpInfo();
 
 // operator

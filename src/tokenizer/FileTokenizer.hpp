@@ -13,8 +13,8 @@ class	FileTokenizer: public ITokenizer
 	typedef std::pair<std::string, int>	t_tokenInfo;
 
 // deleted
-	FileTokenizer(FileTokenizer const& fileTokenizer);
-	FileTokenizer	&operator=(FileTokenizer const& fileTokenizer);
+	FileTokenizer(const FileTokenizer& fileTokenizer);
+	FileTokenizer	&operator=(const FileTokenizer& fileTokenizer);
 
 public:
 // constructors & destructor
@@ -22,13 +22,13 @@ public:
 	~FileTokenizer();
 
 // member functions
-	void				init(std::string const path);
+	void				init(const std::string& path);
 
-	virtual const std::string&	peek();
-	virtual const std::string&	get();
-	virtual bool				empty() const;
-	void						eat(const std::string& target);
-	unsigned int				size();
+	virtual std::string	peek();
+	virtual std::string	get();
+	virtual bool		empty() const;
+	void				eat(const std::string& target);
+	unsigned int		size();
 
 	std::string		getErrorLog(const char* message);
 	void			printTokensByLine() const;

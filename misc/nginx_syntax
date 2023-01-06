@@ -1,0 +1,38 @@
+NUM					: numbers
+STR					: string
+
+%
+program				: main_context
+					;
+main_context		: server
+					;
+server				: "server" "{" server_context "}"
+					;
+server_context		: server_directive
+					| server_directive  server_context
+					;
+server_directive	: listen
+					| server_name
+					| access_log
+					| root
+					| location
+					;
+location			: "location" STR STR "{" location_context "}"
+					;
+location_context	: location_directive
+					| location_directive location_context
+					;
+location_directive	: root
+					| expires
+					;
+listen				: "listen" NUM ";"
+					| "listen" STR STR STR ";"
+					;
+server_name			: "server_name" STR ";"
+					;
+access_log			: "access_log" STR STR ";"
+					;
+root				: "root" STR ";"
+					;
+expires				: "expires" STR ";"
+					;

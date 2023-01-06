@@ -20,15 +20,15 @@ public:
 	std::string::size_type	updateBufferForHeader();
 	std::string::size_type	updateBufferForBody();
 
-	virtual const std::string&	peek();
-	virtual const std::string&	get();
-	const std::string&			getline();
+	// should those virtual method be private?
+	virtual std::string	peek();
+	virtual std::string	get();
+	std::string			getline();
 	char			getc();
 	virtual bool	empty() const;
 
 private:
 	std::string*	m_buffer;
-	std::string		m_token;
 	std::string		m_aheadToken;
 
 	std::string::size_type	m_start;

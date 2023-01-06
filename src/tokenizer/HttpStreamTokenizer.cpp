@@ -69,10 +69,10 @@ HttpStreamTokenizer::updateBufferForBody()
 	return m_end;
 }
 
-const std::string&
+std::string
 HttpStreamTokenizer::peek()
 {
-	if (m_token.size() == 0)
+	if (m_aheadToken.size() == 0)
 		return get();
 
 	return m_aheadToken;
@@ -83,29 +83,30 @@ HttpStreamTokenizer::peek()
  * but it's not the one defined in http rfc.
  * @return a line terminated with \r\n.
  */
-const std::string&
-HttpStreamTokenizer::get()//line()?
+std::string
+HttpStreamTokenizer::get()
 {
 	string::size_type	pos = m_buffer->find("\r\n", m_cur);
 	string::size_type	temp;
+	string				token = m_aheadToken;
 
-	m_token = m_aheadToken;
 	if (empty() == true)
 	{
 		m_aheadToken = "";
-		return m_token;
+		return token;
 	}
 	pos = pos == string::npos ? m_buffer->size() : pos;
 	m_aheadToken = m_buffer->substr(m_cur, pos - m_cur);
 	temp = m_cur;
 	m_cur = pos + 2;
+	//  m_start == temp (original value of m_cur) means it's first call to get() on new stream.
 	if (m_start == temp)
 		get();
 
-	return m_token;
+	return token;
 }
 
-const std::string&
+std::string
 HttpStreamTokenizer::getline()
 {
 	return get();
