@@ -58,7 +58,7 @@ Client::handleEvent(const typename IoEventPoller::EventData& event)
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
 		case IoEventPoller::WRITE:
-			// Logger::log(Logger::DEBUG, "write event");
+			Logger::log(Logger::DEBUG, "write event");
 			m_response.sendResponse(event.getInfo());
 			return IoEventPoller::NORMAL;
 //		case IoEventPoller::EXCEPT:
