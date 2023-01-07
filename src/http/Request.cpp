@@ -60,21 +60,6 @@ Request::receiveRequest(int eventInfo)
 	return count;
 }
 
-// int
-// Request::receiveRawData(int eventInfo)
-// {
-//     int			count = 0;
-//     std::size_t	residue = m_buffer.size();
-//
-//     (void)eventInfo;
-//     // read data from the socket to make zero-terminated buffer.
-//     m_buffer.resize(m_buffer.capacity(), 0);
-//     count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
-//             m_buffer.size() - residue - 1);
-//     m_buffer.resize(residue + count + 1, 0);
-//     return count;
-// }
-
 int
 Request::receiveRawData(int eventInfo)
 {
@@ -82,7 +67,7 @@ Request::receiveRawData(int eventInfo)
 
 #ifdef __APPLE__
 	m_residue = m_buffer.size();
-	m_buffer.resize(m_buffer.capacity(), 0);
+	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + m_residue,
 			eventInfo);
 	// if evenInfo + residue is bigger than buffer size read() will make buffer overflow.
@@ -90,7 +75,7 @@ Request::receiveRawData(int eventInfo)
 #elif __linux__
 	const int residue = m_buffer.size();
 
-	m_buffer.resize(m_buffer.capacity(), 0);
+	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
 			m_buffer.size() - residue - 1);
 	m_buffer.resize(residue + count + 1, 0);

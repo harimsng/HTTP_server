@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "Webserv.hpp"
 #include "parser/AParser.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "Server.hpp"
@@ -28,6 +29,10 @@ public:
 	virtual void	parse(std::vector<Server>& servers);
 	void			parseServer(std::vector<Server>& servers);
 
+private:
+	AddrResolutionTable*	m_addrResolutionTable;
+
+public:
 // static members
 	static int			toInt(const std::string& str);
 	static std::string	toString(int num);

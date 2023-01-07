@@ -4,10 +4,7 @@
 // for gnu c portability and c++98 standard. should be removed later
 #include <stdint.h>
 
-#include <map>
-#include <vector>
-#include <string>
-
+#include "Webserv.hpp"
 #include "Client.hpp"
 #include "Location.hpp"
 #include "socket_/Socket.hpp"

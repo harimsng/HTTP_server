@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-template <typename Tokenizer, typename OutputType>
+template <typename Tokenizer, typename Type>
 class	AParser
 {
 	AParser(AParser const& aParser);
@@ -15,7 +15,7 @@ protected:
 	virtual ~AParser() {};
 
 // member functions
-	virtual void	parse(OutputType& output) = 0;
+	virtual void	parse(Type& type) = 0;
 
 // member variables
 	Tokenizer	m_tokenizer;
