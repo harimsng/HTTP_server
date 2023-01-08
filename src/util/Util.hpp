@@ -6,8 +6,10 @@
 class Util
 {
 public:
-	static const std::string getDate(const char* format);
-	static bool	parseArgument(int argc, char **argv);
+	static bool		parseArgument(int argc, char **argv);
+	static int				toInt(const std::string& str);
+	static std::string		toString(int num);
+	static const std::string	getDate(const char* format);
 
 };
 #endif //Util_hpp

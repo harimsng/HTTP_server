@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "Util.hpp"
 #include "Logger.hpp"
 
@@ -35,4 +37,31 @@ Util::getDate(const char* format)
 	curTimeInfo = localtime(&curTime);
 	strftime(timeBuf, 1024, format, curTimeInfo);
 	return (timeBuf);
+}
+
+int
+Util::toInt(const string& str)
+{
+	stringstream	ss(str);
+	int				num = 0;
+
+	ss >> num;
+	return num;
+}
+
+string
+Util::toString(int num)
+{
+	string	str;
+	int		denom = 1000000000;
+	
+	while (denom > 0 && num / denom == 0)
+		denom /= 10;
+	while (denom > 0)
+	{
+		str.push_back(num / denom + '0');
+		num %= denom;
+		denom /= 10;
+	}
+	return str;
 }

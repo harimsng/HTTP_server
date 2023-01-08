@@ -1,8 +1,8 @@
 #include <sys/stat.h>
 
-#include <sstream>
 #include <iostream>
 
+#include "Webserv.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "parser/ServerParser.hpp"
@@ -21,7 +21,7 @@ ConfigParser::~ConfigParser()
 }
 
 void
-ConfigParser::init(string configPath)
+ConfigParser::init(string configPath, VirtualServerTable& serverTable)
 {
 	ServerParser::setServerSetterMap();
 	LocationParser::setLocationSetterMap();
@@ -32,6 +32,7 @@ ConfigParser::init(string configPath)
 	if (configPath.rfind(".conf") != configPath.size() - 5)
 		throw ConfigParserException("invalid filename");
 
+	m_serverTable = &serverTable;
 	m_tokenizer.init(configPath);
 }
 
@@ -46,56 +47,63 @@ ConfigParser::checkFileStat(const char* path)
 }
 
 void
-ConfigParser::parse(vector<Server>& servers) try
+ConfigParser::parse() try
 {
 	while (m_tokenizer.peek() == "server")
 	{
 		m_tokenizer.get();
-		parseServer(servers);
+		parseServer();
 	}
 	if (m_tokenizer.empty() == false)
 		m_tokenizer.eat("server");
 }
-catch (std::exception& e)
+catch (exception& e)
 {
 	cout << m_tokenizer.getErrorLog(e.what());
 }
 
 void
-ConfigParser::parseServer(vector<Server>& servers)
+ConfigParser::parseServer() throw(string) try
 {
 	m_tokenizer.eat("{");
 	
 	ServerParser	serverParser(m_tokenizer);
 
-	servers.push_back(Server());
-	serverParser.parse(servers.back());
+	Server	newServer;
+	serverParser.parse(newServer);
 	m_tokenizer.eat("}");
+
+	if (m_serverTable->count(newServer.m_addrKey) == 1)
+		checkDuplicateServerName(newServer);
+	else
+		(*m_serverTable)[newServer.m_addrKey];
+	addNameToTable(newServer);
+}
+catch (string& serverName)
+{
 }
 
-int
-ConfigParser::toInt(const string& str)
+void
+ConfigParser::checkDuplicateServerName(const Server& server) const
 {
-	stringstream	ss(str);
-	int				num = 0;
+	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
+	const vector<string>&	names = server.m_serverNames;
 
-	ss >> num;
-	return num;
-}
-
-string
-ConfigParser::toString(int num)
-{
-	string	str;
-	int		denom = 1000000000;
-	
-	while (denom > 0 && num / denom == 0)
-		denom /= 10;
-	while (denom > 0)
+	for (size_t i = 0; i < names.size(); ++i)
 	{
-		str.push_back(num / denom + '0');
-		num %= denom;
-		denom /= 10;
+		if (table.count(names[i]) == 1)
+			throw names[i];
 	}
-	return str;
+}
+
+void
+ConfigParser::addNameToTable(Server& server)
+{
+	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
+	const vector<string>&	names = server.m_serverNames;
+
+	for (size_t i = 0; i < names.size(); ++i)
+	{
+		table[names[i]];
+	}
 }

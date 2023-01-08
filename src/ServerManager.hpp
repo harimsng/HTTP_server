@@ -30,10 +30,8 @@ public:
 	ServerManager();
 	~ServerManager();
 
-// operators
-
 // member functions
-	void	parse(const char* path);
+	void	parseConfig(const char* path);
 	void	run();
 
 private:
@@ -45,8 +43,13 @@ private:
 // member variables
 	std::vector<Server>		m_serverList;
 
-public:
 // static members
+private:
+	static std::map<int, EventObject>	s_eventObjectMap;
+	static IoEventPoller				s_ioEventPoller;
+	static VirtualServerTable			s_serverTable;
+
+public:
 	static void registerEvent(int fd,
 			typename IoEventPoller::e_operation op,
 			typename IoEventPoller::e_filters filter);
@@ -54,23 +57,21 @@ public:
 			int fd, Server* target);
 	static void	removeEventObject(int fd);
 
-	static std::map<int, EventObject>		s_eventObjectMap;
-	static IoEventPoller					s_ioEventPoller;
-
 // friends
 	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
 };
 
-/*
- * Definitions
- */
-
+// static member definitions
 template <typename IoEventPoller>
 std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventObjectMap;
 
 template <typename IoEventPoller>
 IoEventPoller	ServerManager<IoEventPoller>::s_ioEventPoller;
 
+template <typename IoEventPoller>
+VirtualServerTable	ServerManager<IoEventPoller>::s_serverTable;
+
+// member function definitions
 template <typename IoEventPoller>
 ServerManager<IoEventPoller>::ServerManager()
 {
@@ -87,12 +88,12 @@ ServerManager<IoEventPoller>::~ServerManager()
 
 template <typename IoEventPoller>
 void
-ServerManager<IoEventPoller>::parse(const char* path) try
+ServerManager<IoEventPoller>::parseConfig(const char* path) try
 {
 	ConfigParser	configParser;
 
-	configParser.init(path);
-	configParser.parse(m_serverList);
+	configParser.init(path, s_serverTable);
+	configParser.parse();
 	Logger::log(Logger::INFO, "configuration file parsing finished");
 }
 catch (std::exception& e)

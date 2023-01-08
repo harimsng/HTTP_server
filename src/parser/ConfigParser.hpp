@@ -9,7 +9,7 @@
 #include "tokenizer/FileTokenizer.hpp"
 #include "Server.hpp"
 
-class	ConfigParser: public AParser<FileTokenizer, std::vector<Server> >
+class	ConfigParser: public AParser<FileTokenizer, void>
 {
 // deleted
 	ConfigParser(ConfigParser const& configParser);
@@ -23,19 +23,17 @@ public:
 	virtual ~ConfigParser();
 
 // member functions
-	void			init(std::string configPath);
+	void			init(std::string configPath, VirtualServerTable& serverTable);
 	bool			checkFileStat(const char* path);
 
-	virtual void	parse(std::vector<Server>& servers);
-	void			parseServer(std::vector<Server>& servers);
+	virtual void	parse();
+	void			parseServer() throw(std::string);
 
 private:
-	AddrResolutionTable*	m_addrResolutionTable;
+	void	checkDuplicateServerName(const Server& server) const;
+	void	addNameToTable(Server& server);
 
-public:
-// static members
-	static int			toInt(const std::string& str);
-	static std::string	toString(int num);
+	VirtualServerTable*	m_serverTable;
 };
 
 #endif

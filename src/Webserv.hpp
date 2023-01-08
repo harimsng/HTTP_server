@@ -7,7 +7,7 @@
 
 class	Server;
 
-typedef	std::map<std::string, Server*>			NameResolutionTable;
-typedef	std::map<uint64_t, NameResolutionTable>	AddrResolutionTable;
+typedef	std::map<std::string, Server*>		ServerNameTable;
+typedef	std::map<uint64_t, ServerNameTable>	VirtualServerTable;
 
 #endif
