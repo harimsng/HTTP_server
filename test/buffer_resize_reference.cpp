@@ -53,23 +53,29 @@ class B
 
 int main(void)
 {
-	A test1;
+	string a;
 
-	B test2(test1.getBuffer());
+	a.resize(1000);
 
-	test1.printBuffer();
-	test2.printBuffer();
+	cout << a.size() << endl;
+	cout << a.capacity() << endl;
+	// A test1;
+    //
+	// B test2(test1.getBuffer());
+    //
+	// test1.printBuffer();
+	// test2.printBuffer();
+    //
+	// test2.resize();
+	// test1.printBuffer();
+	// test2.printBuffer();
+    //
+	// test1.resize();
+	// test1.printBuffer();
+	// test2.printBuffer();
 
-	test2.resize();
-	test1.printBuffer();
-	test2.printBuffer();
 
-	test1.resize();
-	test1.printBuffer();
-	test2.printBuffer();
-
-
-	test2.resize();
-	test1.printBuffer();
-	test2.printBuffer();
+	// test2.resize();
+	// test1.printBuffer();
+	// test2.printBuffer();
 }
