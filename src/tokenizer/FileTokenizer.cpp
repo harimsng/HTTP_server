@@ -69,17 +69,17 @@ FileTokenizer::getErrorLog(const char* message)
 	if (errorLineNumber >= 3)
 	{
 		getline(m_fstream, errorLine);
-		errorLine = "line " + ConfigParser::toString(errorLineNumber - 2) + ": " + errorLine;
+		errorLine = "line " + Util::toString(errorLineNumber - 2) + ": " + errorLine;
 		errorLog += errorLine + "\n";
 	}
 	if (errorLineNumber >= 2)
 	{
 		getline(m_fstream, errorLine);
-		errorLine = "line " + ConfigParser::toString(errorLineNumber - 1) + ": " + errorLine;
+		errorLine = "line " + Util::toString(errorLineNumber - 1) + ": " + errorLine;
 		errorLog += errorLine + "\n";
 	}
 	getline(m_fstream, errorLine);
-	errorLine = "line " + ConfigParser::toString(errorLineNumber) + ": " + errorLine;
+	errorLine = "line " + Util::toString(errorLineNumber) + ": " + errorLine;
 	errorLog += errorLine + "  <<\n";
 	return errorLog;
 }
@@ -150,7 +150,7 @@ FileTokenizer::printTokensByLine() const
 		if (line != m_tokenArr[i].second)
 		{
 			++line;
-			cout << "\nline " + ConfigParser::toString(line) + ": ";
+			cout << "\nline " + Util::toString(line) + ": ";
 		}
 		cout << m_tokenArr[i].first << ' ';
 	}

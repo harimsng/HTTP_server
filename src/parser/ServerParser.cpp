@@ -72,7 +72,11 @@ ServerParser::setIndex(Server& server)
 void
 ServerParser::setServerNames(Server& server)
 {
-	server.m_serverNames = m_tokenizer.get();
+	// INFO: it would be better if token type is added for the token data.
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		server.m_serverNames.push_back(m_tokenizer.get());
+	}
 	m_tokenizer.eat(";");
 }
 
@@ -85,6 +89,7 @@ ServerParser::setListenAddress(Server& server)
 	uint32_t			addr = 0;
 	uint16_t			port = 0;
 
+	// TODO: we can simplify this function by using getaddrinfo(), not necessary though.
 	if (colonPos != string::npos || count(listenField.begin(), listenField.end(), '.') > 0)
 	{
 		uint16_t	addrPart = 0;
@@ -116,6 +121,7 @@ ServerParser::setListenAddress(Server& server)
 			throw ConfigParser::ConfigParserException("invalid listen address");
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
+	server.m_addrKey = (addr << 16) + port;
 	m_tokenizer.eat(";");
 }
 
@@ -143,13 +149,13 @@ ServerParser::setErrorCode(Server& server)
 void
 ServerParser::setClientMaxBodySize(Server& server)
 {
-	server.m_clientMaxBodySize = ConfigParser::toInt(m_tokenizer.get());
+	server.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setUriBufferSize(Server& server)
 {
-	server.m_uriBufferSize = ConfigParser::toInt(m_tokenizer.get());
+	server.m_uriBufferSize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }

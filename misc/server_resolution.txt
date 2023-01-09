@@ -1,0 +1,23 @@
+NameResolutionTable == map<string, Server*>
+AddrResolutionTable	== map<uint64_t, NameResolutionTable>
+
+AddrResolutionTable // Contains mapped pairs of a listen address and a table of related servers.
+{
+	[listenAddress2] = NameResolutionTable1 // A table of servers related to a specific listenAddress.
+	{
+		[serverName001] // A server which has the serverName001 in its server block in configuration file.
+		{
+			...
+		}
+
+		[serverName002]
+		{
+			...
+		}
+	}
+
+	[listenAddress2] = NameResolutionTable2
+	{
+		
+	}
+}

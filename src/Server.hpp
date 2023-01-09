@@ -4,10 +4,7 @@
 // for gnu c portability and c++98 standard. should be removed later
 #include <stdint.h>
 
-#include <map>
-#include <vector>
-#include <string>
-
+#include "Webserv.hpp"
 #include "Client.hpp"
 #include "Location.hpp"
 #include "socket_/Socket.hpp"
@@ -44,15 +41,19 @@ public:
 // member functions
 	template <typename IoEventPoller>
 	void	initServer();
+
 	template <typename IoEventPoller>
 	typename IoEventPoller::EventStatus	handleEvent(const typename IoEventPoller::EventData& event);
+
+	uint64_t	getAddrKey() const;
+	
 
 private:
 	void	setToDefault();
 
 // member variales - config
 	std::string					m_index;
-	std::string					m_serverNames;
+	std::vector<std::string>	m_serverNames;
 	std::string					m_errorCode;
 	std::string					m_root;
 	std::string					m_errorPath;
@@ -66,13 +67,13 @@ private:
 	Socket<Tcp>			m_socket;
 
 public:
-	const int				m_fd;
+	uint64_t	m_addrKey;
+	const int	m_fd;
 
+// friends
+	friend class			ConfigParser;
 	friend class			ServerParser;
-	friend class			ServerSocket;
 	friend std::ostream&	operator<<(std::ostream& os, const Server& server);
-
-	static const int		s_defaultPort = 8000;
 };
 
 template <typename IoEventPoller>

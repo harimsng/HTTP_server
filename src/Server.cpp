@@ -32,15 +32,26 @@ Server::operator=(const Server& server)
 	return *this;
 }
 
+uint64_t
+Server::getAddrKey() const
+{
+	return m_addrKey;
+}
+
+#define DEFAULT_NAME ("") // coule be hostname
+#define DEFAULT_ADDR (INADDR_ANY)
+#define DEFAULT_PORT (8000)
+// TODO: fill up default variable list
+
 void
 Server::setToDefault()
 {
 //	m_index;
-	m_serverNames = "";
+	m_serverNames = vector<string>(1, "");
 //	m_errorCode;
 //	m_root;
 //	m_errorPages;
-	m_listen = GET_SOCKADDR_IN(INADDR_ANY, s_defaultPort);
+	m_listen = GET_SOCKADDR_IN(DEFAULT_ADDR, DEFAULT_PORT);
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
 }
@@ -51,7 +62,10 @@ operator<<(std::ostream& os, const Server& server)
 	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
 
 	os << "server\n{\n";
-	os << "\tserver_name " << server.m_serverNames << '\n';
+	os << "\tserver_name    ";
+	for (size_t i = 0; i < server.m_serverNames.size(); ++i)
+		os << server.m_serverNames[i] << ' ';
+	os << '\n';
 	os << "\tlisten " << ((addr & 0xff000000) >> 24) << '.'
 	   << ((addr & 0xff0000) >> 16) << '.'
 	   << ((addr & 0xff00) >> 8) << '.'

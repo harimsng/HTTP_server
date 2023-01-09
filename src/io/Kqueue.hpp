@@ -1,6 +1,5 @@
-#include "Server.hpp"
-
 #ifdef __APPLE__
+
 # ifndef KQUEUE_HPP
 # define KQUEUE_HPP
 
@@ -62,5 +61,6 @@ private:
 	size_t				m_registeredEventSize;
 };
 
-#endif
+# endif
+
 #endif

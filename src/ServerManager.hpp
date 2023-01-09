@@ -5,14 +5,14 @@
 #include <map>
 #include <iostream>
 
+#include "Webserv.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
 #include "cgi/Cgi.hpp"
 #include "parser/ConfigParser.hpp"
-//#include "socket/ServerSocket.hpp"
 
-#define ALLOC_SIZE (std::max(sizeof(Client), sizeof(Cgi)))
+static const std::size_t	g_objectSize = (std::max(sizeof(Client), sizeof(Cgi)));
 
 // IoEventPoller is class to encapsulate IO multiplexing system calls and associated types.
 template <typename IoEventPoller>
@@ -30,10 +30,8 @@ public:
 	ServerManager();
 	~ServerManager();
 
-// operators
-
 // member functions
-	void	parse(const char* path);
+	void	parseConfig(const char* path);
 	void	run();
 
 private:
@@ -45,8 +43,13 @@ private:
 // member variables
 	std::vector<Server>		m_serverList;
 
-public:
 // static members
+private:
+	static std::map<int, EventObject>	s_eventObjectMap;
+	static IoEventPoller				s_ioEventPoller;
+	static VirtualServerTable			s_serverTable;
+
+public:
 	static void registerEvent(int fd,
 			typename IoEventPoller::e_operation op,
 			typename IoEventPoller::e_filters filter);
@@ -54,23 +57,21 @@ public:
 			int fd, Server* target);
 	static void	removeEventObject(int fd);
 
-	static std::map<int, EventObject>		s_eventObjectMap;
-	static IoEventPoller					s_ioEventPoller;
-
 // friends
 	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
 };
 
-/*
- * Definitions
- */
-
+// static member definitions
 template <typename IoEventPoller>
 std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventObjectMap;
 
 template <typename IoEventPoller>
 IoEventPoller	ServerManager<IoEventPoller>::s_ioEventPoller;
 
+template <typename IoEventPoller>
+VirtualServerTable	ServerManager<IoEventPoller>::s_serverTable;
+
+// member function definitions
 template <typename IoEventPoller>
 ServerManager<IoEventPoller>::ServerManager()
 {
@@ -87,12 +88,12 @@ ServerManager<IoEventPoller>::~ServerManager()
 
 template <typename IoEventPoller>
 void
-ServerManager<IoEventPoller>::parse(const char* path) try
+ServerManager<IoEventPoller>::parseConfig(const char* path) try
 {
 	ConfigParser	configParser;
 
-	configParser.init(path);
-	configParser.parse(m_serverList);
+	configParser.init(path, s_serverTable);
+	configParser.parse();
 	Logger::log(Logger::INFO, "configuration file parsing finished");
 }
 catch (std::exception& e)
@@ -194,7 +195,7 @@ ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, 
 			break;
 		case EventObject::CLIENT:
 			if (s_eventObjectMap.count(fd) == 0)
-				et.object = operator new(ALLOC_SIZE);
+				et.object = operator new(g_objectSize);
 
 			else if (type != s_eventObjectMap[fd].type)
 				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
@@ -203,7 +204,7 @@ ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, 
 			break;
 		case EventObject::CGI:
 			if (s_eventObjectMap.count(fd) == 0)
-				et.object = operator new(ALLOC_SIZE);
+				et.object = operator new(g_objectSize);
 
 			else if (type != s_eventObjectMap[fd].type)
 				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
