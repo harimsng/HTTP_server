@@ -57,15 +57,18 @@ Client::handleEvent(const typename IoEventPoller::EventData& event)
 			Logger::log(Logger::DEBUG, "read event");
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
+			break;
 		case IoEventPoller::WRITE:
 			Logger::log(Logger::DEBUG, "write event");
 			m_response.sendResponse(event.getInfo());
 			return IoEventPoller::NORMAL;
+			break;
 //		case IoEventPoller::EXCEPT:
-//			break;
+			// break;
 		default:
 			throw std::runtime_error("not handled event filter in Client::handleEvent()");
 	}
+	return (IoEventPoller::END);
 }
 // catch (HttpErrorHandler& e)
 // {

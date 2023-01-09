@@ -17,6 +17,7 @@ Request::Request(const Socket<Tcp>& socket)
 	m_parser(m_buffer)
 {
 	m_residue = 0;
+	m_buffer.resize(0);
 }
 
 Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
@@ -26,6 +27,7 @@ Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
 	m_httpInfo(&httpInfo)
 {
 	m_residue = 0;
+	m_buffer.resize(0);
 }
 
 Request::~Request()
