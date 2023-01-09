@@ -45,16 +45,14 @@ private:
 
 // static members
 private:
-	static std::map<int, EventObject>	s_eventObjectMap;
 	static IoEventPoller				s_ioEventPoller;
 	static VirtualServerTable			s_serverTable;
 
 public:
-	static void registerEvent(int fd,
-			typename IoEventPoller::e_operation op,
-			typename IoEventPoller::e_filters filter);
-	static void	addEventObject(typename EventObject::e_type type,
+	static EventObject*	createEventObject(typename EventObject::e_type type,
 			int fd, Server* target);
+	static void registerEvent(typename IoEventPoller::e_operation op,
+			typename IoEventPoller::e_filters filter, EventObject* eventObject);
 	static void	removeEventObject(int fd);
 
 // friends
@@ -62,9 +60,6 @@ public:
 };
 
 // static member definitions
-template <typename IoEventPoller>
-std::map<int, EventObject>	ServerManager<IoEventPoller>::s_eventObjectMap;
-
 template <typename IoEventPoller>
 IoEventPoller	ServerManager<IoEventPoller>::s_ioEventPoller;
 
@@ -106,7 +101,8 @@ void
 ServerManager<IoEventPoller>::initServers()
 {
 	for (size_t i = 0; i < m_serverList.size(); i++)
-		m_serverList[i].template initServer<IoEventPoller>();
+	{
+	}
 
 	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
 }
@@ -175,47 +171,36 @@ ServerManager<IoEventPoller>::processEventObject(const EventData& event, EventOb
 
 template <typename IoEventPoller>
 void
-ServerManager<IoEventPoller>::registerEvent(int fd, typename IoEventPoller::e_operation op,
-		typename IoEventPoller::e_filters filter)
+ServerManager<IoEventPoller>::registerEvent(typename IoEventPoller::e_operation op,
+		typename IoEventPoller::e_filters filter, EventObject* eventObject)
 {
-	s_ioEventPoller.add(fd, op, filter);
+	s_ioEventPoller.add(op, filter, eventObject);
 }
 
 template <typename IoEventPoller>
-void
-ServerManager<IoEventPoller>::addEventObject(typename EventObject::e_type type, int fd, Server* server)
+EventObject*
+ServerManager<IoEventPoller>::createEventObject(typename EventObject::e_type type, int fd, uint64_t info)
 {
-	EventObject	et;
+	EventObject*	eventObject = new EventObject();
 
-	et.type = type;
+	eventObject->type = type;
 	switch (type)
 	{
 		case EventObject::SERVER:
-			et.object = reinterpret_cast<void*>(server);
+			eventObject.object = reinterpret_cast<void*>(reinterpret_cast<Server*>(info));
 			break;
 		case EventObject::CLIENT:
-			if (s_eventObjectMap.count(fd) == 0)
-				et.object = operator new(g_objectSize);
-
-			else if (type != s_eventObjectMap[fd].type)
-				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
-
-			new (et.object) Client(*server, fd);
+			Client*	newClient = new Client(fd, s_serverTable[info]);
+			eventObject.object = reinterpret_cast<void*>(newClient);
 			break;
 		case EventObject::CGI:
-			if (s_eventObjectMap.count(fd) == 0)
-				et.object = operator new(g_objectSize);
-
-			else if (type != s_eventObjectMap[fd].type)
-				throw std::runtime_error("addEventObject(): previous object has not been cleaned");
-
-			new (et.object) Cgi();
+			Client*	newCgi = new Cgi();
+			eventObject.object = reinterpret_cast<void*>(newCgi);
 			break;
-
 		default:
 			;
 	}
-	s_eventObjectMap[fd] = et;
+	return eventObject;
 }
 
 template <typename IoEventPoller>

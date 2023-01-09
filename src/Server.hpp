@@ -26,6 +26,7 @@ struct	EventObject
 		CGI = 3
 	};
 	e_type	type;
+	int		fd;
 	void*	object;
 };
 
@@ -87,9 +88,9 @@ Server::initServer()
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
-	ServerManager<IoEventPoller>::addEventObject(EventObject::SERVER, m_fd, this);
+	void*	object = ServerManager<IoEventPoller>::addEventObject(EventObject::SERVER, m_fd, this);
 	ServerManager<IoEventPoller>::registerEvent(m_fd, IoEventPoller::ADD,
-			IoEventPoller::READ);
+			IoEventPoller::READ, object);
 }
 
 template <typename IoEventPoller>
@@ -108,9 +109,9 @@ Server::handleEvent(const typename IoEventPoller::EventData& event)
 				throw std::runtime_error("accept error in Server::handleEvent()");
 
 			ServerManager<IoEventPoller>::addEventObject(EventObject::CLIENT,
-					clientFd, this);
-			ServerManager<IoEventPoller>::registerEvent(clientFd,
-					IoEventPoller::ADD, filter);
+					clientFd, m_listen.sin_port);
+			ServerManager<IoEventPoller>::registerEvent(IoEventPoller::ADD,
+					clientFd, filter);
 			// ServerManager<IoEventPoller>::registerEvent(clientFd,
 			//         IoEventPoller::ADD, IoEventPoller::READWRITE);
 			break;
