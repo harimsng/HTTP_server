@@ -17,7 +17,7 @@ class	Server: public IEventObject
 
 public:
 // constructors & destructor
-	Server();
+	Server(uint16_t port);
 	virtual ~Server();
 	Server(const Server& server);
 

@@ -21,6 +21,7 @@ struct	EventProperties
 
 	enum	e_filters
 	{
+		NONE = 0x0,
 		READ = 0x1,
 		WRITE = 0x2,
 		READWRITE = 0x3,
@@ -44,7 +45,7 @@ protected:
 public:
 // member functions
 	virtual void				add(int fd, const Event& event) = 0;
-	virtual void				add(int fd, e_operation flag, e_filters filter, void* userData) = 0;
+	virtual void				add(int fd, e_operation op, e_filters filter, void* userData) = 0;
 	virtual const EventList&	poll() = 0;
 };
 

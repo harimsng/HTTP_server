@@ -45,6 +45,8 @@ VirtualServer::setToDefault()
 	m_listen = GET_SOCKADDR_IN(DEFAULT_ADDR, DEFAULT_PORT);
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
+//
+	m_addrKey = (DEFAULT_ADDR << 16) + DEFAULT_PORT;
 }
 
 std::ostream&

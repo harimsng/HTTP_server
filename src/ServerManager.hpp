@@ -11,6 +11,7 @@
 #include "VirtualServer.hpp"
 #include "Client.hpp"
 #include "cgi/Cgi.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "parser/ConfigParser.hpp"
 
 static const std::size_t	g_objectSize = (std::max(sizeof(Client), sizeof(Cgi)));
@@ -109,14 +110,14 @@ ServerManager<IoEventPoller>::initServers()
 		 itr != s_virtualServerTable.end();
 		 ++itr)
 	{
-		portSet.insert(itr->first & 0xff);
+		portSet.insert(itr->first & 0xffff);
 	}
 
 	for (set<uint64_t>::iterator itr = portSet.begin();
 		 itr != portSet.end();
 		 ++itr)
 	{
-		Server*	newServer = new Server();
+		Server*	newServer = new Server(*itr);
 
 		newServer->initServer();
 		ServerManager<IoEventPoller>::registerEvent(newServer->m_fd, IoEventPoller::ADD,
@@ -124,7 +125,7 @@ ServerManager<IoEventPoller>::initServers()
 		s_listenServerTable[*itr] = newServer;
 	}
 
-	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
+	Logger::log(Logger::INFO, "%zu listen servers are initiated", s_listenServerTable.size());
 }
 
 template <typename IoEventPoller>
@@ -138,11 +139,15 @@ ServerManager<IoEventPoller>::run() try
 		const EventList&	eventList = s_ioEventPoller.poll();
 		processEvents(eventList);
 	}
-	Logger::log(Logger::INFO, "%zu servers exited", m_serverList.size());
+	Logger::log(Logger::INFO, "%zu listen servers exited", s_listenServerTable.size());
 }
 catch (std::runtime_error& e)
 {
 	Logger::log(Logger::ERROR, "%s", e.what());
+}
+catch (HttpErrorHandler& e)
+{
+	Logger::log(Logger::ERROR, "%s, %d %s", e.getErrorMessage().data(), errno, strerror(errno));
 }
 catch (...)
 {
@@ -158,7 +163,13 @@ ServerManager<IoEventPoller>::processEvents(const EventList& events)
 		const Event&	event = events[i];
 		void*			udata = const_cast<void*>(event.getUserDataPtr());
 
-		reinterpret_cast<EventObject*>(udata)->handleEvent(event);
+		typename IoEventPoller::EventStatus status =
+			reinterpret_cast<EventObject*>(udata)->handleEvent(event);
+		if (status == IoEventPoller::END)
+		{
+			LOG(DEBUG, "fd: %d event delete", event.getFd());
+			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
+		}
 	}
 }
 

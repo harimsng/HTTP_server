@@ -6,6 +6,9 @@
 
 #include "util/Util.hpp"
 
+#define LOG(type, fmt, ...)	\
+	Logger::log(Logger::type, fmt, ##__VA_ARGS__)
+
 class	Logger
 {
 // hidden
