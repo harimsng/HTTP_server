@@ -33,21 +33,21 @@ Kqueue::operator=(Kqueue const& kqueue)
 }
 
 void
-Kqueue::add(int fd, const EventData& event)
+Kqueue::add(int fd, const Event& event)
 {
 	(void)fd;
 	m_changeList.push_back(event);
 }
 
 void
-Kqueue::add(int fd, e_operation flag, e_filters filter)
+Kqueue::add(int fd, e_operation op, e_filters filter, void* userData)
 {
 	static const int16_t	filterTable[3] = {EVFILT_READ, EVFILT_WRITE, EVFILT_EXCEPT};
 	static const uint16_t	flagTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
 	Kevent	event;
 
-	EV_SET(&event, fd, 0, 0, 0, 0, NULL);
-	event.flags = flagTable[flag - 1];
+	EV_SET(&event, fd, 0, 0, 0, 0, userData);
+	event.flags = flagTable[op - 1];
 	for (uint64_t bitmask = 1, count = 0; count < 3; bitmask <<= 1, ++count)
 	{
 		if ((filter & bitmask) != 0)
@@ -58,7 +58,7 @@ Kqueue::add(int fd, e_operation flag, e_filters filter)
 	}
 }
 
-Kqueue::EventData
+Kqueue::Event
 Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags,
 					intptr_t data, void* udata)
 {

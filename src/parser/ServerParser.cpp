@@ -38,7 +38,7 @@ ServerParser::~ServerParser()
 
 // member functions
 void
-ServerParser::parse(Server& server)
+ServerParser::parse(VirtualServer& server)
 {
 	while (s_serverSetterMap.count(m_tokenizer.peek()) == 1)
 	{
@@ -47,7 +47,7 @@ ServerParser::parse(Server& server)
 }
 
 void
-ServerParser::parseLocation(Server& server)
+ServerParser::parseLocation(VirtualServer& server)
 {
 	string	locationPath = m_tokenizer.get();
 
@@ -63,14 +63,14 @@ ServerParser::parseLocation(Server& server)
 
 // setters
 void
-ServerParser::setIndex(Server& server)
+ServerParser::setIndex(VirtualServer& server)
 {
 	server.m_index = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setServerNames(Server& server)
+ServerParser::setServerNames(VirtualServer& server)
 {
 	// INFO: it would be better if token type is added for the token data.
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
@@ -81,7 +81,7 @@ ServerParser::setServerNames(Server& server)
 }
 
 void
-ServerParser::setListenAddress(Server& server)
+ServerParser::setListenAddress(VirtualServer& server)
 {
 	string				listenField = m_tokenizer.get();
 	stringstream		ss;
@@ -126,35 +126,35 @@ ServerParser::setListenAddress(Server& server)
 }
 
 void
-ServerParser::setRoot(Server& server)
+ServerParser::setRoot(VirtualServer& server)
 {
 	server.m_root = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setErrorPages(Server& server)
+ServerParser::setErrorPages(VirtualServer& server)
 {
 	server.m_errorPages = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setErrorCode(Server& server)
+ServerParser::setErrorCode(VirtualServer& server)
 {
 	server.m_errorCode = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setClientMaxBodySize(Server& server)
+ServerParser::setClientMaxBodySize(VirtualServer& server)
 {
 	server.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setUriBufferSize(Server& server)
+ServerParser::setUriBufferSize(VirtualServer& server)
 {
 	server.m_uriBufferSize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");

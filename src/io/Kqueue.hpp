@@ -11,26 +11,27 @@
 
 struct	Kevent: public kevent
 {
-	int	getFd() const {return ident;}
-	int	getInfo() const {return data;}
-	IoMultiplexEnum::e_filters	getFilter() const
+	int		getFd() const {return ident;}
+	int		getInfo() const {return data;}
+	void*	getUserDataPtr() const {return udata;}
+	EventProperties::e_filters	getFilter() const
 	{
 		switch (filter)
 		{
 			case EVFILT_READ:
-				return IoMultiplexEnum::READ;
+				return EventProperties::READ;
 			case EVFILT_WRITE:
-				return IoMultiplexEnum::WRITE;
+				return EventProperties::WRITE;
 			default:
-				return IoMultiplexEnum::FILT_ERROR;
+				return EventProperties::FILT_ERROR;
 		}
 	}
 };
 
 struct	KqueueAttr
 {
-	typedef Kevent					EventData;
-	typedef std::vector<EventData>	EventList;
+	typedef Kevent				Event;
+	typedef std::vector<Event>	EventList;
 };
 
 class	Kqueue: public IIoMultiplex<KqueueAttr>
@@ -47,10 +48,10 @@ public:
 	virtual ~Kqueue();
 
 // member functions
-	virtual void	add(int fd, const EventData& event);
-	virtual void	add(int fd, e_operation flag, e_filters filter);
-	EventData		createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags = 0,
-								intptr_t data = 0, void* udata = NULL);
+	virtual void	add(int fd, const Event& event);
+	virtual void	add(int fd, e_operation op, e_filters filter, void* userData = NULL);
+	Event			createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags = 0,
+							intptr_t data = 0, void* udata = NULL);
 	virtual const EventList&	poll();
 
 private:

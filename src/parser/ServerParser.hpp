@@ -7,16 +7,16 @@
 #include "parser/AParser.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 
-class	Server;
+class	VirtualServer;
 
-class	ServerParser: public AParser<FileTokenizer, Server>
+class	ServerParser: public AParser<FileTokenizer, VirtualServer>
 {
 	ServerParser(ServerParser const& serverParser);
 	ServerParser	&operator=(ServerParser const& serverParser);
 
 public:
 // static members
-	typedef void	(ServerParser::*t_setter)(Server&);
+	typedef void	(ServerParser::*t_setter)(VirtualServer&);
 
 	static std::map<std::string, t_setter>	s_serverSetterMap;
 	static void								setServerSetterMap();
@@ -26,17 +26,17 @@ public:
 	virtual ~ServerParser();
 
 // member functions
-	virtual void	parse(Server& server);
+	virtual void	parse(VirtualServer& server);
 
-	void		parseLocation(Server& server);
-	void		setIndex(Server& server);
-	void		setServerNames(Server& server);
-	void		setListenAddress(Server& server);
-	void		setRoot(Server& server);
-	void		setErrorPages(Server& server);
-	void		setErrorCode(Server& server);
-	void		setClientMaxBodySize(Server& server);
-	void		setUriBufferSize(Server& server);
+	void		parseLocation(VirtualServer& server);
+	void		setIndex(VirtualServer& server);
+	void		setServerNames(VirtualServer& server);
+	void		setListenAddress(VirtualServer& server);
+	void		setRoot(VirtualServer& server);
+	void		setErrorPages(VirtualServer& server);
+	void		setErrorCode(VirtualServer& server);
+	void		setClientMaxBodySize(VirtualServer& server);
+	void		setUriBufferSize(VirtualServer& server);
 
 private:
 // member variables

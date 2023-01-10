@@ -1,80 +1,71 @@
+#include "ServerManager.hpp"
+#include "Client.hpp"
 #include "Server.hpp"
 
-Server::Server()
-:	m_fd(m_socket.m_fd)
+// deleted
+Server&
+Server::operator=(const Server& server)
 {
-	setToDefault();
+	(void)server;
+	throw logic_error("Server::operator=() is forbidden");
+	return *this;
+}
+
+// constructors & destructor
+Server::Server()
+:	m_socket(Socket<Tcp>()),
+	m_fd(m_socket.m_fd)
+{
 }
 
 Server::~Server()
 {
 }
 
-Server::Server(Server const& server)
+Server::Server(const Server& server)
 :	m_socket(server.m_socket),
-	m_fd(m_socket.m_fd)
+	m_fd(server.m_fd)
 {
-	*this = server;
 }
-
-Server&
-Server::operator=(const Server& server)
-{
-	m_index = server.m_index;
-	m_serverNames = server.m_serverNames;
-	m_errorCode = server.m_errorCode;
-	m_root = server.m_root;
-	m_errorPages = server.m_errorPages;
-	m_listen = server.m_listen;
-	m_clientMaxBodySize = server.m_clientMaxBodySize;
-	m_uriBufferSize = server.m_uriBufferSize;
-	m_locationList = server.m_locationList;
-	return *this;
-}
-
-uint64_t
-Server::getAddrKey() const
-{
-	return m_addrKey;
-}
-
-#define DEFAULT_NAME ("") // coule be hostname
-#define DEFAULT_ADDR (INADDR_ANY)
-#define DEFAULT_PORT (8000)
-// TODO: fill up default variable list
 
 void
-Server::setToDefault()
+Server::initServer()
 {
-//	m_index;
-	m_serverNames = vector<string>(1, "");
-//	m_errorCode;
-//	m_root;
-//	m_errorPages;
-	m_listen = GET_SOCKADDR_IN(DEFAULT_ADDR, DEFAULT_PORT);
-	m_clientMaxBodySize = 1 << 13; // 8kb
-//	m_uriBufferSize;
+	Socket<Tcp>::SocketAddr socketaddr;
+	
+	if (m_socket.m_fd < 0)
+		throw std::runtime_error("server socket() error");
+
+	socketaddr.sin_port = m_port;
+	if (m_socket.bind(&socketaddr) < 0)
+		throw std::runtime_error("server socket bind() error");
+	if (m_socket.listen() < 0)
+		throw std::runtime_error("server socket listen() error");
 }
 
-std::ostream&
-operator<<(std::ostream& os, const Server& server)
+Server::IoEventPoller::EventStatus
+Server::handleEvent(const IoEventPoller::Event& event)
 {
-	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
+	IoEventPoller::e_filters	filter = event.getFilter();
 
-	os << "server\n{\n";
-	os << "\tserver_name    ";
-	for (size_t i = 0; i < server.m_serverNames.size(); ++i)
-		os << server.m_serverNames[i] << ' ';
-	os << '\n';
-	os << "\tlisten " << ((addr & 0xff000000) >> 24) << '.'
-	   << ((addr & 0xff0000) >> 16) << '.'
-	   << ((addr & 0xff00) >> 8) << '.'
-	   << (addr & 0xff) << ':'
-	   << ntohs(server.m_listen.sin_port) << '\n';
-	os << "\tindex " << server.m_index << '\n';
-	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
-	for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
-		os << server.m_locationList[i];
-	os << "}\n";
-	return os;
+	switch (filter)
+	{
+		case IoEventPoller::READ:
+			int		clientFd;
+			clientFd = m_socket.accept();
+
+			if (clientFd < 0)
+				throw std::runtime_error("accept error in Server::handleEvent()");
+
+			Client* client;
+			client = new Client(clientFd);
+			ServerManager<IoEventPoller>::registerEvent(clientFd, IoEventPoller::ADD,
+					filter, client);
+			// ServerManager<IoEventPoller>::registerEvent(clientFd,
+			//         IoEventPoller::ADD, IoEventPoller::READWRITE);
+			break;
+		default:
+			throw std::runtime_error("not handled event filter in Server::handleEvent()");
+	}
+	return IoEventPoller::NORMAL;
 }

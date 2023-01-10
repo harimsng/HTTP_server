@@ -8,7 +8,17 @@
 
 struct	Tcp
 {
-	typedef sockaddr_in	socketAddr;
+	struct	SocketAddr: public sockaddr_in
+	{
+		SocketAddr()
+		{
+			sin_len = socketAddrLen;
+			sin_family = domain;
+			sin_port = 0;
+			sin_addr.s_addr = static_cast<in_addr_t>(0);
+			::memset(sin_zero, 0, sizeof(sin_zero));
+		};
+	};
 
 	static const socklen_t	socketAddrLen = INET_ADDRSTRLEN;
 	static const int		domain = AF_INET;

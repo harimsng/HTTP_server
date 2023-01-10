@@ -2,8 +2,8 @@
 #include <iostream>
 
 #include "parser/ConfigParser.hpp"
-#include "tokenizer/FileTokenizer.hpp"
 #include "exception/FileTokenizerException.hpp"
+#include "tokenizer/FileTokenizer.hpp"
 
 using namespace std;
 
@@ -37,8 +37,10 @@ FileTokenizer::get()
 void
 FileTokenizer::eat(const string& target)
 {
+	string	temp = peek();
+
 	if (get() != target)
-		throw FileTokenizerException("unexpected token");
+		throw FileTokenizerException("unexpected token: '" + temp + "'");
 }
 
 unsigned int
@@ -96,10 +98,9 @@ FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 			m_tokenArr.push_back(make_pair(string(1, chunk[end]), lineNumber));
 			start = end + 1;
 		}
-		else if (chunk[end] == '\0')
+		else if (chunk[end] == '\0' && start != end)
 		{
-			if (start != end)
-				m_tokenArr.push_back(make_pair(chunk.substr(start, end - start), lineNumber));
+			m_tokenArr.push_back(make_pair(chunk.substr(start, end - start), lineNumber));
 		}
 	}
 }

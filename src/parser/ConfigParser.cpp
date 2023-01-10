@@ -55,36 +55,43 @@ ConfigParser::parse() try
 		parseServer();
 	}
 	if (m_tokenizer.empty() == false)
-		m_tokenizer.eat("server");
+		m_tokenizer.eat("server");	// this will always throw.
 }
 catch (exception& e)
 {
+	Logger::log(Logger::ERROR, "syntax error");
 	cout << m_tokenizer.getErrorLog(e.what());
+	throw 1;
 }
 
 void
-ConfigParser::parseServer() throw(string) try
+ConfigParser::parseServer() try
 {
 	m_tokenizer.eat("{");
 	
 	ServerParser	serverParser(m_tokenizer);
 
-	Server	newServer;
-	serverParser.parse(newServer);
+	VirtualServer*	newServer = new VirtualServer;
+	serverParser.parse(*newServer);
 	m_tokenizer.eat("}");
 
-	if (m_serverTable->count(newServer.m_addrKey) == 1)
-		checkDuplicateServerName(newServer);
+	if (m_serverTable->count(newServer->m_addrKey) == 1)
+		checkDuplicateServerName(*newServer);
 	else
-		(*m_serverTable)[newServer.m_addrKey];
-	addNameToTable(newServer);
+		(*m_serverTable)[newServer->m_addrKey][""] = newServer;
+
+	addNameToTable(*newServer);
 }
-catch (string& serverName)
+catch (VirtualServer* newServer)
+{
+	delete newServer;
+}
+catch (string& duplicatedServerName)
 {
 }
 
 void
-ConfigParser::checkDuplicateServerName(const Server& server) const
+ConfigParser::checkDuplicateServerName(VirtualServer& server)
 {
 	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
 	const vector<string>&	names = server.m_serverNames;
@@ -97,13 +104,13 @@ ConfigParser::checkDuplicateServerName(const Server& server) const
 }
 
 void
-ConfigParser::addNameToTable(Server& server)
+ConfigParser::addNameToTable(VirtualServer& server)
 {
 	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
 	const vector<string>&	names = server.m_serverNames;
 
 	for (size_t i = 0; i < names.size(); ++i)
 	{
-		table[names[i]];
+		table[names[i]] = &server;
 	}
 }
