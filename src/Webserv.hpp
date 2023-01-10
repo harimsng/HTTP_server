@@ -1,14 +1,18 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
+#include "OsDependency.hpp"
+
 #include <map>
 #include <vector>
 #include <string>
 
 class	Server;
+class	VirtualServer;
 
-typedef	std::map<std::string, Server*>		ServerNameTable;
-typedef	std::map<uint64_t, ServerNameTable>	VirtualServerTable;
+typedef	std::map<std::string, VirtualServer*>	ServerNameTable;
+typedef	std::map<uint64_t, ServerNameTable>		VirtualServerTable;
+typedef std::map<uint64_t, Server*>				ListenServerTable;
 /*
 
 listen 80			-> 80 << 32 + 0 == 80

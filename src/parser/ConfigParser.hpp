@@ -7,7 +7,7 @@
 #include "Webserv.hpp"
 #include "parser/AParser.hpp"
 #include "tokenizer/FileTokenizer.hpp"
-#include "Server.hpp"
+#include "VirtualServer.hpp"
 
 class	ConfigParser: public AParser<FileTokenizer, void>
 {
@@ -30,8 +30,8 @@ public:
 	void			parseServer() throw(std::string);
 
 private:
-	void	checkDuplicateServerName(const Server& server) const;
-	void	addNameToTable(Server& server);
+	void	checkDuplicateServerName(VirtualServer& server);
+	void	addNameToTable(VirtualServer& server);
 
 	VirtualServerTable*	m_serverTable;
 };

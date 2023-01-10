@@ -1,7 +1,7 @@
 #ifndef IIOMULTIPLEX_HPP
 #define IIOMULTIPLEX_HPP
 
-struct	IoMultiplexEnum
+struct	EventProperties
 {
 	enum	e_eventStatus
 	{
@@ -29,10 +29,10 @@ struct	IoMultiplexEnum
 };
 
 template <typename Attr>
-class	IIoMultiplex: public IoMultiplexEnum
+class	IIoMultiplex: public EventProperties
 {
 public:
-	typedef typename Attr::EventData	EventData;
+	typedef typename Attr::Event		Event;
 	typedef typename Attr::EventList	EventList;
 	typedef enum e_eventStatus			EventStatus;
 
@@ -43,8 +43,8 @@ protected:
 
 public:
 // member functions
-	virtual void				add(int fd, const EventData& event) = 0;
-	virtual void				add(int fd, e_operation flag, e_filters filter) = 0;
+	virtual void				add(int fd, const Event& event) = 0;
+	virtual void				add(int fd, e_operation flag, e_filters filter, void* userData) = 0;
 	virtual const EventList&	poll() = 0;
 };
 

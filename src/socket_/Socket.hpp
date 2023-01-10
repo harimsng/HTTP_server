@@ -10,9 +10,11 @@
 template <typename SocketType>
 class	Socket
 {
+public:
 // types
-	typedef typename SocketType::socketAddr	socketAddr;
+	typedef typename SocketType::SocketAddr	SocketAddr;
 
+private:
 // deleted
 	Socket	&operator=(const Socket& socket) {(void)socket; return *this;}
 
@@ -21,29 +23,27 @@ public:
 	Socket() throw();
 	~Socket() throw();
 	Socket(const Socket & socket) throw();
-	Socket(int fd, const socketAddr* addr = NULL) throw();
+	Socket(int fd, const SocketAddr* addr = NULL) throw();
 
 // member functions
-	int		listen(int backlog = 16) throw();
-	int		bind(socketAddr* raddr) throw();
+	int		listen(int backlog = 8) throw();
+	int		bind(SocketAddr* addr) throw();
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
-	int		connect(socketAddr* addr) throw();
+	int		connect(SocketAddr* addr) throw();
 	const std::string&	getAddressString() const throw();
 
 // member variables
 	const int	m_fd;
 private:
-	socketAddr	m_addr;
+	SocketAddr	m_addr;
 };
 
 template <typename SocketType>
 Socket<SocketType>::Socket() throw()
 :	m_fd(socket(SocketType::domain, SocketType::type, SocketType::protocol))
 {
-	int socketOption;
+	int socketOption = 1;
 
-	std::ios_base::Init();
-	socketOption = 1;
 	setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
 
 }
@@ -61,7 +61,7 @@ Socket<SocketType>::Socket(Socket const& socket) throw()
 }
 
 template <typename SocketType>
-Socket<SocketType>::Socket(int fd, const socketAddr* addr) throw()
+Socket<SocketType>::Socket(int fd, const SocketAddr* addr) throw()
 :	m_fd(fd)
 {
 	if (addr != NULL)
@@ -70,7 +70,7 @@ Socket<SocketType>::Socket(int fd, const socketAddr* addr) throw()
 
 template <typename SocketType>
 int
-Socket<SocketType>::bind(socketAddr* addr) throw()
+Socket<SocketType>::bind(SocketAddr* addr) throw()
 {
 	::memcpy(&m_addr, addr, sizeof(*addr));
 	return ::bind(m_fd, reinterpret_cast<sockaddr*>(addr), SocketType::socketAddrLen);
@@ -92,7 +92,7 @@ Socket<SocketType>::accept(sockaddr* raddr, socklen_t* sockLen) const throw()
 
 template <typename SocketType>
 int
-Socket<SocketType>::connect(socketAddr* addr) throw()
+Socket<SocketType>::connect(SocketAddr* addr) throw()
 {
 	return ::connect(m_fd, addr, SocketType::socketAddrLen);
 }
