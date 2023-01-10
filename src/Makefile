@@ -68,12 +68,10 @@ debug: DEBUG.mode
 RELEASE.mode:
 	$(MAKE) fclean
 	touch RELEASE.mode
-	ls RELEASE.mode
 
 DEBUG.mode:
 	$(MAKE) fclean
 	touch DEBUG.mode
-	ls DEBUG.mode
 
 clean:
 	$(RM) $(OBJ)

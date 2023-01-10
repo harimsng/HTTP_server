@@ -18,6 +18,15 @@ struct	Tcp
 			sin_addr.s_addr = static_cast<in_addr_t>(0);
 			::memset(sin_zero, 0, sizeof(sin_zero));
 		};
+
+		SocketAddr(const sockaddr_in& addr)
+		{
+			sin_len = addr.sin_len;
+			sin_family = addr.sin_family;
+			sin_port = addr.sin_port;
+			sin_addr.s_addr = addr.sin_addr.s_addr;
+			::memset(sin_zero, 0, sizeof(sin_zero));
+		};
 	};
 
 	static const socklen_t	socketAddrLen = INET_ADDRSTRLEN;

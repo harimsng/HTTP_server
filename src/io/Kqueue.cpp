@@ -4,10 +4,9 @@
 
 // constructors & destructor
 Kqueue::Kqueue()
+:	m_registeredEventSize(0)
 {
 	m_kqueue = kqueue();
-	m_registeredEventSize = 8;
-	m_eventList.resize(m_registeredEventSize);
 	if (m_kqueue < 0)
 		throw std::runtime_error("kqueue() fail");
 }
@@ -37,6 +36,7 @@ Kqueue::add(int fd, const Event& event)
 {
 	(void)fd;
 	m_changeList.push_back(event);
+	++m_registeredEventSize;
 }
 
 void
@@ -54,6 +54,7 @@ Kqueue::add(int fd, e_operation op, e_filters filter, void* userData)
 		{
 			event.filter = filterTable[count];
 			m_changeList.push_back(event);
+			++m_registeredEventSize;
 		}
 	}
 }
@@ -74,7 +75,7 @@ Kqueue::poll()
 	int						count = 0;
 	// static const timespec	timeSpec = {0, 0};
 
-	// m_eventList.resize(m_registeredEventSize);
+	m_eventList.resize(m_registeredEventSize);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
 				   m_eventList.data(), m_eventList.size(), 0);
 	m_changeList.clear();
