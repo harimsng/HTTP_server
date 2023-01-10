@@ -45,7 +45,8 @@ DEP			:=	$(OBJ:%.o=%.d)
 
 INCL_PATH	=	-I./\
 
-ifeq ($(DEBUG_MODE), 1)
+STATUS		=	$(shell ls DEBUG.mode 2>/dev/null)
+ifeq ($(STATUS), DEBUG.mode)
 CXXFLAGS	+=	$(DEBUGFLAGS)
 COMPILE_MODE=	DEBUG.mode
 else
@@ -58,19 +59,21 @@ endif
 all: $(COMPILE_MODE)
 	$(MAKE) $(NAME)
 
+release: RELEASE.mode
+	$(MAKE) all
+
+debug: DEBUG.mode
+	$(MAKE) all
+
 RELEASE.mode:
 	$(MAKE) fclean
 	touch RELEASE.mode
+	ls RELEASE.mode
 
 DEBUG.mode:
 	$(MAKE) fclean
 	touch DEBUG.mode
-
-debug:
-	$(MAKE) DEBUG_MODE=1 all
-
-release:
-	$(MAKE) DEBUG_MODE=0 all
+	ls DEBUG.mode
 
 clean:
 	$(RM) $(OBJ)
