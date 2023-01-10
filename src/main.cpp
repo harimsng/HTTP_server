@@ -19,8 +19,21 @@ int	main(int argc, char **argv, char **envp)
 		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return 1;
 	}
-	serverManager.parseConfig(argv[argc - 1]);
-	serverManager.run();
+	try
+	{
+		serverManager.parseConfig(argv[argc - 1]);
+		serverManager.run();
+	}
+	catch (std::exception& e)
+	{
+		cout << e.what();
+		return 1;
+	}
+	catch (int status)
+	{
+		return status;
+	}
 	(void)argv;
 	(void)envp;
+	return 0;
 }

@@ -17,10 +17,10 @@ public:
 	enum	e_types
 	{
 		DISABLED = 0,
-		ERROR = 1,
+		INFO = 1,
 		WARNING = 2,
-		INFO = 3,
-		DEBUG = 4
+		ERROR = 3,
+		DEBUG = 4,
 	};
 
 // constructors & destructor
@@ -30,7 +30,7 @@ public:
 	template <typename T>
 	static void	log(e_types type, const T& object);
 	static void	log(e_types type, const char* format, ...);
-	static void	initLogger(const std::string& type, std::ostream& os = std::cerr);
+	static void	initLogger(const std::string& type = "INFO", std::ostream& os = std::cerr);
 
 	static e_types			s_type;
 	static std::ostream*	s_ostream;

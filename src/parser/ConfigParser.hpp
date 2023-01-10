@@ -27,7 +27,7 @@ public:
 	bool			checkFileStat(const char* path);
 
 	virtual void	parse();
-	void			parseServer() throw(std::string);
+	void			parseServer();
 
 private:
 	void	checkDuplicateServerName(VirtualServer& server);

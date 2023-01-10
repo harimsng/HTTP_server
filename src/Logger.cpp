@@ -47,7 +47,7 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 		+ ERROR * (type == "ERROR")
 		+ DEBUG * (type == "DEBUG");
 	s_type = static_cast<e_types>(temp);
-	cout << "[WARNING] vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
+	cout << "[INFO] vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
 }
 
 void
@@ -60,7 +60,7 @@ Logger::log(e_types type, const char* format, ...)
 	if (s_type == DISABLED || s_type < type)
 		return;
 	va_start(ap, format);
-	vsnprintf(buffer, MAX_BUFFER_LEN, format, ap);
+	vsnprintf(buffer, MAX_BUFFER_LEN - 1, format, ap);
 	switch (type)
 	{
 		case INFO:

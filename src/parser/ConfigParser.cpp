@@ -59,11 +59,13 @@ ConfigParser::parse() try
 }
 catch (exception& e)
 {
+	Logger::log(Logger::ERROR, "syntax error");
 	cout << m_tokenizer.getErrorLog(e.what());
+	throw 1;
 }
 
 void
-ConfigParser::parseServer() throw(string) try
+ConfigParser::parseServer() try
 {
 	m_tokenizer.eat("{");
 	
@@ -77,15 +79,19 @@ ConfigParser::parseServer() throw(string) try
 		checkDuplicateServerName(*newServer);
 	else
 		(*m_serverTable)[newServer->m_addrKey][""] = newServer;
+
 	addNameToTable(*newServer);
 }
-catch (VirtualServer& newServer)
+catch (VirtualServer* newServer)
 {
-	delete &newServer;
+	delete newServer;
+}
+catch (string& duplicatedServerName)
+{
 }
 
 void
-ConfigParser::checkDuplicateServerName(VirtualServer& server) try
+ConfigParser::checkDuplicateServerName(VirtualServer& server)
 {
 	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
 	const vector<string>&	names = server.m_serverNames;
@@ -95,12 +101,6 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 		if (table.count(names[i]) == 1)
 			throw names[i];
 	}
-}
-catch (const string& name)
-{
-	server.m_serverNames.clear();
-	server.m_serverNames.push_back(name);
-	throw server;
 }
 
 void

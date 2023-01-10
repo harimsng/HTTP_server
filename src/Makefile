@@ -53,7 +53,7 @@ COMPILE_MODE=	RELEASE.mode
 endif
 
 
-.PHONY: all debug clean fclean re
+.PHONY: all debug release clean fclean re
 
 all: $(COMPILE_MODE)
 	$(MAKE) $(NAME)
@@ -68,6 +68,9 @@ DEBUG.mode:
 
 debug:
 	$(MAKE) DEBUG_MODE=1 all
+
+release:
+	$(MAKE) DEBUG_MODE=0 all
 
 clean:
 	$(RM) $(OBJ)
