@@ -34,7 +34,7 @@ public:
 	typename IoEventPoller::EventStatus	handleEvent(const typename IoEventPoller::EventData& event);
 
 // member variables
-	const Server*	m_server; // is entire Server information is needed? or root directory is enough?
+	const ServerNameTable*	m_serverNameTable; // is entire Server information is needed? or root directory is enough?
 
 	// test
 	HttpInfo		m_httpInfo;
