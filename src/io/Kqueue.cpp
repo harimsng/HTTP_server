@@ -4,7 +4,6 @@
 
 // constructors & destructor
 Kqueue::Kqueue()
-:	m_registeredEventSize(0)
 {
 	m_kqueue = kqueue();
 	if (m_kqueue < 0)
@@ -32,15 +31,14 @@ Kqueue::operator=(Kqueue const& kqueue)
 }
 
 void
-Kqueue::add(int fd, const Event& event)
+Kqueue::addWork(int fd, const Event& event)
 {
 	(void)fd;
 	m_changeList.push_back(event);
-	++m_registeredEventSize;
 }
 
 void
-Kqueue::add(int fd, e_operation op, e_filters filter, void* userData)
+Kqueue::addWork(int fd, e_operation op, e_filters filter, void* userData)
 {
 	static const int16_t	filterTable[3] = {EVFILT_READ, EVFILT_WRITE, EVFILT_EXCEPT};
 	static const uint16_t	flagTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
@@ -54,7 +52,6 @@ Kqueue::add(int fd, e_operation op, e_filters filter, void* userData)
 		{
 			event.filter = filterTable[count];
 			m_changeList.push_back(event);
-			++m_registeredEventSize;
 		}
 	}
 }
@@ -70,12 +67,13 @@ Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags
 }
 
 const Kqueue::EventList&
-Kqueue::poll()
+Kqueue::pollWork()
 {
-	int						count = 0;
+	const int	maxEvent = 64;
+	int			count = 0;
 	// static const timespec	timeSpec = {0, 0};
 
-	m_eventList.resize(m_registeredEventSize);
+	m_eventList.resize(maxEvent);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
 				   m_eventList.data(), m_eventList.size(), 0);
 	m_changeList.clear();
