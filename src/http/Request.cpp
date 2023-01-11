@@ -14,21 +14,17 @@ using namespace	std;
 // constructors & destructor
 Request::Request(const Socket<Tcp>& socket)
 :	m_socket(&socket),
-	m_buffer(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8), 0),
 	m_parser(m_buffer)
 {
-	m_buffer.clear();
-	m_residue = 0;
+	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
 }
 
 Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
 :	m_socket(&socket),
-	m_buffer(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8), 0),
 	m_parser(m_buffer),
 	m_httpInfo(&httpInfo)
 {
-	m_buffer.clear();
-	m_residue = 0;
+	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
 }
 
 Request::~Request()
@@ -40,6 +36,7 @@ Request::Request(const Request& request)
 	m_parser(m_buffer),
 	m_httpInfo(NULL)
 {
+	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
 	(void)request;
 }
 
@@ -77,7 +74,7 @@ Request::receiveRawData(int eventInfo)
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
 			m_buffer.size() - residue - 1);
 	// if evenInfo + residue is bigger than buffer size read() will make buffer overflow.
-	m_buffer.resize(m_residue + count + 1, 0);
+	m_buffer.resize(residue + count + 1, 0);
 #elif __linux__
 	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,

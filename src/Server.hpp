@@ -28,11 +28,11 @@ public:
 
 private:
 // member variables - socket
-	Socket<Tcp>			m_socket;
-	uint16_t			m_port;
+	Socket<Tcp>		m_socket;
 
 public:
-	const int	m_fd;
+	const uint16_t	m_port;
+	const int		m_fd;
 
 };
 

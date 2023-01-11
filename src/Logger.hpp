@@ -3,11 +3,19 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 #include "util/Util.hpp"
 
-#define LOG(type, fmt, ...)	\
-	Logger::log(Logger::type, fmt, ##__VA_ARGS__)
+#define LOG(type, fmt, ...)\
+	if (Logger::type == Logger::DEBUG)\
+	{\
+		Logger::log(Logger::DEBUG, "%s: %d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
+	}\
+	else\
+	{\
+		Logger::log(Logger::type, fmt, ##__VA_ARGS__);\
+	}\
 
 class	Logger
 {
@@ -39,11 +47,15 @@ public:
 	static std::ostream*	s_ostream;
 };
 
+/*
+ * note: sync code with void Logger::log(e_types type, const char* format, ...)
+ */
 template <typename T>
 void
 Logger::log(e_types type, const T& object)
 {
 	std::string	prefix;
+	std::string	suffix;
 
 	if (s_type == DISABLED || s_type < type)
 		return;
@@ -57,6 +69,8 @@ Logger::log(e_types type, const T& object)
 			break;
 		case ERROR:
 			prefix = "[ERROR] ";
+			suffix = " (" + Util::toString(errno) + " "
+				+ std::strerror(errno) + ")";
 			break;
 		case DEBUG:
 			prefix = "[DEBUG] ";
@@ -65,7 +79,7 @@ Logger::log(e_types type, const T& object)
 			break;
 	}
 	prefix.append(Util::getDate("%F %T "));
-	*s_ostream << prefix << object << '\n';
+	*s_ostream << prefix << object << suffix << '\n';
 }
 
 #endif

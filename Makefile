@@ -40,10 +40,12 @@ SRC			=	main.cpp\
 #				socket/ServerSocket.cpp\
 
 
+SRC			:=	$(SRC:%=src/%)
 OBJ			:=	$(SRC:%.cpp=%.o)
 DEP			:=	$(OBJ:%.o=%.d)
 
-INCL_PATH	=	-I./\
+INCL_PATH	=	-Isrc/\
+				-Iinclude/\
 
 STATUS		=	$(shell ls DEBUG.mode 2>/dev/null)
 ifeq ($(STATUS), DEBUG.mode)

@@ -67,6 +67,7 @@ HttpRequestParser::~HttpRequestParser()
 void
 HttpRequestParser::parse(Request& request)
 {
+	// using function pointer table instead of switch statement?
 	string::size_type	pos;
 
 	pos = updateBuffer();

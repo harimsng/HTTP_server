@@ -54,6 +54,7 @@ void
 Logger::log(e_types type, const char* format, ...)
 {
 	std::string	prefix;
+	std::string	suffix;
 	char		buffer[MAX_BUFFER_LEN] = {0, };
 	va_list		ap;
 
@@ -64,20 +65,22 @@ Logger::log(e_types type, const char* format, ...)
 	switch (type)
 	{
 		case INFO:
-			prefix = "[INFO] ";
+			prefix = "[INFO]    ";
 			break;
 		case WARNING:
 			prefix = "[WARNING] ";
 			break;
 		case ERROR:
-			prefix = "[ERROR] ";
+			prefix = "[ERROR]   ";
+			suffix = " (" + Util::toString(errno) + " "
+				+ std::strerror(errno) + ")";
 			break;
 		case DEBUG:
-			prefix = "[DEBUG] ";
+			prefix = "[DEBUG]   ";
 			break;
 		default:
 			break;
 	}
 	prefix.append(Util::getDate("%F %T "));
-	*s_ostream << prefix << buffer << '\n';
+	*s_ostream << prefix << buffer << suffix << '\n';
 }

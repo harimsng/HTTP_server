@@ -96,7 +96,7 @@ ServerManager<IoEventPoller>::parseConfig(const char* path) try
 }
 catch (std::exception& e)
 {
-	std::cout << e.what() << '\n';
+	LOG(ERROR, "%s", e.what());
 }
 
 
