@@ -1,9 +1,7 @@
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "http/Request.hpp"
 #include "parser/HttpRequestParser.hpp"
-
-// for test
-#include "Logger.hpp"
 
 using namespace std;
 

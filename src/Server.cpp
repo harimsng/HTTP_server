@@ -42,7 +42,7 @@ Server::initServer()
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
-	Logger::log(Logger::DEBUG, "listen server bind on port: %u", m_port);
+	Logger::log(Logger::DEBUG, "listen server binds and listen on port: %u", m_port);
 }
 
 Server::IoEventPoller::EventStatus
