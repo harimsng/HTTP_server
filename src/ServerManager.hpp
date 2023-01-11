@@ -86,7 +86,7 @@ ServerManager<IoEventPoller>::~ServerManager()
 
 template <typename IoEventPoller>
 void
-ServerManager<IoEventPoller>::parseConfig(const char* path) try
+ServerManager<IoEventPoller>::parseConfig(const char* path)
 {
 	ConfigParser	configParser;
 
@@ -94,11 +94,6 @@ ServerManager<IoEventPoller>::parseConfig(const char* path) try
 	configParser.parse();
 	Logger::log(Logger::INFO, "configuration file parsing finished");
 }
-catch (std::exception& e)
-{
-	LOG(ERROR, "%s", e.what());
-}
-
 
 template <typename IoEventPoller>
 void
@@ -141,16 +136,18 @@ ServerManager<IoEventPoller>::run() try
 	}
 	Logger::log(Logger::INFO, "%zu listen servers exited", s_listenServerTable.size());
 }
+// TODO: cleanup
 catch (std::runtime_error& e)
 {
 	Logger::log(Logger::ERROR, "%s", e.what());
 }
 catch (HttpErrorHandler& e)
 {
-	Logger::log(Logger::ERROR, "%s, %d %s", e.getErrorMessage().data(), errno, strerror(errno));
+	Logger::log(Logger::ERROR, "%s", e.getErrorMessage().data());
 }
 catch (...)
 {
+	Logger::log(Logger::ERROR, "unexpected error");
 }
 
 
@@ -167,8 +164,10 @@ ServerManager<IoEventPoller>::processEvents(const EventList& events)
 			reinterpret_cast<EventObject*>(udata)->handleEvent(event);
 		if (status == IoEventPoller::END)
 		{
-			LOG(DEBUG, "fd: %d event delete", event.getFd());
-			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
+			LOG(DEBUG, "event(fd:%d) ends", event.getFd());
+			// INFO: is this right?
+			close(event.getFd());
+//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
 	}
 }

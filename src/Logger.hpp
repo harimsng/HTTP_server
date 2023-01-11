@@ -1,21 +1,26 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <string>
-#include <iostream>
-#include <iomanip>
+# include <string>
+# include <iostream>
+# include <iomanip>
 
-#include "util/Util.hpp"
+# include "util/Util.hpp"
 
-#define LOG(type, fmt, ...)\
+# if 0
+#  define LOG(type, fmt, ...)\
+		Logger::log(Logger::type, fmt, ##__VA_ARGS__);
+# else
+#  define LOG(type, fmt, ...)\
 	if (Logger::type == Logger::DEBUG)\
 	{\
-		Logger::log(Logger::DEBUG, "%s: %d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
+		Logger::log(Logger::DEBUG, "%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
 	}\
 	else\
 	{\
 		Logger::log(Logger::type, fmt, ##__VA_ARGS__);\
-	}\
+	}
+# endif
 
 class	Logger
 {
@@ -32,6 +37,7 @@ public:
 		WARNING = 2,
 		ERROR = 3,
 		DEBUG = 4,
+		VERBOSE = 5,
 	};
 
 // constructors & destructor
@@ -43,6 +49,7 @@ public:
 	static void	log(e_types type, const char* format, ...);
 	static void	initLogger(const std::string& type = "INFO", std::ostream& os = std::cerr);
 
+private:
 	static e_types			s_type;
 	static std::ostream*	s_ostream;
 };

@@ -26,13 +26,15 @@ int	main(int argc, char **argv, char **envp)
 	}
 	catch (std::exception& e)
 	{
-		cout << e.what();
+		LOG(ERROR, "%s", e.what());
 		return 1;
 	}
+	/*
 	catch (int status)
 	{
 		return status;
 	}
+	*/
 	(void)argv;
 	(void)envp;
 	return 0;

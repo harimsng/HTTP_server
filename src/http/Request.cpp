@@ -1,10 +1,9 @@
 #include <unistd.h>
 #include <stdexcept>
 
-// for test
 #include "Logger.hpp"
-#include "Request.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "Request.hpp"
 
 #define REQUEST_BUFFER_SIZE (8192)
 #define REQUEST_EOF (0)
