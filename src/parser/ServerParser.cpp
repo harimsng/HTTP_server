@@ -2,7 +2,7 @@
 #include <algorithm>
 
 #include "exception/ConfigParserException.hpp"
-#include "Server.hpp"
+#include "event/Server.hpp"
 #include "parser/ConfigParser.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"

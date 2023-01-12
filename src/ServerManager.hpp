@@ -1,16 +1,13 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-#include <iostream>
 #include <set>
 
 #include "Webserv.hpp"
-#include "EventObject.hpp"
 #include "Logger.hpp"
-#include "Server.hpp"
-#include "VirtualServer.hpp"
-#include "Client.hpp"
-#include "cgi/Cgi.hpp"
+#include "event/Server.hpp"
+#include "event/Client.hpp"
+#include "event/Cgi.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "parser/ConfigParser.hpp"
 

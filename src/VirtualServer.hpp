@@ -5,10 +5,9 @@
 #include <stdint.h>
 
 #include "Webserv.hpp"
-#include "Client.hpp"
 #include "Location.hpp"
+#include "event/Client.hpp"
 #include "socket_/Socket.hpp"
-#include "EventObject.hpp"
 
 using namespace std;
 

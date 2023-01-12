@@ -2,8 +2,6 @@
 
 #include "Client.hpp"
 
-#define BUFFER_SIZE (1 << (10 + 4))
-
 using namespace	std;
 
 // constructors & destructor
@@ -43,6 +41,7 @@ Client::handleEventWork(const IoEventPoller::Event& event)
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
 		case IoEventPoller::WRITE:
+			LOG(DEBUG, "wrtie event to client");
 			// Logger::log(Logger::DEBUG, "write event");
 			m_response.sendResponse(event.getInfo());
 			return IoEventPoller::NORMAL;

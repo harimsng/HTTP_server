@@ -7,11 +7,12 @@ RM			=	rm -f
 
 SRC			=	main.cpp\
 				Logger.cpp\
-				Server.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
-				Client.cpp\
-				cgi/Cgi.cpp\
+\
+				event/Client.cpp\
+				event/Server.cpp\
+				event/Cgi.cpp\
 \
 				parser/ConfigParser.cpp\
 				parser/LocationParser.cpp\
