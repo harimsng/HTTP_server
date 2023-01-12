@@ -34,7 +34,7 @@ public:
 	Client(Client const& client);
 
 // member functions
-	IoEventPoller::EventStatus	handleEvent(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
 
 // member variables
 //

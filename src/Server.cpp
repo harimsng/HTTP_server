@@ -46,7 +46,7 @@ Server::initServer()
 }
 
 Server::IoEventPoller::EventStatus
-Server::handleEvent(const IoEventPoller::Event& event)
+Server::handleEventWork(const IoEventPoller::Event& event)
 {
 	IoEventPoller::e_filters	filter = event.getFilter();
 

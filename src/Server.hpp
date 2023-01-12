@@ -24,7 +24,7 @@ public:
 // member functions
 	void	initServer();
 
-	IoEventPoller::EventStatus	handleEvent(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
 
 private:
 // member variables - socket

@@ -32,7 +32,7 @@ Client::Client(Client const& client)
 }
 
 Client::IoEventPoller::EventStatus
-Client::handleEvent(const IoEventPoller::Event& event)
+Client::handleEventWork(const IoEventPoller::Event& event)
 {
 	IoEventPoller::e_filters	filter = event.getFilter();
 

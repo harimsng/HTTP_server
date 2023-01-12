@@ -11,6 +11,7 @@
 #  define LOG(type, fmt, ...)\
 		Logger::log(Logger::type, fmt, ##__VA_ARGS__);
 # else
+// VERBOSE DEBUG
 #  define LOG(type, fmt, ...)\
 	if (Logger::type == Logger::DEBUG)\
 	{\
