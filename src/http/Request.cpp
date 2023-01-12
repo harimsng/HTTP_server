@@ -3,19 +3,37 @@
 
 #include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "Request.hpp"
+#include "http/Request.hpp"
 
 #define REQUEST_BUFFER_SIZE (8192)
+#define REQUEST_BUFFER_RESERVE (REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8))
 #define REQUEST_EOF (0)
 
 using namespace	std;
+
+// forbidden
+Request::Request(const Request& request)
+:	m_socket(NULL),
+	m_parser(m_buffer),
+	m_httpInfo(NULL)
+{
+	m_buffer.reserve(REQUEST_BUFFER_RESERVE);
+	(void)request;
+}
+
+Request&
+Request::operator=(const Request& request)
+{
+	(void)request;
+	return *this;
+}
 
 // constructors & destructor
 Request::Request(const Socket<Tcp>& socket)
 :	m_socket(&socket),
 	m_parser(m_buffer)
 {
-	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
+	m_buffer.reserve(REQUEST_BUFFER_RESERVE);
 }
 
 Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
@@ -23,28 +41,11 @@ Request::Request(const Socket<Tcp>& socket, HttpInfo& httpInfo)
 	m_parser(m_buffer),
 	m_httpInfo(&httpInfo)
 {
-	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
+	m_buffer.reserve(REQUEST_BUFFER_RESERVE);
 }
 
 Request::~Request()
 {
-}
-
-Request::Request(const Request& request)
-:	m_socket(NULL),
-	m_parser(m_buffer),
-	m_httpInfo(NULL)
-{
-	m_buffer.reserve(REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8));
-	(void)request;
-}
-
-// operators
-Request&
-Request::operator=(const Request& request)
-{
-	(void)request;
-	return *this;
 }
 
 int

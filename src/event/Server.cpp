@@ -1,7 +1,7 @@
 #include "OsDependency.hpp"
 #include "ServerManager.hpp"
-#include "Client.hpp"
-#include "Server.hpp"
+#include "event/Client.hpp"
+#include "event/Server.hpp"
 
 // deleted
 Server&

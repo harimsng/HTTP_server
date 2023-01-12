@@ -15,13 +15,16 @@ public:
 	Location();
 	~Location();
 	Location(const Location& location);
-	Location&	operator=(const Location& location);
+//	Location&	operator=(const Location& location);
 
 // member functions
 
 private:
+	void	setToDefault();
+
 // member variables
 	std::string		m_index;
+	bool			m_autoindex;
 	std::string		m_expires;
 	std::string		m_proxyPass;
 	std::string		m_limitExcept;

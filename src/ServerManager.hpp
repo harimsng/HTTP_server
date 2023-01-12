@@ -5,11 +5,11 @@
 
 #include "Webserv.hpp"
 #include "Logger.hpp"
+#include "exception/HttpErrorHandler.hpp"
+#include "parser/ConfigParser.hpp"
 #include "event/Server.hpp"
 #include "event/Client.hpp"
 #include "event/Cgi.hpp"
-#include "exception/HttpErrorHandler.hpp"
-#include "parser/ConfigParser.hpp"
 
 static const std::size_t	g_objectSize = (std::max(sizeof(Client), sizeof(Cgi)));
 
@@ -89,7 +89,7 @@ ServerManager<IoEventPoller>::parseConfig(const char* path)
 
 	configParser.init(path, s_virtualServerTable);
 	configParser.parse();
-	Logger::log(Logger::INFO, "configuration file parsing finished");
+	Logger::log(Logger::INFO, "parsing configuration file finished");
 }
 
 template <typename IoEventPoller>

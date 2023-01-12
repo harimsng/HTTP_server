@@ -1,9 +1,7 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
-#include <sys/socket.h>
 #include <unistd.h>
-#include <ostream>
 
 #include "SocketTypes.hpp"
 
@@ -30,6 +28,8 @@ public:
 	int		bind(SocketAddr* addr) throw();
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();
+	
+	const SocketAddr&	getAddress() const throw();
 	const std::string&	getAddressString() const throw();
 
 // member variables
@@ -97,11 +97,22 @@ Socket<SocketType>::connect(SocketAddr* addr) throw()
 	return ::connect(m_fd, addr, SocketType::socketAddrLen);
 }
 
-// operators
 template <typename SocketType>
 const std::string&
 Socket<SocketType>::getAddressString() const throw()
 {
+}
+
+template <typename SocketType>
+const typename Socket<SocketType>::SocketAddr&
+Socket<SocketType>::getAddress() const throw()
+{
+	SocketAddr	addr;
+	socklen_t	len;
+	
+	getsockname(m_fd, &addr, &len);
+	m_addr = addr;
+	return addr;
 }
 
 #endif

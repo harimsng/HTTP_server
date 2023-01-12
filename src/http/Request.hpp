@@ -5,9 +5,9 @@
 #include <map>
 #include <vector>
 
+#include "Location.hpp"
 #include "parser/HttpRequestParser.hpp"
 #include "socket_/Socket.hpp"
-#include "Location.hpp"
 #include "http/HttpInfo.hpp"
 
 /*
