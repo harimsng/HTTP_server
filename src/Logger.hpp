@@ -53,6 +53,7 @@ public:
 private:
 	static e_types			s_type;
 	static std::ostream*	s_ostream;
+	static const char*		s_prefixTable[];
 };
 
 /*
@@ -67,24 +68,11 @@ Logger::log(e_types type, const T& object)
 
 	if (s_type == DISABLED || s_type < type)
 		return;
-	switch (type)
+	prefix = s_prefixTable[type + 1];
+	if (type == ERROR)
 	{
-		case INFO:
-			prefix = "[INFO] ";
-			break;
-		case WARNING:
-			prefix = "[WARNING] ";
-			break;
-		case ERROR:
-			prefix = "[ERROR] ";
-			suffix = " (" + Util::toString(errno) + " "
-				+ std::strerror(errno) + ")";
-			break;
-		case DEBUG:
-			prefix = "[DEBUG] ";
-			break;
-		default:
-			break;
+		suffix = " (" + Util::toString(errno) + " "
+			+ std::strerror(errno) + ")";
 	}
 	prefix.append(Util::getDate("%F %T "));
 	*s_ostream << prefix << object << suffix << '\n';

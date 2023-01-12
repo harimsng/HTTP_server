@@ -39,7 +39,7 @@ Client::handleEventWork(const IoEventPoller::Event& event)
 	switch (filter)
 	{
 		case IoEventPoller::READ:
-			Logger::log(Logger::DEBUG, "read event to client");
+			LOG(DEBUG, "read event to client");
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
 		case IoEventPoller::WRITE:

@@ -15,7 +15,7 @@ public:
 	}
 
 protected:
-	~EventObjectTemplate();
+	~EventObjectTemplate() {};
 
 private:
 	virtual typename IoEventPoller::EventStatus
