@@ -59,10 +59,7 @@ ServerParser::parseLocation(VirtualServer& server)
 	
 	location.m_path = locationPath;
 	locationParser.parse(location);
-	server.m_locationTable[
-	server.m_locationList.push_back(Location());
-	server.m_locationList.back().m_path = locationPath;
-	locationParser.parse(server.m_locationList.back());
+	server.m_locationTable[locationPath] = location;
 	m_tokenizer.eat("}");
 }
 

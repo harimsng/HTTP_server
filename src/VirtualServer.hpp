@@ -10,6 +10,7 @@ using namespace std;
 
 class	VirtualServer
 {
+	typedef	std::map<std::string, Location>	LocationTable;
 public:
 // constructors & destructor
 	VirtualServer();
@@ -33,7 +34,7 @@ private:
 	sockaddr_in					m_listen;
 	int32_t						m_clientMaxBodySize;
 	int32_t						m_uriBufferSize;
-	std::map<std::string, Location>		m_locationList;
+	LocationTable		m_locationTable;
 
 	uint64_t	m_addrKey;
 

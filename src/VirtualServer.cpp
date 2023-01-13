@@ -25,14 +25,9 @@ VirtualServer::operator=(const VirtualServer& server)
 	m_listen = server.m_listen;
 	m_clientMaxBodySize = server.m_clientMaxBodySize;
 	m_uriBufferSize = server.m_uriBufferSize;
-	m_locationList = server.m_locationList;
+	m_locationTable = server.m_locationTable;
 	return *this;
 }
-
-#define DEFAULT_NAME ("") // coule be hostname
-#define DEFAULT_ADDR (INADDR_ANY)
-#define DEFAULT_PORT (8000)
-// TODO: fill up default variable list
 
 void
 VirtualServer::setToDefault()
@@ -66,8 +61,8 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	   << ntohs(server.m_listen.sin_port) << '\n';
 	os << "\tindex " << server.m_index << '\n';
 	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
-	for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
-		os << server.m_locationList[i];
+	for (; i < server.m_locationTable.size(); ++i)
+		os << server.m_locationTable[i];
 	os << "}\n";
 	return os;
 }
