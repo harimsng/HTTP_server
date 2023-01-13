@@ -89,7 +89,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 	string				listenField = m_tokenizer.get();
 	stringstream		ss;
 	string::size_type	colonPos = listenField.find(":");
-	uint32_t			addr = 0;
+	uint64_t			addr = 0;
 	uint16_t			port = 0;
 
 	// TODO: we can simplify this function by using getaddrinfo(), not necessary though.
