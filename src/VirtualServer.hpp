@@ -1,9 +1,6 @@
 #ifndef VIRTUALSERVER_HPP
 #define VIRTUALSERVER_HPP
 
-// for gnu c portability and c++98 standard. should be removed later
-#include <stdint.h>
-
 #include "Webserv.hpp"
 #include "Location.hpp"
 #include "event/Client.hpp"
