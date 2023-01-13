@@ -20,6 +20,7 @@
 # ifdef __linux__
 #  define IO_EVENT_POLLER Epoll
 #  include "io/Epoll.hpp"
+#  include <stdint.h>
 
 #  define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\
 /*sin_family*/	AF_INET,\

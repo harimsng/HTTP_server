@@ -24,15 +24,23 @@ private:
 
 // member variables
 	std::string		m_index;
+
 	bool			m_autoindex;
+
 	std::string		m_expires;
+
 	std::string		m_proxyPass;
-	std::string		m_limitExcept;
+
+	std::string		m_scgiPass;
+	std::string		m_fastcgiPass;
+
 	std::string		m_path;
 	std::string		m_root;
-	std::string		m_cgiPass;
 	std::string		m_alias;
+	std::string		m_limitExcept;
 	std::string		m_clientMaxBodySize;
+	std::string		m_errorPageTable[1024]; // index is status code
+
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };

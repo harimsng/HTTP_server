@@ -1,5 +1,6 @@
 #include <ostream>
 
+#include "Config.hpp"
 #include "Location.hpp"
 
 using namespace std;

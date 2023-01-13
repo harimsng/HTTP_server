@@ -2,8 +2,8 @@
 
 #include <sstream>
 
-#include "Util.hpp"
 #include "Logger.hpp"
+#include "Util.hpp"
 
 using namespace std;
 
@@ -31,6 +31,23 @@ Util::parseArgument(int argc, char **argv)
 	}
 	Logger::initLogger(logLevel);
 	return true;
+}
+
+string
+Util::getFormattedAddress(uint32_t addr, uint16_t port)
+{
+	stringstream	ss;
+	uint32_t		bitshift = 24;
+	int64_t			bitmask = 0xff000000;
+
+	for (; bitshift > 0; bitmask <<= 8, bitshift -= 8)
+	{
+		ss << ((addr & bitmask) >> bitshift) << '.';
+	}
+	ss << (addr & bitmask);
+	if (port != 0)
+		ss << ':' << port;
+	return ss.str();
 }
 
 const string

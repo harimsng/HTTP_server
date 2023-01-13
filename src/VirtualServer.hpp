@@ -1,9 +1,6 @@
 #ifndef VIRTUALSERVER_HPP
 #define VIRTUALSERVER_HPP
 
-// for gnu c portability and c++98 standard. should be removed later
-#include <stdint.h>
-
 #include "Webserv.hpp"
 #include "Location.hpp"
 #include "event/Client.hpp"
@@ -13,6 +10,7 @@ using namespace std;
 
 class	VirtualServer
 {
+	typedef	std::map<std::string, Location>	LocationTable;
 public:
 // constructors & destructor
 	VirtualServer();
@@ -37,7 +35,6 @@ private:
 	int32_t								m_clientMaxBodySize;
 	int32_t								m_uriBufferSize;
 	std::map<std::string, Location>		m_locationList;
-
 	uint64_t	m_addrKey;
 
 // friends

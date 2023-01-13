@@ -25,14 +25,13 @@ VirtualServer::operator=(const VirtualServer& server)
 	m_listen = server.m_listen;
 	m_clientMaxBodySize = server.m_clientMaxBodySize;
 	m_uriBufferSize = server.m_uriBufferSize;
-	m_locationList = server.m_locationList;
+	// m_locationTable = server.m_locationTable;
 	return *this;
 }
 
 #define DEFAULT_NAME ("") // coule be hostname
 #define DEFAULT_ADDR (INADDR_ANY)
 #define DEFAULT_PORT (8000)
-// TODO: fill up default variable list
 
 void
 VirtualServer::setToDefault()
