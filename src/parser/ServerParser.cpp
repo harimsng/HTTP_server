@@ -107,7 +107,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 		}
 		ss >> addrPart;
 		addr = (addr << 8) | addrPart;
-		if (ss.eof() == false || ss.fail() == true)
+		if (addrPart > 255 || ss.eof() == false || ss.fail() == true)
 			throw ConfigParser::ConfigParserException("invalid listen address");
 	}
 
