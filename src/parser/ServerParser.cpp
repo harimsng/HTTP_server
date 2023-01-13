@@ -80,6 +80,7 @@ void
 ServerParser::setServerNames(VirtualServer& server)
 {
 	// INFO: it would be better if token type is added for the token data.
+	server.m_serverNames.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
 		server.m_serverNames.push_back(m_tokenizer.get());

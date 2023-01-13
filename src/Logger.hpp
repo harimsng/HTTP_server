@@ -38,7 +38,7 @@ public:
 		WARNING = 2,
 		ERROR = 3,
 		DEBUG = 4,
-		VERBOSE = 5,
+		VERBOSE = 5
 	};
 
 // constructors & destructor

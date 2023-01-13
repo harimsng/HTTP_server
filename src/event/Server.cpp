@@ -64,8 +64,6 @@ Server::handleEventWork(const IoEventPoller::Event& event)
 			client = new Client(clientFd);
 			ServerManager<IoEventPoller>::registerEvent(clientFd, IoEventPoller::ADD,
 					filter, client);
-			// ServerManager<IoEventPoller>::registerEvent(clientFd,
-			//         IoEventPoller::ADD, IoEventPoller::READWRITE);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");

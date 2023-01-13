@@ -79,7 +79,7 @@ ConfigParser::parseServer() try
 	if (m_serverTable->count(newServer->m_addrKey) == 1)
 		checkDuplicateServerName(*newServer);
 	else
-		(*m_serverTable)[newServer->m_addrKey][""] = newServer;
+		(*m_serverTable)[newServer->m_addrKey]["_"] = newServer;
 
 	addNameToTable(*newServer);
 }
@@ -90,10 +90,11 @@ catch (VirtualServer* newServer)
 }
 catch (string& duplicatedServerName)
 {
+
 }
 
 void
-ConfigParser::checkDuplicateServerName(VirtualServer& server)
+ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 {
 	ServerNameTable&		table = (*m_serverTable)[server.m_addrKey];
 	const vector<string>&	names = server.m_serverNames;
@@ -101,8 +102,14 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server)
 	for (size_t i = 0; i < names.size(); ++i)
 	{
 		if (table.count(names[i]) == 1)
-			throw names[i];
+			throw (make_pair(names[i], &server));
+			// throw names[i];
 	}
+}
+catch (pair<string, VirtualServer*> e)
+{
+	LOG(Logger::WARNING, "duplicated server name \"%s\" same address", e.first.c_str());
+	throw e.second;
 }
 
 void
