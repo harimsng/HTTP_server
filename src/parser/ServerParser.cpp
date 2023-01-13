@@ -94,7 +94,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 	string				listenField = m_tokenizer.get();
 	stringstream		ss;
 	string::size_type	colonPos = listenField.find(":");
-	uint32_t			addr = 0;
+	uint64_t			addr = 0;
 	uint16_t			port = 0;
 
 	// TODO: we can simplify this function by using getaddrinfo(), not necessary though.
@@ -130,6 +130,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
 	server.m_addrKey = (addr << 16) + port;
+	LOG(Logger::DEBUG, "listen field : %s\n addr : %u \naddr << 16 : %llu", listenField.c_str(), addr, (addr << 16));
 	m_tokenizer.eat(";");
 }
 
