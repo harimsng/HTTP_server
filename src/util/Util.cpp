@@ -1,3 +1,5 @@
+#include <sys/stat.h>
+
 #include <sstream>
 
 #include "Util.hpp"
@@ -60,7 +62,7 @@ Util::toString(int num)
 {
 	string	str;
 	int		denom = 1000000000;
-	
+
 	while (denom > 0 && num / denom == 0)
 		denom /= 10;
 	while (denom > 0)
@@ -70,4 +72,14 @@ Util::toString(int num)
 		denom /= 10;
 	}
 	return str;
+}
+
+bool
+Util::checkFileStat(const char* path)
+{
+	struct stat buffer;
+
+	if (stat(path, &buffer) == -1)
+		return (false);
+	return ((buffer.st_mode & S_IFREG) == S_IFREG);
 }

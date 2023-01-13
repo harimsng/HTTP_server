@@ -66,8 +66,14 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	   << ntohs(server.m_listen.sin_port) << '\n';
 	os << "\tindex " << server.m_index << '\n';
 	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
-	for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
-		os << server.m_locationList[i];
+	for (map<string, Location>::const_iterator itr = server.m_locationList.begin();
+			itr != server.m_locationList.end();
+			itr++)
+	{
+		os << itr->second;
+	}
+	// for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
+	//     os << server.m_locationList[i];
 	os << "}\n";
 	return os;
 }

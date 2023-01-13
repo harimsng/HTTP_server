@@ -1,5 +1,3 @@
-#include <sys/stat.h>
-
 #include <iostream>
 
 #include "Webserv.hpp"
@@ -8,6 +6,7 @@
 #include "parser/ServerParser.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ConfigParser.hpp"
+#include "util/Util.hpp"
 
 using namespace std;
 
@@ -26,25 +25,28 @@ ConfigParser::init(string configPath, VirtualServerTable& serverTable)
 	ServerParser::setServerSetterMap();
 	LocationParser::setLocationSetterMap();
 
-	if (checkFileStat(configPath.data()) == false)
+	if (Util::checkFileStat(configPath.data()) == false)
 		throw ConfigParserException("invalid file type");
 
 	if (configPath.rfind(".conf") != configPath.size() - 5)
-		throw ConfigParserException("invalid filename");
+		throw ConfigParserException("invalid file extension");
 
 	m_serverTable = &serverTable;
 	m_tokenizer.init(configPath);
 }
 
-bool
-ConfigParser::checkFileStat(const char* path)
-{
-	struct stat	buffer;
-
-	if (stat(path, &buffer) == -1)
-		throw ConfigParserException("file doesn't exist");
-	return (buffer.st_mode & S_IFREG) == S_IFREG;
-}
+// TODO
+// this function have to move to Util class member function
+// bool
+// ConfigParser::checkFileStat(const char* path)
+// {
+//     struct stat	buffer;
+//
+//     if (stat(path, &buffer) == -1)
+//         return (false);
+//         // throw ConfigParserException("file doesn't exist");
+//     return (buffer.st_mode & S_IFREG) == S_IFREG;
+// }
 
 void
 ConfigParser::parse() try
@@ -67,7 +69,7 @@ void
 ConfigParser::parseServer() try
 {
 	m_tokenizer.eat("{");
-	
+
 	ServerParser	serverParser(m_tokenizer);
 
 	VirtualServer*	newServer = new VirtualServer;
