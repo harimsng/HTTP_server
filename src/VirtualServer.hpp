@@ -5,10 +5,9 @@
 #include <stdint.h>
 
 #include "Webserv.hpp"
-#include "Client.hpp"
 #include "Location.hpp"
+#include "event/Client.hpp"
 #include "socket_/Socket.hpp"
-#include "EventObject.hpp"
 
 using namespace std;
 
@@ -28,6 +27,7 @@ private:
 
 // member variales - config
 	std::string					m_index;
+	bool						m_autoindex;
 	std::vector<std::string>	m_serverNames;
 	std::string					m_errorCode;
 	std::string					m_root;
@@ -36,7 +36,7 @@ private:
 	sockaddr_in					m_listen;
 	int32_t						m_clientMaxBodySize;
 	int32_t						m_uriBufferSize;
-	std::vector<Location>		m_locationList;
+	std::map<std::string, Location>		m_locationList;
 
 	uint64_t	m_addrKey;
 

@@ -1,6 +1,7 @@
+#include "OsDependency.hpp"
 #include "ServerManager.hpp"
-#include "Client.hpp"
-#include "Server.hpp"
+#include "event/Client.hpp"
+#include "event/Server.hpp"
 
 // deleted
 Server&
@@ -12,8 +13,9 @@ Server::operator=(const Server& server)
 }
 
 // constructors & destructor
-Server::Server()
+Server::Server(uint16_t port)
 :	m_socket(Socket<Tcp>()),
+	m_port(port),
 	m_fd(m_socket.m_fd)
 {
 }
@@ -24,33 +26,34 @@ Server::~Server()
 
 Server::Server(const Server& server)
 :	m_socket(server.m_socket),
-	m_fd(server.m_fd)
+	m_port(server.m_port),
+	m_fd(m_socket.m_fd)
 {
 }
 
 void
 Server::initServer()
 {
-	Socket<Tcp>::SocketAddr socketaddr;
-	
 	if (m_socket.m_fd < 0)
 		throw std::runtime_error("server socket() error");
 
-	socketaddr.sin_port = m_port;
+	Socket<Tcp>::SocketAddr socketaddr = GET_SOCKADDR_IN(0, m_port);
 	if (m_socket.bind(&socketaddr) < 0)
 		throw std::runtime_error("server socket bind() error");
 	if (m_socket.listen() < 0)
 		throw std::runtime_error("server socket listen() error");
+	LOG(DEBUG, "listen server binds and listen on port: %u", m_port);
 }
 
 Server::IoEventPoller::EventStatus
-Server::handleEvent(const IoEventPoller::Event& event)
+Server::handleEventWork(const IoEventPoller::Event& event)
 {
 	IoEventPoller::e_filters	filter = event.getFilter();
 
 	switch (filter)
 	{
 		case IoEventPoller::READ:
+			LOG(DEBUG, "read event to server");
 			int		clientFd;
 			clientFd = m_socket.accept();
 

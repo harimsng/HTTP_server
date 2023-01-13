@@ -7,12 +7,11 @@ RM			=	rm -f
 
 SRC			=	main.cpp\
 				Logger.cpp\
+				Server.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
-\
-				event/Client.cpp\
-				event/Server.cpp\
-				event/Cgi.cpp\
+				Client.cpp\
+				cgi/Cgi.cpp\
 \
 				parser/ConfigParser.cpp\
 				parser/LocationParser.cpp\
@@ -41,11 +40,12 @@ SRC			=	main.cpp\
 #				socket/ServerSocket.cpp\
 
 
+SRC			:=	$(SRC:%=src/%)
 OBJ			:=	$(SRC:%.cpp=%.o)
 DEP			:=	$(OBJ:%.o=%.d)
 
-INCL_PATH	=	-I./\
-				-I../include\
+INCL_PATH	=	-Isrc/\
+				-Iinclude/\
 
 STATUS		=	$(shell ls DEBUG.mode 2>/dev/null)
 ifeq ($(STATUS), DEBUG.mode)

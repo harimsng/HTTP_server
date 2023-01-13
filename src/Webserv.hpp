@@ -4,7 +4,6 @@
 #include "OsDependency.hpp"
 
 #include <map>
-#include <vector>
 #include <string>
 
 class	Server;

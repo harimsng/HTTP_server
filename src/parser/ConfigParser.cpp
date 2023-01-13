@@ -59,9 +59,8 @@ ConfigParser::parse() try
 }
 catch (exception& e)
 {
-	Logger::log(Logger::ERROR, "syntax error");
 	cout << m_tokenizer.getErrorLog(e.what());
-	throw 1;
+	throw;
 }
 
 void
@@ -82,6 +81,7 @@ ConfigParser::parseServer() try
 
 	addNameToTable(*newServer);
 }
+// TODO: a server which has duplicated servername is ignored.
 catch (VirtualServer* newServer)
 {
 	delete newServer;

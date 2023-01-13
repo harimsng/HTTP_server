@@ -3,7 +3,7 @@
 
 #include "Webserv.hpp"
 #include "socket_/Socket.hpp"
-#include "EventObject.hpp"
+#include "event/EventObject.hpp"
 
 template <typename IoEventPoller>
 class	ServerManager;
@@ -17,22 +17,22 @@ class	Server: public IEventObject
 
 public:
 // constructors & destructor
-	Server();
+	Server(uint16_t port);
 	virtual ~Server();
 	Server(const Server& server);
 
 // member functions
 	void	initServer();
 
-	IoEventPoller::EventStatus	handleEvent(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
 
 private:
 // member variables - socket
-	Socket<Tcp>			m_socket;
-	uint16_t			m_port;
+	Socket<Tcp>		m_socket;
 
 public:
-	const int	m_fd;
+	const uint16_t	m_port;
+	const int		m_fd;
 
 };
 

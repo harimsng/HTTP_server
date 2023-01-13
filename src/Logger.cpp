@@ -7,6 +7,13 @@
 
 using namespace std;
 
+const char*	Logger::s_prefixTable[] = {
+	"[INFO]    ",
+	"[WARNING] ",
+	"[ERROR]   ",
+	"[DEBUG]   ",
+};
+
 // const string
 // Util::getDate(const char* format);
 
@@ -47,13 +54,15 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 		+ ERROR * (type == "ERROR")
 		+ DEBUG * (type == "DEBUG");
 	s_type = static_cast<e_types>(temp);
-	cout << "[INFO] vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
+	cout << s_prefixTable[INFO]
+		<< "vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
 }
 
 void
 Logger::log(e_types type, const char* format, ...)
 {
 	std::string	prefix;
+	std::string	suffix;
 	char		buffer[MAX_BUFFER_LEN] = {0, };
 	va_list		ap;
 
@@ -61,23 +70,12 @@ Logger::log(e_types type, const char* format, ...)
 		return;
 	va_start(ap, format);
 	vsnprintf(buffer, MAX_BUFFER_LEN - 1, format, ap);
-	switch (type)
+	prefix = s_prefixTable[type - 1];
+	if (type == ERROR)
 	{
-		case INFO:
-			prefix = "[INFO] ";
-			break;
-		case WARNING:
-			prefix = "[WARNING] ";
-			break;
-		case ERROR:
-			prefix = "[ERROR] ";
-			break;
-		case DEBUG:
-			prefix = "[DEBUG] ";
-			break;
-		default:
-			break;
+		suffix = " (" + Util::toString(errno) + " "
+			+ std::strerror(errno) + ")";
 	}
 	prefix.append(Util::getDate("%F %T "));
-	*s_ostream << prefix << buffer << '\n';
+	*s_ostream << prefix << buffer << suffix << '\n';
 }

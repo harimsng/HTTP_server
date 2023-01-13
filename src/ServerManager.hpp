@@ -1,17 +1,15 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-#include <iostream>
 #include <set>
 
 #include "Webserv.hpp"
-#include "EventObject.hpp"
 #include "Logger.hpp"
-#include "Server.hpp"
-#include "VirtualServer.hpp"
-#include "Client.hpp"
-#include "cgi/Cgi.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "parser/ConfigParser.hpp"
+#include "event/Server.hpp"
+#include "event/Client.hpp"
+#include "event/Cgi.hpp"
 
 static const std::size_t	g_objectSize = (std::max(sizeof(Client), sizeof(Cgi)));
 
@@ -85,19 +83,14 @@ ServerManager<IoEventPoller>::~ServerManager()
 
 template <typename IoEventPoller>
 void
-ServerManager<IoEventPoller>::parseConfig(const char* path) try
+ServerManager<IoEventPoller>::parseConfig(const char* path)
 {
 	ConfigParser	configParser;
 
 	configParser.init(path, s_virtualServerTable);
 	configParser.parse();
-	Logger::log(Logger::INFO, "configuration file parsing finished");
+	Logger::log(Logger::INFO, "parsing configuration file finished");
 }
-catch (std::exception& e)
-{
-	std::cout << e.what() << '\n';
-}
-
 
 template <typename IoEventPoller>
 void
@@ -109,14 +102,14 @@ ServerManager<IoEventPoller>::initServers()
 		 itr != s_virtualServerTable.end();
 		 ++itr)
 	{
-		portSet.insert(itr->first & 0xff);
+		portSet.insert(itr->first & 0xffff);
 	}
 
 	for (set<uint64_t>::iterator itr = portSet.begin();
 		 itr != portSet.end();
 		 ++itr)
 	{
-		Server*	newServer = new Server();
+		Server*	newServer = new Server(*itr);
 
 		newServer->initServer();
 		ServerManager<IoEventPoller>::registerEvent(newServer->m_fd, IoEventPoller::ADD,
@@ -124,7 +117,7 @@ ServerManager<IoEventPoller>::initServers()
 		s_listenServerTable[*itr] = newServer;
 	}
 
-	Logger::log(Logger::INFO, "%zu servers are initiated", m_serverList.size());
+	Logger::log(Logger::INFO, "%zu listen servers are initiated", s_listenServerTable.size());
 }
 
 template <typename IoEventPoller>
@@ -138,14 +131,20 @@ ServerManager<IoEventPoller>::run() try
 		const EventList&	eventList = s_ioEventPoller.poll();
 		processEvents(eventList);
 	}
-	Logger::log(Logger::INFO, "%zu servers exited", m_serverList.size());
+	Logger::log(Logger::INFO, "%zu listen servers exited", s_listenServerTable.size());
 }
+// TODO: cleanup
 catch (std::runtime_error& e)
 {
 	Logger::log(Logger::ERROR, "%s", e.what());
 }
+catch (HttpErrorHandler& e)
+{
+	Logger::log(Logger::ERROR, "%s", e.getErrorMessage().data());
+}
 catch (...)
 {
+	Logger::log(Logger::ERROR, "unexpected error");
 }
 
 
@@ -158,7 +157,15 @@ ServerManager<IoEventPoller>::processEvents(const EventList& events)
 		const Event&	event = events[i];
 		void*			udata = const_cast<void*>(event.getUserDataPtr());
 
-		reinterpret_cast<EventObject*>(udata)->handleEvent(event);
+		typename IoEventPoller::EventStatus status =
+			reinterpret_cast<EventObject*>(udata)->handleEvent(event);
+		if (status == IoEventPoller::END)
+		{
+			LOG(DEBUG, "event(fd:%d) ends", event.getFd());
+			// INFO: is this right?
+			close(event.getFd());
+//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
+		}
 	}
 }
 

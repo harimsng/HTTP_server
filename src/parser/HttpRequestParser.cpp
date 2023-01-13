@@ -1,9 +1,7 @@
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "http/Request.hpp"
 #include "parser/HttpRequestParser.hpp"
-
-// for test
-#include "Logger.hpp"
 
 using namespace std;
 
@@ -67,6 +65,7 @@ HttpRequestParser::~HttpRequestParser()
 void
 HttpRequestParser::parse(Request& request)
 {
+	// using function pointer table instead of switch statement?
 	string::size_type	pos;
 
 	pos = updateBuffer();
@@ -74,6 +73,9 @@ HttpRequestParser::parse(Request& request)
 		return;
 	while (m_tokenizer.empty() == false)
 	{
+		(void)request;
+		cout << m_tokenizer.get() << '\n';
+		/*
 		switch (request.m_httpInfo->m_requestReadStatus)
 		{
 			case REQUEST_LINE:
@@ -94,8 +96,9 @@ HttpRequestParser::parse(Request& request)
 				throw std::logic_error("unhandled read status in \
 HttpRequestParser::parse()");
 		}
+*/
 	}
-	Logger::log(Logger::DEBUG, *request.m_httpInfo);
+//	Logger::log(Logger::DEBUG, *request.m_httpInfo);
 }
 
 string::size_type

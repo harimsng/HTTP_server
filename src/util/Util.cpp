@@ -50,6 +50,7 @@ Util::toInt(const string& str)
 	stringstream	ss(str);
 	int				num = 0;
 
+	// TODO: interpret 1m2k3 as 1002003
 	ss >> num;
 	return num;
 }

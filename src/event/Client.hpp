@@ -9,8 +9,8 @@
 //#include "communicator/Response.hpp"
 #include "OsDependency.hpp"
 #include "Webserv.hpp"
-#include "EventObject.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "event/EventObject.hpp"
 #include "http/Request.hpp"
 #include "http/Response.hpp"
 #include "socket_/Socket.hpp"
@@ -34,7 +34,7 @@ public:
 	Client(Client const& client);
 
 // member functions
-	IoEventPoller::EventStatus	handleEvent(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
 
 // member variables
 //

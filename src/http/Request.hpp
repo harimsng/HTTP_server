@@ -5,9 +5,9 @@
 #include <map>
 #include <vector>
 
+#include "Location.hpp"
 #include "parser/HttpRequestParser.hpp"
 #include "socket_/Socket.hpp"
-#include "Location.hpp"
 #include "http/HttpInfo.hpp"
 
 /*
@@ -49,7 +49,6 @@ private:
 	const Socket<Tcp>*	m_socket;
 	std::string			m_buffer;
 	HttpRequestParser	m_parser;
-	int					m_residue;
 
 	HttpInfo*			m_httpInfo;
 

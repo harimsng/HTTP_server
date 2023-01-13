@@ -29,6 +29,7 @@ public:
 	virtual void	parse(Location& location);
 
 	void		setIndex(Location& location);
+	void		setAutoIndex(Location& location);
 	void		setExpires(Location& location);
 	void		setProxyPass(Location& location);
 	void		setLimitExcept(Location& location);

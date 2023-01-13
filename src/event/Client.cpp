@@ -2,8 +2,6 @@
 
 #include "Client.hpp"
 
-#define BUFFER_SIZE (1 << (10 + 4))
-
 using namespace	std;
 
 // constructors & destructor
@@ -32,17 +30,18 @@ Client::Client(Client const& client)
 }
 
 Client::IoEventPoller::EventStatus
-Client::handleEvent(const IoEventPoller::Event& event)
+Client::handleEventWork(const IoEventPoller::Event& event)
 {
 	IoEventPoller::e_filters	filter = event.getFilter();
 
 	switch (filter)
 	{
 		case IoEventPoller::READ:
-			Logger::log(Logger::DEBUG, "read event");
+			LOG(DEBUG, "read event to client");
 			if (m_request.receiveRequest(event.getInfo()) == 0)
 				return IoEventPoller::END;
 		case IoEventPoller::WRITE:
+			LOG(DEBUG, "wrtie event to client");
 			// Logger::log(Logger::DEBUG, "write event");
 			m_response.sendResponse(event.getInfo());
 			return IoEventPoller::NORMAL;

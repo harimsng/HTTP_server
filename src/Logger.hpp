@@ -1,10 +1,27 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <string>
-#include <iostream>
+# include <string>
+# include <iostream>
+# include <iomanip>
 
-#include "util/Util.hpp"
+# include "util/Util.hpp"
+
+# if 0
+#  define LOG(type, fmt, ...)\
+		Logger::log(Logger::type, fmt, ##__VA_ARGS__);
+# else
+// VERBOSE DEBUG
+#  define LOG(type, fmt, ...)\
+	if (Logger::type == Logger::DEBUG)\
+	{\
+		Logger::log(Logger::DEBUG, "%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
+	}\
+	else\
+	{\
+		Logger::log(Logger::type, fmt, ##__VA_ARGS__);\
+	}
+# endif
 
 class	Logger
 {
@@ -21,6 +38,7 @@ public:
 		WARNING = 2,
 		ERROR = 3,
 		DEBUG = 4,
+		VERBOSE = 5,
 	};
 
 // constructors & destructor
@@ -32,37 +50,32 @@ public:
 	static void	log(e_types type, const char* format, ...);
 	static void	initLogger(const std::string& type = "INFO", std::ostream& os = std::cerr);
 
+private:
 	static e_types			s_type;
 	static std::ostream*	s_ostream;
+	static const char*		s_prefixTable[];
 };
 
+/*
+ * note: sync code with void Logger::log(e_types type, const char* format, ...)
+ */
 template <typename T>
 void
 Logger::log(e_types type, const T& object)
 {
 	std::string	prefix;
+	std::string	suffix;
 
 	if (s_type == DISABLED || s_type < type)
 		return;
-	switch (type)
+	prefix = s_prefixTable[type + 1];
+	if (type == ERROR)
 	{
-		case INFO:
-			prefix = "[INFO] ";
-			break;
-		case WARNING:
-			prefix = "[WARNING] ";
-			break;
-		case ERROR:
-			prefix = "[ERROR] ";
-			break;
-		case DEBUG:
-			prefix = "[DEBUG] ";
-			break;
-		default:
-			break;
+		suffix = " (" + Util::toString(errno) + " "
+			+ std::strerror(errno) + ")";
 	}
 	prefix.append(Util::getDate("%F %T "));
-	*s_ostream << prefix << object << '\n';
+	*s_ostream << prefix << object << suffix << '\n';
 }
 
 #endif
