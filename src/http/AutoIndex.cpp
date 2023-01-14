@@ -56,7 +56,7 @@ AutoIndex::autoIndex(std::string path) {
 		else if (file_info->d_type == DT_REG) {
 			page_content += file_info->d_name;
 		}
-		page_content += "</p>";
+		page_content += "</p>\n";
 	}
 	closedir(directory);
 	page_content += "</body>\n";
