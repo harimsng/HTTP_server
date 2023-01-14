@@ -41,7 +41,7 @@ private:
 	void	processEventObject(const Event& event, EventObject& eventObject);
 
 // member variables
-	std::vector<Server>		m_serverList;
+	// std::vector<Server>		m_serverList;
 
 // static members
 private:
@@ -79,7 +79,6 @@ template <typename IoEventPoller>
 ServerManager<IoEventPoller>::~ServerManager()
 {
 }
-
 
 template <typename IoEventPoller>
 void

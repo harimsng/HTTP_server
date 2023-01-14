@@ -13,7 +13,7 @@
 static const std::string	expires = "off";
 
 // ngx_http_index_module
-static const std::string	index = "index.html";
+static const std::string	http_index = "index.html";
 
 // ngx_http_autoindex_module
 static const bool			autoindex = false;

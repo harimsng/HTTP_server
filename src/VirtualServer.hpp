@@ -24,18 +24,17 @@ private:
 	void	setToDefault();
 
 // member variales - config
-	std::string					m_index;
-	bool						m_autoindex;
-	std::vector<std::string>	m_serverNames;
-	std::string					m_errorCode;
-	std::string					m_root;
-	std::string					m_errorPath;
-	std::string					m_errorPages;
-	sockaddr_in					m_listen;
-	int32_t						m_clientMaxBodySize;
-	int32_t						m_uriBufferSize;
-	LocationTable		m_locationTable;
-
+	std::string							m_index;
+	bool								m_autoindex;
+	std::vector<std::string>			m_serverNames;
+	std::string							m_errorCode;
+	std::string							m_root;
+	std::string							m_errorPath;
+	std::string							m_errorPages;
+	sockaddr_in							m_listen;
+	int32_t								m_clientMaxBodySize;
+	int32_t								m_uriBufferSize;
+	std::map<std::string, Location>		m_locationList;
 	uint64_t	m_addrKey;
 
 // friends
