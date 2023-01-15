@@ -20,7 +20,7 @@ struct	EpollEvent: public epoll_event
 
 	IoMultiplex<EpollEvent>::e_filters	getFilter() const
 	{
-		switch (events & (EPOLLIN | EPOLLOUT))
+		switch (events & (EPOLLIN | EPOLLOUT | EPOLLPRI))
 		{
 			case EPOLLIN:
 				return IoMultiplex<EpollEvent>::READ;

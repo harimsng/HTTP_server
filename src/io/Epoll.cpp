@@ -37,7 +37,8 @@ Epoll::addWork(int fd, const Event& event)
 {
 	Event*	newEvent = const_cast<Event*>(&event);
 
-	epoll_ctl(m_epoll, event.m_op, fd, reinterpret_cast<epoll_event*>(newEvent));
+	if (epoll_ctl(m_epoll, event.m_op, fd, reinterpret_cast<epoll_event*>(newEvent)) < 0)
+		throw std::runtime_error("epoll_ctl fail");
 }
 
 void
@@ -60,7 +61,8 @@ Epoll::addWork(int fd, e_operation op, e_filters filter, void* userData)
 		if (filter & bitmask)
 			newEvent.events |= filterTable[count];
 	}
-	epoll_ctl(m_epoll, newEvent.m_op, fd, reinterpret_cast<epoll_event*>(&newEvent));
+	if (epoll_ctl(m_epoll, newEvent.m_op, fd, reinterpret_cast<epoll_event*>(&newEvent)) < 0)
+		throw std::runtime_error("epoll_ctl fail");
 }
 
 const Epoll::EventList&
@@ -68,10 +70,9 @@ Epoll::pollWork()
 {
 	const int	maxEvent = 64;
 	int			count = 0;
-	// static const timespec	timeSpec = {0, 0};
 
 	m_eventList.resize(maxEvent);
-	count = epoll_wait(m_epoll, m_eventList.data(), m_eventList.size(), 0);
+	count = epoll_wait(m_epoll, m_eventList.data(), m_eventList.size(), 100);
 	if (count < 0)
 		throw std::runtime_error("epoll() error");
 	m_eventList.resize(count);

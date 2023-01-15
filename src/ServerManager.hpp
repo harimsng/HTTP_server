@@ -151,6 +151,11 @@ template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::processEvents(const EventList& events)
 {
+	if (events.size() > 0)
+	{
+		LOG(DEBUG, "%d events polled", events.size());
+	}
+
 	for (size_t i = 0; i < events.size(); ++i)
 	{
 		const Event&	event = events[i];
