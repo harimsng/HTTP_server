@@ -7,6 +7,7 @@ using namespace std;
 
 // deleted
 HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)
+:	AParser<HttpStreamTokenizer, Request>()
 {
 	(void)parser;
 }
@@ -56,7 +57,7 @@ HttpRequestParser::~HttpRequestParser()
 //                 throw HttpErrorHandler(501);
 //                 break;
 //             default:
-//                 throw std::logic_error("unhandled read status in \
+//                 throw std::logic_error("unhandled read status in
 // HttpRequestParser::parse()");
 //         }
 //     }
@@ -175,7 +176,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		value = headerLine.substr(curPos, pos - curPos);
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
-			value.pop_back();
+			value.erase(value.end() - 1);
 		headerFieldsMap[field].push_back(value);
 	}
 }

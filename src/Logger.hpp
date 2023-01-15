@@ -4,6 +4,8 @@
 # include <string>
 # include <iostream>
 # include <iomanip>
+# include <cerrno>
+# include <cstring>
 
 # include "util/Util.hpp"
 

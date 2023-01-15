@@ -8,6 +8,7 @@ using namespace	std;
 
 // deleted
 HttpStreamTokenizer::HttpStreamTokenizer(const HttpStreamTokenizer& tokenizer)
+:	ITokenizer()
 {
 	(void)tokenizer;
 }

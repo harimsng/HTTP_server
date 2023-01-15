@@ -3,22 +3,20 @@
 
 #include <iostream>
 #include <string>
-#include <unistd.h>
-#include <dirent.h>
 
 class	AutoIndex
 {
 // deleted
 	AutoIndex	&operator=(const AutoIndex& autoIndex);
+	AutoIndex(const AutoIndex& autoIndex);
 
 public:
 // constructors & destructor
 	AutoIndex();
 	~AutoIndex();
-	AutoIndex(const AutoIndex& autoIndex);
 
 // member functions
-	std::string autoIndex(std::string path);
+	std::string autoIndex(const std::string& path);
 };
 
 #endif

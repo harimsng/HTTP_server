@@ -21,8 +21,9 @@ struct	Kevent: public kevent
 			case EVFILT_WRITE:
 				return IoMultiplex<Kevent>::WRITE;
 			default:
-				return IoMultiplex<Kevent>::FILT_ERROR;
+				return IoMultiplex<Kevent>::ERROR;
 		}
+		return IoMultiplex<Kevent>::NONE;
 	}
 };
 
@@ -37,7 +38,7 @@ class	Kqueue: public IoMultiplex<Kevent>
 public:
 // constructors & destructor
 	Kqueue();
-	virtual ~Kqueue();
+	~Kqueue();
 
 // member functions
 	virtual void	addWork(int fd, const Event& event);
@@ -48,7 +49,9 @@ public:
 
 private:
 // member variables
-	int		m_kqueue;
+	int			m_kqueue;
+	EventList	m_eventList;
+	EventList	m_changeList;
 };
 
 # endif

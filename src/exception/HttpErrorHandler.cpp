@@ -60,7 +60,7 @@ const std::string&	HttpErrorHandler::getErrorMessage(int errorCode)
 	std::string&	errorMessage = s_errorMessageTable[errorCode];
 
 	if (errorMessage.size() == 0)
-		throw std::runtime_error("undefined http error code in HttpErrorHandler::HttpErrorHandler(int)");
+		throw std::runtime_error("undefined http error code in HttpErrorHandler::getErrorMessage(int)");
 	return errorMessage;
 }
 

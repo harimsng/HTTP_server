@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdarg>
 
 #include "ServerManager.hpp"
 #include "Logger.hpp"
