@@ -102,7 +102,7 @@ Socket<SocketType>::getAddress() const throw()
 {
 	SocketAddr	addr;
 	socklen_t	len;
-	
+
 	getsockname(m_fd, &addr, &len);
 	m_addr = addr;
 	return addr;

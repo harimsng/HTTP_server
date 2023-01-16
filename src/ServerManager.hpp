@@ -108,7 +108,7 @@ ServerManager<IoEventPoller>::initServers()
 		 itr != portSet.end();
 		 ++itr)
 	{
-		Server*	newServer = new Server(*itr);
+		Server*	newServer = new Server(*itr, &s_virtualServerTable);
 
 		newServer->initServer();
 		ServerManager<IoEventPoller>::registerEvent(newServer->m_fd, IoEventPoller::ADD,

@@ -31,13 +31,13 @@ public:
 		DELETE
 	};
 // constructors & destructor
-	HttpInfo(const Server& server);
+	HttpInfo();
 	~HttpInfo();
 
 // operator
 	friend std::ostream&	operator<<(std::ostream& os, const HttpInfo& httpInfo);
 
-	const Server*			m_server;
+	// const Server*			m_server;
 	int						m_method;
 	std::string				m_target;
 	std::string				m_protocol;

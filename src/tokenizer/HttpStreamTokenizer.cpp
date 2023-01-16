@@ -102,7 +102,7 @@ HttpStreamTokenizer::get()
 	m_cur = pos + 2;
 	//  m_start == temp (original value of m_cur) means it's first call to get() on new stream.
 	if (m_start == temp)
-		get();
+		token = get();
 
 	return token;
 }
