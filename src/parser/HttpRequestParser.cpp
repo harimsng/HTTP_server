@@ -76,30 +76,35 @@ HttpRequestParser::parse(Request& request)
 	{
 		(void)request;
 		cout << m_tokenizer.get() << '\n';
-		/*
-		switch (request.m_httpInfo->m_requestReadStatus)
-		{
-			case REQUEST_LINE:
-				parseStatusLine(request);
-				break;
-			case HEADER_FIELDS:
-				parseHeaderFields(request.m_httpInfo->m_requestHeaderFields);
-				break;
-			case MESSAGE_BODY:
-				// normal transfer or chunked
-				parseMessageBody();
-				break;
-			case FINISHED:
-				// trailer section is not implemented
-				throw HttpErrorHandler(501);
-				break;
-			default:
-				throw std::logic_error("unhandled read status in \
-HttpRequestParser::parse()");
-		}
-*/
+		// if (m_tokenizer.peek() == "")
+		// {
+		//     // m_tokenizer.get();
+		//     continue;
+		// }
+
+//         switch (request.m_httpInfo->m_requestReadStatus)
+//         {
+//             case REQUEST_LINE:
+//                 parseStatusLine(request);
+//                 break;
+//             case HEADER_FIELDS:
+//                 parseHeaderFields(request.m_httpInfo->m_requestHeaderFields);
+//                 cout << *request.m_httpInfo << endl;
+//                 break;
+//             case MESSAGE_BODY:
+//                 // normal transfer or chunked
+//                 parseMessageBody();
+//                 break;
+//             case FINISHED:
+//                 // trailer section is not implemented
+//                 throw HttpErrorHandler(501);
+//                 break;
+//             default:
+//                 throw std::logic_error("unhandled read status in \
+// HttpRequestParser::parse()");
+		// }
 	}
-//	Logger::log(Logger::DEBUG, *request.m_httpInfo);
+	// Logger::log(Logger::DEBUG, *request.m_httpInfo);
 }
 
 string::size_type

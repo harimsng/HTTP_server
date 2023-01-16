@@ -39,7 +39,7 @@ public:
 // member variables
 //
 // test
-//	HttpInfo		m_httpInfo;
+	HttpInfo		m_httpInfo;
 
 	Socket<Tcp>		m_socket;
 	Request			m_request;
