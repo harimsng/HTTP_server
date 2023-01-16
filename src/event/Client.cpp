@@ -11,11 +11,8 @@ Client::Client(int fd)
 	// m_request(m_socket),
 	// m_response(m_socket)
 	m_request(m_socket, m_httpInfo),
-	m_response(m_socket, m_httpInfo)
+	m_response(m_request)
 {
-	sockaddr_in	addr = m_socket.getAddress();
-
-	m_addrKey = (static_cast<uint64_t>(addr.sin_port) << 32) + addr.sin_addr.s_addr;
 	m_fd = fd;
 }
 
@@ -29,9 +26,8 @@ Client::Client(Client const& client)
 	// m_request(m_socket),
 	// m_response(m_socket)
 	m_request(m_socket, m_httpInfo),
-	m_response(m_socket, m_httpInfo)
+	m_response(m_request)
 {
-	m_addrKey = client.m_addrKey;
 	m_fd = client.m_fd;
 }
 
@@ -44,6 +40,7 @@ Client::handleEventWork()
 			LOG(DEBUG, "read event to client");
 			if (m_request.receiveRequest() == 0)
 				return IoEventPoller::END;
+			m_response.makeResponse();
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "write event to client");

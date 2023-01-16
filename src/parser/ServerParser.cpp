@@ -17,7 +17,7 @@ map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;
 void	ServerParser::setServerSetterMap()
 {
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
-	s_serverSetterMap["server_names"] = &ServerParser::setServerNames;
+	s_serverSetterMap["server_name"] = &ServerParser::setServerNames;
 	s_serverSetterMap["error_code"] = &ServerParser::setErrorCode;
 	s_serverSetterMap["error_pages"] = &ServerParser::setErrorPages;
 	s_serverSetterMap["root"] = &ServerParser::setRoot;
@@ -62,7 +62,7 @@ ServerParser::parseLocation(VirtualServer& server)
 
 	location.m_path = locationPath;
 	locationParser.parse(location);
-	server.m_locationList[locationPath] = location;
+	server.m_locationTable[locationPath] = location;
 	m_tokenizer.eat("}");
 }
 

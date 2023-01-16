@@ -48,13 +48,18 @@ HttpRequestParser::parse(Request& request)
 			case HEADER_FIELDS:
 				parseHeaderFields(request.m_headerFieldsMap);
 				break;
+			case HEADER_FIELDS_END:
+				checkHeaderFields(request.m_headerFieldsMap);
+				if (request.m_method == Request::GET) // if (isReadMethod(request.m_method) == true)
+					break;
+				m_tokenizer.updateBufferForBody();
 			case MESSAGE_BODY:
 				// normal transfer or chunked
-				parseMessageBody();
+				parseMessageBody(request);
 				break;
 			case FINISHED:
 				// trailer section is not implemented
-				throw HttpErrorHandler(501);
+				// throw HttpErrorHandler(501);
 				break;
 			default:
 				throw std::logic_error("unhandled read status in\
@@ -119,7 +124,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 	const string	statusLine = m_tokenizer.getline();
 	string			method;
 
-	method = statusLine.substr(0, statusLine.find(" "));
+	method = Util::toUpper(statusLine.substr(0, statusLine.find(" ")));
 	if (method == "GET")
 		request.m_method = HttpInfo::GET;
 	else if (method == "HEAD")
@@ -132,7 +137,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 		request.m_method = HttpInfo::DELETE;
 	else
 		throw HttpErrorHandler(405);
-	request.m_target = statusLine.substr(statusLine.find(" ") + 1,
+	request.m_uri = statusLine.substr(statusLine.find(" ") + 1,
 			statusLine.rfind(" ") - statusLine.find(" "));
 	request.m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
 	m_readStatus = checkStatusLine(request);
@@ -161,7 +166,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 
 	curPos = 0;
 	pos = headerLine.find(": ");
-	field = headerLine.substr(curPos, pos);
+	field = Util::toUpper(headerLine.substr(curPos, pos));
 	curPos = pos + 2;
 	while (1)
 	{
@@ -182,15 +187,20 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		headerFieldsMap[field].push_back(value);
 	}
 	if (m_tokenizer.peek() == "\r\n")
-	{
-		m_readStatus = MESSAGE_BODY;
-		m_tokenizer.updateBufferForBody();
-	}
+		m_readStatus = HEADER_FIELDS_END;
+}
+
+bool
+HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
+{
+	(void)headerFieldsMap;
+	return true;
 }
 
 void
-HttpRequestParser::parseMessageBody()
+HttpRequestParser::parseMessageBody(Request& request)
 {
+	(void)request;
 	cout << "%% body %%" << m_tokenizer.get() << "%% body end %%";
 }
 

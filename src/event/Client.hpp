@@ -45,8 +45,6 @@ private:
 
 	Request			m_request;
 	Response		m_response;
-	uint64_t		m_addrKey;
-
 };
 
 #endif

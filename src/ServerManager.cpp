@@ -1,5 +1,5 @@
-#include "ServerManager.hpp"
 #include "Webserv.hpp"
+#include "ServerManager.hpp"
 
 // static member definitions
 ServerManager::IoEventPoller	ServerManager::s_ioEventPoller;

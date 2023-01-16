@@ -31,7 +31,7 @@ public:
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();
 	
-	SocketAddr	getAddress() throw();
+	SocketAddr	getAddress() const throw();
 
 // member variables
 	const int	m_fd;
@@ -103,10 +103,10 @@ Socket<SocketType>::connect(SocketAddr* addr) throw()
 
 template <typename SocketType>
 typename Socket<SocketType>::SocketAddr
-Socket<SocketType>::getAddress() throw()
+Socket<SocketType>::getAddress() const throw()
 {
 	SocketAddr	addr;
-	socklen_t	len;
+	socklen_t	len = Tcp::socketAddrLen;
 
 	getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
 	return addr;

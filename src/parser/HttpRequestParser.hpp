@@ -27,6 +27,7 @@ public:
 	{
 		REQUEST_LINE = 0,
 		HEADER_FIELDS,
+		HEADER_FIELDS_END,
 		MESSAGE_BODY,
 		FINISHED
 	};
@@ -41,14 +42,14 @@ public:
 
 	void	parseStatusLine(Request& request);
 	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap);
-	void	parseMessageBody();
+	void	parseMessageBody(Request& request);
 
 	e_readStatus	checkStatusLine(Request& request);
+	bool			checkHeaderFields(HeaderFieldsMap& headerFieldsMap);
 
 	e_readStatus	getReadStatus() const;
 
 // member variables
-private:
 	e_readStatus		m_readStatus;
 };
 

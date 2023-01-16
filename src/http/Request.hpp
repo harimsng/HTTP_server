@@ -57,7 +57,7 @@ private:
 	 * 아래의 변수들은 이제 m_httpInfo에 저장되어있음
 	 * */
 	int					m_method;
-	std::string			m_target;
+	std::string			m_uri;
 	std::string			m_protocol;
 	HeaderFieldsMap		m_headerFieldsMap;
 };

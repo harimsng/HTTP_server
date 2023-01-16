@@ -107,6 +107,16 @@ Util::toString(int num)
 	return str;
 }
 
+string
+Util::toUpper(string str)
+{
+	for (string::size_type i = 0; i < str.size(); ++i)
+	{
+		str[i] &= 111011111;
+	}
+	return str;
+}
+
 bool
 Util::checkFileStat(const char* path)
 {
