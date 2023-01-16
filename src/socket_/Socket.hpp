@@ -30,7 +30,6 @@ public:
 	int		connect(SocketAddr* addr) throw();
 	
 	const SocketAddr&	getAddress() const throw();
-	const std::string&	getAddressString() const throw();
 
 // member variables
 	const int	m_fd;
@@ -98,18 +97,12 @@ Socket<SocketType>::connect(SocketAddr* addr) throw()
 }
 
 template <typename SocketType>
-const std::string&
-Socket<SocketType>::getAddressString() const throw()
-{
-}
-
-template <typename SocketType>
 const typename Socket<SocketType>::SocketAddr&
 Socket<SocketType>::getAddress() const throw()
 {
 	SocketAddr	addr;
 	socklen_t	len;
-	
+
 	getsockname(m_fd, &addr, &len);
 	m_addr = addr;
 	return addr;

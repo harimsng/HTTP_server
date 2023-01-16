@@ -1,8 +1,12 @@
 #include "OsDependency.hpp"
 #include "ServerManager.hpp"
+#include "VirtualServer.hpp"
 #include "event/Client.hpp"
 #include "event/Server.hpp"
 
+#include <iostream>
+
+using namespace std;
 // deleted
 Server&
 Server::operator=(const Server& server)
@@ -15,6 +19,14 @@ Server::operator=(const Server& server)
 // constructors & destructor
 Server::Server(uint16_t port)
 :	m_socket(Socket<Tcp>()),
+	m_port(port),
+	m_fd(m_socket.m_fd)
+{
+}
+
+Server::Server(uint16_t port, VirtualServerTable* virtualServerTable)
+:	m_socket(Socket<Tcp>()),
+	m_virtualServerTable(virtualServerTable),
 	m_port(port),
 	m_fd(m_socket.m_fd)
 {
@@ -49,6 +61,10 @@ Server::IoEventPoller::EventStatus
 Server::handleEventWork(const IoEventPoller::Event& event)
 {
 	IoEventPoller::e_filters	filter = event.getFilter();
+	struct sockaddr clientSocketAddr;
+	socklen_t clientSocketAddrLen = sizeof(struct sockaddr);
+	uint32_t addr;
+	uint16_t port;
 
 	switch (filter)
 	{
@@ -60,12 +76,16 @@ Server::handleEventWork(const IoEventPoller::Event& event)
 			if (clientFd < 0)
 				throw std::runtime_error("accept error in Server::handleEvent()");
 
+			getsockname(clientFd, &clientSocketAddr, &clientSocketAddrLen);
+			addr = (*(sockaddr_in*)(&clientSocketAddr)).sin_addr.s_addr;
+			port = (*(sockaddr_in*)(&clientSocketAddr)).sin_port;
+			// cout << ntohl(addr) << endl;
+			// cout << htons(port) << endl;
+			cout << Util::getFormattedAddress(ntohl(addr), htons(port)) << endl;
 			Client* client;
 			client = new Client(clientFd);
 			ServerManager<IoEventPoller>::registerEvent(clientFd, IoEventPoller::ADD,
 					filter, client);
-			// ServerManager<IoEventPoller>::registerEvent(clientFd,
-			//         IoEventPoller::ADD, IoEventPoller::READWRITE);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");

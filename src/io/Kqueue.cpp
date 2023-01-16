@@ -41,11 +41,11 @@ void
 Kqueue::addWork(int fd, e_operation op, e_filters filter, void* userData)
 {
 	static const int16_t	filterTable[3] = {EVFILT_READ, EVFILT_WRITE, EVFILT_EXCEPT};
-	static const uint16_t	flagTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
+	static const uint16_t	operationTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
 	Kevent	event;
 
 	EV_SET(&event, fd, 0, 0, 0, 0, userData);
-	event.flags = flagTable[op - 1];
+	event.flags = operationTable[op - 1];
 	for (uint64_t bitmask = 1, count = 0; count < 3; bitmask <<= 1, ++count)
 	{
 		if ((filter & bitmask) != 0)

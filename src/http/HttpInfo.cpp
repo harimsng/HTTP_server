@@ -2,9 +2,8 @@
 
 using namespace std;
 
-HttpInfo::HttpInfo(const Server& server)
-	:m_server(&server),
-	m_requestReadStatus(REQUEST_LINE)
+HttpInfo::HttpInfo()
+	: m_requestReadStatus(REQUEST_LINE)
 {
 }
 

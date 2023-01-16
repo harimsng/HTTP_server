@@ -7,6 +7,7 @@ using namespace std;
 
 // deleted
 HttpRequestParser::HttpRequestParser(const HttpRequestParser& parser)
+:	AParser<HttpStreamTokenizer, Request>()
 {
 	(void)parser;
 }
@@ -56,7 +57,7 @@ HttpRequestParser::~HttpRequestParser()
 //                 throw HttpErrorHandler(501);
 //                 break;
 //             default:
-//                 throw std::logic_error("unhandled read status in \
+//                 throw std::logic_error("unhandled read status in
 // HttpRequestParser::parse()");
 //         }
 //     }
@@ -73,9 +74,8 @@ HttpRequestParser::parse(Request& request)
 		return;
 	while (m_tokenizer.empty() == false)
 	{
-		(void)request;
-		cout << m_tokenizer.get() << '\n';
-		/*
+		// (void)request;
+		// cout << m_tokenizer.get() << '\n';
 		switch (request.m_httpInfo->m_requestReadStatus)
 		{
 			case REQUEST_LINE:
@@ -96,9 +96,8 @@ HttpRequestParser::parse(Request& request)
 				throw std::logic_error("unhandled read status in \
 HttpRequestParser::parse()");
 		}
-*/
 	}
-//	Logger::log(Logger::DEBUG, *request.m_httpInfo);
+	// Logger::log(Logger::INFO, *request.m_httpInfo);
 }
 
 string::size_type
@@ -175,7 +174,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		value = headerLine.substr(curPos, pos - curPos);
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
-			value.pop_back();
+			value.erase(value.end() - 1);
 		headerFieldsMap[field].push_back(value);
 	}
 }
@@ -183,6 +182,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 void
 HttpRequestParser::parseMessageBody()
 {
+
 }
 
 HttpRequestParser::e_readStatus

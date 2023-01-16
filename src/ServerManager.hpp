@@ -41,7 +41,7 @@ private:
 	void	processEventObject(const Event& event, EventObject& eventObject);
 
 // member variables
-	std::vector<Server>		m_serverList;
+	// std::vector<Server>		m_serverList;
 
 // static members
 private:
@@ -80,7 +80,6 @@ ServerManager<IoEventPoller>::~ServerManager()
 {
 }
 
-
 template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::parseConfig(const char* path)
@@ -109,7 +108,7 @@ ServerManager<IoEventPoller>::initServers()
 		 itr != portSet.end();
 		 ++itr)
 	{
-		Server*	newServer = new Server(*itr);
+		Server*	newServer = new Server(*itr, &s_virtualServerTable);
 
 		newServer->initServer();
 		ServerManager<IoEventPoller>::registerEvent(newServer->m_fd, IoEventPoller::ADD,
@@ -152,6 +151,11 @@ template <typename IoEventPoller>
 void
 ServerManager<IoEventPoller>::processEvents(const EventList& events)
 {
+	if (events.size() > 0)
+	{
+		LOG(DEBUG, "%d events polled", events.size());
+	}
+
 	for (size_t i = 0; i < events.size(); ++i)
 	{
 		const Event&	event = events[i];

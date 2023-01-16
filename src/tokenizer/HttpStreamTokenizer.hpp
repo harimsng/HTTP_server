@@ -20,7 +20,6 @@ public:
 	std::string::size_type	updateBufferForHeader();
 	std::string::size_type	updateBufferForBody();
 
-	// should those virtual method be private?
 	virtual std::string	peek();
 	virtual std::string	get();
 	std::string			getline();

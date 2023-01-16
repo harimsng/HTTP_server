@@ -5,7 +5,13 @@ CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
 DEBUGFLAGS	=	-g -fsanitize=address
 RM			=	rm -f
 
-SRC			=	main.cpp\
+ifeq ($(shell uname), Linux)
+SRC			= io/Epoll.cpp
+else
+SRC			= io/Kqueue.cpp
+endif
+
+SRC			+=	main.cpp\
 				Logger.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
@@ -28,8 +34,6 @@ SRC			=	main.cpp\
 				http/Request.cpp\
 				http/Response.cpp\
 				http/HttpInfo.cpp\
-\
-				io/Kqueue.cpp\
 \
 				util/Util.cpp\
 

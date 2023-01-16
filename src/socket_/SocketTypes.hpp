@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <cstring>
 
 #include "OsDependency.hpp"
 
@@ -12,19 +13,13 @@ struct	Tcp
 	{
 		SocketAddr()
 		{
-			sin_len = socketAddrLen;
-			sin_family = domain;
-			sin_port = 0;
-			sin_addr.s_addr = static_cast<in_addr_t>(0);
+			sockaddr_in::operator=(GET_SOCKADDR_IN(0, 0));
 			::memset(sin_zero, 0, sizeof(sin_zero));
 		};
 
 		SocketAddr(const sockaddr_in& addr)
 		{
-			sin_len = addr.sin_len;
-			sin_family = addr.sin_family;
-			sin_port = addr.sin_port;
-			sin_addr.s_addr = addr.sin_addr.s_addr;
+			sockaddr_in::operator=(addr);
 			::memset(sin_zero, 0, sizeof(sin_zero));
 		};
 	};

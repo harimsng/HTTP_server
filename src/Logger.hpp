@@ -4,6 +4,8 @@
 # include <string>
 # include <iostream>
 # include <iomanip>
+# include <cerrno>
+# include <cstring>
 
 # include "util/Util.hpp"
 
@@ -38,7 +40,7 @@ public:
 		WARNING = 2,
 		ERROR = 3,
 		DEBUG = 4,
-		VERBOSE = 5,
+		VERBOSE = 5
 	};
 
 // constructors & destructor

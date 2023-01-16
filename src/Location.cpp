@@ -1,5 +1,6 @@
 #include <ostream>
 
+#include "Config.hpp"
 #include "Location.hpp"
 
 using namespace std;
@@ -35,14 +36,14 @@ Location::setToDefault()
 {
 	m_index = "index.html";
 	m_autoindex = false;
-	m_expires;
-	m_proxyPass;
-	m_limitExcept;
-	m_path;
-	m_root;
-	m_cgiPass;
-	m_alias;
-	m_clientMaxBodySize;
+	// m_expires;
+	// m_proxyPass;
+	// m_limitExcept;
+	// m_path;
+	// m_root;
+	// m_cgiPass;
+	// m_alias;
+	// m_clientMaxBodySize;
 }
 
 ostream&
