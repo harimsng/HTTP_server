@@ -1,3 +1,4 @@
+#include "Config.hpp"
 #include "VirtualServer.hpp"
 
 VirtualServer::VirtualServer()
@@ -29,23 +30,19 @@ VirtualServer::operator=(const VirtualServer& server)
 	return *this;
 }
 
-#define DEFAULT_NAME ("") // coule be hostname
-#define DEFAULT_ADDR (INADDR_ANY)
-#define DEFAULT_PORT (8000)
-
 void
 VirtualServer::setToDefault()
 {
 //	m_index;
-	m_serverNames = vector<string>(1, DEFAULT_NAME);
+	m_serverNames = vector<string>(1, "");
 //	m_errorCode;
 //	m_root;
 //	m_errorPages;
-	m_listen = GET_SOCKADDR_IN(DEFAULT_ADDR, DEFAULT_PORT);
+	m_listen = GET_SOCKADDR_IN(listenIp, listenPort);
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
 //
-	m_addrKey = (DEFAULT_ADDR << 16) + DEFAULT_PORT;
+	m_addrKey = (listenIp << 16) + listenPort;
 }
 
 std::ostream&

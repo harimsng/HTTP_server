@@ -56,6 +56,16 @@ Util::getFormattedAddress(sockaddr_in& addr)
 	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 }
 
+string
+Util::getFormattedAddress(int fd)
+{
+	sockaddr_in		addr;
+	socklen_t		addrLen = Tcp::socketAddrLen;
+
+	getsockname(fd, reinterpret_cast<sockaddr*>(&addr), &addrLen);
+	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
+}
+
 const string
 Util::getDate(const char* format)
 {

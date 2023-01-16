@@ -8,42 +8,48 @@
 template <typename SocketType>
 class	Socket
 {
-public:
-// types
-	typedef typename SocketType::SocketAddr	SocketAddr;
-
-private:
 // deleted
 	Socket	&operator=(const Socket& socket) {(void)socket; return *this;}
 
 public:
+// types
+	typedef typename SocketType::SocketAddr	SocketAddr;
+
 // constructors & destructor
 	Socket() throw();
 	~Socket() throw();
 	Socket(const Socket & socket) throw();
-	Socket(int fd, const SocketAddr* addr = NULL) throw();
+	Socket(int fd) throw();
 
+private:
+	void	init() throw();
+
+public:
 // member functions
 	int		listen(int backlog = 8) throw();
 	int		bind(SocketAddr* addr) throw();
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();
 	
-	const SocketAddr&	getAddress() throw();
+	SocketAddr	getAddress() throw();
 
 // member variables
 	const int	m_fd;
-	SocketAddr	m_addr;
 };
 
 template <typename SocketType>
 Socket<SocketType>::Socket() throw()
 :	m_fd(socket(SocketType::domain, SocketType::type, SocketType::protocol))
 {
-	int socketOption = 1;
+	init();
 
-	setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
+}
 
+template <typename SocketType>
+Socket<SocketType>::Socket(int fd) throw()
+:	m_fd(fd)
+{
+	init();
 }
 
 template <typename SocketType>
@@ -59,18 +65,18 @@ Socket<SocketType>::Socket(Socket const& socket) throw()
 }
 
 template <typename SocketType>
-Socket<SocketType>::Socket(int fd, const SocketAddr* addr) throw()
-:	m_fd(fd)
+void
+Socket<SocketType>::init() throw()
 {
-	if (addr != NULL)
-		::memcpy(&m_addr, addr, sizeof(*addr));
+	int socketOption = 1;
+
+	setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
 }
 
 template <typename SocketType>
 int
 Socket<SocketType>::bind(SocketAddr* addr) throw()
 {
-	::memcpy(&m_addr, addr, sizeof(*addr));
 	return ::bind(m_fd, reinterpret_cast<sockaddr*>(addr), SocketType::socketAddrLen);
 }
 
@@ -96,15 +102,14 @@ Socket<SocketType>::connect(SocketAddr* addr) throw()
 }
 
 template <typename SocketType>
-const typename Socket<SocketType>::SocketAddr&
+typename Socket<SocketType>::SocketAddr
 Socket<SocketType>::getAddress() throw()
 {
 	SocketAddr	addr;
-	socklen_t	len = Tcp::socketAddrLen;
+	socklen_t	len;
 
 	getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
-	m_addr = addr;
-	return m_addr;
+	return addr;
 }
 
 #endif

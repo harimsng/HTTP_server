@@ -1,14 +1,13 @@
 #include <string>
 
-#include "event/EventObject.hpp"
 #include "Client.hpp"
 
 using namespace	std;
 
 // constructors & destructor
 Client::Client(int fd)
-:	m_httpInfo(),
-	m_socket(fd),
+:	m_socket(fd),
+	m_httpInfo(),
 	// m_request(m_socket),
 	// m_response(m_socket)
 	m_request(m_socket, m_httpInfo),
@@ -25,15 +24,15 @@ Client::~Client()
 }
 
 Client::Client(Client const& client)
-	: m_httpInfo(client.m_httpInfo),
-	m_socket(client.m_socket),
+:	m_socket(client.m_socket),
+	m_httpInfo(client.m_httpInfo),
 	// m_request(m_socket),
 	// m_response(m_socket)
 	m_request(m_socket, m_httpInfo),
 	m_response(m_socket, m_httpInfo)
 {
-	m_fd = client.m_fd;
 	m_addrKey = client.m_addrKey;
+	m_fd = client.m_fd;
 }
 
 Client::IoEventPoller::EventStatus

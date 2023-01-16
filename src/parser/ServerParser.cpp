@@ -7,6 +7,9 @@
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
 
+// TODO: alias and root cannot be defined at the same time
+// 		some variables in location block take default value from server block
+
 using namespace std;
 
 map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;

@@ -46,7 +46,7 @@ ServerManager::initServers() try
 
 		anyAddrFlag = (addrKey & 0xffffffff) == 0;
 
-		Server*	newServer = new Server(addrKey);
+		Server*	newServer = new Server();
 
 		newServer->initServer();
 		s_ioEventPoller.add(newServer->m_fd, IoEventPoller::ADD,

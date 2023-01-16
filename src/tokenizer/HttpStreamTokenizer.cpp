@@ -46,7 +46,7 @@ HttpStreamTokenizer::updateBufferForHeader()
 	if (m_cur > m_start)
 		m_start = m_cur;
 
-	pos = m_buffer->rfind("\r\n\r\n");
+	pos = m_buffer->rfind("\r\n");
 	if (pos == string::npos)
 	{
 		if (m_buffer->size() == m_buffer->capacity())
@@ -55,7 +55,7 @@ HttpStreamTokenizer::updateBufferForHeader()
 		return string::npos;
 	}
 	m_cur = m_start;
-	m_end = m_start + pos + 4;
+	m_end = m_start + pos + 2;
 	return m_end;
 }
 
@@ -91,6 +91,9 @@ HttpStreamTokenizer::get()
 
 	pos = pos == string::npos ? m_buffer->size() : pos;
 	m_aheadToken = m_buffer->substr(m_cur, pos - m_cur);
+	if (m_aheadToken == "")
+		m_aheadToken = "\r\n";
+
 	temp = m_cur;
 	m_cur = pos + 2;
 	//  m_start == temp (original value of m_cur) means it's first call to get() on new stream.

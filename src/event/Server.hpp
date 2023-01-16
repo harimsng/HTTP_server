@@ -16,7 +16,7 @@ class	Server: public EventObject
 
 public:
 // constructors & destructor
-	Server(uint64_t addrKey);
+	Server();
 	virtual ~Server();
 	Server(const Server& server);
 

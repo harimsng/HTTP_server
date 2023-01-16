@@ -36,16 +36,17 @@ public:
 // member functions
 	IoEventPoller::EventStatus	handleEventWork();
 
-private:
 // member variables
-//
+private:
+	Socket<Tcp>		m_socket;
+
 // test
 	HttpInfo		m_httpInfo;
 
-	Socket<Tcp>		m_socket;
 	Request			m_request;
 	Response		m_response;
 	uint64_t		m_addrKey;
+
 };
 
 #endif

@@ -134,6 +134,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 			statusLine.rfind(" ") - statusLine.find(" "));
 	request.m_httpInfo->m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
 	request.m_httpInfo->m_requestReadStatus = checkStatusLine(request);
+	m_readStatus = HEADER_FIELDS;
 }
 
 /* TODO
@@ -179,12 +180,17 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 			value.erase(value.end() - 1);
 		headerFieldsMap[field].push_back(value);
 	}
+	if (m_tokenizer.getline() == "\r\n")
+	{
+		m_readStatus = MESSAGE_BODY;
+		m_tokenizer.updateBufferForBody();
+	}
 }
 
 void
 HttpRequestParser::parseMessageBody()
 {
-
+	cout << m_tokenizer.get() << '\n';
 }
 
 HttpRequestParser::e_readStatus
