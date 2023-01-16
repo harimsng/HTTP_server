@@ -79,7 +79,7 @@ ConfigParser::parseServer() try
 	if (m_serverTable->count(newServer->m_addrKey) == 1)
 		checkDuplicateServerName(*newServer);
 	else
-		(*m_serverTable)[newServer->m_addrKey]["_"] = newServer;
+		(*m_serverTable)[newServer->m_addrKey]["."] = newServer;
 
 	addNameToTable(*newServer);
 }

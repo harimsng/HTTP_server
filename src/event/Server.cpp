@@ -17,19 +17,13 @@ Server::operator=(const Server& server)
 }
 
 // constructors & destructor
-Server::Server(uint16_t port)
-:	m_socket(Socket<Tcp>()),
-	m_port(port),
-	m_fd(m_socket.m_fd)
-{
-}
+Server::Server(uint64_t addrKey)
+:	m_socket(Socket<Tcp>())
 
-Server::Server(uint16_t port, VirtualServerTable* virtualServerTable)
-:	m_socket(Socket<Tcp>()),
-	m_virtualServerTable(virtualServerTable),
-	m_port(port),
-	m_fd(m_socket.m_fd)
 {
+	m_fd = m_socket.m_fd;
+	m_socket.m_addr =
+		GET_SOCKADDR_IN(addrKey & 0xffffffff, addrKey >> 32);
 }
 
 Server::~Server()
@@ -37,10 +31,9 @@ Server::~Server()
 }
 
 Server::Server(const Server& server)
-:	m_socket(server.m_socket),
-	m_port(server.m_port),
-	m_fd(m_socket.m_fd)
+:	m_socket(server.m_socket)
 {
+	m_fd = m_socket.m_fd;
 }
 
 void
@@ -49,27 +42,30 @@ Server::initServer()
 	if (m_socket.m_fd < 0)
 		throw std::runtime_error("server socket() error");
 
-	Socket<Tcp>::SocketAddr socketaddr = GET_SOCKADDR_IN(0, m_port);
-	if (m_socket.bind(&socketaddr) < 0)
+	if (m_socket.bind(&m_socket.m_addr) < 0)
+	{
+		close(m_socket.m_fd);
 		throw std::runtime_error("server socket bind() error");
+	}
 	if (m_socket.listen() < 0)
+	{
+		close(m_socket.m_fd);
 		throw std::runtime_error("server socket listen() error");
-	LOG(DEBUG, "listen server binds and listen on port: %u", m_port);
+	}
+	LOG(DEBUG, "listen server binds and listen on : %s", Util::getFormattedAddress(m_socket.m_addr).data());
 }
 
 Server::IoEventPoller::EventStatus
-Server::handleEventWork(const IoEventPoller::Event& event)
+Server::handleEventWork()
 {
-	IoEventPoller::e_filters	filter = event.getFilter();
 	struct sockaddr clientSocketAddr;
 	socklen_t clientSocketAddrLen = sizeof(struct sockaddr);
 	uint32_t addr;
 	uint16_t port;
 
-	switch (filter)
+	switch (m_filter)
 	{
 		case IoEventPoller::READ:
-			LOG(DEBUG, "read event to server");
 			int		clientFd;
 			clientFd = m_socket.accept();
 
@@ -79,13 +75,12 @@ Server::handleEventWork(const IoEventPoller::Event& event)
 			getsockname(clientFd, &clientSocketAddr, &clientSocketAddrLen);
 			addr = (*(sockaddr_in*)(&clientSocketAddr)).sin_addr.s_addr;
 			port = (*(sockaddr_in*)(&clientSocketAddr)).sin_port;
-			// cout << ntohl(addr) << endl;
-			// cout << htons(port) << endl;
-			cout << Util::getFormattedAddress(ntohl(addr), htons(port)) << endl;
+			LOG(DEBUG, "read event to server toward %s", Util::getFormattedAddress(ntohl(addr), htons(port)).data());
+
 			Client* client;
 			client = new Client(clientFd);
-			ServerManager<IoEventPoller>::registerEvent(clientFd, IoEventPoller::ADD,
-					filter, client);
+			ServerManager::registerEvent(clientFd, IoEventPoller::ADD,
+					IoEventPoller::READ | IoEventPoller::WRITE, client);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");

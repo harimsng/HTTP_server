@@ -49,11 +49,11 @@ Request::~Request()
 }
 
 int
-Request::receiveRequest(int eventInfo)
+Request::receiveRequest()
 {
 	int			count;
 
-	count = receiveRawData(eventInfo);
+	count = receiveRawData();
 	if (count == 0)
 		return REQUEST_EOF;
 	else if (count == -1)
@@ -63,12 +63,11 @@ Request::receiveRequest(int eventInfo)
 }
 
 int
-Request::receiveRawData(int eventInfo)
+Request::receiveRawData()
 {
 	const int	residue = m_buffer.size();
 	int			count = 0;
 
-	(void)eventInfo;
 #ifdef __APPLE__
 	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,

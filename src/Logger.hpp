@@ -36,9 +36,9 @@ public:
 	enum	e_types
 	{
 		DISABLED = 0,
-		INFO = 1,
+		ERROR = 1,
 		WARNING = 2,
-		ERROR = 3,
+		INFO = 3,
 		DEBUG = 4,
 		VERBOSE = 5
 	};

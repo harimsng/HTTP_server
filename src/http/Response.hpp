@@ -21,7 +21,7 @@ public:
 	~Response();
 
 // member functions
-	void		sendResponse(int eventInfo);
+	void		sendResponse();
 	void		makeErrorResponse(const std::string& errorMessage);
 
 private:

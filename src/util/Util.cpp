@@ -50,6 +50,12 @@ Util::getFormattedAddress(uint32_t addr, uint16_t port)
 	return ss.str();
 }
 
+string
+Util::getFormattedAddress(sockaddr_in& addr)
+{
+	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
+}
+
 const string
 Util::getDate(const char* format)
 {

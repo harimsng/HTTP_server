@@ -20,9 +20,9 @@
 
 class	Server;
 
-class	Client: public IEventObject
+class	Client: public EventObject
 {
-	typedef	IEventObject::IoEventPoller	IoEventPoller;
+	typedef	EventObject::IoEventPoller	IoEventPoller;
 
 // deleted
 	Client	&operator=(Client const& client);
@@ -34,8 +34,9 @@ public:
 	Client(Client const& client);
 
 // member functions
-	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork();
 
+private:
 // member variables
 //
 // test
@@ -44,6 +45,7 @@ public:
 	Socket<Tcp>		m_socket;
 	Request			m_request;
 	Response		m_response;
+	uint64_t		m_addrKey;
 };
 
 #endif

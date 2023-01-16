@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "Webserv.hpp"
+#include "VirtualServer.hpp"
 #include "parser/AParser.hpp"
 #include "tokenizer/FileTokenizer.hpp"
-#include "VirtualServer.hpp"
 
 class	ConfigParser: public AParser<FileTokenizer, void>
 {

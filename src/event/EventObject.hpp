@@ -1,31 +1,25 @@
 #ifndef EVENTOBJECT_HPP
 #define EVENTOBJECT_HPP
 
-#include "Webserv.hpp"
+#include "OsDependency.hpp"
 
-template <typename IoEventPollerType>
-class	EventObjectTemplate
+class	EventObject
 {
 public:
-	typedef	IoEventPollerType	IoEventPoller;
-	typename IoEventPoller::EventStatus
-	handleEvent(const typename IoEventPoller::Event& event)
-	{
-		return handleEventWork(event);
-	}
+	typedef	IO_EVENT_POLLER	IoEventPoller;
 
-protected:
-	~EventObjectTemplate() {};
+	EventObject() {};
+	EventObject(int fd): m_fd(fd) {};
+	virtual ~EventObject() {};
+
+	IoEventPoller::EventStatus	handleEvent() {return handleEventWork();}
 
 private:
-	virtual typename IoEventPoller::EventStatus
-	handleEventWork(const typename IoEventPoller::Event& event) = 0;
-};
+	virtual IoEventPoller::EventStatus	handleEventWork() = 0;
 
-struct	IEventObject: public EventObjectTemplate<IO_EVENT_POLLER>
-{
-protected:
-	~IEventObject() {};
+public:
+	int							m_fd;
+	IoEventPoller::e_filters	m_filter;
 };
 
 #endif

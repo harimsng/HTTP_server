@@ -1,7 +1,7 @@
 #include <string>
 
-#include "Client.hpp"
 #include "event/EventObject.hpp"
+#include "Client.hpp"
 
 using namespace	std;
 
@@ -14,6 +14,10 @@ Client::Client(int fd)
 	m_request(m_socket, m_httpInfo),
 	m_response(m_socket, m_httpInfo)
 {
+	sockaddr_in	addr = m_socket.getAddress();
+
+	m_addrKey = (static_cast<uint64_t>(addr.sin_port) << 32) + addr.sin_addr.s_addr;
+	m_fd = fd;
 }
 
 Client::~Client()
@@ -28,24 +32,24 @@ Client::Client(Client const& client)
 	m_request(m_socket, m_httpInfo),
 	m_response(m_socket, m_httpInfo)
 {
+	m_fd = client.m_fd;
+	m_addrKey = client.m_addrKey;
 }
 
 Client::IoEventPoller::EventStatus
-Client::handleEventWork(const IoEventPoller::Event& event)
+Client::handleEventWork()
 {
-	IoEventPoller::e_filters	filter = event.getFilter();
-
-	switch (filter)
+	switch (m_filter)
 	{
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
-			if (m_request.receiveRequest(event.getInfo()) == 0)
+			if (m_request.receiveRequest() == 0)
 				return IoEventPoller::END;
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "wrtie event to client");
 			// Logger::log(Logger::DEBUG, "write event");
-			m_response.sendResponse(event.getInfo());
+			m_response.sendResponse();
 			return IoEventPoller::NORMAL;
 //		case IoEventPoller::EXCEPT:
 //			break;

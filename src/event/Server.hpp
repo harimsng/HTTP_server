@@ -5,37 +5,29 @@
 #include "socket_/Socket.hpp"
 #include "event/EventObject.hpp"
 
-template <typename IoEventPoller>
 class	ServerManager;
 
-class	Server: public IEventObject
+class	Server: public EventObject
 {
-	typedef	IEventObject::IoEventPoller	IoEventPoller;
+	typedef	EventObject::IoEventPoller	IoEventPoller;
 
 // deleted
 	Server	&operator=(const Server& server);
 
 public:
 // constructors & destructor
-	Server(uint16_t port);
-	Server(uint16_t port, VirtualServerTable* virtualServerTable);
+	Server(uint64_t addrKey);
 	virtual ~Server();
 	Server(const Server& server);
 
 // member functions
 	void	initServer();
 
-	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork();
 
 private:
 // member variables - socket
 	Socket<Tcp>		m_socket;
-
-public:
-	VirtualServerTable*	m_virtualServerTable;
-	const uint16_t		m_port;
-	const int			m_fd;
-
 };
 
 #endif

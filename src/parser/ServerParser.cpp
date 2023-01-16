@@ -71,6 +71,7 @@ ServerParser::setIndex(VirtualServer& server)
 	m_tokenizer.eat(";");
 }
 
+// TODO: apply server name rule
 void
 ServerParser::setServerNames(VirtualServer& server)
 {
@@ -78,6 +79,7 @@ ServerParser::setServerNames(VirtualServer& server)
 	server.m_serverNames.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
+		// if (checkServerName(m_tokenizer.peek()) == false) check "."
 		server.m_serverNames.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
@@ -124,7 +126,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 			throw ConfigParser::ConfigParserException("invalid listen address");
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
-	server.m_addrKey = (addr << 16) + port;
+	server.m_addrKey = (static_cast<uint64_t>(port) << 32) + addr;
 	LOG(Logger::DEBUG, "addr/port : %s", Util::getFormattedAddress(addr, port).c_str());
 	m_tokenizer.eat(";");
 }

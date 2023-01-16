@@ -29,11 +29,10 @@ public:
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();
 	
-	const SocketAddr&	getAddress() const throw();
+	const SocketAddr&	getAddress() throw();
 
 // member variables
 	const int	m_fd;
-private:
 	SocketAddr	m_addr;
 };
 
@@ -98,14 +97,14 @@ Socket<SocketType>::connect(SocketAddr* addr) throw()
 
 template <typename SocketType>
 const typename Socket<SocketType>::SocketAddr&
-Socket<SocketType>::getAddress() const throw()
+Socket<SocketType>::getAddress() throw()
 {
 	SocketAddr	addr;
 	socklen_t	len;
 
-	getsockname(m_fd, &addr, &len);
+	getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
 	m_addr = addr;
-	return addr;
+	return m_addr;
 }
 
 #endif

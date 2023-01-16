@@ -34,9 +34,8 @@ Response::operator=(const Response& response)
 }
 
 void
-Response::sendResponse(int eventInfo)
+Response::sendResponse()
 {
-	(void)eventInfo;
 }
 
 void

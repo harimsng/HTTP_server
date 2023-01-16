@@ -9,9 +9,10 @@
 using namespace std;
 
 const char*	Logger::s_prefixTable[] = {
-	"[INFO]    ",
-	"[WARNING] ",
+	"",
 	"[ERROR]   ",
+	"[WARNING] ",
+	"[INFO]    ",
 	"[DEBUG]   ",
 };
 
@@ -50,9 +51,9 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 
 	s_ostream = &os;
 	temp = DISABLED
-		+ INFO * (type == "INFO")
-		+ WARNING * (type == "WARNING")
 		+ ERROR * (type == "ERROR")
+		+ WARNING * (type == "WARNING")
+		+ INFO * (type == "INFO")
 		+ DEBUG * (type == "DEBUG");
 	s_type = static_cast<e_types>(temp);
 	cout << s_prefixTable[INFO]
@@ -71,7 +72,7 @@ Logger::log(e_types type, const char* format, ...)
 		return;
 	va_start(ap, format);
 	vsnprintf(buffer, MAX_BUFFER_LEN - 1, format, ap);
-	prefix = s_prefixTable[type - 1];
+	prefix = s_prefixTable[type];
 	if (type == ERROR)
 	{
 		suffix = " (" + Util::toString(errno) + " "
