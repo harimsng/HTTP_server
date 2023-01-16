@@ -43,6 +43,5 @@ public:
 	std::string				m_protocol;
 	int						m_requestReadStatus;
 	requestHeaderFields_t	m_requestHeaderFields;
-
 };
 #endif //HttpInfo_hpp

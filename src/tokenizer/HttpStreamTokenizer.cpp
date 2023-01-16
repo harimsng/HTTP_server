@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 
@@ -112,6 +113,15 @@ char
 HttpStreamTokenizer::getc()
 {
 	return empty() == false ? (*m_buffer)[m_cur++] : '\0';
+}
+
+void
+HttpStreamTokenizer::flush()
+{
+	m_buffer->erase(0, m_end);
+	m_start = 0;
+	m_cur = 0;
+	m_end = m_buffer->size();
 }
 
 bool

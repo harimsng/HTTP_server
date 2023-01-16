@@ -24,7 +24,9 @@ public:
 	virtual std::string	get();
 	std::string			getline();
 	char			getc();
+	void			flush();
 	virtual bool	empty() const;
+
 
 private:
 	std::string*	m_buffer;

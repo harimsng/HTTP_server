@@ -72,8 +72,8 @@ Request::receiveRawData()
 	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
 			m_buffer.size() - residue - 1);
-	// if evenInfo + residue is bigger than buffer size read() will make buffer overflow.
-	m_buffer.resize(residue + count + 1, 0);
+	m_buffer.resize(residue + count, 0);
+
 #elif __linux__
 	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
 	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,

@@ -30,43 +30,9 @@ HttpRequestParser::~HttpRequestParser()
 {
 }
 
-// void
-// HttpRequestParser::parse(Request& request)
-// {
-//     string::size_type	pos;
-//
-//     pos = updateBuffer();
-//     if (pos == string::npos)
-//         return;
-//     while (m_tokenizer.empty() == false)
-//     {
-//         switch (m_readStatus)
-//         {
-//             case REQUEST_LINE:
-//                 readStatusLine(request);
-//                 break;
-//             case HEADER_FIELDS:
-//                 readHeaderFields(request.m_headerFieldsMap);
-//                 break;
-//             case MESSAGE_BODY:
-//                 // normal transfer or chunked
-//                 readMessageBody();
-//                 break;
-//             case FINISHED:
-//                 // trailer section is not implemented
-//                 throw HttpErrorHandler(501);
-//                 break;
-//             default:
-//                 throw std::logic_error("unhandled read status in
-// HttpRequestParser::parse()");
-//         }
-//     }
-// }
-
 void
 HttpRequestParser::parse(Request& request)
 {
-	// using function pointer table instead of switch statement?
 	string::size_type	pos;
 
 	pos = updateBuffer();
@@ -74,10 +40,47 @@ HttpRequestParser::parse(Request& request)
 		return;
 	while (m_tokenizer.empty() == false)
 	{
+		switch (m_readStatus)
+		{
+			case REQUEST_LINE:
+				parseStatusLine(request);
+				break;
+			case HEADER_FIELDS:
+				parseHeaderFields(request.m_headerFieldsMap);
+				break;
+			case MESSAGE_BODY:
+				// normal transfer or chunked
+				parseMessageBody();
+				break;
+			case FINISHED:
+				// trailer section is not implemented
+				throw HttpErrorHandler(501);
+				break;
+			default:
+				throw std::logic_error("unhandled read status in\
+HttpRequestParser::parse()");
+		}
+	}
+	m_tokenizer.flush();
+//	Logger::log(Logger::INFO, *request.m_httpInfo);
+}
+
+/*
+void
+HttpRequestParser::parse(Request& request)
+{
+	// using function pointer table instead of switch statement?
+	string::size_type	pos;
+
+	pos = updateBuffer();
+	LOG(DEBUG, "buffer status = %d", pos);
+	if (pos == string::npos)
+		return;
+	while (m_tokenizer.empty() == false)
+	{
 		(void)request;
 		cout << m_tokenizer.get() << '\n';
-		/*
-		switch (request.m_httpInfo->m_requestReadStatus)
+		switch (m_readStatus)
 		{
 			case REQUEST_LINE:
 				parseStatusLine(request);
@@ -97,10 +100,9 @@ HttpRequestParser::parse(Request& request)
 				throw std::logic_error("unhandled read status in \
 HttpRequestParser::parse()");
 		}
-		*/
 	}
-	// Logger::log(Logger::INFO, *request.m_httpInfo);
 }
+		*/
 
 string::size_type
 HttpRequestParser::updateBuffer()
@@ -119,22 +121,21 @@ HttpRequestParser::parseStatusLine(Request &request)
 
 	method = statusLine.substr(0, statusLine.find(" "));
 	if (method == "GET")
-		request.m_httpInfo->m_method = HttpInfo::GET;
+		request.m_method = HttpInfo::GET;
 	else if (method == "HEAD")
-		request.m_httpInfo->m_method = HttpInfo::HEAD;
+		request.m_method = HttpInfo::HEAD;
 	else if (method == "POST")
-		request.m_httpInfo->m_method = HttpInfo::POST;
+		request.m_method = HttpInfo::POST;
 	else if (method == "PUT")
-		request.m_httpInfo->m_method = HttpInfo::PUT;
+		request.m_method = HttpInfo::PUT;
 	else if (method == "DELETE")
-		request.m_httpInfo->m_method = HttpInfo::DELETE;
+		request.m_method = HttpInfo::DELETE;
 	else
 		throw HttpErrorHandler(405);
-	request.m_httpInfo->m_target = statusLine.substr(statusLine.find(" ") + 1,
+	request.m_target = statusLine.substr(statusLine.find(" ") + 1,
 			statusLine.rfind(" ") - statusLine.find(" "));
-	request.m_httpInfo->m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
-	request.m_httpInfo->m_requestReadStatus = checkStatusLine(request);
-	m_readStatus = HEADER_FIELDS;
+	request.m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
+	m_readStatus = checkStatusLine(request);
 }
 
 /* TODO
@@ -144,7 +145,7 @@ HttpRequestParser::e_readStatus
 HttpRequestParser::checkStatusLine(Request &request)
 {
 //	findLocationBlock(request);
-	if (request.m_httpInfo->m_protocol != "HTTP/1.1")
+	if (request.m_protocol != "HTTP/1.1")
 		throw HttpErrorHandler(505);
 	return (HEADER_FIELDS);
 }
@@ -180,7 +181,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 			value.erase(value.end() - 1);
 		headerFieldsMap[field].push_back(value);
 	}
-	if (m_tokenizer.getline() == "\r\n")
+	if (m_tokenizer.peek() == "\r\n")
 	{
 		m_readStatus = MESSAGE_BODY;
 		m_tokenizer.updateBufferForBody();
@@ -190,7 +191,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 void
 HttpRequestParser::parseMessageBody()
 {
-	cout << m_tokenizer.get() << '\n';
+	cout << "%% body %%" << m_tokenizer.get() << "%% body end %%";
 }
 
 HttpRequestParser::e_readStatus

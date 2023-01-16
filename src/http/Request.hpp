@@ -16,6 +16,7 @@
 class	Request
 {
 	friend class	HttpRequestParser;
+	friend class	Response;
 
 // deleted
 	Request(const Request& request);

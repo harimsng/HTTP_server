@@ -21,7 +21,7 @@ public:
 	Server(const Server& server);
 
 // member functions
-	void	initServer();
+	void	initServer(uint32_t addr, uint16_t port);
 
 	IoEventPoller::EventStatus	handleEventWork();
 

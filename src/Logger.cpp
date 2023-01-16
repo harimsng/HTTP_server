@@ -79,5 +79,5 @@ Logger::log(e_types type, const char* format, ...)
 			+ std::strerror(errno) + ")";
 	}
 	prefix.append(Util::getDate("%F %T "));
-	*s_ostream << prefix << buffer << suffix << '\n';
+	*s_ostream << prefix << buffer << suffix << endl;
 }
