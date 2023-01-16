@@ -1,33 +1,11 @@
-#ifdef __APPLE__
+#ifndef KQUEUE_HPP
+#define KQUEUE_HPP
 
-# ifndef KQUEUE_HPP
-# define KQUEUE_HPP
+#include <sys/event.h>
 
-# include <sys/event.h>
+#include "IoMultiplex.hpp"
 
-# include "IoMultiplex.hpp"
-
-struct	Kevent: public kevent
-{
-	int		getFd() const {return ident;}
-	int		getInfo() const {return data;}
-	void*	getUserDataPtr() const {return udata;}
-	IoMultiplex<Kevent>::e_filters	getFilter() const
-	{
-		switch (filter)
-		{
-			case EVFILT_READ:
-				return IoMultiplex<Kevent>::READ;
-			case EVFILT_WRITE:
-				return IoMultiplex<Kevent>::WRITE;
-			default:
-				return IoMultiplex<Kevent>::ERROR;
-		}
-		return IoMultiplex<Kevent>::NONE;
-	}
-};
-
-class	Kqueue: public IoMultiplex<Kevent>
+class	Kqueue: public IoMultiplex<kevent>
 {
 // deleted
 	Kqueue(Kqueue const& kqueue);
@@ -41,11 +19,10 @@ public:
 	~Kqueue();
 
 // member functions
-	virtual void	addWork(int fd, const Event& event);
 	virtual void	addWork(int fd, e_operation op, e_filters filter, void* userData = NULL);
 	Event			createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags = 0,
 							intptr_t data = 0, void* udata = NULL);
-	virtual const EventList&	pollWork();
+	virtual int		pollWork();
 
 private:
 // member variables
@@ -53,7 +30,5 @@ private:
 	EventList	m_eventList;
 	EventList	m_changeList;
 };
-
-# endif
 
 #endif

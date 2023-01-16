@@ -15,9 +15,9 @@ Server::operator=(const Server& server)
 // constructors & destructor
 Server::Server(uint16_t port)
 :	m_socket(Socket<Tcp>()),
-	m_port(port),
-	m_fd(m_socket.m_fd)
+	m_port(port)
 {
+	m_fd = m_socket.m_fd;
 }
 
 Server::~Server()
@@ -26,9 +26,9 @@ Server::~Server()
 
 Server::Server(const Server& server)
 :	m_socket(server.m_socket),
-	m_port(server.m_port),
-	m_fd(m_socket.m_fd)
+	m_port(server.m_port)
 {
+	m_fd = m_socket.m_fd;
 }
 
 void
@@ -46,11 +46,9 @@ Server::initServer()
 }
 
 Server::IoEventPoller::EventStatus
-Server::handleEventWork(const IoEventPoller::Event& event)
+Server::handleEventWork()
 {
-	IoEventPoller::e_filters	filter = event.getFilter();
-
-	switch (filter)
+	switch (m_filter)
 	{
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to server");
@@ -62,8 +60,8 @@ Server::handleEventWork(const IoEventPoller::Event& event)
 
 			Client* client;
 			client = new Client(clientFd);
-			ServerManager<IoEventPoller>::registerEvent(clientFd, IoEventPoller::ADD,
-					filter, client);
+			ServerManager::registerEvent(clientFd, IoEventPoller::ADD,
+					IoEventPoller::READ, client);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");

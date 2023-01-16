@@ -7,35 +7,9 @@
 
 # include "IoMultiplex.hpp"
 
-struct	EpollEvent: public epoll_event
-{
-	struct	InternalData
-	{
-		int		fd;
-		void*	udata;
-	};
-	int		getFd() const {return reinterpret_cast<InternalData*>(data.ptr)->fd;}
-	int		getInfo() const {return events;}
-	void*	getUserDataPtr() const {return reinterpret_cast<InternalData*>(data.ptr)->udata;}
+class	EventObject;
 
-	IoMultiplex<EpollEvent>::e_filters	getFilter() const
-	{
-		switch (events & (EPOLLIN | EPOLLOUT | EPOLLPRI))
-		{
-			case EPOLLIN:
-				return IoMultiplex<EpollEvent>::READ;
-			case EPOLLOUT:
-				return IoMultiplex<EpollEvent>::WRITE;
-			case EPOLLPRI:
-				return IoMultiplex<EpollEvent>::ERROR;
-		}
-		return IoMultiplex<EpollEvent>::NONE;
-	}
-	
-	int	m_op;
-};
-
-class	Epoll: public IoMultiplex<EpollEvent>
+class	Epoll: public IoMultiplex<epoll_event>
 {
 // deleted
 	Epoll(Epoll const& epoll);
@@ -49,9 +23,8 @@ public:
 	~Epoll();
 
 // member functions
-	virtual void	addWork(int fd, const Event& event);
-	virtual void	addWork(int fd, e_operation op, e_filters filter, void* userData = 0);
-	virtual const EventList&	pollWork();
+	virtual void	addWork(int fd, e_operation op, e_filters filter, EventObject* object);
+	virtual int		pollWork();
 
 private:
 // member variables

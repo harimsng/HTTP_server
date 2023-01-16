@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include <stdexcept>
 
+#include "Logger.hpp"
+#include "event/EventObject.hpp"
 #include "Epoll.hpp"
 
 // deleted
@@ -10,7 +12,6 @@ Epoll::Epoll(Epoll const& epoll)
 	throw std::runtime_error("deleted function Epoll::Epoll(Epoll const&) usage");
 }
 
-// operators
 Epoll&
 Epoll::operator=(Epoll const& epoll)
 {
@@ -33,39 +34,23 @@ Epoll::~Epoll()
 }
 
 void
-Epoll::addWork(int fd, const Event& event)
-{
-	Event*	newEvent = const_cast<Event*>(&event);
-
-	if (epoll_ctl(m_epoll, event.m_op, fd, reinterpret_cast<epoll_event*>(newEvent)) < 0)
-		throw std::runtime_error("epoll_ctl fail");
-}
-
-void
-Epoll::addWork(int fd, e_operation op, e_filters filter, void* userData)
+Epoll::addWork(int fd, e_operation op, e_filters filter, EventObject* object)
 {
 	static const int	operationTable[3] = {EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 	static const uint32_t	filterTable[3] = {EPOLLIN, EPOLLOUT, EPOLLERR};
 	Event	newEvent;
-	Event::InternalData*	internal;
 
-	// TODO: decide when to release
-	if (op == ADD)
-		newEvent.data.ptr = new Event::InternalData;
-	newEvent.m_op = operationTable[op - 1];
-	internal = reinterpret_cast<Event::InternalData*>(newEvent.data.ptr);
-	internal->fd = fd;
-	internal->udata = userData;
+	newEvent.data.ptr = object;
 	for (int count = 0, bitmask = 0x1; count < 3; ++count, bitmask <<= 1)
 	{
 		if (filter & bitmask)
 			newEvent.events |= filterTable[count];
 	}
-	if (epoll_ctl(m_epoll, newEvent.m_op, fd, reinterpret_cast<epoll_event*>(&newEvent)) < 0)
+	if (epoll_ctl(m_epoll, operationTable[op - 1], fd, reinterpret_cast<epoll_event*>(&newEvent)) < 0)
 		throw std::runtime_error("epoll_ctl fail");
 }
 
-const Epoll::EventList&
+int
 Epoll::pollWork()
 {
 	const int	maxEvent = 64;
@@ -76,5 +61,28 @@ Epoll::pollWork()
 	if (count < 0)
 		throw std::runtime_error("epoll() error");
 	m_eventList.resize(count);
-	return m_eventList;
+
+	if (m_eventList.size() > 0)
+	{
+		LOG(DEBUG, "%d events polled", m_eventList.size());
+	}
+
+	for (size_t i = 0; i < m_eventList.size(); ++i)
+	{
+		Event&			event = m_eventList[i];
+		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
+
+		// TODO: divide by filter
+		EventStatus status = object->handleEvent();
+		if (status == END)
+		{
+			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
+			// INFO: is this right?
+			close(object->m_fd);
+			delete object;
+//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
+		}
+	}
+	return 0;
 }
+

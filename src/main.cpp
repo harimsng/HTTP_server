@@ -10,9 +10,10 @@
 
 using namespace	std;
 
-int	main(int argc, char **argv, char **envp)
+// use char **environ for environment variables
+int	main(int argc, char **argv)
 {
-	ServerManager<IO_EVENT_POLLER>	serverManager;
+	ServerManager	serverManager;
 
 	if (Util::parseArgument(argc, argv) == false)
 	{
@@ -35,7 +36,5 @@ int	main(int argc, char **argv, char **envp)
 		return status;
 	}
 	*/
-	(void)argv;
-	(void)envp;
 	return 0;
 }

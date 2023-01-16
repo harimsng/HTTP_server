@@ -3,6 +3,8 @@
 
 #include <vector>
 
+class	EventObject;
+
 template <typename T>
 class	IoMultiplex
 {
@@ -41,25 +43,14 @@ protected:
 
 public:
 // member functions
-	void	add(int fd, const Event& event)
-	{
-		addWork(fd, event);
-	}
+	void	add(int fd, e_operation op, e_filters filter, EventObject* userData)
+	{addWork(fd, op, filter, userData);}
 
-	void	add(int fd, e_operation op, e_filters filter, void* userData)
-	{
-		addWork(fd, op, filter, userData);
-	}
-
-	const EventList&	poll()
-	{
-		return pollWork();
-	}
+	int		poll() {return pollWork();}
 
 private:
-	virtual void	addWork(int fd, const Event& event) = 0;
-	virtual void	addWork(int fd, e_operation op, e_filters filter, void* userData) = 0;
-	virtual const EventList&	pollWork() = 0;
+	virtual void	addWork(int fd, e_operation op, e_filters filter, EventObject* userData) = 0;
+	virtual int		pollWork() = 0;
 };
 
 #endif

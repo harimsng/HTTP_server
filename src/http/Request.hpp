@@ -41,9 +41,9 @@ public:
 	~Request();
 
 // member functions
-	int		receiveRequest(int eventInfo);
+	int		receiveRequest();
 private:
-	int		receiveRawData(int eventInfo);
+	int		receiveRawData();
 
 // member variables
 	const Socket<Tcp>*	m_socket;

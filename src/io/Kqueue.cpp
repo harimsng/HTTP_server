@@ -2,6 +2,21 @@
 
 #include "Kqueue.hpp"
 
+// deleted
+Kqueue::Kqueue(Kqueue const& kqueue)
+{
+	(void)kqueue;
+	throw std::runtime_error("deleted function Kqueue::Kqueue(Kqueue const&) usage");
+}
+
+Kqueue&
+Kqueue::operator=(Kqueue const& kqueue)
+{
+	(void)kqueue;
+	throw std::runtime_error("deleted function Kqueue::operator=(Kqueue const&) usage");
+	return *this;
+}
+
 // constructors & destructor
 Kqueue::Kqueue()
 {
@@ -13,28 +28,6 @@ Kqueue::Kqueue()
 Kqueue::~Kqueue()
 {
 	close(m_kqueue);
-}
-
-Kqueue::Kqueue(Kqueue const& kqueue)
-{
-	(void)kqueue;
-	throw std::runtime_error("deleted function Kqueue::Kqueue(Kqueue const&) usage");
-}
-
-// operators
-Kqueue&
-Kqueue::operator=(Kqueue const& kqueue)
-{
-	(void)kqueue;
-	throw std::runtime_error("deleted function Kqueue::operator=(Kqueue const&) usage");
-	return *this;
-}
-
-void
-Kqueue::addWork(int fd, const Event& event)
-{
-	(void)fd;
-	m_changeList.push_back(event);
 }
 
 void
@@ -66,7 +59,7 @@ Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags
 	return newEvent;
 }
 
-const Kqueue::EventList&
+int
 Kqueue::pollWork()
 {
 	const int	maxEvent = 64;
@@ -80,5 +73,27 @@ Kqueue::pollWork()
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
 	m_eventList.resize(count);
-	return m_eventList;
+
+	if (m_eventList.size() > 0)
+	{
+		LOG(DEBUG, "%d events polled", m_eventList.size());
+	}
+
+	for (size_t i = 0; i < m_eventList.size(); ++i)
+	{
+		Event&			event = m_eventList[i];
+		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
+
+		// TODO: divide by filter
+		EventStatus status = object->handleEvent(event);
+		if (status == END)
+		{
+			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
+			// INFO: is this right?
+			close(object->m_fd);
+			delete object;
+//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
+		}
+	}
+	return 0;
 }

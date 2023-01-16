@@ -20,9 +20,9 @@
 
 class	Server;
 
-class	Client: public IEventObject
+class	Client: public EventObject
 {
-	typedef	IEventObject::IoEventPoller	IoEventPoller;
+	typedef	EventObject::IoEventPoller	IoEventPoller;
 
 // deleted
 	Client	&operator=(Client const& client);
@@ -34,7 +34,7 @@ public:
 	Client(Client const& client);
 
 // member functions
-	IoEventPoller::EventStatus	handleEventWork(const IoEventPoller::Event& event);
+	IoEventPoller::EventStatus	handleEventWork();
 
 // member variables
 //

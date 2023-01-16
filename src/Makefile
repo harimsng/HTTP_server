@@ -13,6 +13,7 @@ endif
 
 SRC			+=	main.cpp\
 				Logger.cpp\
+				ServerManager.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
 \
