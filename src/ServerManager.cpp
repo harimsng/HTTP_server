@@ -82,15 +82,15 @@ ServerManager::run() try
 // TODO: cleanup
 catch (std::runtime_error& e)
 {
-	Logger::log(Logger::ERROR, "%s", e.what());
+	LOG(ERROR, "%s", e.what());
 }
 catch (HttpErrorHandler& e)
 {
-	Logger::log(Logger::ERROR, "%s", e.getErrorMessage().data());
+	LOG(ERROR, "%s", e.getErrorMessage().data());
 }
 catch (...)
 {
-	Logger::log(Logger::ERROR, "unexpected error");
+	LOG(ERROR, "unexpected error");
 }
 
 void

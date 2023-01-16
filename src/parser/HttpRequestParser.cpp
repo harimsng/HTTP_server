@@ -74,8 +74,9 @@ HttpRequestParser::parse(Request& request)
 		return;
 	while (m_tokenizer.empty() == false)
 	{
-		// (void)request;
-		// cout << m_tokenizer.get() << '\n';
+		(void)request;
+		cout << m_tokenizer.get() << '\n';
+		/*
 		switch (request.m_httpInfo->m_requestReadStatus)
 		{
 			case REQUEST_LINE:
@@ -96,6 +97,7 @@ HttpRequestParser::parse(Request& request)
 				throw std::logic_error("unhandled read status in \
 HttpRequestParser::parse()");
 		}
+		*/
 	}
 	// Logger::log(Logger::INFO, *request.m_httpInfo);
 }

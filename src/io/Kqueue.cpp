@@ -86,7 +86,21 @@ Kqueue::pollWork()
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
 
-		// TODO: divide by filter
+		switch (event.filter)
+		{
+			case EVFILT_READ:
+				object->m_filter = READ;
+				break;
+			case EVFILT_WRITE:
+				object->m_filter = WRITE;
+				break;
+			case EVFILT_EXCEPT:
+				object->m_filter = ERROR;
+				break;
+			default:
+				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");
+		}
+
 		EventStatus status = object->handleEvent();
 		if (status == END)
 		{

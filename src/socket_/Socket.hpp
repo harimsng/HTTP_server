@@ -100,7 +100,7 @@ const typename Socket<SocketType>::SocketAddr&
 Socket<SocketType>::getAddress() throw()
 {
 	SocketAddr	addr;
-	socklen_t	len;
+	socklen_t	len = Tcp::socketAddrLen;
 
 	getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
 	m_addr = addr;

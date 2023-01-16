@@ -47,8 +47,7 @@ Client::handleEventWork()
 				return IoEventPoller::END;
 			break;
 		case IoEventPoller::WRITE:
-			LOG(DEBUG, "wrtie event to client");
-			// Logger::log(Logger::DEBUG, "write event");
+			LOG(DEBUG, "write event to client");
 			m_response.sendResponse();
 			return IoEventPoller::NORMAL;
 //		case IoEventPoller::EXCEPT:

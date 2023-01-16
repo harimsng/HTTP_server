@@ -80,7 +80,7 @@ Server::handleEventWork()
 			Client* client;
 			client = new Client(clientFd);
 			ServerManager::registerEvent(clientFd, IoEventPoller::ADD,
-					IoEventPoller::READ | IoEventPoller::WRITE, client);
+					IoEventPoller::READ, client);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");

@@ -38,12 +38,11 @@ private:
 	// std::vector<Server>		m_serverList;
 
 // static members
-private:
+public:
 	static IoEventPoller		s_ioEventPoller;
 	static VirtualServerTable	s_virtualServerTable;
 	static ListenServerTable	s_listenServerTable;
 
-public:
 	static void	registerEvent(int fd, IoEventPoller::e_operation op,
 			int filter, EventObject* object);
 
