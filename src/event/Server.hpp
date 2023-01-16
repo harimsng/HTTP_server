@@ -18,6 +18,7 @@ class	Server: public IEventObject
 public:
 // constructors & destructor
 	Server(uint16_t port);
+	Server(uint16_t port, VirtualServerTable* virtualServerTable);
 	virtual ~Server();
 	Server(const Server& server);
 
@@ -31,8 +32,9 @@ private:
 	Socket<Tcp>		m_socket;
 
 public:
-	const uint16_t	m_port;
-	const int		m_fd;
+	VirtualServerTable*	m_virtualServerTable;
+	const uint16_t		m_port;
+	const int			m_fd;
 
 };
 

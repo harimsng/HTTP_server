@@ -1,6 +1,7 @@
 #include <string>
 
 #include "Client.hpp"
+#include "event/EventObject.hpp"
 
 using namespace	std;
 
@@ -56,6 +57,7 @@ Client::handleEventWork(const IoEventPoller::Event& event)
 // catch (HttpErrorHandler& e)
 // {
 //     m_response.makeErrorResponse(e.getErrorMessage());
+//     return (IoEventPoller::NORMAL);
 // }
 
 // operators

@@ -40,7 +40,7 @@ Util::getFormattedAddress(uint32_t addr, uint16_t port)
 	uint32_t		bitshift = 24;
 	int64_t			bitmask = 0xff000000;
 
-	for (; bitshift > 0; bitmask <<= 8, bitshift -= 8)
+	for (; bitshift > 0; bitmask >>= 8, bitshift -= 8)
 	{
 		ss << ((addr & bitmask) >> bitshift) << '.';
 	}
