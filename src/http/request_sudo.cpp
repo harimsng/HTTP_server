@@ -59,8 +59,8 @@ RequestSudo::saveRealPath(std::string const &uri)
             2-2-2. 없을경우 index.html를 file에 추가
             2-1-4. 만약 path + file 가 존재 하지 않을경우 = path만 변수에 저장, file 비움 > end
     */
-    std::string newUri = "";
-    if (trailing_slash == false) // 1
+    std::string newUri = uri;
+    if (uri.at(uri.size() - 1) != '/') // 1
     {
         if (find_location_block(uri) == true) // 1-1
         {
@@ -87,9 +87,9 @@ RequestSudo::saveRealPath(std::string const &uri)
             }
         }
     }
-    if (find_location_block(uri) == true) // 2-1
+    if (find_location_block(newUri) == true) // 2-1
     {
-        setRootAlias(uri);
+        setRootAlias(newUri);
         if (locationBlock->index != "")
         {
             this->file = locationBlock->index;
@@ -111,7 +111,7 @@ RequestSudo::saveRealPath(std::string const &uri)
     else // 2-2
     {
         this->root = serverRoot->root;
-        this->path = this->root + uri;
+        this->path = this->root + newUri;
         if (serverRoot->index != "")
         {
             this->file = serverRoot->index;
