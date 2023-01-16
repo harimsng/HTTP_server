@@ -1,95 +1,26 @@
-NAME		=	webserv
+NAME	=	webserv
 
-CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
-DEBUGFLAGS	=	-g -fsanitize=address
-RM			=	rm -f
+.PHONY: all release debug clean fclean re
 
-SRC			=	main.cpp\
-				Logger.cpp\
-				Server.cpp\
-				VirtualServer.cpp\
-				Location.cpp\
-				Client.cpp\
-				cgi/Cgi.cpp\
-\
-				parser/ConfigParser.cpp\
-				parser/LocationParser.cpp\
-				parser/ServerParser.cpp\
-				parser/HttpRequestParser.cpp\
-\
-				tokenizer/HttpStreamTokenizer.cpp\
-				tokenizer/FileTokenizer.cpp\
-\
-				exception/ConfigParserException.cpp\
-				exception/HttpErrorHandler.cpp\
-\
-				http/Request.cpp\
-				http/Response.cpp\
-				http/HttpInfo.cpp\
-\
-				io/Kqueue.cpp\
-\
-				util/Util.cpp\
+$(NAME): all
 
-#				communicator/Communicator.cpp\
-#				communicator/Request.cpp\
-#				communicator/Response.cpp\
-#\
-#				socket/ClientSocket.cpp\
-#				socket/ServerSocket.cpp\
+all:
+	$(MAKE) -C src all
+	cp src/$(NAME) .
 
+release:
+	$(MAKE) -C src release
+	cp src/$(NAME) .
 
-SRC			:=	$(SRC:%=src/%)
-OBJ			:=	$(SRC:%.cpp=%.o)
-DEP			:=	$(OBJ:%.o=%.d)
-
-INCL_PATH	=	-Isrc/\
-				-Iinclude/\
-
-STATUS		=	$(shell ls DEBUG.mode 2>/dev/null)
-ifeq ($(STATUS), DEBUG.mode)
-CXXFLAGS	+=	$(DEBUGFLAGS)
-COMPILE_MODE=	DEBUG.mode
-else
-COMPILE_MODE=	RELEASE.mode
-endif
-
-
-.PHONY: all debug release clean fclean re
-
-all: $(COMPILE_MODE)
-	$(MAKE) $(NAME)
-
-release: RELEASE.mode
-	$(MAKE) all
-
-debug: DEBUG.mode
-	$(MAKE) all
-
-RELEASE.mode:
-	$(MAKE) fclean
-	touch RELEASE.mode
-
-DEBUG.mode:
-	$(MAKE) fclean
-	touch DEBUG.mode
+debug:
+	$(MAKE) -C src debug
+	cp src/$(NAME) .
 
 clean:
-	$(RM) $(OBJ)
-	$(RM) $(DEP)
-	$(RM) RELEASE.mode DEBUG.mode
+	$(MAKE) -C src clean
 
 fclean: clean
-	$(RM) $(NAME)
+	$(MAKE) -C src fclean
 
 re: fclean
-	$(MAKE) all
-
-$(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCL_PATH)
-
-$(OBJ): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $< $(INCL_PATH)
-
--include $(DEP)
+	$(MAKE) -C src all
