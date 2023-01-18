@@ -28,9 +28,9 @@ Server::~Server()
 }
 
 Server::Server(const Server& server)
-:	m_socket(server.m_socket)
+:	EventObject(server),
+	m_socket(server.m_socket)
 {
-	m_fd = m_socket.m_fd;
 }
 
 void

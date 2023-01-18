@@ -6,14 +6,10 @@ using namespace	std;
 
 // constructors & destructor
 Client::Client(int fd)
-:	m_socket(fd),
-	m_httpInfo(),
-	// m_request(m_socket),
-	// m_response(m_socket)
-	m_request(m_socket, m_httpInfo),
-	m_response(m_request)
+:	EventObject(fd),
+	m_socket(fd),
+	m_requestHandler(m_socket)
 {
-	m_fd = fd;
 }
 
 Client::~Client()
@@ -21,12 +17,9 @@ Client::~Client()
 }
 
 Client::Client(Client const& client)
-:	m_socket(client.m_socket),
-	m_httpInfo(client.m_httpInfo),
-	// m_request(m_socket),
-	// m_response(m_socket)
-	m_request(m_socket, m_httpInfo),
-	m_response(m_request)
+:	EventObject(client),
+	m_socket(client.m_socket),
+	m_requestHandler(m_socket)
 {
 	m_fd = client.m_fd;
 }
@@ -38,13 +31,13 @@ Client::handleEventWork()
 	{
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
-			if (m_request.receiveRequest() == 0)
+			if (m_requestHandler.receiveRequest() == 0)
 				return IoEventPoller::END;
-			m_response.makeResponse();
+			m_requestHandler.makeResponse();
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "write event to client");
-			m_response.sendResponse();
+			m_requestHandler.sendResponse();
 			return IoEventPoller::NORMAL;
 //		case IoEventPoller::EXCEPT:
 //			break;

@@ -4,7 +4,7 @@
 #include "Webserv.hpp"
 #include "Location.hpp"
 #include "event/Client.hpp"
-#include "socket_/Socket.hpp"
+#include "socket/Socket.hpp"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ private:
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;
-	friend std::string 		Response::getResourceLocation(const std::string& host);
+	friend std::string 		RequestHandler::getResourceLocation(const std::string& host);
 	friend std::ostream&	operator<<(std::ostream& os, const VirtualServer& server);
 };
 
