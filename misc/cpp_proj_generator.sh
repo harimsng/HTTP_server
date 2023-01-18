@@ -58,12 +58,14 @@ $CLASS::~$CLASS()
 
 $CLASS::$CLASS(const $CLASS& $LOWCAMELCASE_CLASS)
 {
+	(void)$LOWCAMELCASE_CLASS;
 }
 
 // operators
 $CLASS&
 $CLASS::operator=(const $CLASS& $LOWCAMELCASE_CLASS)
 {
+	(void)$LOWCAMELCASE_CLASS;
 	return *this;
 }"
 #####

@@ -21,7 +21,7 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 
 // constructors & destructor
 HttpRequestParser::HttpRequestParser(std::string& buffer)
-:	m_readStatus(REQUEST_LINE)
+:	m_readStatus(REQUEST_LINE_METHOD)
 {
 	m_tokenizer.init(buffer);
 }
@@ -42,14 +42,15 @@ HttpRequestParser::parse(Request& request)
 	{
 		switch (m_readStatus)
 		{
+			case REQUEST_LINE_METHOD:
+				parseMethod(request);
+				break;
 			case REQUEST_LINE:
 				parseStatusLine(request);
 				break;
 			case HEADER_FIELDS:
 				parseHeaderFields(request.m_headerFieldsMap);
 				break;
-			case HEADER_FIELDS_END:
-				checkHeaderFields(request.m_headerFieldsMap);
 			default:
 				throw std::logic_error("unhandled read status in\
 HttpRequestParser::parse()");
@@ -59,44 +60,39 @@ HttpRequestParser::parse()");
 //	Logger::log(Logger::INFO, *request.m_httpInfo);
 }
 
-/*
 void
-HttpRequestParser::parse(Request& request)
+HttpRequestParser::parseMethod(Request &request)
 {
-	// using function pointer table instead of switch statement?
-	string::size_type	pos;
+	char	c = m_tokenizer.getc();
+	string	method;
 
-	pos = updateBuffer();
-	LOG(DEBUG, "buffer status = %d", pos);
-	if (pos == string::npos)
-		return;
-	while (m_tokenizer.empty() == false)
+	method.reserve(8);
+	while (c != '\0' && c != ' ')
 	{
-		(void)request;
-		cout << m_tokenizer.get() << '\n';
-		switch (m_readStatus)
-		{
-			case REQUEST_LINE:
-				parseStatusLine(request);
-				break;
-			case HEADER_FIELDS:
-				parseHeaderFields(request.m_httpInfo->m_requestHeaderFields);
-				break;
-			case MESSAGE_BODY:
-				// normal transfer or chunked
-				parseMessageBody();
-				break;
-			case FINISHED:
-				// trailer section is not implemented
-				throw HttpErrorHandler(501);
-				break;
-			default:
-				throw std::logic_error("unhandled read status in \
-HttpRequestParser::parse()");
-		}
+		method += c;
+		m_tokenizer.getc();
 	}
+	method += ' ';
+	method = Util::toUpper(method);
+	if (method == "GET ")
+		request.m_method = RequestHandler::GET;
+	else if (method == "HEAD ")
+		request.m_method = RequestHandler::HEAD;
+	else if (method == "POST ")
+		request.m_method = RequestHandler::POST;
+	else if (method == "PUT ")
+		request.m_method = RequestHandler::PUT;
+	else if (method == "DELETE ")
+		request.m_method = RequestHandler::DELETE;
+	else if (method == "CONNECT ")
+		request.m_method = RequestHandler::DELETE;
+	else if (method == "OPTION ")
+		request.m_method = RequestHandler::DELETE;
+	else if (method == "TRACE ")
+		request.m_method = RequestHandler::DELETE;
+	else
+		throw HttpErrorHandler(400);
 }
-		*/
 
 void
 HttpRequestParser::parseStatusLine(Request &request)
@@ -104,22 +100,8 @@ HttpRequestParser::parseStatusLine(Request &request)
 	const string	statusLine = m_tokenizer.getline();
 	string			method;
 
-	method = Util::toUpper(statusLine.substr(0, statusLine.find(" ")));
-	if (method == "GET")
-		request.m_method = RequestHandler::GET;
-	else if (method == "HEAD")
-		request.m_method = RequestHandler::HEAD;
-	else if (method == "POST")
-		request.m_method = RequestHandler::POST;
-	else if (method == "PUT")
-		request.m_method = RequestHandler::PUT;
-	else if (method == "DELETE")
-		request.m_method = RequestHandler::DELETE;
-	else
-		throw HttpErrorHandler(405);
-	request.m_uri = statusLine.substr(statusLine.find(" ") + 1,
-			statusLine.rfind(" ") - statusLine.find(" "));
-	request.m_protocol = statusLine.substr(statusLine.rfind(" ") + 1);
+	request.m_uri = statusLine.substr(0, statusLine.find(" "));
+	request.m_protocol = statusLine.substr(statusLine.find(" ") + 1);
 	m_readStatus = checkStatusLine(request);
 }
 
@@ -167,7 +149,10 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		headerFieldsMap[field].push_back(value);
 	}
 	if (m_tokenizer.peek() == "\r\n")
+	{
+		checkHeaderFields(headerFieldsMap);
 		m_readStatus = HEADER_FIELDS_END;
+	}
 }
 
 bool
