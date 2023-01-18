@@ -8,6 +8,7 @@
 #include "Location.hpp"
 #include "parser/HttpRequestParser.hpp"
 #include "socket/Socket.hpp"
+#include "io/Buffer.hpp"
 
 /*
  * reference: RFC 9112 HTTP/1.1
@@ -54,8 +55,8 @@ private:
 
 // member variables
 	const Socket<Tcp>*	m_socket;
-	std::string			m_recvBuffer;
-	std::string			m_sendBuffer;
+	Buffer				m_recvBuffer;
+	Buffer				m_sendBuffer;
 	HttpRequestParser	m_parser;
 
 	Request				m_request;
