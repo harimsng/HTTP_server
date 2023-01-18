@@ -33,6 +33,14 @@ SRC			+=	main.cpp\
 				exception/HttpErrorHandler.cpp\
 \
 				http/RequestHandler.cpp\
+				http/AMethod.cpp\
+				http/GetMethod.cpp\
+				http/HeadMethod.cpp\
+				http/PutMethod.cpp\
+				http/PostMethod.cpp\
+				http/DeleteMethod.cpp\
+\
+				io/Buffer.cpp\
 \
 				util/Util.cpp\
 

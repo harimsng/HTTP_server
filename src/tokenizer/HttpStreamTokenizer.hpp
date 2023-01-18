@@ -17,8 +17,7 @@ public:
 
 // member functions
 	void	init(std::string& buffer);
-	std::string::size_type	updateBufferForHeader();
-	std::string::size_type	updateBufferForBody();
+	std::string::size_type	updateBuffer();
 
 	virtual std::string	peek();
 	virtual std::string	get();

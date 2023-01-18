@@ -40,7 +40,7 @@ HttpStreamTokenizer::init(string& buffer)
 }
 
 string::size_type
-HttpStreamTokenizer::updateBufferForHeader()
+HttpStreamTokenizer::updateBuffer()
 {
 	string::size_type	pos;
 
@@ -57,17 +57,6 @@ HttpStreamTokenizer::updateBufferForHeader()
 	}
 	m_cur = m_start;
 	m_end = m_start + pos + 2;
-	return m_end;
-}
-
-string::size_type
-HttpStreamTokenizer::updateBufferForBody()
-{
-	if (m_cur > m_start)
-		m_start = m_cur;
-
-	m_cur = m_start;
-	m_end = m_buffer->size();
 	return m_end;
 }
 

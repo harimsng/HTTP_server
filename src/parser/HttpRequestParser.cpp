@@ -35,7 +35,7 @@ HttpRequestParser::parse(Request& request)
 {
 	string::size_type	pos;
 
-	pos = updateBuffer();
+	pos = m_tokenizer.updateBuffer();
 	if (pos == string::npos)
 		return;
 	while (m_tokenizer.empty() == false)
@@ -50,18 +50,6 @@ HttpRequestParser::parse(Request& request)
 				break;
 			case HEADER_FIELDS_END:
 				checkHeaderFields(request.m_headerFieldsMap);
-				if (request.m_method == RequestHandler::GET) // if (isReadMethod(request.m_method) == true)
-					break;
-				m_tokenizer.updateBufferForBody();
-				// fall through
-			case MESSAGE_BODY:
-				// normal transfer or chunked
-				parseMessageBody(request);
-				break;
-			case FINISHED:
-				// trailer section is not implemented
-				// throw HttpErrorHandler(501);
-				break;
 			default:
 				throw std::logic_error("unhandled read status in\
 HttpRequestParser::parse()");
@@ -109,15 +97,6 @@ HttpRequestParser::parse()");
 	}
 }
 		*/
-
-string::size_type
-HttpRequestParser::updateBuffer()
-{
-	if (m_readStatus < MESSAGE_BODY)
-		return m_tokenizer.updateBufferForHeader();
-	else
-		return m_tokenizer.updateBufferForBody();
-}
 
 void
 HttpRequestParser::parseStatusLine(Request &request)
@@ -196,17 +175,4 @@ HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
 	(void)headerFieldsMap;
 	return true;
-}
-
-void
-HttpRequestParser::parseMessageBody(Request& request)
-{
-	(void)request;
-	cout << "%% body %%" << m_tokenizer.get() << "%% body end %%";
-}
-
-HttpRequestParser::e_readStatus
-HttpRequestParser::getReadStatus() const
-{
-	return m_readStatus;
 }
