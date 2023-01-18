@@ -1,14 +1,11 @@
-#include <unistd.h>
 #include <stdexcept>
 
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
+#include "http/RequestHandler.hpp"
 
-#define REQUEST_BUFFER_SIZE (8192)
-#define REQUEST_BUFFER_RESERVE (REQUEST_BUFFER_SIZE + (REQUEST_BUFFER_SIZE >> 8))
 #define REQUEST_EOF (0)
 
 using namespace	std;
@@ -18,7 +15,6 @@ RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_socket(NULL),
 	m_parser(m_recvBuffer)
 {
-	m_recvBuffer.reserve(REQUEST_BUFFER_RESERVE);
 	(void)requestHandler;
 }
 
@@ -34,7 +30,6 @@ RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 :	m_socket(&socket),
 	m_parser(m_recvBuffer)
 {
-	m_recvBuffer.reserve(REQUEST_BUFFER_RESERVE);
 }
 
 RequestHandler::~RequestHandler()
@@ -52,27 +47,6 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 	m_parser.parse(m_request);
-	return count;
-}
-
-int
-RequestHandler::receiveRawData()
-{
-	const int	residue = m_recvBuffer.size();
-	int			count = 0;
-
-#ifdef __APPLE__
-	m_buffer.resize(REQUEST_BUFFER_SIZE, 0);
-	count = ::read(m_socket->m_fd, const_cast<char*>(m_buffer.data()) + residue,
-			m_buffer.size() - residue - 1);
-	m_buffer.resize(residue + count, 0);
-
-#elif __linux__
-	m_recvBuffer.resize(REQUEST_BUFFER_SIZE, 0);
-	count = ::read(m_socket->m_fd, const_cast<char*>(m_recvBuffer.data()) + residue,
-			m_recvBuffer.size() - residue - 1);
-	m_recvBuffer.resize(residue + count + 1, 0);
-#endif
 	return count;
 }
 
