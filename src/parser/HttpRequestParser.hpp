@@ -7,12 +7,18 @@
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 
-class	Request;
 class	Server;
-
-class	StatusLine;
+struct	Request;
 
 typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
+
+struct Request
+{
+	int					m_method;
+	std::string			m_uri;
+	std::string			m_protocol;
+	HeaderFieldsMap		m_headerFieldsMap;
+};
 
 class	HttpRequestParser
 :	public AParser<HttpStreamTokenizer, Request>

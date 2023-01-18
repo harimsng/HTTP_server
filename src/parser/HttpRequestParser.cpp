@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "http/Request.hpp"
+#include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
 
 using namespace std;
@@ -50,9 +50,10 @@ HttpRequestParser::parse(Request& request)
 				break;
 			case HEADER_FIELDS_END:
 				checkHeaderFields(request.m_headerFieldsMap);
-				if (request.m_method == Request::GET) // if (isReadMethod(request.m_method) == true)
+				if (request.m_method == RequestHandler::GET) // if (isReadMethod(request.m_method) == true)
 					break;
 				m_tokenizer.updateBufferForBody();
+				// fall through
 			case MESSAGE_BODY:
 				// normal transfer or chunked
 				parseMessageBody(request);
@@ -126,15 +127,15 @@ HttpRequestParser::parseStatusLine(Request &request)
 
 	method = Util::toUpper(statusLine.substr(0, statusLine.find(" ")));
 	if (method == "GET")
-		request.m_method = HttpInfo::GET;
+		request.m_method = RequestHandler::GET;
 	else if (method == "HEAD")
-		request.m_method = HttpInfo::HEAD;
+		request.m_method = RequestHandler::HEAD;
 	else if (method == "POST")
-		request.m_method = HttpInfo::POST;
+		request.m_method = RequestHandler::POST;
 	else if (method == "PUT")
-		request.m_method = HttpInfo::PUT;
+		request.m_method = RequestHandler::PUT;
 	else if (method == "DELETE")
-		request.m_method = HttpInfo::DELETE;
+		request.m_method = RequestHandler::DELETE;
 	else
 		throw HttpErrorHandler(405);
 	request.m_uri = statusLine.substr(statusLine.find(" ") + 1,

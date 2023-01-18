@@ -6,9 +6,9 @@ DEBUGFLAGS	=	-g -fsanitize=address
 RM			=	rm -f
 
 ifeq ($(shell uname), Linux)
-SRC			= io/Epoll.cpp
+SRC			=	io/Epoll.cpp
 else
-SRC			= io/Kqueue.cpp
+SRC			=	io/Kqueue.cpp
 endif
 
 SRC			+=	main.cpp\
@@ -32,9 +32,7 @@ SRC			+=	main.cpp\
 				exception/ConfigParserException.cpp\
 				exception/HttpErrorHandler.cpp\
 \
-				http/Request.cpp\
-				http/Response.cpp\
-				http/HttpInfo.cpp\
+				http/RequestHandler.cpp\
 \
 				util/Util.cpp\
 
