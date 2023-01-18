@@ -10,13 +10,14 @@
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
 
+class	AMethod;
+
 /*
  * reference: RFC 9112 HTTP/1.1
  */
 class	RequestHandler
 {
 	friend class	HttpRequestParser;
-	friend class	Response;
 
 // deleted
 	RequestHandler(const RequestHandler& requestHandler);
@@ -55,11 +56,12 @@ private:
 
 // member variables
 	const Socket<Tcp>*	m_socket;
-	Buffer				m_recvBuffer;
-	Buffer				m_sendBuffer;
+	ReceiveBuffer		m_recvBuffer;
+	SendBuffer			m_sendBuffer;
 	HttpRequestParser	m_parser;
 
 	Request				m_request;
+	AMethod*			m_method;
 };
 
 #endif

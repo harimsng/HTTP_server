@@ -34,8 +34,6 @@ public:
 		REQUEST_LINE = 0,
 		HEADER_FIELDS,
 		HEADER_FIELDS_END,
-		MESSAGE_BODY,
-		FINISHED
 	};
 
 // constructors & destructor
@@ -48,12 +46,9 @@ public:
 
 	void	parseStatusLine(Request& request);
 	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap);
-	void	parseMessageBody(Request& request);
 
 	e_readStatus	checkStatusLine(Request& request);
 	bool			checkHeaderFields(HeaderFieldsMap& headerFieldsMap);
-
-	e_readStatus	getReadStatus() const;
 
 // member variables
 	e_readStatus		m_readStatus;

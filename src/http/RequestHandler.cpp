@@ -4,6 +4,7 @@
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
+#include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
 
 #define REQUEST_EOF (0)
@@ -13,7 +14,8 @@ using namespace	std;
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_socket(NULL),
-	m_parser(m_recvBuffer)
+	m_parser(m_recvBuffer),
+	m_method(NULL)
 {
 	(void)requestHandler;
 }
@@ -28,7 +30,8 @@ RequestHandler::operator=(const RequestHandler& request)
 // constructors & destructor
 RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 :	m_socket(&socket),
-	m_parser(m_recvBuffer)
+	m_parser(m_recvBuffer),
+	m_method(NULL)
 {
 }
 
@@ -41,52 +44,36 @@ RequestHandler::receiveRequest()
 {
 	int			count;
 
-	count = receiveRawData();
+	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
 		return REQUEST_EOF;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
-	m_parser.parse(m_request);
-	return count;
-}
 
-void
-RequestHandler::makeResponse()
-{
-	switch (m_parser.m_readStatus)
+	if (m_method != NULL)
 	{
-		case HttpRequestParser::REQUEST_LINE:
-		case HttpRequestParser::HEADER_FIELDS:
-			return;
-		case HttpRequestParser::HEADER_FIELDS_END:
-			makeResponseHeader();
-			break;
-		case HttpRequestParser::MESSAGE_BODY:
-			makeResponseBody();
-			break;
-		case HttpRequestParser::FINISHED:
-			;
-	};
+		m_method->completeResponse();
+		return count;
+	}
+
+	m_parser.parse(m_request);
+	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
+		makeResponseHeader();
+	return count;
 }
 
 // HOST field could be empty
 void
 RequestHandler::makeResponseHeader()
 {
-	string	rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-
-	if (m_request.m_method == RequestHandler::GET)
-	{
-		makeResponseBody();
-		m_parser.m_readStatus = HttpRequestParser::FINISHED;
+	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		return;
-	}
-	m_parser.m_readStatus = HttpRequestParser::MESSAGE_BODY;
-}
+	string		rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
 
-void
-RequestHandler::makeResponseBody()
-{
+	Util::checkFileStat(rl.data());
+	// status code 200
+	// make response header
+	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
 }
 
 std::string

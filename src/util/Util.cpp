@@ -120,6 +120,7 @@ Util::toUpper(string str)
 	return str;
 }
 
+// TODO: extend and throw
 bool
 Util::checkFileStat(const char* path)
 {

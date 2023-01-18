@@ -33,7 +33,6 @@ Client::handleEventWork()
 			LOG(DEBUG, "read event to client");
 			if (m_requestHandler.receiveRequest() == 0)
 				return IoEventPoller::END;
-			m_requestHandler.makeResponse();
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "write event to client");
