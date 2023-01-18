@@ -107,7 +107,7 @@ HttpStreamTokenizer::getc()
 void
 HttpStreamTokenizer::flush()
 {
-	m_buffer->erase(0, m_end);
+	m_buffer->erase(0, m_cur);
 	m_start = 0;
 	m_cur = 0;
 	m_end = m_buffer->size();

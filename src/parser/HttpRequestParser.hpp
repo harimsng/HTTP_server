@@ -31,7 +31,8 @@ class	HttpRequestParser
 public:
 	enum	e_readStatus
 	{
-		REQUEST_LINE = 0,
+		REQUEST_LINE_METHOD = 0,
+		REQUEST_LINE,
 		HEADER_FIELDS,
 		HEADER_FIELDS_END,
 	};
@@ -44,6 +45,7 @@ public:
 	virtual void			parse(Request& request);
 	std::string::size_type	updateBuffer();
 
+	void	parseMethod(Request& request);
 	void	parseStatusLine(Request& request);
 	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap);
 
