@@ -3,7 +3,6 @@
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
 

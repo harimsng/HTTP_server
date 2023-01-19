@@ -49,7 +49,6 @@ public:
 	std::string	getResourceLocation(const std::string& host);
 
 private:
-	int		receiveRawData();
 	void	makeResponseHeader();
 	void	makeResponseBody();
 	void	makeErrorResponse(const std::string& errorMessage);
