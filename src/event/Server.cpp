@@ -19,7 +19,6 @@ Server::operator=(const Server& server)
 // constructors & destructor
 Server::Server()
 :	m_socket(Socket<Tcp>())
-
 {
 	m_fd = m_socket.m_fd;
 }
@@ -29,19 +28,19 @@ Server::~Server()
 }
 
 Server::Server(const Server& server)
-:	m_socket(server.m_socket)
+:	EventObject(server),
+	m_socket(server.m_socket)
 {
-	m_fd = m_socket.m_fd;
 }
 
 void
-Server::initServer()
+Server::initServer(uint32_t addr, uint16_t port)
 {
 	if (m_socket.m_fd < 0)
 		throw std::runtime_error("server socket() error");
 
-	Tcp::SocketAddr	addr = m_socket.getAddress();
-	if (m_socket.bind(&addr) < 0)
+	Tcp::SocketAddr	sockaddr = GET_SOCKADDR_IN(addr, port);
+	if (m_socket.bind(&sockaddr) < 0)
 	{
 		close(m_socket.m_fd);
 		throw std::runtime_error("server socket bind() error");
@@ -51,7 +50,7 @@ Server::initServer()
 		close(m_socket.m_fd);
 		throw std::runtime_error("server socket listen() error");
 	}
-	LOG(DEBUG, "listen server binds and listen on : %s", Util::getFormattedAddress(addr).data());
+	LOG(DEBUG, "listen server binds and listen on : %s", Util::getFormattedAddress(m_socket.m_fd).data());
 }
 
 Server::IoEventPoller::EventStatus

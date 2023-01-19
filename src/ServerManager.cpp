@@ -1,5 +1,5 @@
-#include "ServerManager.hpp"
 #include "Webserv.hpp"
+#include "ServerManager.hpp"
 
 // static member definitions
 ServerManager::IoEventPoller	ServerManager::s_ioEventPoller;
@@ -48,7 +48,7 @@ ServerManager::initServers() try
 
 		Server*	newServer = new Server();
 
-		newServer->initServer();
+		newServer->initServer(addrKey & 0xffffffff, port);
 		s_ioEventPoller.add(newServer->m_fd, IoEventPoller::ADD,
 				IoEventPoller::READ, newServer);
 		s_listenServerTable[addrKey] = newServer;

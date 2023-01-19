@@ -5,18 +5,12 @@
 #include <sstream>
 #include <iostream>
 
-//#include "communicator/Request.hpp"
-//#include "communicator/Response.hpp"
-#include "OsDependency.hpp"
 #include "Webserv.hpp"
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "event/EventObject.hpp"
-#include "http/Request.hpp"
-#include "http/Response.hpp"
-#include "socket_/Socket.hpp"
-
-#include "http/HttpInfo.hpp"
-#include "Logger.hpp"
+#include "http/RequestHandler.hpp"
+#include "socket/Socket.hpp"
 
 class	Server;
 
@@ -39,14 +33,7 @@ public:
 // member variables
 private:
 	Socket<Tcp>		m_socket;
-
-// test
-	HttpInfo		m_httpInfo;
-
-	Request			m_request;
-	Response		m_response;
-	uint64_t		m_addrKey;
-
+	RequestHandler	m_requestHandler;
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include "Webserv.hpp"
 #include "Location.hpp"
 #include "event/Client.hpp"
-#include "socket_/Socket.hpp"
+#include "socket/Socket.hpp"
 
 using namespace std;
 
@@ -34,12 +34,13 @@ private:
 	sockaddr_in							m_listen;
 	int32_t								m_clientMaxBodySize;
 	int32_t								m_uriBufferSize;
-	std::map<std::string, Location>		m_locationList;
+	std::map<std::string, Location>		m_locationTable;
 	uint64_t	m_addrKey;
 
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;
+	friend std::string 		RequestHandler::getResourceLocation(const std::string& host);
 	friend std::ostream&	operator<<(std::ostream& os, const VirtualServer& server);
 };
 

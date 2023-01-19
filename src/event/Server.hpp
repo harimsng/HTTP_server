@@ -2,7 +2,7 @@
 #define SERVER_HPP
 
 #include "Webserv.hpp"
-#include "socket_/Socket.hpp"
+#include "socket/Socket.hpp"
 #include "event/EventObject.hpp"
 
 class	ServerManager;
@@ -21,7 +21,7 @@ public:
 	Server(const Server& server);
 
 // member functions
-	void	initServer();
+	void	initServer(uint32_t addr, uint16_t port);
 
 	IoEventPoller::EventStatus	handleEventWork();
 

@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 
@@ -39,7 +40,7 @@ HttpStreamTokenizer::init(string& buffer)
 }
 
 string::size_type
-HttpStreamTokenizer::updateBufferForHeader()
+HttpStreamTokenizer::updateBuffer()
 {
 	string::size_type	pos;
 
@@ -56,17 +57,6 @@ HttpStreamTokenizer::updateBufferForHeader()
 	}
 	m_cur = m_start;
 	m_end = m_start + pos + 2;
-	return m_end;
-}
-
-string::size_type
-HttpStreamTokenizer::updateBufferForBody()
-{
-	if (m_cur > m_start)
-		m_start = m_cur;
-
-	m_cur = m_start;
-	m_end = m_buffer->size();
 	return m_end;
 }
 
@@ -112,6 +102,15 @@ char
 HttpStreamTokenizer::getc()
 {
 	return empty() == false ? (*m_buffer)[m_cur++] : '\0';
+}
+
+void
+HttpStreamTokenizer::flush()
+{
+	m_buffer->erase(0, m_cur);
+	m_start = 0;
+	m_cur = 0;
+	m_end = m_buffer->size();
 }
 
 bool

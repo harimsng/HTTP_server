@@ -13,7 +13,10 @@ Util::parseArgument(int argc, char **argv)
 	string	logLevel = "INFO";
 
 	if (argc == 1)
+	{
+		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return false;
+	}
 
 	for (int i = 1; i < argc - 1; ++i)
 	{
@@ -21,7 +24,7 @@ Util::parseArgument(int argc, char **argv)
 		string::size_type	pos;
 
 		if (!(arg[0] == '-' && arg[1] == '-'))
-			// error
+			// TOTO: argument error handling
 			break;
 		pos = arg.find('=');
 		if (arg.substr(2, pos - 2) != "log")
@@ -107,6 +110,17 @@ Util::toString(int num)
 	return str;
 }
 
+string
+Util::toUpper(string str)
+{
+	for (string::size_type i = 0; i < str.size(); ++i)
+	{
+		str[i] &= 111011111;
+	}
+	return str;
+}
+
+// TODO: extend and throw
 bool
 Util::checkFileStat(const char* path)
 {

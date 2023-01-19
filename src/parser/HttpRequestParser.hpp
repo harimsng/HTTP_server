@@ -7,12 +7,18 @@
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 
-class	Request;
 class	Server;
-
-class	StatusLine;
+struct	Request;
 
 typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
+
+struct Request
+{
+	int					m_method;
+	std::string			m_uri;
+	std::string			m_protocol;
+	HeaderFieldsMap		m_headerFieldsMap;
+};
 
 class	HttpRequestParser
 :	public AParser<HttpStreamTokenizer, Request>
@@ -25,10 +31,10 @@ class	HttpRequestParser
 public:
 	enum	e_readStatus
 	{
-		REQUEST_LINE = 0,
+		REQUEST_LINE_METHOD = 0,
+		REQUEST_LINE,
 		HEADER_FIELDS,
-		MESSAGE_BODY,
-		FINISHED
+		HEADER_FIELDS_END,
 	};
 
 // constructors & destructor
@@ -39,16 +45,14 @@ public:
 	virtual void			parse(Request& request);
 	std::string::size_type	updateBuffer();
 
+	void	parseMethod(Request& request);
 	void	parseStatusLine(Request& request);
 	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap);
-	void	parseMessageBody();
 
 	e_readStatus	checkStatusLine(Request& request);
-
-	e_readStatus	getReadStatus() const;
+	bool			checkHeaderFields(HeaderFieldsMap& headerFieldsMap);
 
 // member variables
-private:
 	e_readStatus		m_readStatus;
 };
 

@@ -17,7 +17,6 @@ int	main(int argc, char **argv)
 
 	if (Util::parseArgument(argc, argv) == false)
 	{
-		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return 1;
 	}
 	try
