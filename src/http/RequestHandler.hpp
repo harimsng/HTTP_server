@@ -10,6 +10,8 @@
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
 
+const std::string	g_httpVersion = "HTTP/1.1";
+
 class	AMethod;
 
 /*
@@ -43,7 +45,7 @@ public:
 
 // member functions
 	int		receiveRequest();
-	void	makeResponse();
+	void	generateResponse(int statusCode);
 	void	sendResponse();
 
 	std::string	getResourceLocation(const std::string& host);

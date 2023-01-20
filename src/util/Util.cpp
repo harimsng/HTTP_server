@@ -36,6 +36,19 @@ Util::parseArgument(int argc, char **argv)
 	return true;
 }
 
+uint64_t
+Util::convertAddrKey(uint32_t addr, uint16_t port)
+{
+	return (static_cast<uint64_t>(port) << 32) + addr;
+}
+
+void
+Util::convertAddrKey(uint64_t addrKey, uint32_t& addr, uint16_t& port)
+{
+	addr = addrKey & 0xffffffff;
+	port = addrKey >> 32;
+}
+
 string
 Util::getFormattedAddress(uint32_t addr, uint16_t port)
 {

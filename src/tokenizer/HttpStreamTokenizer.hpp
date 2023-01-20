@@ -3,6 +3,8 @@
 
 #include "tokenizer/ITokenizer.hpp"
 
+extern const char*	g_CRLF;
+
 class	HttpStreamTokenizer: public ITokenizer
 {
 // deleted

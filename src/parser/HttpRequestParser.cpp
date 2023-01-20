@@ -73,7 +73,6 @@ HttpRequestParser::parseMethod(Request &request)
 		m_tokenizer.getc();
 	}
 	method += ' ';
-	method = Util::toUpper(method);
 	if (method == "GET ")
 		request.m_method = RequestHandler::GET;
 	else if (method == "HEAD ")
@@ -112,7 +111,7 @@ HttpRequestParser::e_readStatus
 HttpRequestParser::checkStatusLine(Request &request)
 {
 //	findLocationBlock(request);
-	if (request.m_protocol != "HTTP/1.1")
+	if (request.m_protocol != g_httpVersion)
 		throw HttpErrorHandler(505);
 	return (HEADER_FIELDS);
 }
@@ -138,7 +137,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		if (pos == string::npos)
 		{
 			value = headerLine.substr(curPos);
-			headerFieldsMap[field].push_back(value);
+			headerFieldsMap[field].push_back(Util::toUpper(value));
 			break;
 		}
 		pos++;
@@ -146,7 +145,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
 			value.erase(value.end() - 1);
-		headerFieldsMap[field].push_back(value);
+		headerFieldsMap[field].push_back(Util::toUpper(value));
 	}
 	if (m_tokenizer.peek() == "\r\n")
 	{
@@ -158,6 +157,8 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 bool
 HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
-	(void)headerFieldsMap;
-	return true;
+	bool	check = true;
+
+	check &= headerFieldsMap.count("HOST") > 0;
+	return check;
 }

@@ -42,7 +42,7 @@ VirtualServer::setToDefault()
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
 //
-	m_addrKey = (listenIp << 16) + listenPort;
+	m_addrKey = Util::convertAddrKey(listenIp, listenPort);
 }
 
 std::ostream&

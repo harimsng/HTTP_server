@@ -3,10 +3,10 @@
 #include "Webserv.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/ConfigParserException.hpp"
+#include "util/Util.hpp"
 #include "parser/ServerParser.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ConfigParser.hpp"
-#include "util/Util.hpp"
 
 using namespace std;
 

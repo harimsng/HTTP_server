@@ -71,7 +71,7 @@ Buffer::send(int fd)
 
 	count = ::write(fd, const_cast<char*>(data() + m_writePos), size() - m_writePos);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		throw std::runtime_error("write() fail in Buffer::receive()");
 
 	m_writePos += count;
 	if (m_writePos == size())

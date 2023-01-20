@@ -2,6 +2,8 @@
 
 #include "HttpErrorHandler.hpp"
 
+extern const char*	g_httpVersion;
+
 std::string	HttpErrorHandler::s_errorMessageTable[1024] = {"", };
 
 void	HttpErrorHandler::setErrorMessageTable()
@@ -53,11 +55,11 @@ void	HttpErrorHandler::setErrorMessageTable()
 	}
 }
 
-const std::string&	HttpErrorHandler::getErrorMessage(int errorCode)
+const std::string&	HttpErrorHandler::getErrorMessage(int statusCode)
 {
 	setErrorMessageTable();
 
-	std::string&	errorMessage = s_errorMessageTable[errorCode];
+	std::string&	errorMessage = s_errorMessageTable[statusCode];
 
 	if (errorMessage.size() == 0)
 		throw std::runtime_error("undefined http error code in HttpErrorHandler::getErrorMessage(int)");

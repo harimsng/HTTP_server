@@ -11,6 +11,7 @@ using namespace std;
 class	VirtualServer
 {
 	typedef	std::map<std::string, Location>	LocationTable;
+
 public:
 // constructors & destructor
 	VirtualServer();
@@ -19,7 +20,6 @@ public:
 	VirtualServer	&operator=(VirtualServer const& server);
 
 // member functions
-
 private:
 	void	setToDefault();
 
