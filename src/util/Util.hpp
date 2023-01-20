@@ -8,6 +8,9 @@
 class Util
 {
 public:
+	static uint64_t			convertAddrKey(uint32_t addr, uint16_t port);
+	static void				convertAddrKey(uint64_t addrKey, uint32_t& addr, uint16_t& port);
+
 	static bool					parseArgument(int argc, char **argv);
 	static std::string			getFormattedAddress(uint32_t addr, uint16_t port);
 	static std::string			getFormattedAddress(sockaddr_in& addr);

@@ -19,7 +19,7 @@ private:
 	static std::string			s_errorMessageTable[1024];
 	static void					setErrorMessageTable();
 public:
-	static const std::string&	getErrorMessage(int errorCode);
+	static const std::string&	getErrorMessage(int statusCode);
 	const std::string&			getErrorMessage();
 };
 

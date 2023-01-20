@@ -40,6 +40,8 @@ Server::initServer(uint32_t addr, uint16_t port)
 		throw std::runtime_error("server socket() error");
 
 	Tcp::SocketAddr	sockaddr = GET_SOCKADDR_IN(addr, port);
+	LOG(DEBUG, "listen server trying to bind and listen on: %s",
+			Util::getFormattedAddress(addr, port).data());
 	if (m_socket.bind(&sockaddr) < 0)
 	{
 		close(m_socket.m_fd);
@@ -50,7 +52,7 @@ Server::initServer(uint32_t addr, uint16_t port)
 		close(m_socket.m_fd);
 		throw std::runtime_error("server socket listen() error");
 	}
-	LOG(DEBUG, "listen server binds and listen on : %s", Util::getFormattedAddress(m_socket.m_fd).data());
+	LOG(DEBUG, "success");
 }
 
 Server::IoEventPoller::EventStatus

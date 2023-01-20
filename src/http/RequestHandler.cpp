@@ -3,7 +3,6 @@
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
 
@@ -86,6 +85,21 @@ RequestHandler::getResourceLocation(const std::string& host)
 
 	(void)locationTable;
 	return "";
+}
+
+void
+RequestHandler::generateResponse(int statusCode)
+{
+	// status-line
+	m_sendBuffer.append(g_httpVersion);
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(Util::toString(statusCode));
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(g_CRLF);
+
+	// 
+	//
+	m_sendBuffer.append(g_CRLF);
 }
 
 void

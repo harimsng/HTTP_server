@@ -49,10 +49,10 @@ Buffer::pop_back()
 }
 
 std::string::size_type
-ReceiveBuffer::receive(int fd)
+Buffer::receive(int fd)
 {
-	const int	residue = size();
-	int64_t		count = 0;
+	const int		residue = size();
+	long long int	count = 0;
 
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, const_cast<char*>(data()) + residue,
@@ -65,13 +65,13 @@ ReceiveBuffer::receive(int fd)
 }
 
 std::string::size_type
-SendBuffer::send(int fd)
+Buffer::send(int fd)
 {
-	int64_t	count = 0;
+	long long int	count = 0;
 
 	count = ::write(fd, const_cast<char*>(data() + m_writePos), size() - m_writePos);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		throw std::runtime_error("write() fail in Buffer::receive()");
 
 	m_writePos += count;
 	if (m_writePos == size())

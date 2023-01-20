@@ -39,16 +39,18 @@ ServerManager::initServers() try
 		 ++itr)
 	{
 		uint64_t	addrKey = itr->first;
-		uint64_t	port = addrKey >> 32;
+		uint32_t	addr;
+		uint16_t	port;
 
+		Util::convertAddrKey(addrKey, addr, port);
 		if (anyAddrFlag == true && prevPort == port)
 			continue;
 
-		anyAddrFlag = (addrKey & 0xffffffff) == 0;
+		anyAddrFlag = addr == 0;
 
 		Server*	newServer = new Server();
 
-		newServer->initServer(addrKey & 0xffffffff, port);
+		newServer->initServer(addr, port);
 		s_ioEventPoller.add(newServer->m_fd, IoEventPoller::ADD,
 				IoEventPoller::READ, newServer);
 		s_listenServerTable[addrKey] = newServer;
