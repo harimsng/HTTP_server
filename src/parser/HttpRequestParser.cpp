@@ -83,14 +83,8 @@ HttpRequestParser::parseMethod(Request &request)
 		request.m_method = RequestHandler::PUT;
 	else if (method == "DELETE ")
 		request.m_method = RequestHandler::DELETE;
-	else if (method == "CONNECT ")
-		request.m_method = RequestHandler::DELETE;
-	else if (method == "OPTION ")
-		request.m_method = RequestHandler::DELETE;
-	else if (method == "TRACE ")
-		request.m_method = RequestHandler::DELETE;
 	else
-		throw HttpErrorHandler(400);
+		request.m_method = RequestHandler::ERROR;
 }
 
 void
@@ -101,20 +95,17 @@ HttpRequestParser::parseStatusLine(Request &request)
 
 	request.m_uri = statusLine.substr(0, statusLine.find(" "));
 	request.m_protocol = statusLine.substr(statusLine.find(" ") + 1);
-	m_readStatus = checkStatusLine(request);
+	m_readStatus = HEADER_FIELDS;
 }
 
-/* TODO
- * find location block from uri
- */
-HttpRequestParser::e_readStatus
-HttpRequestParser::checkStatusLine(Request &request)
-{
-//	findLocationBlock(request);
-	if (request.m_protocol != g_httpVersion)
-		throw HttpErrorHandler(505);
-	return (HEADER_FIELDS);
-}
+// HttpRequestParser::e_readStatus
+// HttpRequestParser::checkStatusLine(Request &request)
+// {
+//     //
+//     if (request.m_protocol != g_httpVersion)
+//         throw HttpErrorHandler(505);
+//     return (HEADER_FIELDS);
+// }
 
 void
 HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
@@ -148,17 +139,18 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		headerFieldsMap[field].push_back(Util::toUpper(value));
 	}
 	if (m_tokenizer.peek() == "\r\n")
-	{
-		checkHeaderFields(headerFieldsMap);
+		// checkHeaderFields(headerFieldsMap);
 		m_readStatus = HEADER_FIELDS_END;
-	}
 }
 
-bool
-HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
-{
-	bool	check = true;
-
-	check &= headerFieldsMap.count("HOST") > 0;
-	return check;
-}
+// bool
+// HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
+// {
+//     bool	check = true;
+//
+//     check &= headerFieldsMap.count("HOST") > 0;
+//
+//     if (check == false)
+//         throw HttpErrorHandler(400);
+//     return check;
+// }

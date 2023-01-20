@@ -5,6 +5,7 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
+#include "parser/HttpRequestParser.hpp"
 
 #define REQUEST_EOF (0)
 
@@ -39,7 +40,7 @@ RequestHandler::~RequestHandler()
 }
 
 int
-RequestHandler::receiveRequest()
+RequestHandler::receiveRequest() try
 {
 	int			count;
 
@@ -49,30 +50,82 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	if (m_method != NULL)
-	{
-		m_method->completeResponse();
-		return count;
-	}
-
-	m_parser.parse(m_request);
+	// if (m_method != NULL)
+	// {
+	//     m_method->completeResponse();
+	//     return count;
+	// }
+	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
+		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 		makeResponseHeader();
+	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+		m_method->completeResponse();
 	return count;
+}
+catch(HttpErrorHandler& e)
+{
+	// generateResponse(404);
+	return (0);
 }
 
 // HOST field could be empty
 void
 RequestHandler::makeResponseHeader()
 {
-	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
-		return;
-	string		rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
+	string		rl;
 
+	checkRequestMessage();
+	rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
 	Util::checkFileStat(rl.data());
 	// status code 200
 	// make response header
-	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	switch (m_request.m_method)
+	{
+		default:
+			m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	}
+	generateResponse(200);
+	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+	// TODO
+	// add write event
+}
+
+void
+RequestHandler::checkRequestMessage()
+{
+	// 1. check method
+	// 2. check uri length
+	// 3. check http version
+	// 4. check reqeust header
+	// 4.1 ckeck host field
+	// 5. check reqeust body size
+
+	checkStatusLine(); // 1, 2, 3
+	checkHeaderFields(); // 4
+}
+
+void
+RequestHandler::checkStatusLine()
+{
+	if (m_request.m_method == ERROR) // check method
+	{}
+	// if (m_request.m_uri >= uri_size) // check uri length
+	if (m_request.m_protocol != "HTTP/1.1") // check http version
+	{}
+}
+
+void
+RequestHandler::checkHeaderFields()
+{
+	bool check = true;
+
+	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
+
+	// ... check allow_method field
+
+	if (check == false)
+		throw HttpErrorHandler(400);
 }
 
 std::string
@@ -96,8 +149,7 @@ RequestHandler::generateResponse(int statusCode)
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(g_CRLF);
-
-	// 
+	//
 	//
 	m_sendBuffer.append(g_CRLF);
 }
@@ -105,6 +157,7 @@ RequestHandler::generateResponse(int statusCode)
 void
 RequestHandler::sendResponse()
 {
+	m_recvBuffer.receive(m_socket->m_fd);
 }
 
 void

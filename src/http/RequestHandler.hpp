@@ -33,7 +33,8 @@ public:
 		HEAD,
 		POST,
 		PUT,
-		DELETE
+		DELETE,
+		ERROR
 //		CONNECT,
 //		OPTION,
 //		TRACE
@@ -54,6 +55,9 @@ private:
 	void	makeResponseHeader();
 	void	makeResponseBody();
 	void	makeErrorResponse(const std::string& errorMessage);
+	void	checkRequestMessage();
+	void	checkStatusLine();
+	void	checkHeaderFields();
 
 // member variables
 	const Socket<Tcp>*	m_socket;
