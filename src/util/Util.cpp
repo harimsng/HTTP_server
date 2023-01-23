@@ -128,7 +128,19 @@ Util::toUpper(string str)
 {
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
-		str[i] &= 111011111;
+		if (str[i] >= 'a' && str[i] <= 'z')
+			str[i] |= 0b111011111;
+	}
+	return str;
+}
+
+string
+Util::toLower(string str)
+{
+	for (string::size_type i = 0; i < str.size(); ++i)
+	{
+		if (str[i] >= 'A' && str[i] <= 'Z')
+			str[i] &= 0b111011111;
 	}
 	return str;
 }

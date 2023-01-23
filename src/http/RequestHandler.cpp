@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <stdexcept>
 
 #include "Logger.hpp"
@@ -5,6 +6,8 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
+
+#define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
 
 #define REQUEST_EOF (0)
 
@@ -43,52 +46,100 @@ RequestHandler::receiveRequest()
 {
 	int			count;
 
+	if (m_sendBuffer.size() != 0)
+		return RECV_SKIPPED;
+
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
-		return REQUEST_EOF;
+		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	if (m_method != NULL)
+	if (m_method != NULL) // after Header fields parsing has ended
 	{
 		m_method->completeResponse();
-		return count;
+		return RECV_NORMAL;
 	}
 
 	m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
-		makeResponseHeader();
-	return count;
+		createResponseHeader();
+	return RECV_NORMAL;
 }
 
-// HOST field could be empty
 void
-RequestHandler::makeResponseHeader()
+RequestHandler::sendResponse()
 {
-	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
-		return;
-	string		rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-
-	Util::checkFileStat(rl.data());
-	// status code 200
-	// make response header
-	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	m_sendBuffer.send(m_socket->m_fd);
 }
 
-std::string
-RequestHandler::getResourceLocation(const std::string& host)
+// TODO: should be called on method classes
+int
+RequestHandler::resolveResourceLocation(const std::string& host)
 {
+	string	resourceLocation;
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
 	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
 	map<string, Location>&	locationTable = server->m_locationTable;
 
 	(void)locationTable;
-	return "";
+	return checkResourceStatus(resourceLocation.data());
+//	m_method->m_resourceLocation = resourceLocation;
+}
+
+int
+RequestHandler::checkResourceStatus(const char* path)
+{
+	int			ret;
+	struct stat	status;
+	int			statusCode;
+
+	ret = stat(path, &status); 
+	if (ret == 0
+		&& S_ISREG(status.st_mode)
+		&& CHECK_PERMISSION(status.st_mode,
+					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
+//					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
+//					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
+					))
+		statusCode = 200;
+
+	switch (errno)
+	{
+		case EACCES:
+			// fall through
+		case ENOENT:
+			// fall through
+		case ENOTDIR:
+			statusCode = 404;
+			break;
+		case ENAMETOOLONG:
+			statusCode = 414;
+			break;
+		default:
+			statusCode = 500;
+			break;
+	}
+	return statusCode;
+}
+
+// HOST field could be empty
+void
+RequestHandler::createResponseHeader()
+{
+	string		resourceLocation;
+	int			statusCode;
+
+// TODO: which should be first between method creation and uri checking
+	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["host"][0]);
+	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
 }
 
 void
-RequestHandler::generateResponse(int statusCode)
+RequestHandler::bufferResponseStatusLine(int statusCode)
 {
 	// status-line
 	m_sendBuffer.append(g_httpVersion);
@@ -96,14 +147,10 @@ RequestHandler::generateResponse(int statusCode)
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(g_CRLF);
-
-	// 
-	//
-	m_sendBuffer.append(g_CRLF);
 }
 
 void
-RequestHandler::sendResponse()
+RequestHandler::bufferResponseHeaderFields()
 {
 }
 
