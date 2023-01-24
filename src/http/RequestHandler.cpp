@@ -52,6 +52,7 @@ int
 RequestHandler::receiveRequest() try
 {
 	int			count;
+	int			receiveStatus = RECV_NORMAL;
 
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
@@ -67,10 +68,16 @@ RequestHandler::receiveRequest() try
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
+	{
 		createResponseHeader();
+		receiveStatus = RECV_EVENT;
+	}
 	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+	{
 		m_method->completeResponse();
-	return count;
+		receiveStatus = RECV_EVENT;
+	}
+	return receiveStatus;
 }
 catch(HttpErrorHandler& e)
 {
@@ -128,17 +135,16 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	VirtualServer*	server;
 	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
 		addrKey &= 0xffff00000000;
-	LOG(DEBUG, "%llu", addrKey);
 	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
 		server = ServerManager::s_virtualServerTable[addrKey]["."];
 	else
 		server = ServerManager::s_virtualServerTable[addrKey][host];
-	LOG(DEBUG, "%s", server->m_root.data());
 	map<string, Location>&	locationTable = server->m_locationTable;
 
 	FindLocation findLocation;
 
 	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
+
 	//(void)locationTable;
 	//return "";
 
@@ -233,7 +239,9 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	m_recvBuffer.receive(m_socket->m_fd);
+	// m_recvBuffer.receive(m_socket->m_fd);
+
+	m_sendBuffer.append(g_CRLF);
 }
 
 void
@@ -267,5 +275,4 @@ operator<<(std::ostream& os, const Request& request)
 void
 RequestHandler::sendResponse()
 {
-
 }

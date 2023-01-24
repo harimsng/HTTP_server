@@ -106,7 +106,7 @@ Kqueue::pollWork()
 		{
 			LOG(DEBUG, "an event(fd: %d) has finished", object->m_fd);
 			// INFO: is this right?
-			close(object->m_fd);
+			// close(object->m_fd);
 			delete object;
 //			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
