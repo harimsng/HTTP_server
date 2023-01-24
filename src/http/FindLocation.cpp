@@ -110,8 +110,36 @@ FindLocation::saveRealPath(string const &uri, map<string, Location>& locationTab
                 LOG(DEBUG, "1-1-0. no file, no path %s", (m_path + m_file).data());
                 return "";
             }
-            LOG(DEBUG, "1-1. %s", m_path.data());
-            return m_path;
+            if (S_ISDIR(d_stat->st_mode) == false) { // 1-1-1 파일일 경우 > end
+                this->m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
+                this->m_file = uri.substr(uri.rfind("/") + 1);
+                LOG(DEBUG, "1-1-1. %s", (m_path + m_file).data());
+                return m_path + m_file;
+            }
+            else  { // 1-1-2 디렉토리일 경우
+                if (m_locationBlock.m_index != "")
+                {
+                    this->m_file = m_locationBlock.m_index;
+                }
+                else if (server->m_index != "")
+                {
+                    this->m_file = server->m_index;
+                }
+                else
+                {
+                    this->m_file = "index.html";
+                }
+                if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
+                        m_path = m_path + "/";
+                string realPath = m_path + m_file;
+                if (lstat(realPath.c_str(), d_stat) == -1) {
+                    this->m_file = "";
+                    LOG(DEBUG, "1-1-2. no file, only path %s", (m_path + m_file).data());
+                    return m_path + m_file;
+                }
+                LOG(DEBUG, "1-1-2. %s", (m_path + m_file).data());
+                return m_path + m_file;
+            }
         }
         else // 1-2. 없을 경우 abcd라는 파일 or 디렉토리를 찾는다
         {
