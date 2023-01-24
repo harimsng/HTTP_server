@@ -31,16 +31,13 @@ Client::handleEventWork()
 	{
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
-			if (m_requestHandler.receiveRequest() == 0)
+			if (m_requestHandler.receiveRequest() == RequestHandler::RECV_END)
 				return IoEventPoller::END;
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "write event to client");
 			m_requestHandler.sendResponse();
-			return IoEventPoller::NORMAL;
 			break;
-//		case IoEventPoller::EXCEPT:
-//			break;
 		default:
 			throw std::runtime_error("not handled event filter in Client::handleEvent()");
 	}

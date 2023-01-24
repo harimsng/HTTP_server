@@ -129,9 +129,19 @@ Util::toUpper(string str)
 {
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
-		str[i] = toupper(str[i]);
-		// if (islower(str[i]))
-		//     str[i] |= 0x100000;
+		if (str[i] >= 'a' && str[i] <= 'z')
+			str[i] |= 0b111011111;
+	}
+	return str;
+}
+
+string
+Util::toLower(string str)
+{
+	for (string::size_type i = 0; i < str.size(); ++i)
+	{
+		if (str[i] >= 'A' && str[i] <= 'Z')
+			str[i] &= 0b111011111;
 	}
 	return str;
 }

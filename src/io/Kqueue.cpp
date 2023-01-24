@@ -2,7 +2,7 @@
 
 #include "Logger.hpp"
 #include "event/EventObject.hpp"
-#include "Kqueue.hpp"
+#include "io/Kqueue.hpp"
 
 // deleted
 Kqueue::Kqueue(Kqueue const& kqueue)
@@ -104,7 +104,7 @@ Kqueue::pollWork()
 		EventStatus status = object->handleEvent();
 		if (status == END)
 		{
-			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
+			LOG(DEBUG, "an event(fd: %d) has finished", object->m_fd);
 			// INFO: is this right?
 			close(object->m_fd);
 			delete object;
