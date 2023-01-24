@@ -46,6 +46,7 @@ HttpRequestParser::parse(Request& request)
 				parseMethod(request);
 				break;
 			case REQUEST_LINE:
+				pos = m_tokenizer.updateBuffer();
 				parseStatusLine(request);
 				break;
 			case HEADER_FIELDS:
@@ -57,7 +58,6 @@ HttpRequestParser::parse()");
 		}
 	}
 	m_tokenizer.flush();
-//	Logger::log(Logger::INFO, *request.m_httpInfo);
 }
 
 void
@@ -70,7 +70,7 @@ HttpRequestParser::parseMethod(Request &request)
 	while (c != '\0' && c != ' ')
 	{
 		method += c;
-		m_tokenizer.getc();
+		c = m_tokenizer.getc();
 	}
 	method += ' ';
 	if (method == "GET ")
@@ -85,6 +85,7 @@ HttpRequestParser::parseMethod(Request &request)
 		request.m_method = RequestHandler::DELETE;
 	else
 		request.m_method = RequestHandler::ERROR;
+	m_readStatus = REQUEST_LINE;
 }
 
 void
@@ -116,6 +117,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	size_t	pos;
 	size_t	curPos;
 
+	cout << headerLine << endl;
 	curPos = 0;
 	pos = headerLine.find(": ");
 	field = Util::toUpper(headerLine.substr(curPos, pos));

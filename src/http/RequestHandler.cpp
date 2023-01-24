@@ -45,16 +45,12 @@ RequestHandler::receiveRequest() try
 	int			count;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
+	cout << "count : " << count << endl;
 	if (count == 0)
 		return REQUEST_EOF;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	// if (m_method != NULL)
-	// {
-	//     m_method->completeResponse();
-	//     return count;
-	// }
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -87,8 +83,6 @@ RequestHandler::makeResponseHeader()
 	}
 	generateResponse(200);
 	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
-	// TODO
-	// add write event
 }
 
 void

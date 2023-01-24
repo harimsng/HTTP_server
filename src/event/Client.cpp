@@ -38,6 +38,7 @@ Client::handleEventWork()
 			LOG(DEBUG, "write event to client");
 			m_requestHandler.sendResponse();
 			return IoEventPoller::NORMAL;
+			break;
 //		case IoEventPoller::EXCEPT:
 //			break;
 		default:
