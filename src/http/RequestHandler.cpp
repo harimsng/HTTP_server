@@ -168,12 +168,10 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	VirtualServer*	server;
 	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
 		addrKey &= 0xffff00000000;
-	LOG(DEBUG, "%llu", addrKey);
 	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
 		server = ServerManager::s_virtualServerTable[addrKey]["."];
 	else
 		server = ServerManager::s_virtualServerTable[addrKey][host];
-	LOG(DEBUG, "%s", server->m_root.data());
 	map<string, Location>&	locationTable = server->m_locationTable;
 
 	FindLocation findLocation;
