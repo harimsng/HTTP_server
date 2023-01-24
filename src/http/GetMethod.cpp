@@ -19,7 +19,8 @@ GetMethod::operator=(const GetMethod& getMethod)
 	return *this;
 }
 
-void GetMethod::completeResponse()
+void
+GetMethod::completeResponse()
 {
-}
 
+}

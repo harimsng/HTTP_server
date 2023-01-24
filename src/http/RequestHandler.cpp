@@ -42,6 +42,8 @@ RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
+	m_recvBuffer.setFd(m_socket->m_fd);
+	m_sendBuffer.setFd(m_socket->m_fd);
 }
 
 RequestHandler::~RequestHandler()
@@ -62,7 +64,6 @@ RequestHandler::receiveRequest() try
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
-
 	// TODO
 	// change to switch statement
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
@@ -70,20 +71,18 @@ RequestHandler::receiveRequest() try
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
 		createResponseHeader();
-		// receiveStatus = RECV_EVENT;
+		receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
-	{
 		m_method->completeResponse();
-		// receiveStatus = RECV_EVENT;
-	}
 	return receiveStatus;
 }
 catch(HttpErrorHandler& e)
 {
-	cout << "error" << endl;
+	bufferResponseStatusLine(400);
+	bufferResponseHeaderFields();
 	// generateResponse(404);
-	return (0);
+	return (RECV_EVENT);
 }
 
 void
@@ -122,7 +121,6 @@ RequestHandler::checkHeaderFields()
 
 	if (check == false)
 		throw HttpErrorHandler(400);
-	// m_sendBuffer.send(m_socket->m_fd);
 }
 
 // TODO: should be called on method classes
@@ -145,11 +143,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 
 	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
 
-	//(void)locationTable;
-	//return "";
-
 	return checkResourceStatus(resourceLocation.data());
-//	m_method->m_resourceLocation = resourceLocation;
 }
 
 int
@@ -221,8 +215,6 @@ RequestHandler::createResponseHeader()
 			// throw HttpErrorHandler(???);
 	}
 	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
-	// TODO
-	// add write event
 }
 
 void
@@ -233,6 +225,7 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
+	// m_sendBuffer.append(status code message);
 	m_sendBuffer.append(g_CRLF);
 }
 
@@ -241,14 +234,11 @@ RequestHandler::bufferResponseHeaderFields()
 {
 	// m_recvBuffer.receive(m_socket->m_fd);
 
+	// m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);
 }
 
-void
-RequestHandler::makeErrorResponse(const std::string& errorMessage)
-{
-	(void)errorMessage;
-}
 
 std::ostream&
 operator<<(std::ostream& os, const Request& request)
@@ -275,4 +265,5 @@ operator<<(std::ostream& os, const Request& request)
 void
 RequestHandler::sendResponse()
 {
+	m_sendBuffer.send(m_socket->m_fd);
 }

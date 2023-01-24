@@ -1,6 +1,7 @@
 #include <string>
 
 #include "Client.hpp"
+#include "ServerManager.hpp"
 
 using namespace	std;
 
@@ -27,12 +28,22 @@ Client::Client(Client const& client)
 Client::IoEventPoller::EventStatus
 Client::handleEventWork()
 {
+	int recvStatus;
+
 	switch (m_filter)
 	{
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
-			if (m_requestHandler.receiveRequest() == RequestHandler::RECV_END)
-				return IoEventPoller::END;
+			recvStatus = m_requestHandler.receiveRequest();
+			switch (recvStatus)
+			{
+				case RequestHandler::RECV_END:
+					return IoEventPoller::END;
+				case RequestHandler::RECV_EVENT:
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::ADD,
+							IoEventPoller::WRITE, this);
+					return IoEventPoller::NORMAL;
+			}
 			break;
 		case IoEventPoller::WRITE:
 			LOG(DEBUG, "write event to client");
