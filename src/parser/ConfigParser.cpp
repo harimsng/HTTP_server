@@ -80,7 +80,7 @@ ConfigParser::parseServer() try
 		checkDuplicateServerName(*newServer);
 	else
 		(*m_serverTable)[newServer->m_addrKey]["."] = newServer;
-
+	LOG(DEBUG, "%llu", newServer->m_addrKey);
 	addNameToTable(*newServer);
 }
 // TODO: a server which has duplicated servername is ignored.

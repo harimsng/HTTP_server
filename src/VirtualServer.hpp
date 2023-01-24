@@ -10,6 +10,8 @@ using namespace std;
 
 class	VirtualServer
 {
+	friend class	FindLocation;
+
 	typedef	std::map<std::string, Location>	LocationTable;
 
 public:
