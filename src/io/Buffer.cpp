@@ -4,12 +4,12 @@
 #include "Buffer.hpp"
 
 #define BUFFER_SIZE (8192)
-#define BUFFER_RESERVE (BUFFER_SIZE + (BUFFER_SIZE >> 8))
 
 // constructors & destructor
 Buffer::Buffer()
+:	std::string(BUFFER_SIZE, 0)
 {
-	reserve(BUFFER_RESERVE);
+	resize(0);
 }
 
 Buffer::~Buffer()
@@ -55,7 +55,7 @@ Buffer::receive(int fd)
 	long long int	count = 0;
 
 	resize(BUFFER_SIZE, 0);
-	count = ::read(fd, const_cast<char*>(data()) + residue,
+	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
 	if (count < -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
@@ -69,9 +69,11 @@ Buffer::send(int fd)
 {
 	long long int	count = 0;
 
-	count = ::write(fd, const_cast<char*>(data() + m_writePos), size() - m_writePos);
+	if (size() == 0)
+		return 0;
+	count = ::write(fd, data() + m_writePos, size() - m_writePos);
 	if (count == -1)
-		throw std::runtime_error("write() fail in Buffer::receive()");
+		throw std::runtime_error("read() fail in Buffer::receive()");
 
 	m_writePos += count;
 	if (m_writePos == size())

@@ -30,12 +30,13 @@ static const std::string	root = "html";
 static const std::string	alias = "";
 
 // if clientMaxBodySize = 0, it's unlimited.
-static const int64_t		clientMaxBodySize = 1000000;
+static const int64_t		clientMaxBodySize = 1000000;	// not necessary?
+
 // static const std::vector<int16_t>	errorCode;
 static const std::string	errorPagePath = "";
 
 static const int32_t		listenIp = 0;
 static const int32_t		listenPort = 8000;
-static const int32_t		uriBufferSize = 8192;
+static const int32_t		uriBufferSize = 8192;	// not necessary?
 
 #endif

@@ -6,7 +6,7 @@
 # ifdef __APPLE__
 
 #  define IO_EVENT_POLLER Kqueue
-#  include "io/Kqueue.hpp"
+#  define IO_EVENT_HEADER "io/Kqueue.hpp"
 // reason for not directly including the header file is to minimize compile time overhead.
 
 #  define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\

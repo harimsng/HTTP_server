@@ -1,5 +1,5 @@
-#ifndef Util_hpp
-#define Util_hpp
+#ifndef UTIL_HPP
+#define UTIL_HPP
 
 #include <string>
 
@@ -19,6 +19,7 @@ public:
 	static int					toInt(const std::string& str);
 	static std::string			toString(int num);
 	static std::string			toUpper(std::string str);
+	static std::string			toLower(std::string str);
 
 	static const std::string	getDate(const char* format);
 	static bool					checkFileStat(const char* path);

@@ -2,7 +2,6 @@
 #define ITOKENIZER_HPP
 
 #include <string>
-#include <vector>
 
 class	ITokenizer
 {

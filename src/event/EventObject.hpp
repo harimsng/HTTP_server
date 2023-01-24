@@ -2,6 +2,7 @@
 #define EVENTOBJECT_HPP
 
 #include "OsDependency.hpp"
+#include IO_EVENT_HEADER
 
 class	EventObject
 {
