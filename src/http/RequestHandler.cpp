@@ -11,6 +11,7 @@
 #include "http/PostMethod.hpp"
 #include "http/DeleteMethod.hpp"
 #include "http/RequestHandler.hpp"
+#include "http/FindLocation.hpp"
 #include "parser/HttpRequestParser.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
@@ -123,12 +124,24 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 {
 	string			resourceLocation;
 	Tcp::SocketAddr	addr = m_socket->getAddress();
-	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
-	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
+	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
+	VirtualServer*	server;
+	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
+		addrKey &= 0xffff00000000;
+	LOG(DEBUG, "%llu", addrKey);
+	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
+		server = ServerManager::s_virtualServerTable[addrKey]["."];
+	else
+		server = ServerManager::s_virtualServerTable[addrKey][host];
+	LOG(DEBUG, "%s", server->m_root.data());
 	map<string, Location>&	locationTable = server->m_locationTable;
 
+	FindLocation findLocation;
 
-	(void)locationTable;
+	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
+	//(void)locationTable;
+	//return "";
+
 	return checkResourceStatus(resourceLocation.data());
 //	m_method->m_resourceLocation = resourceLocation;
 }
