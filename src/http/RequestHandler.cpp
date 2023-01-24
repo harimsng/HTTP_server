@@ -10,12 +10,10 @@
 #include "http/PutMethod.hpp"
 #include "http/PostMethod.hpp"
 #include "http/DeleteMethod.hpp"
-#include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
+#include "http/RequestHandler.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
-
-#define REQUEST_EOF (0)
 
 using namespace	std;
 
@@ -61,12 +59,19 @@ RequestHandler::receiveRequest() try
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
-		m_parser.parse(m_request);
-	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
-		createResponseHeader();
-	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
-		m_method->completeResponse();
+	switch (m_parser.m_readStatus)
+	{
+		case HttpRequestParser::REQUEST_LINE_METHOD:
+		case HttpRequestParser::REQUEST_LINE:
+		case HttpRequestParser::HEADER_FIELDS:
+			m_parser.parse(m_request);
+		case HttpRequestParser::HEADER_FIELDS_END:
+			createResponseHeader();
+		case HttpRequestParser::CONTENT:
+			m_method->completeResponse();
+		case HttpRequestParser::FINISHED:
+			m_recvBuffer.clear(); // ignores excessive data
+	}
 	return count;
 }
 catch(HttpErrorHandler& e)
@@ -105,7 +110,7 @@ RequestHandler::sendResponse()
 			// throw HttpErrorHandler(???);
 	}
 	// generateResponse(200);
-	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
