@@ -24,7 +24,7 @@ FindLocation::findLocationBlock(string const &uri, map<string, Location>& locati
 {
     string tmpUri = uri;
     while (tmpUri != "/") {
-        if (locationTable.find(tmpUri) != locationTable.end() || 
+        if (locationTable.find(tmpUri) != locationTable.end() ||
             locationTable.find(tmpUri + "/") != locationTable.end() ) {
             m_locationBlock = locationTable[tmpUri];
             if (locationTable.find(tmpUri + "/") != locationTable.end()) {
