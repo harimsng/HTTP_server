@@ -34,9 +34,10 @@ bool
 FindLocation::findLocationBlock(string const &uri, map<string, Location>& locationTable)
 {
     string tmpUri = uri;
+    int count = 0;
+
     while (tmpUri != "/" && tmpUri != "") {
-        if (locationTable.find(tmpUri) != locationTable.end() || 
-            locationTable.find(tmpUri + "/") != locationTable.end() ) {
+        if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
             m_locationBlock = locationTable[tmpUri];
             if (locationTable.find(tmpUri + "/") != locationTable.end()) {
                 m_locationBlock = locationTable[tmpUri + "/"];
@@ -44,7 +45,13 @@ FindLocation::findLocationBlock(string const &uri, map<string, Location>& locati
             m_remainUri = uri.substr(tmpUri.length());
             return true;
         }
+        if (locationTable.find(tmpUri + "/") != locationTable.end() ) {
+            m_locationBlock = locationTable[tmpUri + "/"];
+            m_remainUri = uri.substr(tmpUri.length());
+            return true;
+        }
         tmpUri = tmpUri.substr(0, tmpUri.rfind("/"));
+        count++;
     }
     return false;
 }
@@ -74,6 +81,22 @@ FindLocation::saveRealPath(string const &uri, map<string, Location>& locationTab
             2-1-4. 만약 path + file 가 존재 하지 않을경우 = path만 변수에 저장, file 비움 > end
     */
     string newUri = uri;
+    if (uri == "/") // 0. root 요청
+    {
+        this->m_path = server->m_root;
+        if (server->m_index != "")
+        {
+            this->m_file = server->m_index;
+        }
+        else
+        {
+            this->m_file = "index.html";
+        }
+        if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
+                m_path = m_path + "/";
+        LOG(DEBUG, "0. default root %s", (m_path + m_file).data());
+        return m_path + m_file;
+    }
     if (uri.at(uri.size() - 1) != '/') // 1. trailing slash 없이 요청
     {
         if (findLocationBlock(uri, locationTable) == true) // 1-1. 있을 경우 location block의 내용으로 치환 > end
