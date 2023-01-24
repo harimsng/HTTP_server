@@ -39,6 +39,7 @@ SRC			+=	main.cpp\
 				http/PutMethod.cpp\
 				http/PostMethod.cpp\
 				http/DeleteMethod.cpp\
+				http/FindLocation.cpp\
 \
 				io/Buffer.cpp\
 \

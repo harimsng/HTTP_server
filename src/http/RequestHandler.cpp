@@ -6,6 +6,7 @@
 #include "parser/HttpRequestParser.hpp"
 #include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
+#include "http/FindLocation.hpp"
 
 #define REQUEST_EOF (0)
 
@@ -55,8 +56,8 @@ RequestHandler::receiveRequest()
 		m_method->completeResponse();
 		return count;
 	}
-
 	m_parser.parse(m_request);
+	LOG(DEBUG, "parse complete");
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 		makeResponseHeader();
 	return count;
@@ -66,6 +67,7 @@ RequestHandler::receiveRequest()
 void
 RequestHandler::makeResponseHeader()
 {
+	LOG(DEBUG, "makeResponseHeader");
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		return;
 	string		rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
@@ -84,8 +86,11 @@ RequestHandler::getResourceLocation(const std::string& host)
 	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
 	map<string, Location>&	locationTable = server->m_locationTable;
 
-	(void)locationTable;
-	return "";
+	FindLocation findLocation;
+
+	return findLocation.saveRealPath(host, locationTable, server);
+	//(void)locationTable;
+	//return "";
 }
 
 void

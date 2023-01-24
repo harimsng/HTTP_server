@@ -7,6 +7,7 @@ class	Location
 {
 	friend class	LocationParser;
 	friend class	ServerParser;
+	friend class	FindLocation;
 
 // deleted
 

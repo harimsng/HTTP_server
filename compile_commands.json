@@ -1,0 +1,38 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-I../include",
+      "-o",
+      "http/RequestHandler.o",
+      "http/RequestHandler.cpp"
+    ],
+    "directory": "/Users/gson/webserv/src",
+    "file": "/Users/gson/webserv/src/http/RequestHandler.cpp",
+    "output": "/Users/gson/webserv/src/http/RequestHandler.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-std=c++98",
+      "-c",
+      "-I./",
+      "-I../include",
+      "-o",
+      "http/FindLocation.o",
+      "http/FindLocation.cpp"
+    ],
+    "directory": "/Users/gson/webserv/src",
+    "file": "/Users/gson/webserv/src/http/FindLocation.cpp",
+    "output": "/Users/gson/webserv/src/http/FindLocation.o"
+  }
+]
