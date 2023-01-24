@@ -5,7 +5,13 @@
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "http/AMethod.hpp"
+#include "http/GetMethod.hpp"
+#include "http/HeadMethod.hpp"
+#include "http/PutMethod.hpp"
+#include "http/PostMethod.hpp"
+#include "http/DeleteMethod.hpp"
 #include "http/RequestHandler.hpp"
+#include "parser/HttpRequestParser.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
 
@@ -42,7 +48,7 @@ RequestHandler::~RequestHandler()
 }
 
 int
-RequestHandler::receiveRequest()
+RequestHandler::receiveRequest() try
 {
 	int			count;
 
@@ -55,22 +61,100 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	if (m_method != NULL) // after Header fields parsing has ended
-	{
-		m_method->completeResponse();
-		return RECV_NORMAL;
-	}
-
-	m_parser.parse(m_request);
+	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
+		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 		createResponseHeader();
-	return RECV_NORMAL;
+	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+		m_method->completeResponse();
+	return count;
+}
+catch(HttpErrorHandler& e)
+{
+	cout << "error" << endl;
+	// generateResponse(404);
+	return (0);
 }
 
 void
 RequestHandler::sendResponse()
 {
-	m_sendBuffer.send(m_socket->m_fd);
+	string		rl;
+
+	checkRequestMessage();
+	// rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
+	// Util::checkFileStat(rl.data());
+	switch (m_request.m_method)
+	{
+		case GET:
+			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case HEAD:
+			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case POST:
+			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case PUT:
+			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case DELETE:
+			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		default: ;
+			// throw HttpErrorHandler(???);
+	}
+	// generateResponse(200);
+	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+}
+
+void
+RequestHandler::checkRequestMessage()
+{
+	// 1. check method
+	// 2. check uri length
+	// 3. check http version
+	// 4. check reqeust header
+	// 4.1 ckeck host field
+	// 5. check reqeust body size
+
+	checkStatusLine(); // 1, 2, 3
+	checkHeaderFields(); // 4
+}
+
+void
+RequestHandler::checkStatusLine()
+{
+	if (m_request.m_method == ERROR) // check method
+	{}
+	// if (m_request.m_uri >= uri_size) // check uri length
+	if (m_request.m_protocol != "HTTP/1.1") // check http version
+	{}
+}
+
+void
+RequestHandler::checkHeaderFields()
+{
+
+	HeaderFieldsMap::const_iterator mapIt;
+
+	for (mapIt = m_request.m_headerFieldsMap.begin();
+				mapIt != m_request.m_headerFieldsMap.end(); mapIt++)
+		{
+			cout << "\n\t" << mapIt->first << " : ";
+			vector<string>::const_iterator vecIt = mapIt->second.begin();
+			for (; vecIt != mapIt->second.end(); vecIt++)
+				cout << *vecIt << " ";
+		}
+	bool check = true;
+
+	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
+
+	// ... check allow_method field
+
+	if (check == false)
+		throw HttpErrorHandler(400);
+	// m_sendBuffer.send(m_socket->m_fd);
 }
 
 // TODO: should be called on method classes
@@ -82,6 +166,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
 	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
 	map<string, Location>&	locationTable = server->m_locationTable;
+
 
 	(void)locationTable;
 	return checkResourceStatus(resourceLocation.data());
@@ -95,7 +180,7 @@ RequestHandler::checkResourceStatus(const char* path)
 	struct stat	status;
 	int			statusCode;
 
-	ret = stat(path, &status); 
+	ret = stat(path, &status);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
@@ -133,7 +218,7 @@ RequestHandler::createResponseHeader()
 
 // TODO: which should be first between method creation and uri checking
 	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	// m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
 	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
 }
@@ -152,6 +237,7 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 void
 RequestHandler::bufferResponseHeaderFields()
 {
+	m_recvBuffer.receive(m_socket->m_fd);
 }
 
 void

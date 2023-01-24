@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 
 #include <sstream>
+#include <cctype>
 
 #include "Logger.hpp"
 #include "Util.hpp"

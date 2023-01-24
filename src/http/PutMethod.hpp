@@ -1,18 +1,20 @@
 #ifndef PUTMETHOD_HPP
 #define PUTMETHOD_HPP
 
-class	PutMethod
+#include "http/AMethod.hpp"
+
+class	PutMethod : public AMethod
 {
 public:
 // constructors & destructor
-	PutMethod();
+	PutMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
 	~PutMethod();
-	PutMethod(const PutMethod& putMethod);
 
 // operators
 	PutMethod	&operator=(const PutMethod& putMethod);
 
 // member functions
+	virtual void	completeResponse();
 };
 
 #endif

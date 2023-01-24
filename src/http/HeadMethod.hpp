@@ -1,18 +1,19 @@
 #ifndef HEADMETHOD_HPP
 #define HEADMETHOD_HPP
 
-class	HeadMethod
+#include "http/AMethod.hpp"
+class	HeadMethod : public AMethod
 {
 public:
 // constructors & destructor
-	HeadMethod();
+	HeadMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
 	~HeadMethod();
-	HeadMethod(const HeadMethod& headMethod);
 
 // operators
 	HeadMethod	&operator=(const HeadMethod& headMethod);
 
 // member functions
+	virtual void	completeResponse();
 };
 
 #endif

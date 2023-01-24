@@ -1,17 +1,19 @@
 #ifndef DELETEMETHOD_HPP
 #define DELETEMETHOD_HPP
 
-class	DeleteMethod
+#include "http/AMethod.hpp"
+
+class	DeleteMethod : public AMethod
 {
 public:
 // constructors & destructor
-	DeleteMethod();
+	DeleteMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
 	~DeleteMethod();
-	DeleteMethod(const DeleteMethod& deleteMethod);
 
 // operators
 	DeleteMethod	&operator=(const DeleteMethod& deleteMethod);
 
+	virtual void	completeResponse();
 // member functions
 };
 
