@@ -6,6 +6,7 @@
 
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
+#include "Location.hpp"
 
 class	Server;
 struct	Request;

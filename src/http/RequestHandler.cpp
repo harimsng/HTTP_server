@@ -157,8 +157,8 @@ RequestHandler::checkResourceStatus(const char* path)
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
-					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
-//					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
+//					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
+					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
 //					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
 					))
 		statusCode = 200;
@@ -239,6 +239,11 @@ RequestHandler::bufferResponseHeaderFields()
 	m_sendBuffer.append(g_CRLF);
 }
 
+void
+RequestHandler::sendResponse()
+{
+	m_sendBuffer.send(m_socket->m_fd);
+}
 
 std::ostream&
 operator<<(std::ostream& os, const Request& request)
@@ -260,10 +265,4 @@ operator<<(std::ostream& os, const Request& request)
 			os << *vecIt << " ";
 	}
 	return (os);
-}
-
-void
-RequestHandler::sendResponse()
-{
-	m_sendBuffer.send(m_socket->m_fd);
 }
