@@ -130,7 +130,7 @@ Util::toUpper(string str)
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
 		if (str[i] >= 'a' && str[i] <= 'z')
-			str[i] |= 0b111011111;
+			str[i] |= 32;
 	}
 	return str;
 }
@@ -141,7 +141,7 @@ Util::toLower(string str)
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
 		if (str[i] >= 'A' && str[i] <= 'Z')
-			str[i] &= 0b111011111;
+			str[i] &= 0x1ef;
 	}
 	return str;
 }
