@@ -70,12 +70,12 @@ RequestHandler::receiveRequest() try
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
 		createResponseHeader();
-		receiveStatus = RECV_EVENT;
+		// receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
 	{
 		m_method->completeResponse();
-		receiveStatus = RECV_EVENT;
+		// receiveStatus = RECV_EVENT;
 	}
 	return receiveStatus;
 }
