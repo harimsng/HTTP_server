@@ -45,7 +45,8 @@ public:
 		RECV_END = 0,
 		RECV_ERROR = 1,
 		RECV_NORMAL = 2,
-		RECV_SKIPPED = 3
+		RECV_SKIPPED = 3,
+		RECV_EVENT = 4
 	};
 
 // constructors & destructor
