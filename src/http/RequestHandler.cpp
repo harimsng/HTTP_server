@@ -176,7 +176,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 
 	FindLocation findLocation;
 
-	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
+	resourceLocation = findLocation.saveRealPath(m_request, locationTable, server);
 	//(void)locationTable;
 	//return "";
 
