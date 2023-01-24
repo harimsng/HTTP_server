@@ -16,26 +16,27 @@ public:
 
 // member functions
 	const std::string&		getBuffer() const;
+	std::string::size_type	receive(int fd);
+	std::string::size_type	send(int fd);
 
 	char	front() const;
 	char	back() const;
-
 	void	pop_back();
+
+private:
+	std::string::size_type	m_writePos;
 };
 
 class	ReceiveBuffer: public Buffer
 {
-public:
-	std::string::size_type	receive(int fd);
+private:
+	std::string::size_type	send(int fd);
 };
 
 class	SendBuffer: public Buffer
 {
-public:
-	std::string::size_type	send(int fd);
-
 private:
-	std::string::size_type	m_writePos;
+	std::string::size_type	receive(int fd);
 };
 
 #endif

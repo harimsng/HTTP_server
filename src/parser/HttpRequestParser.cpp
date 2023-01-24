@@ -2,6 +2,7 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
+#include "tokenizer/HttpStreamTokenizer.hpp"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 
 // constructors & destructor
 HttpRequestParser::HttpRequestParser(std::string& buffer)
-:	m_readStatus(REQUEST_LINE_METHOD)
+:	m_readStatus(REQUEST_LINE)
 {
 	m_tokenizer.init(buffer);
 }
@@ -57,7 +58,6 @@ HttpRequestParser::parse()");
 		}
 	}
 	m_tokenizer.flush();
-//	Logger::log(Logger::INFO, *request.m_httpInfo);
 }
 
 void
@@ -70,10 +70,9 @@ HttpRequestParser::parseMethod(Request &request)
 	while (c != '\0' && c != ' ')
 	{
 		method += c;
-		m_tokenizer.getc();
+		c = m_tokenizer.getc();
 	}
 	method += ' ';
-	method = Util::toUpper(method);
 	if (method == "GET ")
 		request.m_method = RequestHandler::GET;
 	else if (method == "HEAD ")
@@ -84,14 +83,9 @@ HttpRequestParser::parseMethod(Request &request)
 		request.m_method = RequestHandler::PUT;
 	else if (method == "DELETE ")
 		request.m_method = RequestHandler::DELETE;
-	else if (method == "CONNECT ")
-		request.m_method = RequestHandler::DELETE;
-	else if (method == "OPTION ")
-		request.m_method = RequestHandler::DELETE;
-	else if (method == "TRACE ")
-		request.m_method = RequestHandler::DELETE;
 	else
-		throw HttpErrorHandler(400);
+		request.m_method = RequestHandler::ERROR;
+	m_readStatus = REQUEST_LINE;
 }
 
 void
@@ -99,22 +93,27 @@ HttpRequestParser::parseStatusLine(Request &request)
 {
 	const string	statusLine = m_tokenizer.getline();
 	string			method;
+	size_t			spacePos;
+	size_t			spacePos2;
 
-	request.m_uri = statusLine.substr(0, statusLine.find(" "));
-	request.m_protocol = statusLine.substr(statusLine.find(" ") + 1);
-	m_readStatus = checkStatusLine(request);
-}
-
-/* TODO
- * find location block from uri
- */
-HttpRequestParser::e_readStatus
-HttpRequestParser::checkStatusLine(Request &request)
-{
-//	findLocationBlock(request);
-	if (request.m_protocol != "HTTP/1.1")
-		throw HttpErrorHandler(505);
-	return (HEADER_FIELDS);
+	spacePos = statusLine.find(" ");
+	spacePos2 = statusLine.rfind(" ");
+	method = statusLine.substr(0, spacePos);
+	if (method == "GET")
+		request.m_method = RequestHandler::GET;
+	else if (method == "HEAD")
+		request.m_method = RequestHandler::HEAD;
+	else if (method == "POST")
+		request.m_method = RequestHandler::POST;
+	else if (method == "PUT")
+		request.m_method = RequestHandler::PUT;
+	else if (method == "DELETE")
+		request.m_method = RequestHandler::DELETE;
+	else
+		request.m_method = RequestHandler::ERROR;
+	request.m_uri = statusLine.substr(spacePos + 1, spacePos2 - spacePos - 1);
+	request.m_protocol = statusLine.substr(spacePos2 + 1);
+	m_readStatus = HEADER_FIELDS;
 }
 
 void
@@ -138,7 +137,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		if (pos == string::npos)
 		{
 			value = headerLine.substr(curPos);
-			headerFieldsMap[field].push_back(value);
+			headerFieldsMap[field].push_back(Util::toUpper(value));
 			break;
 		}
 		pos++;
@@ -146,18 +145,20 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
 			value.erase(value.end() - 1);
-		headerFieldsMap[field].push_back(value);
+		headerFieldsMap[field].push_back(Util::toUpper(value));
 	}
-	if (m_tokenizer.peek() == "\r\n")
-	{
-		checkHeaderFields(headerFieldsMap);
+	if (m_tokenizer.peek() == g_CRLF)
 		m_readStatus = HEADER_FIELDS_END;
-	}
 }
 
-bool
-HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
-{
-	(void)headerFieldsMap;
-	return true;
-}
+// bool
+// HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
+// {
+//     bool	check = true;
+//
+//     check &= headerFieldsMap.count("HOST") > 0;
+//
+//     if (check == false)
+//         throw HttpErrorHandler(400);
+//     return check;
+// }

@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 
 #include <sstream>
+#include <cctype>
 
 #include "Logger.hpp"
 #include "Util.hpp"
@@ -34,6 +35,19 @@ Util::parseArgument(int argc, char **argv)
 	}
 	Logger::initLogger(logLevel);
 	return true;
+}
+
+uint64_t
+Util::convertAddrKey(uint32_t addr, uint16_t port)
+{
+	return (static_cast<uint64_t>(port) << 32) + addr;
+}
+
+void
+Util::convertAddrKey(uint64_t addrKey, uint32_t& addr, uint16_t& port)
+{
+	addr = addrKey & 0xffffffff;
+	port = addrKey >> 32;
 }
 
 string
@@ -115,7 +129,19 @@ Util::toUpper(string str)
 {
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
-		str[i] &= 111011111;
+		if (str[i] >= 'a' && str[i] <= 'z')
+			str[i] ^= 32;
+	}
+	return str;
+}
+
+string
+Util::toLower(string str)
+{
+	for (string::size_type i = 0; i < str.size(); ++i)
+	{
+		if (str[i] >= 'A' && str[i] <= 'Z')
+			str[i] ^= 32;
 	}
 	return str;
 }

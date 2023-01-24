@@ -3,10 +3,10 @@
 #include "Webserv.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/ConfigParserException.hpp"
+#include "util/Util.hpp"
 #include "parser/ServerParser.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ConfigParser.hpp"
-#include "util/Util.hpp"
 
 using namespace std;
 
@@ -80,7 +80,7 @@ ConfigParser::parseServer() try
 		checkDuplicateServerName(*newServer);
 	else
 		(*m_serverTable)[newServer->m_addrKey]["."] = newServer;
-
+	LOG(DEBUG, "%llu", newServer->m_addrKey);
 	addNameToTable(*newServer);
 }
 // TODO: a server which has duplicated servername is ignored.

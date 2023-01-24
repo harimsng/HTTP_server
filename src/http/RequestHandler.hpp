@@ -10,6 +10,8 @@
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
 
+static const char*	g_httpVersion = "HTTP/1.1";
+
 class	AMethod;
 
 /*
@@ -31,10 +33,19 @@ public:
 		HEAD,
 		POST,
 		PUT,
-		DELETE
+		DELETE,
+		ERROR
 //		CONNECT,
 //		OPTION,
 //		TRACE
+	};
+
+	enum	e_receiveStatus
+	{
+		RECV_END = 0,
+		RECV_ERROR = 1,
+		RECV_NORMAL = 2,
+		RECV_SKIPPED = 3
 	};
 
 // constructors & destructor
@@ -43,16 +54,21 @@ public:
 
 // member functions
 	int		receiveRequest();
-	void	makeResponse();
 	void	sendResponse();
 
-	std::string	getResourceLocation(const std::string& host);
+	int		resolveResourceLocation(const std::string& host);
 
 private:
-	int		receiveRawData();
-	void	makeResponseHeader();
-	void	makeResponseBody();
+	int		checkResourceStatus(const char* path);
+
+	void	createResponseHeader();
+	void	bufferResponseStatusLine(int statusCode);
+	void	bufferResponseHeaderFields();
+
 	void	makeErrorResponse(const std::string& errorMessage);
+	void	checkRequestMessage();
+	void	checkStatusLine();
+	void	checkHeaderFields();
 
 // member variables
 	const Socket<Tcp>*	m_socket;

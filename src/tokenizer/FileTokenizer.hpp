@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <vector>
 
 #include "tokenizer/ITokenizer.hpp"
 

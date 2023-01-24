@@ -4,12 +4,12 @@
 #include "Buffer.hpp"
 
 #define BUFFER_SIZE (8192)
-#define BUFFER_RESERVE (BUFFER_SIZE + (BUFFER_SIZE >> 8))
 
 // constructors & destructor
 Buffer::Buffer()
+:	std::string(BUFFER_SIZE, 0)
 {
-	reserve(BUFFER_RESERVE);
+	resize(0);
 }
 
 Buffer::~Buffer()
@@ -49,13 +49,13 @@ Buffer::pop_back()
 }
 
 std::string::size_type
-ReceiveBuffer::receive(int fd)
+Buffer::receive(int fd)
 {
-	const int	residue = size();
-	int64_t		count = 0;
+	const int		residue = size();
+	long long int	count = 0;
 
 	resize(BUFFER_SIZE, 0);
-	count = ::read(fd, const_cast<char*>(data()) + residue,
+	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
 	if (count < -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
@@ -65,11 +65,13 @@ ReceiveBuffer::receive(int fd)
 }
 
 std::string::size_type
-SendBuffer::send(int fd)
+Buffer::send(int fd)
 {
-	int64_t	count = 0;
+	long long int	count = 0;
 
-	count = ::write(fd, const_cast<char*>(data() + m_writePos), size() - m_writePos);
+	if (size() == 0)
+		return 0;
+	count = ::write(fd, data() + m_writePos, size() - m_writePos);
 	if (count == -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
 

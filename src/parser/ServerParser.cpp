@@ -129,7 +129,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 			throw ConfigParser::ConfigParserException("invalid listen address");
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
-	server.m_addrKey = (static_cast<uint64_t>(port) << 32) + addr;
+	server.m_addrKey = Util::convertAddrKey(addr, port);
 	LOG(Logger::DEBUG, "addr/port : %s", Util::getFormattedAddress(addr, port).c_str());
 	m_tokenizer.eat(";");
 }

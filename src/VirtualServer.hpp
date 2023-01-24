@@ -13,6 +13,7 @@ class	VirtualServer
 	friend class	FindLocation;
 
 	typedef	std::map<std::string, Location>	LocationTable;
+
 public:
 // constructors & destructor
 	VirtualServer();
@@ -21,7 +22,6 @@ public:
 	VirtualServer	&operator=(VirtualServer const& server);
 
 // member functions
-
 private:
 	void	setToDefault();
 
@@ -42,7 +42,7 @@ private:
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;
-	friend std::string 		RequestHandler::getResourceLocation(const std::string& host);
+	friend int				RequestHandler::resolveResourceLocation(const std::string& host);
 	friend std::ostream&	operator<<(std::ostream& os, const VirtualServer& server);
 };
 

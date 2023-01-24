@@ -4,6 +4,8 @@
 
 using namespace	std;
 
+const char*	g_CRLF = "\r\n";
+
 // for test
 #include <iostream>
 
@@ -47,7 +49,7 @@ HttpStreamTokenizer::updateBuffer()
 	if (m_cur > m_start)
 		m_start = m_cur;
 
-	pos = m_buffer->rfind("\r\n");
+	pos = m_buffer->rfind(g_CRLF);
 	if (pos == string::npos)
 	{
 		if (m_buffer->size() == m_buffer->capacity())
@@ -72,7 +74,7 @@ HttpStreamTokenizer::peek()
 std::string
 HttpStreamTokenizer::get()
 {
-	string::size_type	pos = m_buffer->find("\r\n", m_cur);
+	string::size_type	pos = m_buffer->find(g_CRLF, m_cur);
 	string::size_type	temp;
 	string				token = m_aheadToken;
 
@@ -82,7 +84,7 @@ HttpStreamTokenizer::get()
 	pos = pos == string::npos ? m_buffer->size() : pos;
 	m_aheadToken = m_buffer->substr(m_cur, pos - m_cur);
 	if (m_aheadToken == "")
-		m_aheadToken = "\r\n";
+		m_aheadToken = g_CRLF;
 
 	temp = m_cur;
 	m_cur = pos + 2;

@@ -1,12 +1,20 @@
+#include <sys/stat.h>
 #include <stdexcept>
 
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "http/AMethod.hpp"
+#include "http/GetMethod.hpp"
+#include "http/HeadMethod.hpp"
+#include "http/PutMethod.hpp"
+#include "http/PostMethod.hpp"
+#include "http/DeleteMethod.hpp"
 #include "http/RequestHandler.hpp"
 #include "http/FindLocation.hpp"
+#include "parser/HttpRequestParser.hpp"
+
+#define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
 
 #define REQUEST_EOF (0)
 
@@ -41,61 +49,208 @@ RequestHandler::~RequestHandler()
 }
 
 int
-RequestHandler::receiveRequest()
+RequestHandler::receiveRequest() try
 {
 	int			count;
 
+	if (m_sendBuffer.size() != 0)
+		return RECV_SKIPPED;
+
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
-		return REQUEST_EOF;
+		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
-	if (m_method != NULL)
-	{
-		m_method->completeResponse();
-		return count;
-	}
-	m_parser.parse(m_request);
-	LOG(DEBUG, "parse complete");
+	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
+		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
-		makeResponseHeader();
+		createResponseHeader();
+	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+		m_method->completeResponse();
 	return count;
 }
-
-// HOST field could be empty
-void
-RequestHandler::makeResponseHeader()
+catch(HttpErrorHandler& e)
 {
-	LOG(DEBUG, "makeResponseHeader");
-	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
-		return;
-	string		rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-
-	Util::checkFileStat(rl.data());
-	// status code 200
-	// make response header
-	m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
-}
-
-std::string
-RequestHandler::getResourceLocation(const std::string& host)
-{
-	Tcp::SocketAddr	addr = m_socket->getAddress();
-	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
-	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
-	map<string, Location>&	locationTable = server->m_locationTable;
-
-	FindLocation findLocation;
-
-	return findLocation.saveRealPath(host, locationTable, server);
-	//(void)locationTable;
-	//return "";
+	cout << "error" << endl;
+	// generateResponse(404);
+	return (0);
 }
 
 void
 RequestHandler::sendResponse()
 {
+	string		rl;
+
+	checkRequestMessage();
+	// rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
+	// Util::checkFileStat(rl.data());
+	switch (m_request.m_method)
+	{
+		case GET:
+			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case HEAD:
+			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case POST:
+			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case PUT:
+			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case DELETE:
+			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		default: ;
+			// throw HttpErrorHandler(???);
+	}
+	// generateResponse(200);
+	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+}
+
+void
+RequestHandler::checkRequestMessage()
+{
+	// 1. check method
+	// 2. check uri length
+	// 3. check http version
+	// 4. check reqeust header
+	// 4.1 ckeck host field
+	// 5. check reqeust body size
+
+	checkStatusLine(); // 1, 2, 3
+	checkHeaderFields(); // 4
+}
+
+void
+RequestHandler::checkStatusLine()
+{
+	if (m_request.m_method == ERROR) // check method
+	{}
+	// if (m_request.m_uri >= uri_size) // check uri length
+	if (m_request.m_protocol != "HTTP/1.1") // check http version
+	{}
+}
+
+void
+RequestHandler::checkHeaderFields()
+{
+
+	HeaderFieldsMap::const_iterator mapIt;
+
+	for (mapIt = m_request.m_headerFieldsMap.begin();
+				mapIt != m_request.m_headerFieldsMap.end(); mapIt++)
+		{
+			cout << "\n\t" << mapIt->first << " : ";
+			vector<string>::const_iterator vecIt = mapIt->second.begin();
+			for (; vecIt != mapIt->second.end(); vecIt++)
+				cout << *vecIt << " ";
+		}
+	bool check = true;
+
+	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
+
+	// ... check allow_method field
+
+	if (check == false)
+		throw HttpErrorHandler(400);
+	// m_sendBuffer.send(m_socket->m_fd);
+}
+
+// TODO: should be called on method classes
+int
+RequestHandler::resolveResourceLocation(const std::string& host)
+{
+	string	resourceLocation;
+	Tcp::SocketAddr	addr = m_socket->getAddress();
+	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
+	VirtualServer*	server;
+	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
+		addrKey &= 0xffff00000000;
+	LOG(DEBUG, "%llu", addrKey);
+	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
+		server = ServerManager::s_virtualServerTable[addrKey]["."];
+	else
+		server = ServerManager::s_virtualServerTable[addrKey][host];
+	LOG(DEBUG, "%s", server->m_root.data());
+	map<string, Location>&	locationTable = server->m_locationTable;
+
+	FindLocation findLocation;
+
+	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
+	//(void)locationTable;
+	//return "";
+
+	return checkResourceStatus(resourceLocation.data());
+//	m_method->m_resourceLocation = resourceLocation;
+}
+
+int
+RequestHandler::checkResourceStatus(const char* path)
+{
+	int			ret;
+	struct stat	status;
+	int			statusCode;
+
+	ret = stat(path, &status);
+	if (ret == 0
+		&& S_ISREG(status.st_mode)
+		&& CHECK_PERMISSION(status.st_mode,
+					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
+//					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
+//					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
+					))
+		statusCode = 200;
+
+	switch (errno)
+	{
+		case EACCES:
+			// fall through
+		case ENOENT:
+			// fall through
+		case ENOTDIR:
+			statusCode = 404;
+			break;
+		case ENAMETOOLONG:
+			statusCode = 414;
+			break;
+		default:
+			statusCode = 500;
+			break;
+	}
+	return statusCode;
+}
+
+// HOST field could be empty
+void
+RequestHandler::createResponseHeader()
+{
+	string		resourceLocation;
+	int			statusCode;
+
+// TODO: which should be first between method creation and uri checking
+	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
+	// m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
+}
+
+void
+RequestHandler::bufferResponseStatusLine(int statusCode)
+{
+	// status-line
+	m_sendBuffer.append(g_httpVersion);
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(Util::toString(statusCode));
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(g_CRLF);
+}
+
+void
+RequestHandler::bufferResponseHeaderFields()
+{
+	m_recvBuffer.receive(m_socket->m_fd);
 }
 
 void

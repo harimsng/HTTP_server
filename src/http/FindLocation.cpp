@@ -41,6 +41,7 @@ FindLocation::findLocationBlock(string const &uri, map<string, Location>& locati
 string
 FindLocation::saveRealPath(string const &uri, map<string, Location>& locationTable, VirtualServer* server)
 {
+    LOG(DEBUG, "uri is %s", uri.data());
     /*
     trailing slash 없이 요청 (/abcd)(/abcd/efgh/ijkl)
         1. /abcd location block 찾기
@@ -64,11 +65,12 @@ FindLocation::saveRealPath(string const &uri, map<string, Location>& locationTab
     string newUri = uri;
     if (uri.at(uri.size() - 1) != '/') // 1
     {
+        LOG(DEBUG, "here");
         if (findLocationBlock(uri, locationTable) == true) // 1-1
         {
             setRootAlias(uri, server);
             this->m_file = this->m_path.substr(this->m_path.rfind("/") + 1);
-            cout << m_path << endl;
+            LOG(DEBUG, "%s", m_path.data());
             return m_path;
         }
         else // 1-2
@@ -78,7 +80,7 @@ FindLocation::saveRealPath(string const &uri, map<string, Location>& locationTab
             if (lstat(realPath.c_str(), d_stat) == -1) {
                 this->m_path = "";
                 this->m_file = "";
-                cout << " " << endl;
+                LOG(DEBUG, "%s", (m_path + m_file).data());
                 return "";
             }
             if (S_ISDIR(d_stat->st_mode) == false) { // 1-2-1
