@@ -1,18 +1,19 @@
 #ifndef POSTMETHOD_HPP
 #define POSTMETHOD_HPP
 
-class	PostMethod
+#include "http/AMethod.hpp"
+class	PostMethod : public AMethod
 {
 public:
 // constructors & destructor
-	PostMethod();
+	PostMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
 	~PostMethod();
-	PostMethod(const PostMethod& postMethod);
 
 // operators
 	PostMethod	&operator=(const PostMethod& postMethod);
 
 // member functions
+	virtual void	completeResponse();
 };
 
 #endif

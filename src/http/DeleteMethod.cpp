@@ -1,17 +1,13 @@
 #include "DeleteMethod.hpp"
 
 // constructors & destructor
-DeleteMethod::DeleteMethod()
+DeleteMethod::DeleteMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
+: AMethod(request, sendBuffer, recvBuffer)
 {
 }
 
 DeleteMethod::~DeleteMethod()
 {
-}
-
-DeleteMethod::DeleteMethod(const DeleteMethod& deleteMethod)
-{
-	(void)deleteMethod;
 }
 
 // operators
@@ -21,3 +17,9 @@ DeleteMethod::operator=(const DeleteMethod& deleteMethod)
 	(void)deleteMethod;
 	return *this;
 }
+
+void
+DeleteMethod::completeResponse()
+{
+}
+

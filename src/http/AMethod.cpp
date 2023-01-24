@@ -2,25 +2,17 @@
 #include "AMethod.hpp"
 
 // constructors & destructor
-AMethod::AMethod()
-{
-}
-
-AMethod::~AMethod()
-{
-}
-
-AMethod::AMethod(const AMethod& aMethod)
-{
-	(void)aMethod;
-}
-
 AMethod::AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
 {
 	(void)request;
 	(void)sendBuffer;
 	(void)recvBuffer;
 }
+
+AMethod::~AMethod()
+{
+}
+
 
 // operators
 AMethod&

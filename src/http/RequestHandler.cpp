@@ -4,6 +4,11 @@
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "http/AMethod.hpp"
+#include "http/GetMethod.hpp"
+#include "http/HeadMethod.hpp"
+#include "http/PutMethod.hpp"
+#include "http/PostMethod.hpp"
+#include "http/DeleteMethod.hpp"
 #include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
 
@@ -45,7 +50,6 @@ RequestHandler::receiveRequest() try
 	int			count;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	cout << "count : " << count << endl;
 	if (count == 0)
 		return REQUEST_EOF;
 	else if (count == -1)
@@ -61,6 +65,7 @@ RequestHandler::receiveRequest() try
 }
 catch(HttpErrorHandler& e)
 {
+	cout << "error" << endl;
 	// generateResponse(404);
 	return (0);
 }
@@ -72,14 +77,27 @@ RequestHandler::makeResponseHeader()
 	string		rl;
 
 	checkRequestMessage();
-	rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-	Util::checkFileStat(rl.data());
-	// status code 200
-	// make response header
+	// rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
+	// Util::checkFileStat(rl.data());
 	switch (m_request.m_method)
 	{
-		default:
-			m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+		case GET:
+			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case HEAD:
+			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case POST:
+			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case PUT:
+			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case DELETE:
+			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		default: ;
+			// throw HttpErrorHandler(???);
 	}
 	generateResponse(200);
 	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
@@ -112,6 +130,17 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
+
+	HeaderFieldsMap::const_iterator mapIt;
+
+	for (mapIt = m_request.m_headerFieldsMap.begin();
+				mapIt != m_request.m_headerFieldsMap.end(); mapIt++)
+		{
+			cout << "\n\t" << mapIt->first << " : ";
+			vector<string>::const_iterator vecIt = mapIt->second.begin();
+			for (; vecIt != mapIt->second.end(); vecIt++)
+				cout << *vecIt << " ";
+		}
 	bool check = true;
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
@@ -129,6 +158,7 @@ RequestHandler::getResourceLocation(const std::string& host)
 	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
 	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
 	map<string, Location>&	locationTable = server->m_locationTable;
+
 
 	(void)locationTable;
 	return "";

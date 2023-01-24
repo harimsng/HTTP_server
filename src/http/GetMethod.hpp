@@ -1,17 +1,19 @@
 #ifndef GETMETHOD_HPP
 #define GETMETHOD_HPP
 
-class	GetMethod
+#include "http/AMethod.hpp"
+
+class	GetMethod : public AMethod
 {
 public:
 // constructors & destructor
-	GetMethod();
+	GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
 	~GetMethod();
-	GetMethod(const GetMethod& getMethod);
 
 // operators
 	GetMethod	&operator=(const GetMethod& getMethod);
 
+	virtual void	completeResponse();
 // member functions
 };
 

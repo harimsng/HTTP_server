@@ -7,18 +7,19 @@ struct	Request;
 
 class	AMethod
 {
+private:
+	AMethod();
+	AMethod(const AMethod& method);
 public:
 // constructors & destructor
-	AMethod();
-	~AMethod();
-	AMethod(const AMethod& method);
 	AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	~AMethod();
 
 // operators
 	AMethod	&operator=(const AMethod& aMethod);
 
 // member functions
-	void	completeResponse();
+	virtual void	completeResponse() = 0;
 };
 
 #endif

@@ -50,6 +50,7 @@ public:
 	void	sendResponse();
 
 	std::string	getResourceLocation(const std::string& host);
+	// friend std::ostream& operator<<(std::ostream& os, const Request& request);
 
 private:
 	void	makeResponseHeader();

@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 
 #include <sstream>
+#include <cctype>
 
 #include "Logger.hpp"
 #include "Util.hpp"
@@ -128,7 +129,9 @@ Util::toUpper(string str)
 {
 	for (string::size_type i = 0; i < str.size(); ++i)
 	{
-		str[i] &= 111011111;
+		str[i] = toupper(str[i]);
+		// if (islower(str[i]))
+		//     str[i] |= 0x100000;
 	}
 	return str;
 }
