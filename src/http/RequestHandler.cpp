@@ -61,6 +61,8 @@ RequestHandler::receiveRequest() try
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
+	// TODO
+	// change to switch statement
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -74,38 +76,6 @@ catch(HttpErrorHandler& e)
 	cout << "error" << endl;
 	// generateResponse(404);
 	return (0);
-}
-
-void
-RequestHandler::sendResponse()
-{
-	string		rl;
-
-	checkRequestMessage();
-	// rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-	// Util::checkFileStat(rl.data());
-	switch (m_request.m_method)
-	{
-		case GET:
-			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case HEAD:
-			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case POST:
-			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case PUT:
-			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case DELETE:
-			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		default: ;
-			// throw HttpErrorHandler(???);
-	}
-	// generateResponse(200);
-	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
 }
 
 void
@@ -136,16 +106,6 @@ void
 RequestHandler::checkHeaderFields()
 {
 
-	HeaderFieldsMap::const_iterator mapIt;
-
-	for (mapIt = m_request.m_headerFieldsMap.begin();
-				mapIt != m_request.m_headerFieldsMap.end(); mapIt++)
-		{
-			cout << "\n\t" << mapIt->first << " : ";
-			vector<string>::const_iterator vecIt = mapIt->second.begin();
-			for (; vecIt != mapIt->second.end(); vecIt++)
-				cout << *vecIt << " ";
-		}
 	bool check = true;
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
@@ -161,7 +121,7 @@ RequestHandler::checkHeaderFields()
 int
 RequestHandler::resolveResourceLocation(const std::string& host)
 {
-	string	resourceLocation;
+	string			resourceLocation;
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = (static_cast<uint64_t>(ntohs(addr.sin_port)) << 32) + ntohl(addr.sin_addr.s_addr);
 	VirtualServer*	server = ServerManager::s_virtualServerTable[addrKey][host];
@@ -216,11 +176,34 @@ RequestHandler::createResponseHeader()
 	string		resourceLocation;
 	int			statusCode;
 
+	checkRequestMessage();
 // TODO: which should be first between method creation and uri checking
-	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-	// m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
+	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
 	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
+	switch (m_request.m_method)
+	{
+		case GET:
+			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case HEAD:
+			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case POST:
+			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case PUT:
+			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case DELETE:
+			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		default: ;
+			// throw HttpErrorHandler(???);
+	}
+	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+	// TODO
+	// add write event
 }
 
 void
@@ -266,4 +249,10 @@ operator<<(std::ostream& os, const Request& request)
 			os << *vecIt << " ";
 	}
 	return (os);
+}
+
+void
+RequestHandler::sendResponse()
+{
+
 }
