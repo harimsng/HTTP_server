@@ -3,10 +3,10 @@
 
 // constructors & destructor
 AMethod::AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
+	:m_request(request),
+	m_sendBuffer(sendBuffer),
+	m_recvBuffer(recvBuffer)
 {
-	(void)request;
-	(void)sendBuffer;
-	(void)recvBuffer;
 }
 
 AMethod::~AMethod()

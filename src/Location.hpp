@@ -8,6 +8,8 @@ class	Location
 	friend class	LocationParser;
 	friend class	ServerParser;
 	friend class	FindLocation;
+	friend class	AMethod;
+	friend class	GetMethod;
 
 // deleted
 
