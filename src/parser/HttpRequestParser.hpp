@@ -6,6 +6,7 @@
 
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
+#include "Location.hpp"
 
 class	Server;
 struct	Request;
@@ -17,6 +18,9 @@ struct Request
 	int					m_method;
 	std::string			m_uri;
 	std::string			m_protocol;
+	std::string			m_path;
+	std::string			m_file;
+	Location			m_locationBlock;
 	HeaderFieldsMap		m_headerFieldsMap;
 };
 

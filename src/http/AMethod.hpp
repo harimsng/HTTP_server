@@ -2,6 +2,9 @@
 #define AMETHOD_HPP
 
 #include "io/Buffer.hpp"
+#include "parser/HttpRequestParser.hpp"
+#include "fstream"
+#include "util/Util.hpp"
 
 struct	Request;
 
@@ -20,6 +23,10 @@ public:
 
 // member functions
 	virtual void	completeResponse() = 0;
+
+	Request&		m_request;
+	SendBuffer&		m_sendBuffer;
+	ReceiveBuffer&	m_recvBuffer;
 };
 
 #endif

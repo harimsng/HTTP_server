@@ -20,9 +20,10 @@ class FindLocation {
         Location    m_locationBlock;
         struct stat*   d_stat;
 
+        std::string removeTrailingSlash(string first, string second);
         void setRootAlias(std::string const &uri, VirtualServer* server);
-        bool findLocationBlock(std::string const &uri, std::map<std::string, Location>& locationTable);
-        std::string saveRealPath(std::string const &uri, std::map<std::string, Location>& locationTable, VirtualServer* server);
+        bool findLocationBlock(Request &request, std::string const &uri, std::map<std::string, Location>& locationTable);
+        std::string saveRealPath(Request &request, std::map<std::string, Location>& locationTable, VirtualServer* server);
 };
 
 #endif

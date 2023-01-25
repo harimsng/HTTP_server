@@ -1,28 +1,46 @@
 server{
-	server_names 1;
+	server_name ;
 	root	123;
-	listen	1.123.123.123:8080;
+	listen	8083;
 	client_max_body_size 123;
-	location asd
-	{
-		root	456;
+
+	root /Users/gson/webserv/html/;
+
+	location /42/ {
+		alias /Users/gson/webserv/html/42;
+
 	}
 
-	location zxc
-	{
-		root 789;
+	location /423 {
+		alias /Users/gson/webserv/html/423;
 	}
 }
 
 server{
-	root	abc;
-	listen	1.22.123.123:8080;
-	location zzzz
-	{
-		root	def;
+	root /Users/gson/webserv/html/;
+	listen	8080;
+
+	location /44/ {
+		root /Users/gson/webserv/html/;
+
 	}
-	location xxxx
-	{
-		root	ghi;
+
+	location /44/45/ {
+		root /Users/gson/webserv/html/;
+
+	}
+
+	location /44/45/46 {
+		root /Users/gson/webserv/html/test/;
+
+	}
+
+	location /42/ {
+		alias /Users/gson/webserv/html/42;
+
+	}
+
+	location /423 {
+		alias /Users/gson/webserv/html/422;
 	}
 }

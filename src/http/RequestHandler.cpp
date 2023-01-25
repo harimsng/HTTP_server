@@ -40,6 +40,8 @@ RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
+	m_recvBuffer.setFd(m_socket->m_fd);
+	m_sendBuffer.setFd(m_socket->m_fd);
 }
 
 RequestHandler::~RequestHandler()
@@ -50,6 +52,7 @@ int
 RequestHandler::receiveRequest() try
 {
 	int			count;
+	int			receiveStatus = RECV_NORMAL;
 
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
@@ -59,59 +62,23 @@ RequestHandler::receiveRequest() try
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
-
-	switch (m_parser.m_readStatus)
+	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
+		m_parser.parse(m_request);
+	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
-		case HttpRequestParser::REQUEST_LINE_METHOD:
-		case HttpRequestParser::REQUEST_LINE:
-		case HttpRequestParser::HEADER_FIELDS:
-			m_parser.parse(m_request);
-		case HttpRequestParser::HEADER_FIELDS_END:
-			createResponseHeader();
-		case HttpRequestParser::CONTENT:
-			m_method->completeResponse();
-		case HttpRequestParser::FINISHED:
-			m_recvBuffer.clear(); // ignores excessive data
+		createResponseHeader();
+		receiveStatus = RECV_EVENT;
 	}
-	return count;
+	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
+		m_method->completeResponse();
+	return receiveStatus;
 }
-catch(HttpErrorHandler& e)
+catch (HttpErrorHandler& e)
 {
-	cout << "error" << endl;
+	bufferResponseStatusLine(400);
+	bufferResponseHeaderFields();
 	// generateResponse(404);
 	return (0);
-}
-
-void
-RequestHandler::sendResponse()
-{
-	string		rl;
-
-	checkRequestMessage();
-	// rl = getResourceLocation(m_request.m_headerFieldsMap["host"][0]);
-	// Util::checkFileStat(rl.data());
-	switch (m_request.m_method)
-	{
-		case GET:
-			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case HEAD:
-			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case POST:
-			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case PUT:
-			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		case DELETE:
-			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
-			break;
-		default: ;
-			// throw HttpErrorHandler(???);
-	}
-	// generateResponse(200);
-	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -142,16 +109,6 @@ void
 RequestHandler::checkHeaderFields()
 {
 
-	HeaderFieldsMap::const_iterator mapIt;
-
-	for (mapIt = m_request.m_headerFieldsMap.begin();
-				mapIt != m_request.m_headerFieldsMap.end(); mapIt++)
-		{
-			cout << "\n\t" << mapIt->first << " : ";
-			vector<string>::const_iterator vecIt = mapIt->second.begin();
-			for (; vecIt != mapIt->second.end(); vecIt++)
-				cout << *vecIt << " ";
-		}
 	bool check = true;
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
@@ -160,35 +117,29 @@ RequestHandler::checkHeaderFields()
 
 	if (check == false)
 		throw HttpErrorHandler(400);
-	// m_sendBuffer.send(m_socket->m_fd);
 }
 
 // TODO: should be called on method classes
 int
 RequestHandler::resolveResourceLocation(const std::string& host)
 {
-	string	resourceLocation;
+	string			resourceLocation;
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 	VirtualServer*	server;
 	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
 		addrKey &= 0xffff00000000;
-	LOG(DEBUG, "%llu", addrKey);
 	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
 		server = ServerManager::s_virtualServerTable[addrKey]["."];
 	else
 		server = ServerManager::s_virtualServerTable[addrKey][host];
-	LOG(DEBUG, "%s", server->m_root.data());
 	map<string, Location>&	locationTable = server->m_locationTable;
 
 	FindLocation findLocation;
 
-	resourceLocation = findLocation.saveRealPath(m_request.m_uri, locationTable, server);
-	//(void)locationTable;
-	//return "";
+	resourceLocation = findLocation.saveRealPath(m_request, locationTable, server);
 
 	return checkResourceStatus(resourceLocation.data());
-//	m_method->m_resourceLocation = resourceLocation;
 }
 
 int
@@ -202,8 +153,8 @@ RequestHandler::checkResourceStatus(const char* path)
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
-					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
-//					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
+//					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
+					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
 //					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
 					))
 		statusCode = 200;
@@ -234,11 +185,32 @@ RequestHandler::createResponseHeader()
 	string		resourceLocation;
 	int			statusCode;
 
+	checkRequestMessage();
 // TODO: which should be first between method creation and uri checking
 	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
-	// m_method = new AMethod(m_request, m_sendBuffer, m_recvBuffer);
 	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
+	switch (m_request.m_method)
+	{
+		case GET:
+			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case HEAD:
+			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case POST:
+			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case PUT:
+			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		case DELETE:
+			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			break;
+		default: ;
+			// throw HttpErrorHandler(???);
+	}
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -249,19 +221,24 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
+	// m_sendBuffer.append(status code message);
 	m_sendBuffer.append(g_CRLF);
 }
 
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	m_recvBuffer.receive(m_socket->m_fd);
+	// m_recvBuffer.receive(m_socket->m_fd);
+
+	// m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
+	m_sendBuffer.append(g_CRLF);
 }
 
 void
-RequestHandler::makeErrorResponse(const std::string& errorMessage)
+RequestHandler::sendResponse()
 {
-	(void)errorMessage;
+	m_sendBuffer.send(m_socket->m_fd);
 }
 
 std::ostream&

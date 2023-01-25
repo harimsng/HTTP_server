@@ -57,7 +57,7 @@ Buffer::receive(int fd)
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (count < -1)
+	if (count == -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
 
 	resize(residue + count, 0);
@@ -82,4 +82,46 @@ Buffer::send(int fd)
 		clear();
 	}
 	return count;
+}
+
+std::string::size_type
+Buffer::receive()
+{
+	const int		residue = size();
+	long long int	count = 0;
+
+	resize(BUFFER_SIZE, 0);
+	count = ::read(m_fd, &(*this)[0] + residue,
+			size() - residue - 1);
+	if (count == -1)
+		throw std::runtime_error("read() fail in Buffer::receive()");
+
+	resize(residue + count, 0);
+	return count;
+}
+
+std::string::size_type
+Buffer::send()
+{
+	long long int	count = 0;
+
+	if (size() == 0)
+		return 0;
+	count = ::write(m_fd, data() + m_writePos, size() - m_writePos);
+	if (count == -1)
+		throw std::runtime_error("read() fail in Buffer::receive()");
+
+	m_writePos += count;
+	if (m_writePos == size())
+	{
+		m_writePos = 0;
+		clear();
+	}
+	return count;
+}
+
+void
+Buffer::setFd(int fd)
+{
+	m_fd = fd;
 }
