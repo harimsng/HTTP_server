@@ -75,7 +75,6 @@ std::string
 HttpStreamTokenizer::get()
 {
 	string::size_type	pos = m_buffer->find(g_CRLF, m_cur);
-	string::size_type	temp;
 	string				token = m_aheadToken;
 
 	if (empty() == true)
@@ -86,10 +85,9 @@ HttpStreamTokenizer::get()
 	if (m_aheadToken == "")
 		m_aheadToken = g_CRLF;
 
-	temp = m_cur;
 	m_cur = pos + 2;
-	//  m_start == temp (original value of m_cur) means it's first call to get() on new stream.
-	if (m_start == temp)
+	//  if token.size() == 0, m_aheadToken was empty that current call to this method is first call.
+	if (token.size() == 0)
 		return get();
 	return token;
 }

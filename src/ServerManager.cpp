@@ -25,7 +25,7 @@ ServerManager::parseConfig(const char* path)
 
 	configParser.init(path, s_virtualServerTable);
 	configParser.parse();
-	Logger::log(Logger::INFO, "parsing configuration file finished");
+	Logger::log(Logger::INFO, "finished parsing configuration file");
 }
 
 void
@@ -51,8 +51,7 @@ ServerManager::initServers() try
 		Server*	newServer = new Server();
 
 		newServer->initServer(addr, port);
-		s_ioEventPoller.add(newServer->m_fd, IoEventPoller::ADD,
-				IoEventPoller::READ, newServer);
+		registerEvent(newServer->m_fd, IoEventPoller::ADD, IoEventPoller::READ, newServer);
 		s_listenServerTable[addrKey] = newServer;
 		prevPort = port;
 	}

@@ -1,10 +1,14 @@
 #ifndef AMETHOD_HPP
 #define AMETHOD_HPP
 
-#include "io/Buffer.hpp"
+#include <fstream>
+
 #include "parser/HttpRequestParser.hpp"
-#include "fstream"
+#include "io/Buffer.hpp"
 #include "util/Util.hpp"
+
+class	SendBuffer;
+class	ReceiveBuffer;
 
 struct	Request;
 
@@ -13,6 +17,7 @@ class	AMethod
 private:
 	AMethod();
 	AMethod(const AMethod& method);
+
 public:
 // constructors & destructor
 	AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
@@ -24,6 +29,7 @@ public:
 // member functions
 	virtual void	completeResponse() = 0;
 
+protected:
 	Request&		m_request;
 	SendBuffer&		m_sendBuffer;
 	ReceiveBuffer&	m_recvBuffer;

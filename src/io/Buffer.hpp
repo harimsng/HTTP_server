@@ -16,9 +16,12 @@ public:
 
 // member functions
 	const std::string&		getBuffer() const;
+	std::string::size_type	read(int fd);
 	std::string::size_type	receive(int fd);
-	std::string::size_type	send(int fd);
 	std::string::size_type	receive();
+
+	std::string::size_type	write(int fd);
+	std::string::size_type	send(int fd);
 	std::string::size_type	send();
 	void					setFd(int fd);
 
