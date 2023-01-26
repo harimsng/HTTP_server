@@ -86,10 +86,10 @@ catch (HttpErrorHandler& e)
 	return (0);
 }
 
-int
+void
 RequestHandler::sendResponse()
 {
-	return m_sendBuffer.send(m_socket->m_fd);
+	m_sendBuffer.send(m_socket->m_fd);
 }
 
 void
@@ -243,7 +243,6 @@ RequestHandler::bufferResponseHeaderFields()
 
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
-	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append(g_CRLF);
 }
 
