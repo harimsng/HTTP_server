@@ -1,4 +1,6 @@
 #include "http/RequestHandler.hpp"
+#include "io/Buffer.hpp"
+#include "util/Util.hpp"
 #include "AMethod.hpp"
 
 // constructors & destructor

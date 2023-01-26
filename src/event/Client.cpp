@@ -1,7 +1,7 @@
 #include <string>
 
-#include "Client.hpp"
 #include "ServerManager.hpp"
+#include "Client.hpp"
 
 using namespace	std;
 
@@ -35,6 +35,7 @@ Client::handleEventWork()
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
 			recvStatus = m_requestHandler.receiveRequest();
+			LOG(DEBUG, "read event status = %d", recvStatus);
 			switch (recvStatus)
 			{
 				case RequestHandler::RECV_END:
@@ -43,6 +44,8 @@ Client::handleEventWork()
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::ADD,
 							IoEventPoller::WRITE, this);
 					return IoEventPoller::NORMAL;
+				default:
+					;
 			}
 			break;
 		case IoEventPoller::WRITE:

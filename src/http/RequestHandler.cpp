@@ -62,15 +62,20 @@ RequestHandler::receiveRequest() try
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
+
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
+
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
+		//m_method->createResponseHeader();
 		createResponseHeader();
 		receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
+		//m_method->createResponseContent
 		m_method->completeResponse();
+
 	return receiveStatus;
 }
 catch (HttpErrorHandler& e)
@@ -79,6 +84,12 @@ catch (HttpErrorHandler& e)
 	bufferResponseHeaderFields();
 	// generateResponse(404);
 	return (0);
+}
+
+int
+RequestHandler::sendResponse()
+{
+	return m_sendBuffer.send(m_socket->m_fd);
 }
 
 void
@@ -233,12 +244,7 @@ RequestHandler::bufferResponseHeaderFields()
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);
-}
-
-void
-RequestHandler::sendResponse()
-{
-	m_sendBuffer.send(m_socket->m_fd);
+	m_sendBuffer.append(g_CRLF);
 }
 
 std::ostream&
