@@ -35,7 +35,6 @@ Client::handleEventWork()
 		case IoEventPoller::READ:
 			LOG(DEBUG, "read event to client");
 			recvStatus = m_requestHandler.receiveRequest();
-			LOG(DEBUG, "read event status = %d", recvStatus);
 			switch (recvStatus)
 			{
 				case RequestHandler::RECV_END:

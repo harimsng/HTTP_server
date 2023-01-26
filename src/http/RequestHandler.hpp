@@ -55,7 +55,7 @@ public:
 
 // member functions
 	int		receiveRequest();
-	int		sendResponse();
+	void	sendResponse();
 
 	int		resolveResourceLocation(const std::string& host);
 
