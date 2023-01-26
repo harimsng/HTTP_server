@@ -1,8 +1,8 @@
 #include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "http/RequestHandler.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
+#include "parser/HttpRequestParser.hpp"
 
 using namespace std;
 

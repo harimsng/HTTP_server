@@ -10,13 +10,11 @@
 #include "http/PutMethod.hpp"
 #include "http/PostMethod.hpp"
 #include "http/DeleteMethod.hpp"
-#include "http/RequestHandler.hpp"
 #include "http/FindLocation.hpp"
 #include "parser/HttpRequestParser.hpp"
+#include "http/RequestHandler.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
-
-#define REQUEST_EOF (0)
 
 using namespace	std;
 
@@ -64,8 +62,6 @@ RequestHandler::receiveRequest() try
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
-	// TODO
-	// change to switch statement
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -73,16 +69,16 @@ RequestHandler::receiveRequest() try
 		createResponseHeader();
 		receiveStatus = RECV_EVENT;
 	}
-	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 		m_method->completeResponse();
 	return receiveStatus;
 }
-catch(HttpErrorHandler& e)
+catch (HttpErrorHandler& e)
 {
 	bufferResponseStatusLine(400);
 	bufferResponseHeaderFields();
 	// generateResponse(404);
-	return (RECV_EVENT);
+	return (0);
 }
 
 void
@@ -214,7 +210,7 @@ RequestHandler::createResponseHeader()
 		default: ;
 			// throw HttpErrorHandler(???);
 	}
-	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void

@@ -57,7 +57,7 @@ Buffer::receive(int fd)
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (count < -1)
+	if (count == -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
 
 	resize(residue + count, 0);
@@ -93,7 +93,7 @@ Buffer::receive()
 	resize(BUFFER_SIZE, 0);
 	count = ::read(m_fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (count < -1)
+	if (count == -1)
 		throw std::runtime_error("read() fail in Buffer::receive()");
 
 	resize(residue + count, 0);
