@@ -3,6 +3,10 @@
 
 #include "Buffer.hpp"
 
+#include <iostream>
+
+using namespace std;
+
 #define BUFFER_SIZE (8192)
 
 // constructors & destructor
@@ -10,6 +14,7 @@ Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0)
 {
 	resize(0);
+	m_writePos = 0;
 }
 
 Buffer::~Buffer()
@@ -61,7 +66,7 @@ std::string::size_type
 Buffer::receive(int fd)
 {
 	const int		residue = size();
-	long long int	count = 0;
+	long int	count = 0;
 
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
@@ -95,13 +100,13 @@ Buffer::write(int fd)
 std::string::size_type
 Buffer::send(int fd)
 {
-	long long int	count = 0;
+	long int	count = 0;
 
 	if (size() == 0)
 		return 0;
 	count = ::write(fd, data() + m_writePos, size() - m_writePos);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		throw std::runtime_error("write() fail in Buffer::send()");
 
 	m_writePos += count;
 	if (m_writePos == size())
@@ -115,7 +120,7 @@ Buffer::send(int fd)
 std::string::size_type
 Buffer::send()
 {
-	return send(m_fd);
+	return this->send(m_fd);
 }
 
 void

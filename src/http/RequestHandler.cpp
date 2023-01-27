@@ -58,6 +58,8 @@ RequestHandler::receiveRequest() try
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
+	// cout << m_recvBuffer << endl;
+	// cout << m_parser.m_readStatus << endl;
 	if (count == 0)
 		return RECV_END;
 	else if (count == -1)
@@ -73,17 +75,21 @@ RequestHandler::receiveRequest() try
 		receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
+	{
 		//m_method->createResponseContent
 		m_method->completeResponse();
+		m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE;
+	}
 
 	return receiveStatus;
 }
 catch (HttpErrorHandler& e)
 {
-	m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Location: http://localhost:8080/error.html");
-	m_sendBuffer.append(g_CRLF);
+	// LOG(ERROR, "%s", e.getErrorMessage().c_str());
+	// m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
+	// m_sendBuffer.append(g_CRLF);
+	// m_sendBuffer.append("Location: http://localhost:8080/error.html");
+	// m_sendBuffer.append(g_CRLF);
 	// m_sendBuffer.append(gtCRLF);
 	// bufferResponseStatusLine(400);
 	// bufferResponseHeaderFields();
@@ -93,6 +99,8 @@ catch (HttpErrorHandler& e)
 void
 RequestHandler::sendResponse()
 {
+	// cout << endl;
+	// cout << "send buffer : " << m_sendBuffer << endl;
 	m_sendBuffer.send(m_socket->m_fd);
 }
 
@@ -106,8 +114,8 @@ RequestHandler::checkRequestMessage()
 	// 4.1 ckeck host field
 	// 5. check reqeust body size
 
-	if (m_request.m_uri == "/")
-		throw HttpErrorHandler(400);
+	// if (m_request.m_uri == "/")
+	//     throw HttpErrorHandler(400);
 	checkStatusLine(); // 1, 2, 3
 	checkHeaderFields(); // 4
 }
@@ -239,7 +247,7 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
-	// m_sendBuffer.append(status code message);
+	m_sendBuffer.append("OK");
 	m_sendBuffer.append(g_CRLF);
 }
 
@@ -250,6 +258,8 @@ RequestHandler::bufferResponseHeaderFields()
 
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Connection: keep-alive");
 	m_sendBuffer.append(g_CRLF);
 }
 

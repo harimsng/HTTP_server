@@ -67,7 +67,7 @@ GetMethod::completeResponse()
 	int			fd = open(filePath.data(), O_RDONLY);
 	string::size_type	readSize;
 
-	m_sendBuffer.append(" 
+	// m_sendBuffer.append("
 	do
 	{
 		readSize = buffer.read(fd);

@@ -33,7 +33,7 @@ Client::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::READ:
-			LOG(DEBUG, "read event to client");
+			LOG(INFO, "read event to client");
 			recvStatus = m_requestHandler.receiveRequest();
 			switch (recvStatus)
 			{

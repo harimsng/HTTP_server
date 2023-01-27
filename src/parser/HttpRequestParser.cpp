@@ -98,7 +98,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 		throw HttpErrorHandler(400);
 	request.m_uri = statusLine.substr(0, spacePos);
 	request.m_protocol = statusLine.substr(spacePos + 1);
-	LOG(DEBUG, "uri = %s, protocol = %s", request.m_uri.data(), request.m_protocol.data());
+	LOG(ERROR, "uri = %s, protocol = %s", request.m_uri.data(), request.m_protocol.data());
 	m_readStatus = HEADER_FIELDS;
 }
 
