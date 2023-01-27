@@ -1,6 +1,0 @@
-[DEBUG]   2023-01-26 23:53:46 parser/ServerParser.cpp:133: addr/port : 0.0.0.0:8083
-[DEBUG]   2023-01-26 23:53:46 parser/ServerParser.cpp:133: addr/port : 0.0.0.0:8080
-[INFO]    2023-01-26 23:53:46 finished parsing configuration file
-[DEBUG]   2023-01-26 23:53:46 event/Server.cpp:44: listen server trying to bind and listen on: 0.0.0.0:8080
-[DEBUG]   2023-01-26 23:53:46 event/Server.cpp:44: listen server trying to bind and listen on: 0.0.0.0:8083
-[INFO]    2023-01-26 23:53:46 2 listen servers are initiated

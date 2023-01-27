@@ -4,9 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+
 #include "Location.hpp"
 #include "VirtualServer.hpp"
 
