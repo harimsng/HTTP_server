@@ -73,13 +73,17 @@ RequestHandler::receiveRequest() try
 		receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
+	{
 		//m_method->createResponseContent
 		m_method->completeResponse();
+		m_parser.m_readStatus = HttpRequestParser::HEADER_FIELDS;
+	}
 
 	return receiveStatus;
 }
 catch (HttpErrorHandler& e)
 {
+	LOG(ERROR, "%s", e.getErrorMessage().data());
 	m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Location: http://localhost:8080/error.html");
@@ -106,8 +110,8 @@ RequestHandler::checkRequestMessage()
 	// 4.1 ckeck host field
 	// 5. check reqeust body size
 
-	if (m_request.m_uri == "/")
-		throw HttpErrorHandler(400);
+//	if (m_request.m_uri == "/")
+//		throw HttpErrorHandler(400);
 	checkStatusLine(); // 1, 2, 3
 	checkHeaderFields(); // 4
 }

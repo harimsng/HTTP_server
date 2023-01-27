@@ -34,6 +34,7 @@ DeleteMethod::checkMethodLimit(const vector<string>& limitExcept) const
 void
 DeleteMethod::completeResponse()
 {
+	/*
 	int deleteStatus;
 	vector<string> limitExcept;
 	istringstream ss(m_request.m_locationBlock.m_limitExcept);
@@ -63,5 +64,6 @@ DeleteMethod::completeResponse()
 	deleteStatus = unlink(filePath.c_str());
 	if (deleteStatus == -1)
 		m_statusCode = 202;
+	*/
 }
 

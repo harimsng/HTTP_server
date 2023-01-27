@@ -24,7 +24,7 @@ class	Client: public EventObject
 public:
 // constructors & destructor
 	Client(int fd);
-	~Client();
+	virtual ~Client();
 	Client(Client const& client);
 
 // member functions

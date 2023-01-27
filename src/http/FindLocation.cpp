@@ -1,5 +1,9 @@
-#include "FindLocation.hpp"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <cstddef>
+
+#include "FindLocation.hpp"
 
 using namespace	std;
 
