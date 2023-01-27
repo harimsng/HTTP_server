@@ -80,10 +80,14 @@ RequestHandler::receiveRequest() try
 }
 catch (HttpErrorHandler& e)
 {
-	bufferResponseStatusLine(400);
-	bufferResponseHeaderFields();
-	// generateResponse(404);
-	return (0);
+	m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Location: http://localhost:8080/error.html");
+	m_sendBuffer.append(g_CRLF);
+	// m_sendBuffer.append(gtCRLF);
+	// bufferResponseStatusLine(400);
+	// bufferResponseHeaderFields();
+	return (RECV_EVENT);
 }
 
 void
@@ -102,6 +106,8 @@ RequestHandler::checkRequestMessage()
 	// 4.1 ckeck host field
 	// 5. check reqeust body size
 
+	if (m_request.m_uri == "/")
+		throw HttpErrorHandler(400);
 	checkStatusLine(); // 1, 2, 3
 	checkHeaderFields(); // 4
 }
@@ -158,7 +164,7 @@ RequestHandler::checkResourceStatus(const char* path)
 {
 	int			ret;
 	struct stat	status;
-	int			statusCode;
+	int			statusCode = 0;
 
 	ret = stat(path, &status);
 	if (ret == 0
@@ -168,7 +174,8 @@ RequestHandler::checkResourceStatus(const char* path)
 					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
 //					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
 					))
-		statusCode = 200;
+		return (200);
+		// statusCode = 200;
 
 	switch (errno)
 	{

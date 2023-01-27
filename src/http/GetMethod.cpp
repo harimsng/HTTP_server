@@ -7,7 +7,8 @@
 using namespace std;
 
 // constructors & destructor
-GetMethod::GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer): AMethod(request, sendBuffer, recvBuffer)
+GetMethod::GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
+: AMethod(request, sendBuffer, recvBuffer)
 {
 }
 

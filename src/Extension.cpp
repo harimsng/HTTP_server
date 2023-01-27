@@ -1,6 +1,9 @@
 #include "Extension.hpp"
+#include <utility>
 
-std::vector<std::pair<std::string, std::string> >extensionType = {
+using namespace std;
+
+std::vector<std::pair<std::string, std::string> > extensionType = {
 	std::pair<std::string, std::string>("html", "text/html"),
 	std::pair<std::string, std::string>("htm","text/html"),
 	std::pair<std::string, std::string>("shtml","text/html"),
@@ -32,7 +35,7 @@ std::vector<std::pair<std::string, std::string> >extensionType = {
 	std::pair<std::string, std::string>("exe", "application/zip"),
 	std::pair<std::string, std::string>("mp3", "audio/mpeg"),
 	std::pair<std::string, std::string>("ogg", "audio/ogg"),
-	std::pair<std::string, std::string>("m4a", "audio/x-m4a"),
+	std::pair<std::string, std::string>("m4a", "audio/x-m4a")
 };
 
 std::string findContentType(std::string content)
