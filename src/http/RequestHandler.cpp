@@ -84,7 +84,7 @@ catch(HttpErrorHandler& e)
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Location: http://localhost:8080/error.html");
 	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append(g_CRLF);
+	// m_sendBuffer.append(gtCRLF);
 	// bufferResponseStatusLine(400);
 	// bufferResponseHeaderFields();
 	return (RECV_EVENT);
