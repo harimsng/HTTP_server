@@ -1,12 +1,12 @@
-#include "GetMethod.hpp"
-#include "http/AMethod.hpp"
-#include "tokenizer/HttpStreamTokenizer.hpp"
-
-// constructors & destructor
+#include <fcntl.h>
 #include <iostream>
+
+#include "tokenizer/HttpStreamTokenizer.hpp"
+#include "GetMethod.hpp"
 
 using namespace std;
 
+// constructors & destructor
 GetMethod::GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
 : AMethod(request, sendBuffer, recvBuffer)
 {
@@ -24,6 +24,7 @@ GetMethod::operator=(const GetMethod& getMethod)
 	return *this;
 }
 
+#ifndef FAST_MODE
 void
 GetMethod::completeResponse()
 {
@@ -56,3 +57,49 @@ GetMethod::completeResponse()
 	//	-> open()
 	// reqeust의path
 }
+#else
+void
+GetMethod::completeResponse()
+{
+	string filePath = m_request.m_path + m_request.m_file;
+	const int	bufferSize = 4096;
+	Buffer		buffer;
+	int			fd = open(filePath.data(), O_RDONLY);
+	string::size_type	readSize;
+
+	m_sendBuffer.append(" 
+	do
+	{
+		readSize = buffer.read(fd);
+		buffer.write(fd);
+	}
+	while (readSize == bufferSize);
+	close(fd);
+
+	/*
+	file.open(filePath);
+	while (!file.eof())
+	{
+		getline(file, readLine);
+		if (readLine == "")
+			continue;
+		readBody += readLine + "\n";
+	}
+	readBody.pop_back();
+	file.close();
+	*/
+	m_sendBuffer.append("Content-Length: ");
+	m_sendBuffer.append(Util::toString(readBody.size()));
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append(readBody);
+	// 1. m_path == "" , m_file == ""
+	// 	-> 404
+	// 2. m_path != "", m_file == ""
+	// 	-> autoIndex on -> dir listing
+	// 	-> autoIndex off -> 405
+	// 3. m_path != "", m_file != ""
+	//	-> open()
+	// reqeust의path
+}
+#endif

@@ -60,16 +60,16 @@ public:
 	int		resolveResourceLocation(const std::string& host);
 
 private:
-	int		checkResourceStatus(const char* path);
-
 	void	createResponseHeader();
 	void	bufferResponseStatusLine(int statusCode);
 	void	bufferResponseHeaderFields();
 
-	void	makeErrorResponse(const std::string& errorMessage);
+	int		checkResourceStatus(const char* path);
 	void	checkRequestMessage();
 	void	checkStatusLine();
 	void	checkHeaderFields();
+
+	void	makeErrorResponse(const std::string& errorMessage);
 
 // member variables
 	const Socket<Tcp>*	m_socket;

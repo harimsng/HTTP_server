@@ -39,7 +39,8 @@ public:
 		REQUEST_LINE,
 		HEADER_FIELDS,
 		HEADER_FIELDS_END,
-		BODY_FIELDS
+		CONTENT,
+		FINISHED,
 	};
 
 // constructors & destructor

@@ -2,7 +2,6 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
-#include "tokenizer/HttpStreamTokenizer.hpp"
 
 using namespace std;
 
@@ -22,7 +21,7 @@ HttpRequestParser::operator=(const HttpRequestParser& parser)
 
 // constructors & destructor
 HttpRequestParser::HttpRequestParser(std::string& buffer)
-:	m_readStatus(REQUEST_LINE)
+:	m_readStatus(REQUEST_LINE_METHOD)
 {
 	m_tokenizer.init(buffer);
 }
@@ -44,9 +43,8 @@ HttpRequestParser::parse(Request& request)
 		switch (m_readStatus)
 		{
 			case REQUEST_LINE_METHOD:
-				parseMethod(request);
-				break;
 			case REQUEST_LINE:
+				parseMethod(request);
 				parseStatusLine(request);
 				break;
 			case HEADER_FIELDS:
@@ -94,25 +92,13 @@ HttpRequestParser::parseStatusLine(Request &request)
 	const string	statusLine = m_tokenizer.getline();
 	string			method;
 	size_t			spacePos;
-	size_t			spacePos2;
 
 	spacePos = statusLine.find(" ");
-	spacePos2 = statusLine.rfind(" ");
-	method = statusLine.substr(0, spacePos);
-	if (method == "GET")
-		request.m_method = RequestHandler::GET;
-	else if (method == "HEAD")
-		request.m_method = RequestHandler::HEAD;
-	else if (method == "POST")
-		request.m_method = RequestHandler::POST;
-	else if (method == "PUT")
-		request.m_method = RequestHandler::PUT;
-	else if (method == "DELETE")
-		request.m_method = RequestHandler::DELETE;
-	else
-		request.m_method = RequestHandler::ERROR;
-	request.m_uri = statusLine.substr(spacePos + 1, spacePos2 - spacePos - 1);
-	request.m_protocol = statusLine.substr(spacePos2 + 1);
+	if (spacePos == string::npos)
+		throw HttpErrorHandler(400);
+	request.m_uri = statusLine.substr(0, spacePos);
+	request.m_protocol = statusLine.substr(spacePos + 1);
+	LOG(DEBUG, "uri = %s, protocol = %s", request.m_uri.data(), request.m_protocol.data());
 	m_readStatus = HEADER_FIELDS;
 }
 

@@ -1,3 +1,5 @@
+echo "ClassNames Are UpperCamelCase"
+echo "it requires either awk or gsed(gnu sed)"
 cat $1 2> /dev/null 1> /dev/null
 if [ $? != "0" ]
 then
@@ -9,6 +11,12 @@ FILENAME=$1
 CLASSES=$(cat $FILENAME)
 SRC_LIST=""
 
+AWK=0
+which awk > /dev/null
+if [ $? == "0" ]
+then
+AWK=1
+fi
 which gsed > /dev/null
 if [ $? != "0" ]
 then
@@ -23,8 +31,14 @@ do
 				$CLASS.cpp$SRC_LIST"
 	touch $CLASS.hpp
 	touch $CLASS.cpp
+if [ $AWK != "1" ]
+then
 	HEADER_GUARD="$(echo $CLASS | $SED 's/[A-Z]/&/g' | $SED 's/[a-z]/\U&/g' | $SED 's/$/_HPP/')"
 	LOWCAMELCASE_CLASS=$(echo $CLASS | $SED 's/[A-Z]/\L&/')
+else
+	HEADER_GUARD="$(echo $CLASS | awk '{print toupper($0)}' | $SED 's/$/_HPP/')"
+	LOWCAMELCASE_CLASS=$(echo $CLASS | awk '{print tolower($0)}')
+fi
 
 ##### file contents
 HEADER_CONTENT="#ifndef $HEADER_GUARD

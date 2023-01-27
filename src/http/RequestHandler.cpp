@@ -10,14 +10,11 @@
 #include "http/PutMethod.hpp"
 #include "http/PostMethod.hpp"
 #include "http/DeleteMethod.hpp"
-#include "http/RequestHandler.hpp"
 #include "http/FindLocation.hpp"
 #include "parser/HttpRequestParser.hpp"
-#include "tokenizer/HttpStreamTokenizer.hpp"
+#include "http/RequestHandler.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
-
-#define REQUEST_EOF (0)
 
 using namespace	std;
 
@@ -65,20 +62,23 @@ RequestHandler::receiveRequest() try
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
-	// TODO
-	// change to switch statement
+
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
+
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
+		//m_method->createResponseHeader();
 		createResponseHeader();
 		receiveStatus = RECV_EVENT;
 	}
-	if (m_parser.m_readStatus == HttpRequestParser::BODY_FIELDS)
+	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
+		//m_method->createResponseContent
 		m_method->completeResponse();
+
 	return receiveStatus;
 }
-catch(HttpErrorHandler& e)
+catch (HttpErrorHandler& e)
 {
 	m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
 	m_sendBuffer.append(g_CRLF);
@@ -88,6 +88,12 @@ catch(HttpErrorHandler& e)
 	// bufferResponseStatusLine(400);
 	// bufferResponseHeaderFields();
 	return (RECV_EVENT);
+}
+
+void
+RequestHandler::sendResponse()
+{
+	m_sendBuffer.send(m_socket->m_fd);
 }
 
 void
@@ -222,7 +228,7 @@ RequestHandler::createResponseHeader()
 		default: ;
 			// throw HttpErrorHandler(???);
 	}
-	m_parser.m_readStatus = HttpRequestParser::BODY_FIELDS;
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -245,12 +251,6 @@ RequestHandler::bufferResponseHeaderFields()
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);
-}
-
-void
-RequestHandler::sendResponse()
-{
-	m_sendBuffer.send(m_socket->m_fd);
 }
 
 std::ostream&
