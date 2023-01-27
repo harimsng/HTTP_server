@@ -1,14 +1,15 @@
 #include <fcntl.h>
 #include <iostream>
 
+#include "ServerManager.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "GetMethod.hpp"
 
 using namespace std;
 
 // constructors & destructor
-GetMethod::GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
-: AMethod(request, sendBuffer, recvBuffer)
+GetMethod::GetMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 
@@ -56,6 +57,9 @@ GetMethod::completeResponse()
 	// 3. m_path != "", m_file != ""
 	//	-> open()
 	// reqeust의path
+
+	// method must know end of response(content length, chunked)
+	endResponse();
 }
 #else
 void

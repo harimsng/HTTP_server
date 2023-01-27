@@ -1,8 +1,9 @@
-#include "PostMethod.hpp"
 #include "http/AMethod.hpp"
+#include "PostMethod.hpp"
 
 // constructors & destructor
-PostMethod::PostMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer) : AMethod(request, sendBuffer, recvBuffer)
+PostMethod::PostMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 PostMethod::~PostMethod()

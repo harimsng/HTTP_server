@@ -5,29 +5,29 @@
 
 #define BUFFER_SIZE (8192)
 
-// constructors & destructor
-Buffer::Buffer()
-:	std::string(BUFFER_SIZE, 0)
-{
-	resize(0);
-}
-
-Buffer::~Buffer()
-{
-}
-
+// deleted
 Buffer::Buffer(const Buffer& buffer)
 {
 	if (this != &buffer)
 		*this = buffer;
 }
 
-// operators
 Buffer&
 Buffer::operator=(const Buffer& buffer)
 {
 	(void)buffer;
 	return *this;
+}
+// constructors & destructor
+Buffer::Buffer()
+:	std::string(BUFFER_SIZE, 0),
+	m_writePos(0)
+{
+	resize(0);
+}
+
+Buffer::~Buffer()
+{
 }
 
 char
@@ -101,7 +101,7 @@ Buffer::send(int fd)
 		return 0;
 	count = ::write(fd, data() + m_writePos, size() - m_writePos);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		throw std::runtime_error("write() fail in Buffer::send()");
 
 	m_writePos += count;
 	if (m_writePos == size())

@@ -7,7 +7,7 @@ class	DeleteMethod : public AMethod
 {
 public:
 // constructors & destructor
-	DeleteMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	DeleteMethod(RequestHandler& requestHandler);
 	~DeleteMethod();
 
 // operators

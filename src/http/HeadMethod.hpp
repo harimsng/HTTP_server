@@ -2,11 +2,12 @@
 #define HEADMETHOD_HPP
 
 #include "http/AMethod.hpp"
+
 class	HeadMethod : public AMethod
 {
 public:
 // constructors & destructor
-	HeadMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	HeadMethod(RequestHandler& requestHandler);
 	~HeadMethod();
 
 // operators

@@ -1,8 +1,9 @@
-#include "PutMethod.hpp"
 #include "http/AMethod.hpp"
+#include "PutMethod.hpp"
 
 // constructors & destructor
-PutMethod::PutMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer) : AMethod(request, sendBuffer, recvBuffer)
+PutMethod::PutMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 
