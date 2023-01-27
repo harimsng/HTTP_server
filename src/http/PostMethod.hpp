@@ -2,11 +2,12 @@
 #define POSTMETHOD_HPP
 
 #include "http/AMethod.hpp"
+
 class	PostMethod : public AMethod
 {
 public:
 // constructors & destructor
-	PostMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	PostMethod(RequestHandler& requestHandler);
 	~PostMethod();
 
 // operators

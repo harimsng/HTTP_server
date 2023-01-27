@@ -1,18 +1,13 @@
 #ifndef AMETHOD_HPP
 #define AMETHOD_HPP
 
-#include <fstream>
-
-#include "parser/HttpRequestParser.hpp"
-#include "io/Buffer.hpp"
-#include "util/Util.hpp"
 #include <sys/stat.h>
 #include <sstream>
+#include <fstream>
 
-class	SendBuffer;
-class	ReceiveBuffer;
-
-struct	Request;
+#include "io/Buffer.hpp"
+#include "util/Util.hpp"
+#include "http/RequestHandler.hpp"
 
 class	AMethod
 {
@@ -22,7 +17,7 @@ private:
 
 public:
 // constructors & destructor
-	AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	AMethod(RequestHandler& requestHandler);
 	~AMethod();
 
 // operators
@@ -30,14 +25,17 @@ public:
 
 // member functions
 	virtual void	completeResponse() = 0;
+	void			endResponse();
+
 	void			readFile(std::string& readBody);
 	bool			checkFileExists(const std::string& filePath);
 	bool			checkDirExists(const std::string& filePath);
 
 protected:
-	Request&		m_request;
-	SendBuffer&		m_sendBuffer;
-	ReceiveBuffer&	m_recvBuffer;
+	RequestHandler&		m_requestHandler;
+	Request&			m_request;
+	SendBuffer&			m_sendBuffer;
+	ReceiveBuffer&		m_recvBuffer;
 };
 
 #endif

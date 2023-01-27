@@ -4,7 +4,7 @@
 #include "ServerManager.hpp"
 #include "Logger.hpp"
 
-#define	MAX_BUFFER_LEN (128)
+#define	MAX_BUFFER_LEN (1024)
 
 using namespace std;
 
@@ -70,6 +70,7 @@ Logger::log(e_types type, const char* format, ...)
 
 	if (s_type == DISABLED || s_type < type)
 		return;
+
 	va_start(ap, format);
 	vsnprintf(buffer, MAX_BUFFER_LEN - 1, format, ap);
 	prefix = s_prefixTable[type];

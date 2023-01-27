@@ -51,20 +51,24 @@ RequestHandler::~RequestHandler()
 int
 RequestHandler::receiveRequest() try
 {
-	int			count;
-	int			receiveStatus = RECV_NORMAL;
+	int		count;
+	int		receiveStatus = RECV_NORMAL;
 
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
+	LOG(DEBUG, "m_recvBuffer = \n%s", &m_recvBuffer[0]);
+	LOG(DEBUG, "m_parser.m_readStatus = %d", m_parser.m_readStatus);
 	if (count == 0)
 		return RECV_END;
 	else if (count == -1)
 		throw HttpErrorHandler(500);
 
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
+	{
 		m_parser.parse(m_request);
+	}
 
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
@@ -75,10 +79,10 @@ RequestHandler::receiveRequest() try
 	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 	{
 		//m_method->createResponseContent
-		m_method->completeResponse();
-		m_parser.m_readStatus = HttpRequestParser::HEADER_FIELDS;
-	}
 
+		// this method will be called multiple times. this block is temporary.
+		m_method->completeResponse();
+	}
 	return receiveStatus;
 }
 catch (HttpErrorHandler& e)
@@ -94,10 +98,26 @@ catch (HttpErrorHandler& e)
 	return (RECV_EVENT);
 }
 
-void
-RequestHandler::sendResponse()
+int
+RequestHandler::sendResponse() try
 {
-	m_sendBuffer.send(m_socket->m_fd);
+	int		count = m_sendBuffer.send(m_socket->m_fd);
+	
+	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+		return SEND_DONE;
+	return SEND_NORMAL;
+}
+catch (runtime_error& e)
+{
+	LOG(ERROR, "%s", e.what());
+	return SEND_ERROR;
+}
+
+void
+RequestHandler::resetStates()
+{
+	m_request.m_headerFieldsMap.clear();
+	m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE_METHOD;
 }
 
 void
@@ -159,6 +179,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	FindLocation findLocation;
 
 	resourceLocation = findLocation.saveRealPath(m_request, locationTable, server);
+	LOG(DEBUG, "resource location = \"%s\"", resourceLocation.c_str());
 
 	return checkResourceStatus(resourceLocation.data());
 }
@@ -171,6 +192,7 @@ RequestHandler::checkResourceStatus(const char* path)
 	int			statusCode = 0;
 
 	ret = stat(path, &status);
+	LOG(DEBUG, "resource path = %s", path);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
@@ -197,6 +219,7 @@ RequestHandler::checkResourceStatus(const char* path)
 			statusCode = 500;
 			break;
 	}
+	LOG(DEBUG, "couldn't find requested resource. status Code = %d", statusCode);
 	return statusCode;
 }
 
@@ -212,22 +235,24 @@ RequestHandler::createResponseHeader()
 	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
 	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
+	if (statusCode >= 400)
+		throw HttpErrorHandler(statusCode);
 	switch (m_request.m_method)
 	{
 		case GET:
-			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new GetMethod(*this);
 			break;
 		case HEAD:
-			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+//			m_method = new HeadMethod(*this);
 			break;
 		case POST:
-			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+//			m_method = new PostMethod(*this);
 			break;
 		case PUT:
-			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+//			m_method = new PutMethod(*this);
 			break;
 		case DELETE:
-			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+//			m_method = new DeleteMethod(*this);
 			break;
 		default: ;
 			// throw HttpErrorHandler(???);
@@ -250,8 +275,6 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	// m_recvBuffer.receive(m_socket->m_fd);
-
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);

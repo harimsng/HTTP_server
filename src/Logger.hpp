@@ -70,7 +70,7 @@ Logger::log(e_types type, const T& object)
 
 	if (s_type == DISABLED || s_type < type)
 		return;
-	prefix = s_prefixTable[type + 1];
+	prefix = s_prefixTable[type];
 	if (type == ERROR)
 	{
 		suffix = " (" + Util::toString(errno) + " "

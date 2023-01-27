@@ -28,28 +28,43 @@ Client::Client(Client const& client)
 Client::IoEventPoller::EventStatus
 Client::handleEventWork()
 {
-	int recvStatus;
+	int status;
 
 	switch (m_filter)
 	{
 		case IoEventPoller::READ:
-			LOG(DEBUG, "read event to client");
-			recvStatus = m_requestHandler.receiveRequest();
-			switch (recvStatus)
+			LOG(DEBUG, "read event to client(fd=%d)", m_socket.m_fd);
+			status = m_requestHandler.receiveRequest();
+			switch (status)
 			{
 				case RequestHandler::RECV_END:
 					return IoEventPoller::END;
+
 				case RequestHandler::RECV_EVENT:
+					LOG(DEBUG, "registering write event for fd=%d", m_socket.m_fd);
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::ADD,
 							IoEventPoller::WRITE, this);
-					return IoEventPoller::NORMAL;
+					break;
+
 				default:
 					;
 			}
 			break;
+
 		case IoEventPoller::WRITE:
-			LOG(DEBUG, "write event to client");
-			m_requestHandler.sendResponse();
+			LOG(DEBUG, "write event to client(fd=%d)", m_socket.m_fd);
+			status = m_requestHandler.sendResponse();
+			switch (status)
+			{
+				case RequestHandler::SEND_DONE:
+					LOG(DEBUG, "deleting write event for fd=%d", m_socket.m_fd);
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::DELETE,
+							IoEventPoller::WRITE, this);
+					break;
+
+				default:
+					;
+			}
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Client::handleEvent()");

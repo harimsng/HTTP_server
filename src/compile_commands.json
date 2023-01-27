@@ -12,26 +12,6 @@
       "-I",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
       "-o",
-      "io/Kqueue.o",
-      "io/Kqueue.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/io/Kqueue.cpp",
-    "output": "/Users/hseong/new_webserv/src/io/Kqueue.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
       "main.o",
       "main.cpp"
     ],
@@ -172,26 +152,6 @@
       "-I",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
       "-o",
-      "event/Cgi.o",
-      "event/Cgi.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/event/Cgi.cpp",
-    "output": "/Users/hseong/new_webserv/src/event/Cgi.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
       "parser/ConfigParser.o",
       "parser/ConfigParser.cpp"
     ],
@@ -272,26 +232,6 @@
       "-I",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
       "-o",
-      "tokenizer/HttpStreamTokenizer.o",
-      "tokenizer/HttpStreamTokenizer.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/tokenizer/HttpStreamTokenizer.cpp",
-    "output": "/Users/hseong/new_webserv/src/tokenizer/HttpStreamTokenizer.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
       "tokenizer/FileTokenizer.o",
       "tokenizer/FileTokenizer.cpp"
     ],
@@ -318,26 +258,6 @@
     "directory": "/Users/hseong/new_webserv/src",
     "file": "/Users/hseong/new_webserv/src/exception/ConfigParserException.cpp",
     "output": "/Users/hseong/new_webserv/src/exception/ConfigParserException.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
-      "exception/HttpErrorHandler.o",
-      "exception/HttpErrorHandler.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/exception/HttpErrorHandler.cpp",
-    "output": "/Users/hseong/new_webserv/src/exception/HttpErrorHandler.o"
   },
   {
     "arguments": [
@@ -478,65 +398,5 @@
     "directory": "/Users/hseong/new_webserv/src",
     "file": "/Users/hseong/new_webserv/src/http/DeleteMethod.cpp",
     "output": "/Users/hseong/new_webserv/src/http/DeleteMethod.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
-      "http/FindLocation.o",
-      "http/FindLocation.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/http/FindLocation.cpp",
-    "output": "/Users/hseong/new_webserv/src/http/FindLocation.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
-      "io/Buffer.o",
-      "io/Buffer.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/io/Buffer.cpp",
-    "output": "/Users/hseong/new_webserv/src/io/Buffer.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-Wall",
-      "-Wextra",
-      "-Werror",
-      "-std=c++98",
-      "-c",
-      "-I./",
-      "-I../include",
-      "-I",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-      "-o",
-      "util/Util.o",
-      "util/Util.cpp"
-    ],
-    "directory": "/Users/hseong/new_webserv/src",
-    "file": "/Users/hseong/new_webserv/src/util/Util.cpp",
-    "output": "/Users/hseong/new_webserv/src/util/Util.o"
   }
 ]

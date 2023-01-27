@@ -1,9 +1,10 @@
-#include "HeadMethod.hpp"
 #include "http/AMethod.hpp"
+#include "HeadMethod.hpp"
 
 // constructors & destructor
 
-HeadMethod::HeadMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer) : AMethod(request, sendBuffer, recvBuffer)
+HeadMethod::HeadMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 
