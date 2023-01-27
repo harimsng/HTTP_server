@@ -15,6 +15,7 @@ public:
 
 	virtual void	completeResponse();
 // member functions
+	bool			checkMethodLimit(const std::vector<std::string>& limitExcept) const;
 };
 
 #endif

@@ -93,6 +93,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 	string			method;
 	size_t			spacePos;
 
+	LOG(DEBUG, "statusline = \"%s\"", statusLine.data());
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
 		throw HttpErrorHandler(400);
