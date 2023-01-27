@@ -6,6 +6,8 @@
 #include "parser/HttpRequestParser.hpp"
 #include "io/Buffer.hpp"
 #include "util/Util.hpp"
+#include <sys/stat.h>
+#include <sstream>
 
 class	SendBuffer;
 class	ReceiveBuffer;
@@ -28,6 +30,9 @@ public:
 
 // member functions
 	virtual void	completeResponse() = 0;
+	void			readFile(std::string& readBody);
+	bool			checkFileExists(const std::string& filePath);
+	bool			checkDirExists(const std::string& filePath);
 
 protected:
 	Request&		m_request;

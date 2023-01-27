@@ -26,6 +26,7 @@ private:
 	void	setToDefault();
 
 // member variables
+public:
 	std::string		m_index;
 
 	bool			m_autoindex;
