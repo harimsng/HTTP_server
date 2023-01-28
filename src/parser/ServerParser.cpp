@@ -1,6 +1,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "Logger.hpp"
+#include "util/Util.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "event/Server.hpp"
 #include "parser/ConfigParser.hpp"

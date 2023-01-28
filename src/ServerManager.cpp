@@ -56,7 +56,7 @@ ServerManager::initServers() try
 		prevPort = port;
 	}
 
-	Logger::log(Logger::INFO, "%zu listen servers are initiated", s_listenServerTable.size());
+	Logger::log(Logger::INFO, "%zu listen servers are initiated\n", s_listenServerTable.size());
 }
 catch (std::exception& e)
 {
@@ -78,7 +78,7 @@ ServerManager::run() try
 	{
 		s_ioEventPoller.poll();
 	}
-	Logger::log(Logger::INFO, "%zu listen servers exited", s_listenServerTable.size());
+	Logger::log(Logger::INFO, "%zu listen servers exited\n", s_listenServerTable.size());
 }
 // TODO: cleanup
 catch (std::runtime_error& e)

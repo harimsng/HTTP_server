@@ -87,4 +87,7 @@ private:
 	AMethod*			m_method;
 };
 
+std::ostream&
+operator<<(std::ostream& os, const Request& request);
+
 #endif

@@ -43,7 +43,7 @@ public:
 	std::string		m_alias;
 	std::string		m_limitExcept;
 	std::string		m_clientMaxBodySize;
-	std::string		m_errorPageTable[1024]; // index is status code
+//	std::string		m_errorPageTable[599]; // index is status code
 
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);

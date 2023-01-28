@@ -58,8 +58,6 @@ RequestHandler::receiveRequest() try
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	LOG(DEBUG, "m_recvBuffer = \n%s", &m_recvBuffer[0]);
-	LOG(DEBUG, "m_parser.m_readStatus = %d", m_parser.m_readStatus);
 	if (count == 0)
 		return RECV_END;
 	else if (count == -1)
@@ -69,7 +67,6 @@ RequestHandler::receiveRequest() try
 	{
 		m_parser.parse(m_request);
 	}
-
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
 		//m_method->createResponseHeader();
@@ -95,6 +92,7 @@ catch (HttpErrorHandler& e)
 	// m_sendBuffer.append(gtCRLF);
 	// bufferResponseStatusLine(400);
 	// bufferResponseHeaderFields();
+	resetStates();
 	return (RECV_EVENT);
 }
 
@@ -168,6 +166,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 	VirtualServer*	server;
+
 	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
 		addrKey &= 0xffff00000000;
 	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
@@ -179,7 +178,6 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	FindLocation findLocation;
 
 	resourceLocation = findLocation.saveRealPath(m_request, locationTable, server);
-	LOG(DEBUG, "resource location = \"%s\"", resourceLocation.c_str());
 
 	return checkResourceStatus(resourceLocation.data());
 }
@@ -192,7 +190,6 @@ RequestHandler::checkResourceStatus(const char* path)
 	int			statusCode = 0;
 
 	ret = stat(path, &status);
-	LOG(DEBUG, "resource path = %s", path);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
@@ -219,7 +216,7 @@ RequestHandler::checkResourceStatus(const char* path)
 			statusCode = 500;
 			break;
 	}
-	LOG(DEBUG, "couldn't find requested resource. status Code = %d", statusCode);
+	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
 	return statusCode;
 }
 
@@ -237,22 +234,23 @@ RequestHandler::createResponseHeader()
 	bufferResponseHeaderFields();
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
+	// TODO: check allowed method in VirtualServer
 	switch (m_request.m_method)
 	{
 		case GET:
 			m_method = new GetMethod(*this);
 			break;
 		case HEAD:
-//			m_method = new HeadMethod(*this);
+			m_method = new HeadMethod(*this);
 			break;
 		case POST:
-//			m_method = new PostMethod(*this);
+			m_method = new PostMethod(*this);
 			break;
 		case PUT:
-//			m_method = new PutMethod(*this);
+			m_method = new PutMethod(*this);
 			break;
 		case DELETE:
-//			m_method = new DeleteMethod(*this);
+			m_method = new DeleteMethod(*this);
 			break;
 		default: ;
 			// throw HttpErrorHandler(???);
