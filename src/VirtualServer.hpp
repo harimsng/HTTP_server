@@ -40,7 +40,7 @@ private:
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;
-	friend int				RequestHandler::resolveResourceLocation(const std::string& host);
+	friend void				RequestHandler::createResponseHeader();
 	friend std::ostream&	operator<<(std::ostream& os, const VirtualServer& server);
 };
 

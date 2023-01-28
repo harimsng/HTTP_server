@@ -16,6 +16,7 @@ typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 struct Request
 {
 	int					m_method;
+	int					m_status;
 	std::string			m_uri;
 	std::string			m_queryString;
 	std::string			m_protocol;

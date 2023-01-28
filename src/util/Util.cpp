@@ -4,6 +4,7 @@
 #include <cctype>
 
 #include "Logger.hpp"
+#include "socket/Socket.hpp"
 #include "Util.hpp"
 
 using namespace std;

@@ -70,26 +70,8 @@ HttpRequestParser::parseMethod(Request &request)
 		method += c;
 		c = m_tokenizer.getc();
 	}
-	method += ' ';
-	// TODO
-	// add all method
-	if (method == "GET ")
-		request.m_method = RequestHandler::GET;
-	else if (method == "HEAD ")
-		request.m_method = RequestHandler::HEAD;
-	else if (method == "POST ")
-		request.m_method = RequestHandler::POST;
-	else if (method == "PUT ")
-		request.m_method = RequestHandler::PUT;
-	else if (method == "DELETE ")
-		request.m_method = RequestHandler::DELETE;
-	// TODO
-	// else if (method == "TRACE ")
-		// request.m_method = RequestHandler::TRACE;
-	else
-		// TODO
-		// reqeust.m_status = ??;
-		request.m_method = RequestHandler::ERROR;
+	request.m_method = RequestHandler::s_methodConvertTable[method];
+	LOG(DEBUG, "request.m_method = %x", request.m_method);
 	m_readStatus = REQUEST_LINE;
 }
 

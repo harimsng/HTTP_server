@@ -1,11 +1,14 @@
+#include "Logger.hpp"
 #include "Location.hpp"
+#include "http/RequestHandler.hpp"
 #include "parser/LocationParser.hpp"
 
 using namespace std;
 
 map<string, LocationParser::t_setter>	LocationParser::s_locationSetterMap;
 
-void	LocationParser::setLocationSetterMap()
+void
+LocationParser::setLocationSetterMap()
 {
 	s_locationSetterMap["index"] = &LocationParser::setIndex;
 	s_locationSetterMap["expires"] = &LocationParser::setExpires;
@@ -63,7 +66,14 @@ LocationParser::setProxyPass(Location& location)
 void
 LocationParser::setLimitExcept(Location& location)
 {
-	location.m_limitExcept = m_tokenizer.get();
+	string	method;
+
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		method = m_tokenizer.get();
+		location.m_limitExcept |= RequestHandler::s_methodConvertTable[method];
+		LOG(DEBUG, "method = %s, m_limitExcept = %x", method.c_str(), location.m_limitExcept);
+	}
 	m_tokenizer.eat(";");
 }
 
