@@ -73,6 +73,7 @@ void
 ServerManager::run() try
 {
 	initServers();
+	RequestHandler::setMethodConvertTable();
 
 	while (1)
 	{

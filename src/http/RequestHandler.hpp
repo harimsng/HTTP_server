@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 
-#include "Location.hpp"
 #include "parser/HttpRequestParser.hpp"
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
@@ -13,6 +12,7 @@
 static const char*	g_httpVersion = "HTTP/1.1";
 
 class	AMethod;
+class	VirtualServer;
 
 /*
  * reference: RFC 9112 HTTP/1.1
@@ -30,15 +30,15 @@ class	RequestHandler
 public:
 	enum	e_method
 	{
-		GET = 1,
-		HEAD,
-		POST,
-		PUT,
-		DELETE,
-		ERROR
-//		CONNECT,
-//		OPTION,
-//		TRACE
+		METHOD_ERROR = 0x0,
+		GET = 0x1,
+		HEAD = 0x2,
+		POST = 0x4,
+		PUT = 0x8,
+		DELETE = 0x10,
+		CONNECT = 0x20,
+		OPTION = 0x40,
+		TRACE = 0x80
 	};
 
 	enum	e_receiveStatus
@@ -63,10 +63,11 @@ public:
 	int		sendResponse();
 	void	resetStates();
 
-	int		resolveResourceLocation(const std::string& host);
-
-private:
 	void	createResponseHeader();
+private:
+	VirtualServer*	resolveVirtualServer(const std::string& host);
+	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
+
 	void	bufferResponseStatusLine(int statusCode);
 	void	bufferResponseHeaderFields();
 
@@ -74,6 +75,7 @@ private:
 	void	checkRequestMessage();
 	void	checkStatusLine();
 	void	checkHeaderFields();
+	bool	checkAllowedMethod(uint16_t allowed);
 
 	void	makeErrorResponse(const std::string& errorMessage);
 
@@ -85,6 +87,11 @@ private:
 
 	Request				m_request;
 	AMethod*			m_method;
+
+public:
+// static members
+	static std::map<std::string, uint16_t>	s_methodConvertTable;
+	static void								setMethodConvertTable();
 };
 
 std::ostream&
