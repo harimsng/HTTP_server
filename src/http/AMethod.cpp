@@ -1,6 +1,5 @@
 #include "Webserv.hpp"
 #include "AMethod.hpp"
-#include "http/RequestHandler.hpp"
 
 // constructors & destructor
 AMethod::AMethod(RequestHandler& requestHandler)

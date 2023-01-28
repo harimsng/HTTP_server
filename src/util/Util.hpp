@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "socket/Socket.hpp"
+struct sockaddr_in;
 
 class Util
 {

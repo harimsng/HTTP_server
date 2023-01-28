@@ -41,7 +41,7 @@ public:
 	std::string		m_path;
 	std::string		m_root;
 	std::string		m_alias;
-	std::string		m_limitExcept;
+	uint16_t		m_limitExcept;
 	std::string		m_clientMaxBodySize;
 //	std::string		m_errorPageTable[599]; // index is status code
 

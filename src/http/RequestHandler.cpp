@@ -18,6 +18,8 @@
 
 using namespace	std;
 
+map<string, uint16_t>	RequestHandler::s_methodConvertTable;
+
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_socket(NULL),
@@ -137,7 +139,7 @@ RequestHandler::checkRequestMessage()
 void
 RequestHandler::checkStatusLine()
 {
-	if (m_request.m_method == ERROR) // check method
+	if (m_request.m_method == METHOD_ERROR) // check method
 	{}
 	// if (m_request.m_uri >= uri_size) // check uri length
 	if (m_request.m_protocol != "HTTP/1.1") // check http version
@@ -158,11 +160,17 @@ RequestHandler::checkHeaderFields()
 		throw HttpErrorHandler(400);
 }
 
-// TODO: should be called on method classes
-int
-RequestHandler::resolveResourceLocation(const std::string& host)
+bool
+RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
-	string			resourceLocation;
+	return m_request.m_method & allowed;
+}
+
+// TODO: should be called on method classes
+
+VirtualServer*
+RequestHandler::resolveVirtualServer(const string& host)
+{
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 	VirtualServer*	server;
@@ -173,13 +181,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 		server = ServerManager::s_virtualServerTable[addrKey]["."];
 	else
 		server = ServerManager::s_virtualServerTable[addrKey][host];
-	map<string, Location>&	locationTable = server->m_locationTable;
-
-	FindLocation findLocation;
-
-	resourceLocation = findLocation.saveRealPath(m_request, locationTable, server);
-
-	return checkResourceStatus(resourceLocation.data());
+	return server;
 }
 
 int
@@ -222,19 +224,22 @@ RequestHandler::checkResourceStatus(const char* path)
 
 // HOST field could be empty
 void
-RequestHandler::createResponseHeader()
+RequestHandler::createResponseHeader() try
 {
-	string		resourceLocation;
-	int			statusCode;
+	FindLocation	findLocation;
+	VirtualServer*	virtualServer;
+	string			resourceLocation;
+	int				statusCode = m_request.m_status;
 
 	checkRequestMessage();
-// TODO: which should be first between method creation and uri checking
-	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
-	bufferResponseStatusLine(statusCode);
-	bufferResponseHeaderFields();
+	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
+	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
+	checkAllowedMethod(m_request.m_locationBlock.m_limitExcept);
+	checkResourceStatus(resourceLocation.c_str());
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
-	// TODO: check allowed method in VirtualServer
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
 	switch (m_request.m_method)
 	{
 		case GET:
@@ -256,6 +261,9 @@ RequestHandler::createResponseHeader()
 			// throw HttpErrorHandler(???);
 	}
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
+}
+catch (HttpErrorHandler& e)
+{
 }
 
 void
@@ -298,4 +306,17 @@ operator<<(std::ostream& os, const Request& request)
 			os << *vecIt << " ";
 	}
 	return (os);
+}
+
+void
+RequestHandler::setMethodConvertTable()
+{
+	s_methodConvertTable["GET"] = RequestHandler::GET;
+	s_methodConvertTable["HEAD"] = RequestHandler::HEAD;
+	s_methodConvertTable["POST"] = RequestHandler::POST;
+	s_methodConvertTable["PUT"] = RequestHandler::PUT;
+	s_methodConvertTable["DELETE"] = RequestHandler::DELETE;
+	s_methodConvertTable["OPTION"] = RequestHandler::OPTION;
+	s_methodConvertTable["TRACE"] = RequestHandler::TRACE;
+	s_methodConvertTable["CONNECT"] = RequestHandler::CONNECT;
 }

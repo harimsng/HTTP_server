@@ -11,16 +11,14 @@ class	Location;
 
 class	LocationParser: public AParser<FileTokenizer, Location>
 {
+// deleted
 	LocationParser(LocationParser const& locationParser);
 	LocationParser	&operator=(LocationParser const& locationParser);
 
-public:
-// static members
+// types
 	typedef void	(LocationParser::*t_setter)(Location&);
 
-	static std::map<std::string, t_setter>	s_locationSetterMap;
-	static void								setLocationSetterMap();
-
+public:
 // constructors & destructor
 	LocationParser(FileTokenizer& tokenizer);
 	virtual ~LocationParser();
@@ -42,6 +40,11 @@ public:
 private:
 // member variables
 	FileTokenizer&		m_tokenizer;
+
+public:
+// static members
+	static std::map<std::string, t_setter>	s_locationSetterMap;
+	static void								setLocationSetterMap();
 };
 
 #endif
