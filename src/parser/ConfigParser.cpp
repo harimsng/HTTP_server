@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Webserv.hpp"
+#include "Logger.hpp"
 #include "tokenizer/FileTokenizer.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "util/Util.hpp"
@@ -107,7 +108,7 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 }
 catch (pair<string, VirtualServer*> e)
 {
-	LOG(Logger::WARNING, "duplicated server name \"%s\" same address", e.first.c_str());
+	LOG(WARNING, "duplicated server name \"%s\" same address", e.first.c_str());
 	throw e.second;
 }
 

@@ -1,11 +1,14 @@
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <cstddef>
 
+#include "Logger.hpp"
 #include "FindLocation.hpp"
 
 using namespace	std;
+
+std::ostream&
+operator<<(std::ostream& os, const Request& request);
 
 string
 FindLocation::removeTrailingSlash(string first, string second)
@@ -112,7 +115,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             setRootAlias(uri, server);
             this->m_file = this->m_path.substr(this->m_path.rfind("/") + 1);
             LOG(DEBUG, "1. %s", m_path.data());
-            if (lstat(m_path.c_str(), d_stat) == -1) { // abcd가 없을경우
+            if (lstat(m_path.c_str(), &d_stat) == -1) { // abcd가 없을경우
                 if (request.m_method == RequestHandler::PUT)
                 {
                     request.m_path = m_path.substr(0, uri.find_last_of("/")) + "/";
@@ -126,7 +129,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 LOG(DEBUG, "1-1-0. no file, no path %s", (request.m_path + request.m_file).data());
                 return request.m_path + request.m_file;
             }
-            if (S_ISDIR(d_stat->st_mode) == false) { // 1-1-1 파일일 경우 > end
+            if (S_ISDIR(d_stat.st_mode) == false) { // 1-1-1 파일일 경우 > end
                 request.m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
                 request.m_file = uri.substr(uri.rfind("/") + 1);
                 LOG(DEBUG, "1-1-1. %s", (request.m_path + request.m_file).data());
@@ -148,7 +151,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                         m_path = m_path + "/";
                 string realPath = m_path + m_file;
-                if (lstat(realPath.c_str(), d_stat) == -1) {
+                if (lstat(realPath.c_str(), &d_stat) == -1) {
                     this->m_file = "";
                     request.m_path = m_path;
                     request.m_file = m_file;
@@ -166,7 +169,9 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             this->m_root = server->m_root;
             this->m_root = removeTrailingSlash(this->m_root, uri);
             string realPath = m_root + uri;
-            if (lstat(realPath.c_str(), d_stat) == -1) { // abcd가 없을경우
+			LOG(DEBUG, "realPath = \"%s\"", realPath.c_str());
+            if (lstat(realPath.c_str(), &d_stat) == -1) { // abcd가 없을경우
+				LOG(ERROR, "lstat failed");
                 if (request.m_method == RequestHandler::PUT)
                 {
                     this->m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
@@ -182,7 +187,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 LOG(DEBUG, "1-2-0. no file, no path %s", (m_path + m_file).data());
                 return request.m_path + request.m_file;
             }
-            if (S_ISDIR(d_stat->st_mode) == false) { // 1-2-1  abcd 파일이 있을경우 = path에 root + uri 파일부분 전까지, file에 uri 파일부분 > end
+            if (S_ISDIR(d_stat.st_mode) == false) { // 1-2-1  abcd 파일이 있을경우 = path에 root + uri 파일부분 전까지, file에 uri 파일부분 > end
                 this->m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
                 this->m_file = uri.substr(uri.rfind("/") + 1);
                 request.m_path = m_path;
@@ -213,7 +218,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                 m_path = m_path + "/";
         string realPath = m_path + m_file;
-        if (lstat(realPath.c_str(), d_stat) == -1) {
+        if (lstat(realPath.c_str(), &d_stat) == -1) {
             this->m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
@@ -239,7 +244,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             this->m_file = "index.html";
         }
         string realPath = m_path + m_file;
-        if (lstat(realPath.c_str(), d_stat) == -1) {
+        if (lstat(realPath.c_str(), &d_stat) == -1) {
             this->m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;

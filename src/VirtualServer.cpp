@@ -1,5 +1,10 @@
+#include <iostream>
+
 #include "Config.hpp"
+#include "util/Util.hpp"
 #include "VirtualServer.hpp"
+
+using namespace	std;
 
 VirtualServer::VirtualServer()
 {

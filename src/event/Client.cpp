@@ -41,7 +41,7 @@ Client::handleEventWork()
 					return IoEventPoller::END;
 
 				case RequestHandler::RECV_EVENT:
-					LOG(DEBUG, "registering write event for fd=%d", m_socket.m_fd);
+					LOG(DEBUG, "registering write event for fd=%d\n", m_socket.m_fd);
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::ADD,
 							IoEventPoller::WRITE, this);
 					break;
@@ -57,7 +57,7 @@ Client::handleEventWork()
 			switch (status)
 			{
 				case RequestHandler::SEND_DONE:
-					LOG(DEBUG, "deleting write event for fd=%d", m_socket.m_fd);
+					LOG(DEBUG, "deleting write event for fd=%d\n", m_socket.m_fd);
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::DELETE,
 							IoEventPoller::WRITE, this);
 					break;

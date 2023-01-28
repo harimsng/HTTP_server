@@ -1,12 +1,10 @@
 #ifndef VIRTUALSERVER_HPP
 #define VIRTUALSERVER_HPP
 
-#include "Webserv.hpp"
-#include "Location.hpp"
-#include "event/Client.hpp"
-#include "socket/Socket.hpp"
+#include <vector>
 
-using namespace std;
+#include "Webserv.hpp"
+#include "http/RequestHandler.hpp"
 
 class	VirtualServer
 {

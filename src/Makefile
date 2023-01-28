@@ -2,7 +2,7 @@ NAME		=	webserv
 
 CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
-DEBUGFLAGS	=	-g -fsanitize=address -fsanitize=undefined
+DEBUGFLAGS	=	-g -fsanitize=address #-fsanitize=undefined
 RM			=	rm -f
 
 ifeq ($(shell uname), Linux)
