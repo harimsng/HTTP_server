@@ -26,6 +26,7 @@ RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
+	initExtensionList();
 	(void)requestHandler;
 }
 
@@ -42,6 +43,7 @@ RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
+	initExtensionList();
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
 }
@@ -269,11 +271,64 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	// m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Server: webserv/2.0");	
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
+	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Connection: keep-alive");
 	m_sendBuffer.append(g_CRLF);
+}
+
+void
+RequestHandler::initExtensionList()
+{
+	m_extensionType.push_back(std::pair<std::string, std::string>("html", "text/html"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("htm","text/html"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("shtml","text/html"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("css","text/css"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("xml","text/xml"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("gif","image/gif"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("jpeg","image/gif"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("jpg","image/jpeg"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("txt","text/plain"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("png","image/png"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("ico","image/x-icon"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("bmp","image/x-ms-bmp"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("svg","image/x-ms-bmp"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("webp","image/webp"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("mp4", "video/mp4"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("mpeg", "video/mp4"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("mpg", "video/mpeg"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("avi", "video/x-msvideo"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("js","application/javascript"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("woff","application/font-woff"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("json","application/json"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("doc","application/msword"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("pdf","application/pdf"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("xls", "application/vnd.ms-excel"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("rar", "application/x-rar-compressed"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("zip", "application/zip"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("7z", "application/x-7z-compressed"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("bin", "application/zip"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("exe", "application/zip"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("mp3", "audio/mpeg"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("ogg", "audio/ogg"));
+	m_extensionType.push_back(std::pair<std::string, std::string>("m4a", "audio/x-m4a"));
+}
+
+std::string
+RequestHandler::findContentType(std::string content)
+{
+	std::string extension;
+
+	extension = content.substr(content.find('.') + 1);
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = m_extensionType.begin(); it != m_extensionType.end(); it++)
+		if (extension == it->first)
+			return (it->second);
+	extension = "text/plain";
+	return (extension);
 }
 
 std::ostream&
