@@ -7,7 +7,7 @@ class	GetMethod : public AMethod
 {
 public:
 // constructors & destructor
-	GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	GetMethod(RequestHandler& requestHandler);
 	~GetMethod();
 
 // operators

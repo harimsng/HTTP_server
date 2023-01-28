@@ -3,8 +3,8 @@
 using namespace std;
 
 // constructors & destructor
-DeleteMethod::DeleteMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
-: AMethod(request, sendBuffer, recvBuffer)
+DeleteMethod::DeleteMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 

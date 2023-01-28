@@ -51,15 +51,13 @@ RequestHandler::~RequestHandler()
 int
 RequestHandler::receiveRequest() try
 {
-	int			count;
-	int			receiveStatus = RECV_NORMAL;
+	int		count;
+	int		receiveStatus = RECV_NORMAL;
 
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	// cout << m_recvBuffer << endl;
-	// cout << m_parser.m_readStatus << endl;
 	if (count == 0)
 		return RECV_END;
 	else if (count == -1)
@@ -67,20 +65,18 @@ RequestHandler::receiveRequest() try
 
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
-
 	if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 	{
-		//m_method->createResponseHeader();
 		createResponseHeader();
 		receiveStatus = RECV_EVENT;
 	}
 	if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 	{
-		//m_method->createResponseContent
+		// NOTE
+		// this method will be called multiple times. this block is temporary.
+		// and delete method after complete to make response message
 		m_method->completeResponse();
-		m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE;
 	}
-
 	return receiveStatus;
 }
 catch (HttpErrorHandler& e)
@@ -93,15 +89,30 @@ catch (HttpErrorHandler& e)
 	// m_sendBuffer.append(gtCRLF);
 	// bufferResponseStatusLine(400);
 	// bufferResponseHeaderFields();
+	resetStates();
 	return (RECV_EVENT);
 }
 
-void
-RequestHandler::sendResponse()
+int
+RequestHandler::sendResponse() try
 {
-	// cout << endl;
-	// cout << "send buffer : " << m_sendBuffer << endl;
-	m_sendBuffer.send(m_socket->m_fd);
+	int		count = m_sendBuffer.send(m_socket->m_fd);
+
+	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+		return SEND_DONE;
+	return SEND_NORMAL;
+}
+catch (runtime_error& e)
+{
+	LOG(ERROR, "%s", e.what());
+	return SEND_ERROR;
+}
+
+void
+RequestHandler::resetStates()
+{
+	m_request.m_headerFieldsMap.clear();
+	m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE_METHOD;
 }
 
 void
@@ -152,6 +163,7 @@ RequestHandler::resolveResourceLocation(const std::string& host)
 	Tcp::SocketAddr	addr = m_socket->getAddress();
 	uint64_t		addrKey = Util::convertAddrKey(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 	VirtualServer*	server;
+
 	if (ServerManager::s_virtualServerTable.count(addrKey) == 0)
 		addrKey &= 0xffff00000000;
 	if (ServerManager::s_virtualServerTable[addrKey].count(host) == 0)
@@ -201,6 +213,7 @@ RequestHandler::checkResourceStatus(const char* path)
 			statusCode = 500;
 			break;
 	}
+	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
 	return statusCode;
 }
 
@@ -216,22 +229,25 @@ RequestHandler::createResponseHeader()
 	statusCode = resolveResourceLocation(m_request.m_headerFieldsMap["HOST"][0]);
 	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
+	if (statusCode >= 400)
+		throw HttpErrorHandler(statusCode);
+	// TODO: check allowed method in VirtualServer
 	switch (m_request.m_method)
 	{
 		case GET:
-			m_method = new GetMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new GetMethod(*this);
 			break;
 		case HEAD:
-			m_method = new HeadMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new HeadMethod(*this);
 			break;
 		case POST:
-			m_method = new PostMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new PostMethod(*this);
 			break;
 		case PUT:
-			m_method = new PutMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new PutMethod(*this);
 			break;
 		case DELETE:
-			m_method = new DeleteMethod(m_request, m_sendBuffer, m_recvBuffer);
+			m_method = new DeleteMethod(*this);
 			break;
 		default: ;
 			// throw HttpErrorHandler(???);
@@ -254,8 +270,6 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	// m_recvBuffer.receive(m_socket->m_fd);
-
 	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);

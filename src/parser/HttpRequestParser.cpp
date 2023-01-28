@@ -71,6 +71,8 @@ HttpRequestParser::parseMethod(Request &request)
 		c = m_tokenizer.getc();
 	}
 	method += ' ';
+	// TODO
+	// add all method
 	if (method == "GET ")
 		request.m_method = RequestHandler::GET;
 	else if (method == "HEAD ")
@@ -81,7 +83,12 @@ HttpRequestParser::parseMethod(Request &request)
 		request.m_method = RequestHandler::PUT;
 	else if (method == "DELETE ")
 		request.m_method = RequestHandler::DELETE;
+	// TODO
+	// else if (method == "TRACE ")
+		// request.m_method = RequestHandler::TRACE;
 	else
+		// TODO
+		// reqeust.m_status = ??;
 		request.m_method = RequestHandler::ERROR;
 	m_readStatus = REQUEST_LINE;
 }
@@ -93,13 +100,15 @@ HttpRequestParser::parseStatusLine(Request &request)
 	string			method;
 	size_t			spacePos;
 
-	LOG(DEBUG, "statusline = \"%s\"", statusLine.data());
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
-		throw HttpErrorHandler(400);
+	{
+		// TODO
+		// reqeust.m_status = ??;
+		// throw HttpErrorHandler(400);
+	}
 	request.m_uri = statusLine.substr(0, spacePos);
 	request.m_protocol = statusLine.substr(spacePos + 1);
-	LOG(ERROR, "uri = %s, protocol = %s", request.m_uri.data(), request.m_protocol.data());
 	m_readStatus = HEADER_FIELDS;
 }
 
@@ -112,11 +121,13 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	size_t	pos;
 	size_t	curPos;
 
+	if (headerLine.size() != 0 && headerLine[0] == ' ')
+		return ;
 	curPos = 0;
 	pos = headerLine.find(": ");
 	field = Util::toUpper(headerLine.substr(curPos, pos));
 	curPos = pos + 2;
-	while (1)
+	while (pos != string::npos)
 	{
 		pos = headerLine.find(") ", curPos);
 		if (pos == string::npos)
@@ -124,28 +135,16 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		if (pos == string::npos)
 		{
 			value = headerLine.substr(curPos);
-			headerFieldsMap[field].push_back(Util::toUpper(value));
-			break;
+			headerFieldsMap[field].push_back(Util::toLower(value));
+			continue;
 		}
 		pos++;
 		value = headerLine.substr(curPos, pos - curPos);
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
 			value.erase(value.end() - 1);
-		headerFieldsMap[field].push_back(Util::toUpper(value));
+		headerFieldsMap[field].push_back(Util::toLower(value));
 	}
-	if (m_tokenizer.peek() == g_CRLF)
+	if (m_tokenizer.peek() == "")
 		m_readStatus = HEADER_FIELDS_END;
 }
-
-// bool
-// HttpRequestParser::checkHeaderFields(HeaderFieldsMap& headerFieldsMap)
-// {
-//     bool	check = true;
-//
-//     check &= headerFieldsMap.count("HOST") > 0;
-//
-//     if (check == false)
-//         throw HttpErrorHandler(400);
-//     return check;
-// }

@@ -7,7 +7,7 @@ class	PutMethod : public AMethod
 {
 public:
 // constructors & destructor
-	PutMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer);
+	PutMethod(RequestHandler& requestHandler);
 	~PutMethod();
 
 // operators

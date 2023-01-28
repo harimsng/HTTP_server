@@ -1,6 +1,7 @@
 #include <sstream>
 #include <iostream>
 
+#include "util/Util.hpp"
 #include "parser/ConfigParser.hpp"
 #include "exception/FileTokenizerException.hpp"
 #include "tokenizer/FileTokenizer.hpp"

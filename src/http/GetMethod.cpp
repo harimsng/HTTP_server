@@ -1,14 +1,15 @@
 #include <fcntl.h>
 #include <iostream>
 
+#include "ServerManager.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "GetMethod.hpp"
 
 using namespace std;
 
 // constructors & destructor
-GetMethod::GetMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
-: AMethod(request, sendBuffer, recvBuffer)
+GetMethod::GetMethod(RequestHandler& requestHandler)
+:	AMethod(requestHandler)
 {
 }
 
@@ -48,14 +49,9 @@ GetMethod::completeResponse()
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append(readBody);
-	// 1. m_path == "" , m_file == ""
-	// 	-> 404
-	// 2. m_path != "", m_file == ""
-	// 	-> autoIndex on -> dir listing
-	// 	-> autoIndex off -> 405
-	// 3. m_path != "", m_file != ""
-	//	-> open()
-	// reqeust의path
+
+	// method must know end of response(content length, chunked)
+	endResponse();
 }
 #else
 void

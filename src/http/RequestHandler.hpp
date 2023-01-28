@@ -20,6 +20,7 @@ class	AMethod;
 class	RequestHandler
 {
 	friend class	HttpRequestParser;
+	friend class	AMethod;
 
 // deleted
 	RequestHandler(const RequestHandler& requestHandler);
@@ -46,7 +47,11 @@ public:
 		RECV_ERROR = 1,
 		RECV_NORMAL = 2,
 		RECV_SKIPPED = 3,
-		RECV_EVENT = 4
+		RECV_EVENT = 4,
+		RECV_DONE = 5,
+		SEND_ERROR = 6,
+		SEND_NORMAL = 7,
+		SEND_DONE = 8
 	};
 
 // constructors & destructor
@@ -55,7 +60,8 @@ public:
 
 // member functions
 	int		receiveRequest();
-	void	sendResponse();
+	int		sendResponse();
+	void	resetStates();
 
 	int		resolveResourceLocation(const std::string& host);
 
@@ -80,5 +86,8 @@ private:
 	Request				m_request;
 	AMethod*			m_method;
 };
+
+std::ostream&
+operator<<(std::ostream& os, const Request& request);
 
 #endif

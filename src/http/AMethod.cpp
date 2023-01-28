@@ -1,13 +1,13 @@
-#include "http/RequestHandler.hpp"
-#include "io/Buffer.hpp"
-#include "util/Util.hpp"
+#include "Webserv.hpp"
 #include "AMethod.hpp"
+#include "http/RequestHandler.hpp"
 
 // constructors & destructor
-AMethod::AMethod(Request& request, SendBuffer& sendBuffer, ReceiveBuffer& recvBuffer)
-	:m_request(request),
-	m_sendBuffer(sendBuffer),
-	m_recvBuffer(recvBuffer)
+AMethod::AMethod(RequestHandler& requestHandler)
+:	m_requestHandler(requestHandler),
+	m_request(m_requestHandler.m_request),
+	m_sendBuffer(m_requestHandler.m_sendBuffer),
+	m_recvBuffer(m_requestHandler.m_recvBuffer)
 {
 }
 
@@ -74,4 +74,10 @@ AMethod::checkDirExists(const std::string& filePath)
 		return (true);
 	return (false);
 
+}
+
+void
+AMethod::endResponse()
+{
+	m_requestHandler.resetStates();
 }

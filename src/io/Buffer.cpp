@@ -9,30 +9,29 @@ using namespace std;
 
 #define BUFFER_SIZE (8192)
 
-// constructors & destructor
-Buffer::Buffer()
-:	std::string(BUFFER_SIZE, 0)
-{
-	resize(0);
-	m_writePos = 0;
-}
-
-Buffer::~Buffer()
-{
-}
-
+// deleted
 Buffer::Buffer(const Buffer& buffer)
 {
 	if (this != &buffer)
 		*this = buffer;
 }
 
-// operators
 Buffer&
 Buffer::operator=(const Buffer& buffer)
 {
 	(void)buffer;
 	return *this;
+}
+// constructors & destructor
+Buffer::Buffer()
+:	std::string(BUFFER_SIZE, 0),
+	m_writePos(0)
+{
+	resize(0);
+}
+
+Buffer::~Buffer()
+{
 }
 
 char

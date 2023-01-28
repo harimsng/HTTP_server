@@ -78,16 +78,14 @@ HttpStreamTokenizer::get()
 	string				token = m_aheadToken;
 
 	if (empty() == true)
-		return token;
+		return "";
 
 	pos = pos == string::npos ? m_buffer->size() : pos;
 	m_aheadToken = m_buffer->substr(m_cur, pos - m_cur);
-	if (m_aheadToken == "")
-		m_aheadToken = g_CRLF;
-
 	m_cur = pos + 2;
+
 	//  if token.size() == 0, m_aheadToken was empty that current call to this method is first call.
-	if (token.size() == 0)
+	if (empty() == false && token.size() == 0)
 		return get();
 	return token;
 }
@@ -111,6 +109,7 @@ HttpStreamTokenizer::flush()
 	m_start = 0;
 	m_cur = 0;
 	m_end = m_buffer->size();
+	m_aheadToken = "";
 }
 
 bool
