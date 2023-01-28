@@ -104,10 +104,10 @@ Kqueue::pollWork()
 		EventStatus status = object->handleEvent();
 		if (status == END)
 		{
-			LOG(DEBUG, "an event(fd: %d) has finished", object->m_fd);
+			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
 			// INFO: is this right?
-			// close(object->m_fd);
-			delete object;
+			close(object->m_fd);
+			// delete object;
 //			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
 	}

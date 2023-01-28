@@ -49,14 +49,6 @@ GetMethod::completeResponse()
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append(readBody);
-	// 1. m_path == "" , m_file == ""
-	// 	-> 404
-	// 2. m_path != "", m_file == ""
-	// 	-> autoIndex on -> dir listing
-	// 	-> autoIndex off -> 405
-	// 3. m_path != "", m_file != ""
-	//	-> open()
-	// reqeust의path
 
 	// method must know end of response(content length, chunked)
 	endResponse();
@@ -71,7 +63,7 @@ GetMethod::completeResponse()
 	int			fd = open(filePath.data(), O_RDONLY);
 	string::size_type	readSize;
 
-	m_sendBuffer.append(" 
+	// m_sendBuffer.append("
 	do
 	{
 		readSize = buffer.read(fd);
