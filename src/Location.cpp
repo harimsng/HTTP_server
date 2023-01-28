@@ -38,7 +38,7 @@ Location::setToDefault()
 	m_autoindex = false;
 	// m_expires;
 	// m_proxyPass;
-	// m_limitExcept;
+	m_limitExcept = limitExcept;
 	// m_path;
 	// m_root;
 	// m_cgiPass;
