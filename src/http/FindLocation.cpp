@@ -7,9 +7,6 @@
 
 using namespace	std;
 
-std::ostream&
-operator<<(std::ostream& os, const Request& request);
-
 string
 FindLocation::removeTrailingSlash(string first, string second)
 {
