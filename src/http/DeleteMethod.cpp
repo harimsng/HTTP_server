@@ -36,16 +36,8 @@ DeleteMethod::completeResponse()
 {
 	/*
 	int deleteStatus;
-	vector<string> limitExcept;
-	istringstream ss(m_request.m_locationBlock.m_limitExcept);
-	string	token;
 
 	string filePath = m_request.m_path + m_request.m_file;
-
-	while (getline(ss, token, ',')) // method 예외 목록 저장
-	{
-        limitExcept.push_back(token);
-    }
 
 	if (!checkFileExists(filePath))
 	{
@@ -54,12 +46,7 @@ DeleteMethod::completeResponse()
 		filePath.replace(filePath.find('*'), 1, to_string(m_statusCode)); // error 페이지 가져오는 코드
 		return ;
 	}
-	if (!this->checkMethodLimit(limitExcept))
-	{
-		filePath = m_conf.getErrorPath();
-		m_statusCode = 405;
-		filePath.replace(filePath.find('*'), 1, to_string(m_statusCode));
-	}
+
 	readFile(m_sendBuffer); // 파일 읽기
 	deleteStatus = unlink(filePath.c_str());
 	if (deleteStatus == -1)

@@ -81,6 +81,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 	const string	statusLine = m_tokenizer.getline();
 	string			method;
 	size_t			spacePos;
+	size_t			queryStringPos;
 
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
@@ -90,6 +91,12 @@ HttpRequestParser::parseStatusLine(Request &request)
 		// throw HttpErrorHandler(400);
 	}
 	request.m_uri = statusLine.substr(0, spacePos);
+	queryStringPos = request.m_uri.find("?");
+	if (queryStringPos != std::string::npos)
+	{
+		request.m_queryString.assign(request.m_uri, queryStringPos + 1, std::string::npos);
+		request.m_uri = request.m_uri.substr(0, queryStringPos);
+	}
 	request.m_protocol = statusLine.substr(spacePos + 1);
 	m_readStatus = HEADER_FIELDS;
 }

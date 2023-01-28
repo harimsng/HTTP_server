@@ -18,6 +18,7 @@ struct Request
 	int					m_method;
 	int					m_status;
 	std::string			m_uri;
+	std::string			m_queryString;
 	std::string			m_protocol;
 	std::string			m_path;
 	std::string			m_file;
