@@ -3,6 +3,10 @@
 
 #include "Buffer.hpp"
 
+#include <iostream>
+
+using namespace std;
+
 #define BUFFER_SIZE (8192)
 
 // deleted
@@ -61,7 +65,7 @@ std::string::size_type
 Buffer::receive(int fd)
 {
 	const int		residue = size();
-	long long int	count = 0;
+	long int	count = 0;
 
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
@@ -95,7 +99,7 @@ Buffer::write(int fd)
 std::string::size_type
 Buffer::send(int fd)
 {
-	long long int	count = 0;
+	long int	count = 0;
 
 	if (size() == 0)
 		return 0;
@@ -115,7 +119,7 @@ Buffer::send(int fd)
 std::string::size_type
 Buffer::send()
 {
-	return send(m_fd);
+	return this->send(m_fd);
 }
 
 void

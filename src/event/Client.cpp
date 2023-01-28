@@ -71,11 +71,6 @@ Client::handleEventWork()
 	}
 	return (IoEventPoller::NORMAL);
 }
-// catch (HttpErrorHandler& e)
-// {
-//     m_response.makeErrorResponse(e.getErrorMessage());
-//     return (IoEventPoller::NORMAL);
-// }
 
 // operators
 Client&	Client::operator=(Client const& client)
