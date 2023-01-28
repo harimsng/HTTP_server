@@ -75,6 +75,9 @@ private:
 	void	checkStatusLine();
 	void	checkHeaderFields();
 
+	void		initExtensionList();
+	std::string	findContentType(std::string content);
+
 	void	makeErrorResponse(const std::string& errorMessage);
 
 // member variables
@@ -85,6 +88,7 @@ private:
 
 	Request				m_request;
 	AMethod*			m_method;
+	std::vector<std::pair<std::string, std::string> > m_extensionType;
 };
 
 std::ostream&
