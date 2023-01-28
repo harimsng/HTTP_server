@@ -19,8 +19,8 @@ FindLocation::removeTrailingSlash(string first, string second)
 void
 FindLocation::setRootAlias(string const &uri, VirtualServer* server)
 {
-    this->m_root = m_locationBlock.m_root;
-    this->m_alias = m_locationBlock.m_alias;
+    this->m_root = m_locationBlock->m_root;
+    this->m_alias = m_locationBlock->m_alias;
     if (this->m_root.length() != 0) {
         this->m_root = removeTrailingSlash(this->m_root, uri);
         this->m_path = this->m_root + uri;
@@ -42,16 +42,16 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
 
     while (tmpUri != "/" && tmpUri != "") {
         if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
-            m_locationBlock = locationTable[tmpUri];
+            m_locationBlock = &locationTable[tmpUri];
             if (locationTable.find(tmpUri + "/") != locationTable.end()) {
-                m_locationBlock = locationTable[tmpUri + "/"];
+                m_locationBlock = &locationTable[tmpUri + "/"];
             }
             m_remainUri = uri.substr(tmpUri.length());
             request.m_locationBlock = m_locationBlock;
             return true;
         }
         if (locationTable.find(tmpUri + "/") != locationTable.end() ) {
-            m_locationBlock = locationTable[tmpUri + "/"];
+            m_locationBlock = &locationTable[tmpUri + "/"];
             m_remainUri = uri.substr(tmpUri.length());
             request.m_locationBlock = m_locationBlock;
             return true;
@@ -120,22 +120,19 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 }
                 else
                 {
-                    request.m_path = "";
-                    request.m_file = "";
+					request.m_status = 404;
                 }
                 LOG(DEBUG, "1-1-0. no file, no path %s", (request.m_path + request.m_file).data());
-                return request.m_path + request.m_file;
             }
             if (S_ISDIR(d_stat.st_mode) == false) { // 1-1-1 파일일 경우 > end
                 request.m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
                 request.m_file = uri.substr(uri.rfind("/") + 1);
                 LOG(DEBUG, "1-1-1. %s", (request.m_path + request.m_file).data());
-                return request.m_path + request.m_file;
             }
             else  { // 1-1-2 디렉토리일 경우
-                if (m_locationBlock.m_index != "")
+                if (m_locationBlock->m_index != "")
                 {
-                    this->m_file = m_locationBlock.m_index;
+                    this->m_file = m_locationBlock->m_index;
                 }
                 else if (server->m_index != "")
                 {
@@ -166,9 +163,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             this->m_root = server->m_root;
             this->m_root = removeTrailingSlash(this->m_root, uri);
             string realPath = m_root + uri;
-			LOG(DEBUG, "realPath = \"%s\"", realPath.c_str());
             if (lstat(realPath.c_str(), &d_stat) == -1) { // abcd가 없을경우
-				LOG(ERROR, "lstat failed");
                 if (request.m_method == RequestHandler::PUT)
                 {
                     this->m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
@@ -200,9 +195,9 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     if (findLocationBlock(request, uri, locationTable) == true) // 2-1
     {
         setRootAlias(uri, server);
-        if (m_locationBlock.m_index != "")
+        if (m_locationBlock->m_index != "")
         {
-            this->m_file = m_locationBlock.m_index;
+            this->m_file = m_locationBlock->m_index;
         }
         else if (server->m_index != "")
         {

@@ -51,8 +51,7 @@ HttpRequestParser::parse(Request& request)
 				parseHeaderFields(request.m_headerFieldsMap);
 				break;
 			default:
-				throw std::logic_error("unhandled read status in\
-HttpRequestParser::parse()");
+				;
 		}
 	}
 	m_tokenizer.flush();
@@ -70,7 +69,10 @@ HttpRequestParser::parseMethod(Request &request)
 		method += c;
 		c = m_tokenizer.getc();
 	}
-	request.m_method = RequestHandler::s_methodConvertTable[method];
+	if (RequestHandler::s_methodConvertTable.count(method) != 0)
+		request.m_method = RequestHandler::s_methodConvertTable[method];
+	else
+		UPDATE_REQUEST_ERROR(request.m_status, 400);
 	LOG(DEBUG, "request.m_method = %x", request.m_method);
 	m_readStatus = REQUEST_LINE;
 }
@@ -82,16 +84,15 @@ HttpRequestParser::parseStatusLine(Request &request)
 	string			method;
 	size_t			spacePos;
 
+	m_readStatus = HEADER_FIELDS;
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
 	{
-		// TODO
-		// reqeust.m_status = ??;
-		// throw HttpErrorHandler(400);
+		UPDATE_REQUEST_ERROR(request.m_status, 400);
+		return;
 	}
 	request.m_uri = statusLine.substr(0, spacePos);
 	request.m_protocol = statusLine.substr(spacePos + 1);
-	m_readStatus = HEADER_FIELDS;
 }
 
 void

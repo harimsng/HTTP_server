@@ -68,14 +68,14 @@ private:
 	VirtualServer*	resolveVirtualServer(const std::string& host);
 	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
 
-	void	bufferResponseStatusLine(int statusCode);
-	void	bufferResponseHeaderFields();
-
 	int		checkResourceStatus(const char* path);
 	void	checkRequestMessage();
 	void	checkStatusLine();
 	void	checkHeaderFields();
 	bool	checkAllowedMethod(uint16_t allowed);
+
+	void	bufferResponseStatusLine(int statusCode);
+	void	bufferResponseHeaderFields();
 
 	void	makeErrorResponse(const std::string& errorMessage);
 

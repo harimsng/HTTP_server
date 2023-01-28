@@ -8,6 +8,8 @@
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "Location.hpp"
 
+#define UPDATE_REQUEST_ERROR(status, code) (status = status < 300 ? code : status)
+
 class	Server;
 struct	Request;
 
@@ -15,13 +17,15 @@ typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 
 struct Request
 {
+	Request(): m_locationBlock(NULL) {};
+
 	int					m_method;
 	int					m_status;
 	std::string			m_uri;
 	std::string			m_protocol;
 	std::string			m_path;
 	std::string			m_file;
-	Location			m_locationBlock;
+	Location*			m_locationBlock;
 	HeaderFieldsMap		m_headerFieldsMap;
 };
 

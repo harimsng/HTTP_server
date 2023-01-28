@@ -25,7 +25,7 @@ static const std::string	proxyPass = "";
 static const std::string	scgiPass = "";
 
 // ngx_http_core_module
-static const std::string	limitExcept = "";
+static const uint16_t		limitExcept = 0x1f;
 static const std::string	root = "html";
 static const std::string	alias = "";
 

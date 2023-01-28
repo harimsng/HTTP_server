@@ -51,7 +51,7 @@ RequestHandler::~RequestHandler()
 }
 
 int
-RequestHandler::receiveRequest() try
+RequestHandler::receiveRequest()
 {
 	int		count;
 	int		receiveStatus = RECV_NORMAL;
@@ -63,7 +63,7 @@ RequestHandler::receiveRequest() try
 	if (count == 0)
 		return RECV_END;
 	else if (count == -1)
-		throw HttpErrorHandler(500);
+		return RECV_SKIPPED;
 
 	if (m_parser.m_readStatus < HttpRequestParser::HEADER_FIELDS_END)
 		m_parser.parse(m_request);
@@ -80,19 +80,6 @@ RequestHandler::receiveRequest() try
 		m_method->completeResponse();
 	}
 	return receiveStatus;
-}
-catch (HttpErrorHandler& e)
-{
-	// LOG(ERROR, "%s", e.getErrorMessage().c_str());
-	// m_sendBuffer.append("HTTP/1.1 301 Moved Permanently");
-	// m_sendBuffer.append(g_CRLF);
-	// m_sendBuffer.append("Location: http://localhost:8080/error.html");
-	// m_sendBuffer.append(g_CRLF);
-	// m_sendBuffer.append(gtCRLF);
-	// bufferResponseStatusLine(400);
-	// bufferResponseHeaderFields();
-	resetStates();
-	return (RECV_EVENT);
 }
 
 int
@@ -146,7 +133,6 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
-
 	bool check = true;
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
@@ -160,7 +146,9 @@ RequestHandler::checkHeaderFields()
 bool
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
-	return m_request.m_method & allowed;
+	if (!(m_request.m_method & allowed))
+		throw HttpErrorHandler(405);
+	return true;
 }
 
 // TODO: should be called on method classes
@@ -231,11 +219,13 @@ RequestHandler::createResponseHeader() try
 	checkRequestMessage();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
-	checkAllowedMethod(m_request.m_locationBlock.m_limitExcept);
+	if (m_request.m_locationBlock != NULL)
+		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	checkResourceStatus(resourceLocation.c_str());
+
+	bufferResponseStatusLine(statusCode);
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
-	bufferResponseStatusLine(statusCode);
 	bufferResponseHeaderFields();
 	switch (m_request.m_method)
 	{
@@ -261,6 +251,7 @@ RequestHandler::createResponseHeader() try
 }
 catch (HttpErrorHandler& e)
 {
+	resetStates();
 }
 
 void

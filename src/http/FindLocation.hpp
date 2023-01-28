@@ -15,7 +15,7 @@ class FindLocation {
         std::string m_path;
         std::string m_file;
         std::string m_remainUri;
-        Location    m_locationBlock;
+        Location*   m_locationBlock;
         struct stat   d_stat;
 
         std::string removeTrailingSlash(std::string first, std::string second);
