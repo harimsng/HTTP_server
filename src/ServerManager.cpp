@@ -3,9 +3,7 @@
 
 // static member definitions
 ServerManager::IoEventPoller	ServerManager::s_ioEventPoller;
-
 VirtualServerTable	ServerManager::s_virtualServerTable;
-
 ListenServerTable	ServerManager::s_listenServerTable;
 
 
@@ -74,6 +72,7 @@ ServerManager::run() try
 {
 	initServers();
 	RequestHandler::setMethodConvertTable();
+	RequestHandler::initExtensionList();
 
 	while (1)
 	{

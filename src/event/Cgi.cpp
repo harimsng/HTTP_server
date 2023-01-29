@@ -1,4 +1,9 @@
 #include "Cgi.hpp"
+
+#define READ (0)
+#define WRITE (1)
+#define BUFFER_SIZE (65535)
+
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
 {
@@ -30,7 +35,7 @@ Cgi::Cgi(Cgi const& cgi)
 void
 Cgi::initCgi(const Request &request)
 {
-	m_cgiPath = request.m_locationBlock.m_scgiPass;
+	m_cgiPath = request.m_locationBlock->m_scgiPass;
 	m_path = request.m_path + request.m_file;
 
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
@@ -60,7 +65,7 @@ Cgi::initCgi(const Request &request)
     std::string REDIRECT_STATUS = "REDIRECT_STATUS=200"; // php-cgi direct exec
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
-    std::string REQUEST_METHOD = "REQUEST_METHOD=" + request.m_method; // 실제 메소드 이름으로 수정 필요
+    std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method]; // 실제 메소드 이름으로 수정 필요
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_uri;

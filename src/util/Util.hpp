@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "Types.hpp"
+
 struct sockaddr_in;
 
 class Util
