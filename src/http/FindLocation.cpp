@@ -100,7 +100,23 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         }
         if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                 m_path = m_path + "/";
-        LOG(DEBUG, "0. default root %s", (m_path + m_file).data());
+        if (lstat(m_path.c_str(), &d_stat) == -1) {
+            request.m_path = m_path;
+            request.m_file = m_file;
+            request.m_status = 404;
+            LOG(DEBUG, "0-1. no file, no path %s", (request.m_path + request.m_file).data());
+            return request.m_path + request.m_file;
+        }
+        string realPath = m_path + m_file;
+        if (lstat(realPath.c_str(), &d_stat) == -1) {
+            this->m_file = "";
+            request.m_path = m_path;
+            request.m_file = m_file;
+            request.m_status = 404;
+            LOG(DEBUG, "0-1. no file, only path %s", (request.m_path + request.m_file).data());
+            return request.m_path + request.m_file;
+        }
+        LOG(DEBUG, "0-2. default root %s", (m_path + m_file).data());
         request.m_path = m_path;
         request.m_file = m_file;
         return m_path + m_file;
@@ -113,21 +129,20 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             this->m_file = this->m_path.substr(this->m_path.rfind("/") + 1);
             LOG(DEBUG, "1. %s", m_path.data());
             if (lstat(m_path.c_str(), &d_stat) == -1) { // abcd가 없을경우
-                if (request.m_method == RequestHandler::PUT)
+                request.m_path = m_path.substr(0, uri.find_last_of("/")) + "/";
+                request.m_file = m_file;
+                if (request.m_method != RequestHandler::PUT)
                 {
-                    request.m_path = m_path.substr(0, uri.find_last_of("/")) + "/";
-                    request.m_file = m_file;
-                }
-                else
-                {
-					request.m_status = 404;
+                    request.m_status = 404;
                 }
                 LOG(DEBUG, "1-1-0. no file, no path %s", (request.m_path + request.m_file).data());
+                return m_path + m_file;
             }
             if (S_ISDIR(d_stat.st_mode) == false) { // 1-1-1 파일일 경우 > end
                 request.m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
                 request.m_file = uri.substr(uri.rfind("/") + 1);
                 LOG(DEBUG, "1-1-1. %s", (request.m_path + request.m_file).data());
+                return m_path + m_file;
             }
             else  { // 1-1-2 디렉토리일 경우
                 if (m_locationBlock->m_index != "")
@@ -144,11 +159,19 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 }
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                         m_path = m_path + "/";
+                if (lstat(m_path.c_str(), &d_stat) == -1) {
+                    request.m_path = m_path;
+                    request.m_file = m_file;
+                    request.m_status = 404;
+                    LOG(DEBUG, "1-1-2. no file, no path %s", (request.m_path + request.m_file).data());
+                    return request.m_path + request.m_file;
+                }
                 string realPath = m_path + m_file;
                 if (lstat(realPath.c_str(), &d_stat) == -1) {
                     this->m_file = "";
                     request.m_path = m_path;
                     request.m_file = m_file;
+                    request.m_status = 404;
                     LOG(DEBUG, "1-1-2. no file, only path %s", (request.m_path + request.m_file).data());
                     return request.m_path + request.m_file;
                 }
@@ -164,15 +187,12 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             this->m_root = removeTrailingSlash(this->m_root, uri);
             string realPath = m_root + uri;
             if (lstat(realPath.c_str(), &d_stat) == -1) { // abcd가 없을경우
-                if (request.m_method == RequestHandler::PUT)
+                this->m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
+                this->m_file = realPath.substr(realPath.rfind("/") + 1);
+                if (request.m_method != RequestHandler::PUT)
                 {
-                    this->m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
-                    this->m_file = realPath.substr(realPath.rfind("/") + 1);
-                }
-                else
-                {
-                    this->m_path = "";
-                    this->m_file = "";
+                    request.m_status = 404;
+
                 }
                 request.m_path = m_path;
                 request.m_file = m_file;
@@ -209,11 +229,19 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         }
         if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                 m_path = m_path + "/";
+        if (lstat(m_path.c_str(), &d_stat) == -1) {
+            request.m_path = m_path;
+            request.m_file = m_file;
+            request.m_status = 404;
+            LOG(DEBUG, "2-1-0. no file, no path %s", (m_path + m_file).data());
+            return m_path + m_file;
+        }
         string realPath = m_path + m_file;
         if (lstat(realPath.c_str(), &d_stat) == -1) {
             this->m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
+            request.m_status = 404;
             LOG(DEBUG, "2-1-0. no file, only path %s", (m_path + m_file).data());
             return m_path + m_file;
         }
@@ -235,11 +263,19 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         {
             this->m_file = "index.html";
         }
+        if (lstat(m_path.c_str(), &d_stat) == -1) {
+            request.m_path = m_path;
+            request.m_file = m_file;
+            request.m_status = 404;
+            LOG(DEBUG, "2-2-0. no file, no path %s", (m_path + m_file).data());
+            return m_path + m_file;
+        }
         string realPath = m_path + m_file;
         if (lstat(realPath.c_str(), &d_stat) == -1) {
             this->m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
+            request.m_status = 404;
             LOG(DEBUG, "2-2-0. no file, only path %s", (m_path + m_file).data());
             return m_path + m_file;
         }
