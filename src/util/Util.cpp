@@ -157,3 +157,27 @@ Util::checkFileStat(const char* path)
 		return (false);
 	return ((buffer.st_mode & S_IFREG) == S_IFREG);
 }
+
+string
+Util::makeErrorPage(int status)
+{
+	string buf;
+	ostringstream ss;
+	ss << status;
+	string statusStr = ss.str();
+
+	buf =
+	"<!DOCTYPE html>\n"
+	"<html>\n"
+	"	<head>\n"
+	"		<title>" + statusStr + "</title>\n"
+	"	</head>\n"
+	"	<body>\n"
+	"		<h1>"
+	+ statusStr + " " + "Error!"
+	"		</h1>\n"
+	"	</body>\n"
+	"</html>";
+
+	return buf;
+}
