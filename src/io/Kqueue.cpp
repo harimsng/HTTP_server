@@ -105,10 +105,9 @@ Kqueue::pollWork()
 		if (status == END)
 		{
 			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
-			// INFO: is this right?
 			close(object->m_fd);
+			// INFO: fix deallocate
 			// delete object;
-//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
 	}
 	return 0;

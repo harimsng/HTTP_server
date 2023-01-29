@@ -1,6 +1,8 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
+#include "Types.hpp"
+
 #include <string>
 
 class	Location

@@ -7,8 +7,6 @@
 
 #  define IO_EVENT_POLLER Kqueue
 #  define IO_EVENT_HEADER "io/Kqueue.hpp"
-// reason for not directly including the header file is to minimize compile time overhead.
-
 #  define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\
 /*sin_len*/		INET_ADDRSTRLEN,\
 /*sin_family*/	AF_INET,\
@@ -19,7 +17,7 @@
 # endif
 # ifdef __linux__
 #  define IO_EVENT_POLLER Epoll
-#  include "io/Epoll.hpp"
+#  define IO_EVENT_HEADER "io/Epoll.hpp"
 #  include <stdint.h>
 
 #  define GET_SOCKADDR_IN(addr, port) ((sockaddr_in){\

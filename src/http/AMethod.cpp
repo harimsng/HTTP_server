@@ -32,12 +32,16 @@ AMethod::completeResponse()
 void
 AMethod::readFile(std::string& readBody)
 {
+	struct stat		fileStatus;
 	std::fstream	file;
 	std::string		readLine;
+	std::string 	filePath = m_request.m_path + m_request.m_file;
 
-	std::string filePath = m_request.m_path + m_request.m_file;
-
-	file.open(filePath);
+	file.open(filePath.c_str());
+	stat(filePath.c_str(), &fileStatus);
+	readBody.clear();
+	readBody.reserve(fileStatus.st_size);
+	// INFO: it doesn't send raw content of resource.
 	while (!file.eof())
 	{
 		std::getline(file, readLine);
@@ -45,7 +49,7 @@ AMethod::readFile(std::string& readBody)
 			continue;
 		readBody += readLine + "\n";
 	}
-	readBody.pop_back();
+	readBody.erase(readBody.end() - 1);
 	file.close();
 }
 
