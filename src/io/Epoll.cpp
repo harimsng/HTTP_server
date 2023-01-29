@@ -5,6 +5,8 @@
 #include "event/EventObject.hpp"
 #include "Epoll.hpp"
 
+#define MATCH_EVENT(events, event) (((events) & (event)) == (event))
+
 // deleted
 Epoll::Epoll(Epoll const& epoll)
 {
@@ -71,14 +73,27 @@ Epoll::pollWork()
 	{
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
+		int				status = NORMAL;
 
-		// TODO: divide by filter
-		EventStatus status = object->handleEvent();
+		if (MATCH_EVENT(event.events, EPOLLIN))
+		{
+			object->m_filter = READ;
+			status |= object->handleEvent();
+		}
+		if (MATCH_EVENT(event.events, EPOLLOUT))
+		{
+			object->m_filter = WRITE;
+			status |= object->handleEvent();
+		}
+		if (MATCH_EVENT(event.events, EPOLLERR))
+		{
+			object->m_filter = ERROR;
+			status |= object->handleEvent();
+		}
 		if (status == END)
 		{
 			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
 			// INFO: is this right?
-			close(object->m_fd);
 			delete object;
 //			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
