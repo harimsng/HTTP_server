@@ -1,4 +1,3 @@
-#include "http/AMethod.hpp"
 #include "PostMethod.hpp"
 
 // constructors & destructor

@@ -43,6 +43,7 @@ SRC			+=	main.cpp\
 				http/PostMethod.cpp\
 				http/DeleteMethod.cpp\
 				http/FindLocation.cpp\
+				http/AutoIndex.cpp\
 \
 				io/Buffer.cpp\
 \
@@ -72,9 +73,6 @@ endif
 
 
 .PHONY: all debug release clean fclean re
-
-test:
-	echo $(WORKING_DIR)
 
 all: $(COMPILE_MODE)
 	$(MAKE) $(NAME)
