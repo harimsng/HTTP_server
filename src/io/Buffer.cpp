@@ -11,6 +11,7 @@ using namespace std;
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
+:	string()
 {
 	if (this != &buffer)
 		*this = buffer;

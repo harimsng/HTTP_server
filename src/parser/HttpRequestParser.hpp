@@ -11,6 +11,7 @@
 #define UPDATE_REQUEST_ERROR(status, code) (status = status < 300 ? code : status)
 
 class	Server;
+class	VirtualServer;
 struct	Request;
 
 typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
@@ -27,6 +28,7 @@ struct Request
 	std::string			m_path;
 	std::string			m_file;
 	Location*			m_locationBlock;
+	VirtualServer*		m_virtualServer;
 	HeaderFieldsMap		m_headerFieldsMap;
 };
 

@@ -18,7 +18,12 @@
 
 using namespace	std;
 
+const char*	g_httpVersion = "HTTP/1.1";
+
 map<string, uint16_t>	RequestHandler::s_methodConvertTable;
+map<uint16_t, string>	RequestHandler::s_methodRConvertTable;
+vector<pair<string, string> >	RequestHandler::s_extensionTypeTable;
+
 
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
@@ -26,7 +31,6 @@ RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
-	initExtensionList();
 	(void)requestHandler;
 }
 
@@ -43,7 +47,6 @@ RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 	m_parser(m_recvBuffer),
 	m_method(NULL)
 {
-	initExtensionList();
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
 }
@@ -78,8 +81,13 @@ RequestHandler::receiveRequest()
 	{
 		// NOTE
 		// this method will be called multiple times. this block is temporary.
-		// and delete method after complete to make response message
 		m_method->completeResponse();
+		// resetStates();
+	}
+	if (m_parser.m_readStatus == HttpRequestParser::FINISHED)
+	{
+		delete m_method;
+		resetStates();
 	}
 	return receiveStatus;
 }
@@ -90,7 +98,9 @@ RequestHandler::sendResponse() try
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	{
 		return SEND_DONE;
+	}
 	return SEND_NORMAL;
 }
 catch (runtime_error& e)
@@ -125,11 +135,9 @@ RequestHandler::checkRequestMessage()
 void
 RequestHandler::checkStatusLine()
 {
-	if (m_request.m_method == METHOD_ERROR) // check method
-	{}
 	// if (m_request.m_uri >= uri_size) // check uri length
 	if (m_request.m_protocol != "HTTP/1.1") // check http version
-	{}
+		UPDATE_REQUEST_ERROR(m_request.m_status, 505);
 }
 
 void
@@ -139,10 +147,8 @@ RequestHandler::checkHeaderFields()
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
 
-	// ... check allow_method field
-
 	if (check == false)
-		throw HttpErrorHandler(400);
+		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
 bool
@@ -216,19 +222,16 @@ RequestHandler::createResponseHeader() try
 	FindLocation	findLocation;
 	VirtualServer*	virtualServer;
 	string			resourceLocation;
-	int				statusCode = m_request.m_status;
+	int&			statusCode = m_request.m_status;
 
 	checkRequestMessage();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
+	m_request.m_virtualServer = virtualServer;
 	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	if (m_request.m_locationBlock != NULL)
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	checkResourceStatus(resourceLocation.c_str());
+	statusCode = checkResourceStatus(resourceLocation.c_str());
 
-	bufferResponseStatusLine(statusCode);
-	if (statusCode >= 400)
-		throw HttpErrorHandler(statusCode);
-	bufferResponseHeaderFields();
 	switch (m_request.m_method)
 	{
 		case GET:
@@ -246,14 +249,23 @@ RequestHandler::createResponseHeader() try
 		case DELETE:
 			m_method = new DeleteMethod(*this);
 			break;
-		default: ;
-			// throw HttpErrorHandler(???);
+		default:
+			UPDATE_REQUEST_ERROR(statusCode, 400);
 	}
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
+	if (statusCode >= 400)
+		throw HttpErrorHandler(statusCode);
+
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 catch (HttpErrorHandler& e)
 {
-	resetStates();
+	if (m_request.m_method != HEAD)
+		m_method = new GetMethod(*this);
+	else
+		m_method = new HeadMethod(*this);
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -264,59 +276,24 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
-	m_sendBuffer.append("OK");
+	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
 	m_sendBuffer.append(g_CRLF);
 }
 
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	m_sendBuffer.append("Server: webserv/2.0");	
+	m_sendBuffer.append("Server: webserv/2.0");
 	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
-	m_sendBuffer.append(g_CRLF);
+	// TODO : should be moved to method class
+	// m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
+	// m_sendBuffer.append(g_CRLF);
+	// m_sendBuffer.append("Connection: keep-alive");
+	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Connection: keep-alive");
 	m_sendBuffer.append(g_CRLF);
 }
 
-void
-RequestHandler::initExtensionList()
-{
-	m_extensionType.push_back(std::pair<std::string, std::string>("html", "text/html"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("htm","text/html"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("shtml","text/html"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("css","text/css"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("xml","text/xml"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("gif","image/gif"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("jpeg","image/gif"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("jpg","image/jpeg"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("txt","text/plain"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("png","image/png"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("ico","image/x-icon"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("bmp","image/x-ms-bmp"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("svg","image/x-ms-bmp"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("webp","image/webp"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("mp4", "video/mp4"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("mpeg", "video/mp4"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("mpg", "video/mpeg"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("avi", "video/x-msvideo"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("js","application/javascript"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("woff","application/font-woff"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("json","application/json"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("doc","application/msword"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("pdf","application/pdf"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("xls", "application/vnd.ms-excel"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("rar", "application/x-rar-compressed"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("zip", "application/zip"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("7z", "application/x-7z-compressed"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("bin", "application/zip"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("exe", "application/zip"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("mp3", "audio/mpeg"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("ogg", "audio/ogg"));
-	m_extensionType.push_back(std::pair<std::string, std::string>("m4a", "audio/x-m4a"));
-}
 
 std::string
 RequestHandler::findContentType(std::string content)
@@ -324,7 +301,7 @@ RequestHandler::findContentType(std::string content)
 	std::string extension;
 
 	extension = content.substr(content.find('.') + 1);
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = m_extensionType.begin(); it != m_extensionType.end(); it++)
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = s_extensionTypeTable.begin(); it != s_extensionTypeTable.end(); it++)
 		if (extension == it->first)
 			return (it->second);
 	extension = "text/plain";
@@ -364,4 +341,51 @@ RequestHandler::setMethodConvertTable()
 	s_methodConvertTable["OPTION"] = RequestHandler::OPTION;
 	s_methodConvertTable["TRACE"] = RequestHandler::TRACE;
 	s_methodConvertTable["CONNECT"] = RequestHandler::CONNECT;
+
+	s_methodRConvertTable[RequestHandler::GET] = "GET";
+	s_methodRConvertTable[RequestHandler::HEAD] = "HEAD";
+	s_methodRConvertTable[RequestHandler::POST] = "POST";
+	s_methodRConvertTable[RequestHandler::PUT] = "PUT";
+	s_methodRConvertTable[RequestHandler::DELETE] = "DELETE";
+	s_methodRConvertTable[RequestHandler::OPTION] = "OPTION";
+	s_methodRConvertTable[RequestHandler::TRACE] = "TRACE";
+	s_methodRConvertTable[RequestHandler::CONNECT] = "CONNECT";
+}
+
+void
+RequestHandler::initExtensionList()
+{
+	s_extensionTypeTable.reserve(64);
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("html", "text/html"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("htm","text/html"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("shtml","text/html"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("css","text/css"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("xml","text/xml"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("gif","image/gif"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("jpeg","image/gif"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("jpg","image/jpeg"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("txt","text/plain"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("png","image/png"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("ico","image/x-icon"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("bmp","image/x-ms-bmp"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("svg","image/x-ms-bmp"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("webp","image/webp"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("mp4", "video/mp4"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("mpeg", "video/mp4"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("mpg", "video/mpeg"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("avi", "video/x-msvideo"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("js","application/javascript"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("woff","application/font-woff"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("json","application/json"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("doc","application/msword"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("pdf","application/pdf"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("xls", "application/vnd.ms-excel"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("rar", "application/x-rar-compressed"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("zip", "application/zip"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("7z", "application/x-7z-compressed"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("bin", "application/zip"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("exe", "application/zip"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("mp3", "audio/mpeg"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("ogg", "audio/ogg"));
+	s_extensionTypeTable.push_back(std::pair<std::string, std::string>("m4a", "audio/x-m4a"));
 }

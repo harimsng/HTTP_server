@@ -1,7 +1,10 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
+#include "Types.hpp"
+
 #include <string>
+#include <vector>
 
 class	Location
 {
@@ -43,6 +46,7 @@ public:
 	std::string		m_alias;
 	uint16_t		m_limitExcept;
 	std::string		m_clientMaxBodySize;
+	std::vector<std::string> m_errorPage;
 //	std::string		m_errorPageTable[599]; // index is status code
 
 

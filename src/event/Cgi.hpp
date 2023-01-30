@@ -5,11 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "http/RequestHandler.hpp"
 
-#define READ 0
-#define WRITE 1
-#define BUFFER_SIZE 65535
+#include "http/RequestHandler.hpp"
 
 class	Cgi
 {
@@ -37,9 +34,9 @@ private:
 		std::string					m_script;
 		std::string					m_query;
 
-		int							m_fromCgiToServer[2];
-		int							m_fromServerToCgi[2];
-		pid_t						m_pid;
+		// int							m_fromCgiToServer[2];
+		// int							m_fromServerToCgi[2];
+		// pid_t						m_pid;
 		bool						m_bodyFlag;
 };
 

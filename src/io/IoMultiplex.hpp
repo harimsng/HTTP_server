@@ -11,10 +11,10 @@ class	IoMultiplex
 public:
 	enum	e_eventStatus
 	{
-		NORMAL = 1,
-		END = 2,
-		NON_BLOCK = 3,
-		STAT_ERROR = 4,
+		NORMAL = 0x0,
+		END = 0x1,
+		NON_BLOCK = 0x2,
+		STAT_ERROR = 0x4,
 	};
 
 	enum	e_operation

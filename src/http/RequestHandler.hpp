@@ -9,7 +9,7 @@
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
 
-static const char*	g_httpVersion = "HTTP/1.1";
+extern const char*	g_httpVersion;
 
 class	AMethod;
 class	VirtualServer;
@@ -64,6 +64,7 @@ public:
 	void	resetStates();
 
 	void	createResponseHeader();
+	std::string	findContentType(std::string content);
 private:
 	VirtualServer*	resolveVirtualServer(const std::string& host);
 	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
@@ -76,8 +77,6 @@ private:
 
 	void	bufferResponseStatusLine(int statusCode);
 	void	bufferResponseHeaderFields();
-	void		initExtensionList();
-	std::string	findContentType(std::string content);
 
 	void	makeErrorResponse(const std::string& errorMessage);
 
@@ -89,10 +88,13 @@ private:
 
 	Request				m_request;
 	AMethod*			m_method;
-	std::vector<std::pair<std::string, std::string> > m_extensionType;
 public:
 // static members
+	static std::vector<std::pair<std::string, std::string> > s_extensionTypeTable;
+	static void		initExtensionList();
+
 	static std::map<std::string, uint16_t>	s_methodConvertTable;
+	static std::map<uint16_t, std::string>	s_methodRConvertTable;
 	static void								setMethodConvertTable();
 };
 

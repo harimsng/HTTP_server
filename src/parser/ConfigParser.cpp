@@ -108,7 +108,7 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 }
 catch (pair<string, VirtualServer*> e)
 {
-	LOG(WARNING, "duplicated server name \"%s\" same address", e.first.c_str());
+	LOG(WARNING, "duplicated server name \"%s\" in same address", e.first.c_str());
 	throw e.second;
 }
 

@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "Types.hpp"
+
 struct sockaddr_in;
 
 class Util
@@ -24,7 +26,7 @@ public:
 	static const std::string	getDate(const char* format);
 	static bool					checkFileStat(const char* path);
 
-	string						makeErrorPage(int status);
+	std::string					makeErrorPage(int status);
 
 };
 #endif //Util_hpp

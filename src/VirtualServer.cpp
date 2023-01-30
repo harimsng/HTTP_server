@@ -27,10 +27,11 @@ VirtualServer::operator=(const VirtualServer& server)
 	m_serverNames = server.m_serverNames;
 	m_errorCode = server.m_errorCode;
 	m_root = server.m_root;
-	m_errorPages = server.m_errorPages;
+	// m_errorPages = server.m_errorPage;
 	m_listen = server.m_listen;
 	m_clientMaxBodySize = server.m_clientMaxBodySize;
 	m_uriBufferSize = server.m_uriBufferSize;
+	m_errorPage = server.m_errorPage;
 	// m_locationTable = server.m_locationTable;
 	return *this;
 }
