@@ -6,6 +6,7 @@
 #include "Logger.hpp"
 #include "socket/Socket.hpp"
 #include "Util.hpp"
+#include "exception/HttpErrorHandler.hpp"
 
 using namespace std;
 
@@ -114,6 +115,8 @@ Util::toString(int num)
 	string	str;
 	int		denom = 1000000000;
 
+	if (num == 0)
+		return ("0");
 	while (denom > 0 && num / denom == 0)
 		denom /= 10;
 	while (denom > 0)
@@ -175,7 +178,7 @@ Util::makeErrorPage(int status)
 	"	</head>\n"
 	"	<body>\n"
 	"		<h1>"
-	+ statusStr + " " + "Error!"
+	+ statusStr + " " + HttpErrorHandler::getErrorMessage(status) +
 	"		</h1>\n"
 	"	</body>\n"
 	"</html>\n";

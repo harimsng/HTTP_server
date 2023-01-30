@@ -49,14 +49,6 @@ SRC			+=	main.cpp\
 \
 				util/Util.cpp\
 
-#				communicator/Communicator.cpp\
-#				communicator/Request.cpp\
-#				communicator/Response.cpp\
-#\
-#				socket/ClientSocket.cpp\
-#				socket/ServerSocket.cpp\
-
-
 OBJ			:=	$(SRC:%.cpp=%.o)
 DEP			:=	$(OBJ:%.o=%.d)
 

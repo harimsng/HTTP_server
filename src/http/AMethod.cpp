@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define FILE_BUFFER_SIZE (8192)
+
 // constructors & destructor
 AMethod::AMethod(RequestHandler& requestHandler)
 :	m_requestHandler(requestHandler),
@@ -42,20 +44,22 @@ AMethod::readFile(std::string& readBody)
 {
 	struct stat		fileStatus;
 	std::fstream	file;
-	std::string		readLine;
+	std::string		fileBuffer;
 	std::string 	filePath = m_request.m_path + m_request.m_file;
 
 	if (m_request.m_status != 200)
 	{
-		vector<string> error_page;
+		map<int, string> error_page;
 
 		// filePath = "/Users/soum/webserv/html/error.html";
 		if (m_request.m_locationBlock == NULL)
 		{
-			error_page = m_request.m_virtualServer->m_errorPage;
-			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end() - 1))
-				filePath = m_request.m_virtualServer->m_root + error_page.back();
+			error_page = m_request.m_virtualServer->m_errorPageTable;
+			if(error_page.size() != 0 && error_page.count(m_request.m_status) != 0)
+			{
+				filePath = m_request.m_virtualServer->m_root + error_page[m_request.m_status];
+				filePath.replace(filePath.find('*'), 1, std::to_string(m_request.m_status));
+			}
 			else
 			{
 				readBody = Util::makeErrorPage(m_request.m_status);
@@ -64,10 +68,12 @@ AMethod::readFile(std::string& readBody)
 		}
 		else
 		{
-			error_page = m_request.m_locationBlock->m_errorPage;
-			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end() - 1))
-				filePath = m_request.m_locationBlock->m_root + error_page.back();
+			error_page = m_request.m_locationBlock->m_errorPageTable;
+			if(error_page.size() != 0 && error_page.count(m_request.m_status) != 0)
+			{
+				filePath = m_request.m_locationBlock->m_root + error_page[m_request.m_status];
+				filePath.replace(filePath.find('*'), 1, std::to_string(m_request.m_status));
+			}
 			else
 			{
 				readBody = Util::makeErrorPage(m_request.m_status);
@@ -82,12 +88,11 @@ AMethod::readFile(std::string& readBody)
 	// INFO: it doesn't send raw content of resource.
 	while (!file.eof())
 	{
-		std::getline(file, readLine);
-		if (readLine == "")
-			continue;
-		readBody += readLine + "\n";
+		fileBuffer.resize(FILE_BUFFER_SIZE);
+		file.read(&fileBuffer[0], FILE_BUFFER_SIZE);
+		fileBuffer.resize(file.gcount());
+		readBody += fileBuffer + "\n";
 	}
-	readBody.erase(readBody.end() - 1);
 	file.close();
 }
 
