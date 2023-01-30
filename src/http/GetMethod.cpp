@@ -50,6 +50,8 @@ GetMethod::completeResponse()
 		case DONE:
 		// method must know end of response(content length, chunked)
 			endResponse();
-		break;
+			break;
+		default:
+			;
 	}
 }

@@ -34,6 +34,7 @@ AMethod::operator=(const AMethod& aMethod)
 void
 AMethod::completeResponse()
 {
+
 }
 
 void
@@ -52,19 +53,18 @@ AMethod::readFile(std::string& readBody)
 		if (m_request.m_locationBlock == NULL)
 		{
 			error_page = m_request.m_virtualServer->m_errorPage;
-			if(error_page.size() != 0 && find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end())
+			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
+				!= error_page.end() - 1))
 				filePath = m_request.m_virtualServer->m_root + error_page.back();
 		}
 		else
 		{
 			error_page = m_request.m_locationBlock->m_errorPage;
-			if(error_page.size() != 0 && find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end())
+			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
+				!= error_page.end() - 1))
 				filePath = m_request.m_locationBlock->m_root + error_page.back();
 		}
 	}
-	cout << filePath << endl;
 	file.open(filePath.c_str());
 	stat(filePath.c_str(), &fileStatus);
 	readBody.clear();
@@ -118,7 +118,8 @@ AMethod::completeResponseHeader()
 {
 	m_sendBuffer.append("Content-Type: " + m_requestHandler.findContentType(m_request.m_file));
 	m_sendBuffer.append(g_CRLF);
-	if (m_request.m_status >= 300)
+	if (m_request.m_status >= 300 ||
+			m_request.m_headerFieldsMap.count("CONNECTION") == 0)
 		m_sendBuffer.append("Connection: close");
 	else
 		m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);

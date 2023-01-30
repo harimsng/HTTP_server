@@ -23,16 +23,16 @@ HeadMethod::operator=(const HeadMethod& headMethod)
 void
 HeadMethod::completeResponse()
 {
-	/*
-	std::string filePath = m_request.m_path + m_request.m_file;
-
-	if (!checkFileExists(filePath))
+	switch(m_methodStatus)
 	{
-		filePath = m_conf.getErrorPath();
-		m_statusCode = 404;
-		m_filePath.replace(m_filePath.find('*'), 1, std::to_string(m_statusCode));
-		return ;
+		case HEADER:
+			completeResponseHeader();
+			m_sendBuffer.append(g_CRLF);
+			m_methodStatus = DONE;
+		case DONE:
+			endResponse();
+			break;
+		default:
+			;
 	}
-	*/
 }
-
