@@ -143,7 +143,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             else  { // 1-1-2 디렉토리일 경우
                 if (m_locationBlock->m_index.size() != 0)
                 {
-                    for (int i = 0; i < m_locationBlock->m_index.size(); i++)
+                    for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
                     {
                         this->m_file = m_locationBlock->m_index[i];
                         if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
@@ -209,7 +209,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
 
         if (m_locationBlock->m_index.size() != 0)
         {
-            for (int i = 0; i < m_locationBlock->m_index.size(); i++)
+            for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
             {
                 this->m_file = m_locationBlock->m_index[i];
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
@@ -245,7 +245,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
 
         if (m_locationBlock->m_index.size() != 0)
         {
-            for (int i = 0; i < m_locationBlock->m_index.size(); i++)
+            for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
             {
                 this->m_file = m_locationBlock->m_index[i];
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')

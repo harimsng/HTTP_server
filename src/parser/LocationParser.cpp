@@ -122,3 +122,10 @@ LocationParser::setErrorPage(Location& location)
 	m_tokenizer.eat(";");
 
 }
+
+void
+LocationParser::setAutoIndex(Location& location)
+{
+	location.m_autoindex = m_tokenizer.get() == "on" ? true : false;
+	m_tokenizer.eat(";");
+}
