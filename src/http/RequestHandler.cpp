@@ -304,7 +304,7 @@ RequestHandler::findContentType(std::string content)
 	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = s_extensionTypeTable.begin(); it != s_extensionTypeTable.end(); it++)
 		if (extension == it->first)
 			return (it->second);
-	extension = "text/plain";
+	extension = "text/html";
 	return (extension);
 }
 
