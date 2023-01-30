@@ -36,6 +36,7 @@ public:
 	void		setErrorPage(VirtualServer& server);
 	void		setClientMaxBodySize(VirtualServer& server);
 	void		setAutoIndex(VirtualServer& server);
+	void		setCgiPass(VirtualServer& server);
 
 private:
 // member variables
