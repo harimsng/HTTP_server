@@ -1,8 +1,11 @@
 #include <dirent.h>
 #include <unistd.h>
+#include <string>
 
 #include "exception/HttpErrorHandler.hpp"
 #include "AutoIndex.hpp"
+
+using namespace std;
 
 // deleted
 AutoIndex&
@@ -42,9 +45,12 @@ AutoIndex::autoIndex(const std::string& path) {
 	// ENOTDIR not a directory -> logic error
 
 	// save to string and return it OR write to socket
+
+	// Users/soum/webserv/html/44/
 	page_content.reserve(2048);
 	while ((file_info = readdir(directory)) != NULL) {
-		page_content += "<p>";
+		page_content += "<a href=\"http://localhost:8080/index.html\">";
+		// if (string(file_info->d_name) == "./")
 		page_content += file_info->d_name;
 		if (file_info->d_type == DT_DIR)
 			page_content += "/";

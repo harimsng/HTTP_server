@@ -40,6 +40,7 @@ SRC			+=	main.cpp\
 				http/PostMethod.cpp\
 				http/DeleteMethod.cpp\
 				http/FindLocation.cpp\
+				http/AutoIndex.cpp\
 \
 				io/Buffer.cpp\
 \

@@ -39,14 +39,6 @@ DeleteMethod::completeResponse()
 
 	string filePath = m_request.m_path + m_request.m_file;
 
-	if (!checkFileExists(filePath))
-	{
-		filePath = m_conf.getErrorPath(); // error 페이지 가져오는 코드
-		m_statusCode = 404;
-		filePath.replace(filePath.find('*'), 1, to_string(m_statusCode)); // error 페이지 가져오는 코드
-		return ;
-	}
-
 	readFile(m_sendBuffer); // 파일 읽기
 	deleteStatus = unlink(filePath.c_str());
 	if (deleteStatus == -1)
