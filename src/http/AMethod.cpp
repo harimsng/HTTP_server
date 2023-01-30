@@ -49,13 +49,18 @@ AMethod::readFile(std::string& readBody)
 	{
 		vector<string> error_page;
 
-		filePath = "/Users/soum/webserv/html/error.html";
+		// filePath = "/Users/soum/webserv/html/error.html";
 		if (m_request.m_locationBlock == NULL)
 		{
 			error_page = m_request.m_virtualServer->m_errorPage;
 			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
 				!= error_page.end() - 1))
 				filePath = m_request.m_virtualServer->m_root + error_page.back();
+			else
+			{
+				readBody = Util::makeErrorPage(m_request.m_status);
+				return;
+			}
 		}
 		else
 		{
@@ -63,6 +68,11 @@ AMethod::readFile(std::string& readBody)
 			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
 				!= error_page.end() - 1))
 				filePath = m_request.m_locationBlock->m_root + error_page.back();
+			else
+			{
+				readBody = Util::makeErrorPage(m_request.m_status);
+				return;
+			}
 		}
 	}
 	file.open(filePath.c_str());
