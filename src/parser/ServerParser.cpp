@@ -26,7 +26,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["listen"] = &ServerParser::setListenAddress;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
-	s_serverSetterMap["cgiPass"] = &ServerParser::setCgiPass;
+	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
 	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 }
 
@@ -76,7 +76,7 @@ ServerParser::setIndex(VirtualServer& server)
 {
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		server.m_index.push_back( m_tokenizer.get());
+		server.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }

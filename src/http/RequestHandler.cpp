@@ -113,6 +113,7 @@ void
 RequestHandler::resetStates()
 {
 	m_request.m_headerFieldsMap.clear();
+	m_request = Request();
 	m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE_METHOD;
 }
 
@@ -151,12 +152,11 @@ RequestHandler::checkHeaderFields()
 		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
-bool
+void
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
 	if (!(m_request.m_method & allowed))
-		throw HttpErrorHandler(405);
-	return true;
+		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
 }
 
 // TODO: should be called on method classes
@@ -177,14 +177,15 @@ RequestHandler::resolveVirtualServer(const string& host)
 	return server;
 }
 
-int
-RequestHandler::checkResourceStatus(const char* path)
+void
+RequestHandler::checkResourceStatus()
 {
 	int			ret;
 	struct stat	status;
 	int			statusCode = 0;
+	string		path = m_request.m_path + m_request.m_file;
 
-	ret = stat(path, &status);
+	ret = stat(path.c_str(), &status);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode,
@@ -192,7 +193,7 @@ RequestHandler::checkResourceStatus(const char* path)
 					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
 //					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
 					))
-		return (200);
+		return;
 		// statusCode = 200;
 
 	switch (errno)
@@ -212,7 +213,8 @@ RequestHandler::checkResourceStatus(const char* path)
 			break;
 	}
 	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
-	return statusCode;
+
+	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
 }
 
 // HOST field could be empty
@@ -221,18 +223,18 @@ RequestHandler::createResponseHeader() try
 {
 	FindLocation	findLocation;
 	VirtualServer*	virtualServer;
-	string			resourceLocation;
 	int&			statusCode = m_request.m_status;
 
 	checkRequestMessage();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
-	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
+	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	if (m_request.m_locationBlock != NULL)
 	{
+		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	statusCode = checkResourceStatus(resourceLocation.c_str());
+	checkResourceStatus();
 
 	switch (m_request.m_method)
 	{
