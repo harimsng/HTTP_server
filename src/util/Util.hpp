@@ -26,7 +26,6 @@ public:
 	static const std::string	getDate(const char* format);
 	static bool					checkFileStat(const char* path);
 
-	std::string					makeErrorPage(int status);
-
+	static std::string			makeErrorPage(int status);
 };
 #endif //Util_hpp

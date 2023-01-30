@@ -81,8 +81,13 @@ RequestHandler::receiveRequest()
 	{
 		// NOTE
 		// this method will be called multiple times. this block is temporary.
-		// and delete method after complete to make response message
 		m_method->completeResponse();
+		// resetStates();
+	}
+	if (m_parser.m_readStatus == HttpRequestParser::FINISHED)
+	{
+		delete m_method;
+		resetStates();
 	}
 	return receiveStatus;
 }
@@ -93,7 +98,9 @@ RequestHandler::sendResponse() try
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	{
 		return SEND_DONE;
+	}
 	return SEND_NORMAL;
 }
 catch (runtime_error& e)
@@ -128,11 +135,9 @@ RequestHandler::checkRequestMessage()
 void
 RequestHandler::checkStatusLine()
 {
-	if (m_request.m_method == METHOD_ERROR) // check method
-	{}
 	// if (m_request.m_uri >= uri_size) // check uri length
 	if (m_request.m_protocol != "HTTP/1.1") // check http version
-	{}
+		UPDATE_REQUEST_ERROR(m_request.m_status, 505);
 }
 
 void
@@ -142,10 +147,8 @@ RequestHandler::checkHeaderFields()
 
 	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
 
-	// ... check allow_method field
-
 	if (check == false)
-		throw HttpErrorHandler(400);
+		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
 bool
@@ -219,19 +222,16 @@ RequestHandler::createResponseHeader() try
 	FindLocation	findLocation;
 	VirtualServer*	virtualServer;
 	string			resourceLocation;
-	int				statusCode = m_request.m_status;
+	int&			statusCode = m_request.m_status;
 
 	checkRequestMessage();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
+	m_request.m_virtualServer = virtualServer;
 	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	if (m_request.m_locationBlock != NULL)
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	checkResourceStatus(resourceLocation.c_str());
+	statusCode = checkResourceStatus(resourceLocation.c_str());
 
-	bufferResponseStatusLine(statusCode);
-	if (statusCode >= 400)
-		throw HttpErrorHandler(statusCode);
-	bufferResponseHeaderFields();
 	switch (m_request.m_method)
 	{
 		case GET:
@@ -249,14 +249,23 @@ RequestHandler::createResponseHeader() try
 		case DELETE:
 			m_method = new DeleteMethod(*this);
 			break;
-		default: ;
-			// throw HttpErrorHandler(???);
+		default:
+			UPDATE_REQUEST_ERROR(statusCode, 400);
 	}
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
+	if (statusCode >= 400)
+		throw HttpErrorHandler(statusCode);
+
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 catch (HttpErrorHandler& e)
 {
-	resetStates();
+	if (m_request.m_method != HEAD)
+		m_method = new GetMethod(*this);
+	else
+		m_method = new HeadMethod(*this);
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -267,20 +276,21 @@ RequestHandler::bufferResponseStatusLine(int statusCode)
 	m_sendBuffer.append(" ");
 	m_sendBuffer.append(Util::toString(statusCode));
 	m_sendBuffer.append(" ");
-	m_sendBuffer.append("OK");
+	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
 	m_sendBuffer.append(g_CRLF);
 }
 
 void
 RequestHandler::bufferResponseHeaderFields()
 {
-	m_sendBuffer.append("Server: webserv/2.0");	
+	m_sendBuffer.append("Server: webserv/2.0");
 	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
-	m_sendBuffer.append(g_CRLF);
+	// TODO : should be moved to method class
+	// m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
+	// m_sendBuffer.append(g_CRLF);
+	// m_sendBuffer.append("Connection: keep-alive");
+	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Connection: keep-alive");
 	m_sendBuffer.append(g_CRLF);
 }
 
@@ -294,7 +304,7 @@ RequestHandler::findContentType(std::string content)
 	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = s_extensionTypeTable.begin(); it != s_extensionTypeTable.end(); it++)
 		if (extension == it->first)
 			return (it->second);
-	extension = "text/plain";
+	extension = "text/html";
 	return (extension);
 }
 

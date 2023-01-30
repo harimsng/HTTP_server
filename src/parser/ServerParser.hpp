@@ -33,7 +33,7 @@ public:
 	void		setServerNames(VirtualServer& server);
 	void		setListenAddress(VirtualServer& server);
 	void		setRoot(VirtualServer& server);
-	void		setErrorPages(VirtualServer& server);
+	void		setErrorPage(VirtualServer& server);
 	void		setErrorCode(VirtualServer& server);
 	void		setClientMaxBodySize(VirtualServer& server);
 	void		setUriBufferSize(VirtualServer& server);

@@ -4,11 +4,13 @@
 #include <vector>
 
 #include "Webserv.hpp"
+#include "http/AMethod.hpp"
 #include "http/RequestHandler.hpp"
 
 class	VirtualServer
 {
 	friend class	FindLocation;
+	friend class	AMethod;
 
 	typedef	std::map<std::string, Location>	LocationTable;
 
@@ -30,7 +32,8 @@ private:
 	std::string							m_errorCode;
 	std::string							m_root;
 	std::string							m_errorPath;
-	std::string							m_errorPages;
+	std::vector<std::string>			m_errorPage;
+	// std::string							m_errorPages;
 	sockaddr_in							m_listen;
 	int32_t								m_clientMaxBodySize;
 	int32_t								m_uriBufferSize;

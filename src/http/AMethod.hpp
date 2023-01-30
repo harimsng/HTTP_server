@@ -11,6 +11,12 @@
 
 class	AMethod
 {
+public :
+	enum methodStatus{
+		HEADER = 0,
+		BODY,
+		DONE
+	};
 private:
 	AMethod();
 	AMethod(const AMethod& method);
@@ -18,13 +24,14 @@ private:
 public:
 // constructors & destructor
 	AMethod(RequestHandler& requestHandler);
-	~AMethod();
+	virtual ~AMethod();
 
 // operators
 	AMethod	&operator=(const AMethod& aMethod);
 
 // member functions
 	virtual void	completeResponse() = 0;
+	void			completeResponseHeader();
 	void			endResponse();
 
 	void			readFile(std::string& readBody);
@@ -36,6 +43,8 @@ protected:
 	Request&			m_request;
 	SendBuffer&			m_sendBuffer;
 	ReceiveBuffer&		m_recvBuffer;
+	methodStatus		m_methodStatus;
+
 };
 
 #endif

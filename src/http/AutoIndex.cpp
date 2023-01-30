@@ -62,7 +62,7 @@ AutoIndex::autoIndex(const std::string& path) {
 "		</h1>\n"
 + page_content +
 "	</body>\n"
-"</html>";
+"</html>\n";
 	closedir(directory);
 
 	return page_content;

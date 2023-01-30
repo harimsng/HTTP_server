@@ -170,6 +170,7 @@ Util::makeErrorPage(int status)
 	"<!DOCTYPE html>\n"
 	"<html>\n"
 	"	<head>\n"
+	"<meta charset=\"utf-8\">\n"
 	"		<title>" + statusStr + "</title>\n"
 	"	</head>\n"
 	"	<body>\n"
@@ -177,7 +178,7 @@ Util::makeErrorPage(int status)
 	+ statusStr + " " + "Error!"
 	"		</h1>\n"
 	"	</body>\n"
-	"</html>";
+	"</html>\n";
 
 	return buf;
 }

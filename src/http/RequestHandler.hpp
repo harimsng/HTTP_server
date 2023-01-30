@@ -64,6 +64,7 @@ public:
 	void	resetStates();
 
 	void	createResponseHeader();
+	std::string	findContentType(std::string content);
 private:
 	VirtualServer*	resolveVirtualServer(const std::string& host);
 	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
@@ -76,7 +77,6 @@ private:
 
 	void	bufferResponseStatusLine(int statusCode);
 	void	bufferResponseHeaderFields();
-	std::string	findContentType(std::string content);
 
 	void	makeErrorResponse(const std::string& errorMessage);
 

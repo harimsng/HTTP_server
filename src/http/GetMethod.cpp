@@ -4,6 +4,7 @@
 #include "ServerManager.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "GetMethod.hpp"
+#include "AutoIndex.hpp"
 
 using namespace std;
 
@@ -30,13 +31,31 @@ GetMethod::completeResponse()
 {
 	string readBody;
 
-	readFile(readBody);
-	m_sendBuffer.append("Content-Length: ");
-	m_sendBuffer.append(Util::toString(readBody.size()));
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append(readBody);
+	switch (m_methodStatus)
+	{
+		case HEADER:
+			completeResponseHeader();
+			m_methodStatus = BODY;
 
-	// method must know end of response(content length, chunked)
-	endResponse();
+		case BODY:
+			readBody = "";
+			if (m_request.m_file == "")
+				readBody = AutoIndex::autoIndex(m_request.m_path);
+			else
+				readFile(readBody);
+			m_sendBuffer.append("Content-Length: ");
+			m_sendBuffer.append(Util::toString(readBody.size()));
+			m_sendBuffer.append(g_CRLF);
+			m_sendBuffer.append(g_CRLF);
+			m_sendBuffer.append(readBody);
+			m_methodStatus = DONE;
+			// break;
+
+		case DONE:
+		// method must know end of response(content length, chunked)
+			endResponse();
+			break;
+		default:
+			;
+	}
 }
