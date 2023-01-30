@@ -178,7 +178,7 @@ Util::makeErrorPage(int status)
 	+ statusStr + " " + "Error!"
 	"		</h1>\n"
 	"	</body>\n"
-	"</html>";
+	"</html>\n";
 
 	return buf;
 }

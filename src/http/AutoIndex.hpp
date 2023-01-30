@@ -16,7 +16,7 @@ public:
 	~AutoIndex();
 
 // member functions
-	std::string autoIndex(const std::string& path);
+	static std::string autoIndex(const std::string& path);
 };
 
 #endif
