@@ -77,7 +77,11 @@ LocationParser::setPath(Location& location)
 void
 LocationParser::setRoot(Location& location)
 {
+//	static const string	workingDir = WORKING_DIR;
+
 	location.m_root = m_tokenizer.get();
+//	if (location.m_root[0] != '/')
+//		location.m_root = workingDir += location.m_root;
 	m_tokenizer.eat(";");
 }
 
