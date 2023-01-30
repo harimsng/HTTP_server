@@ -27,6 +27,5 @@ public:
 	static bool					checkFileStat(const char* path);
 
 	static std::string			makeErrorPage(int status);
-
 };
 #endif //Util_hpp
