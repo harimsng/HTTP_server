@@ -14,7 +14,6 @@ LocationParser::setLocationSetterMap()
 	s_locationSetterMap["limit_except"] = &LocationParser::setLimitExcept;
 	s_locationSetterMap["path"] = &LocationParser::setPath;
 	s_locationSetterMap["root"] = &LocationParser::setRoot;
-	s_locationSetterMap["cgi_pass"] = &LocationParser::setCgiPass;
 	s_locationSetterMap["alias"] = &LocationParser::setAlias;
 	s_locationSetterMap["client_max_body_size"] = &LocationParser::setClientMaxBodySize;
 	s_locationSetterMap["error_page"] = &LocationParser::setErrorPage;
@@ -82,13 +81,6 @@ LocationParser::setRoot(Location& location)
 	location.m_root = m_tokenizer.get();
 //	if (location.m_root[0] != '/')
 //		location.m_root = workingDir += location.m_root;
-	m_tokenizer.eat(";");
-}
-
-void
-LocationParser::setCgiPass(Location& location)
-{
-	location.m_cgiPass = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 

@@ -20,7 +20,6 @@ Location::setToDefault()
 {
 	m_autoindex = -1;
 	m_limitExcept = limitExcept;
-	m_cgiPass = "";
 	m_alias = "";
 	m_clientMaxBodySize = 0;
 }

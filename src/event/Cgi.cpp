@@ -35,7 +35,7 @@ Cgi::Cgi(Cgi const& cgi)
 void
 Cgi::initCgi(const Request &request)
 {
-	m_cgiPath = request.m_locationBlock->m_cgiPass;
+	m_cgiPath = request.m_cgi;
 	m_path = request.m_path + request.m_file;
 
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
