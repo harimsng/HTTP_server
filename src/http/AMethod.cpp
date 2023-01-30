@@ -75,7 +75,6 @@ AMethod::readFile(std::string& readBody)
 			}
 		}
 	}
-	cout << filePath << endl;
 	file.open(filePath.c_str());
 	stat(filePath.c_str(), &fileStatus);
 	readBody.clear();
