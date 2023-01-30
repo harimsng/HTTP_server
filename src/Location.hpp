@@ -5,23 +5,18 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class	Location
 {
-	friend class	LocationParser;
-	friend class	ServerParser;
-	friend class	FindLocation;
-	friend class	AMethod;
-	friend class	GetMethod;
-
-// deleted
 
 public:
 // constructors & destructor
 	Location();
 	~Location();
-	Location(const Location& location);
-//	Location&	operator=(const Location& location);
+
+//	Location(const Location& location) = default;
+//	Location&	operator=(const Location& location) = default;
 
 // member functions
 
@@ -30,25 +25,17 @@ private:
 
 // member variables
 public:
-	std::string		m_index;
+	int							m_autoindex;
+	uint16_t					m_limitExcept;
+	int32_t						m_clientMaxBodySize;
+	std::string					m_cgiPass;
+	std::string					m_path;
+	std::string					m_root;
+	std::string					m_alias;
+	std::vector<std::string>	m_index;
+	std::map<int, std::string>	m_errorPageTable;
 
-	bool			m_autoindex;
-
-	std::string		m_expires;
-
-	std::string		m_proxyPass;
-
-	std::string		m_scgiPass;
-	std::string		m_fastcgiPass;
-
-	std::string		m_path;
-	std::string		m_root;
-	std::string		m_alias;
-	uint16_t		m_limitExcept;
-	std::string		m_clientMaxBodySize;
-	std::vector<std::string> m_errorPage;
-//	std::string		m_errorPageTable[599]; // index is status code
-
+	std::vector<std::string>	m_cgiExt;
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };

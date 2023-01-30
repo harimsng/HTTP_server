@@ -6,6 +6,7 @@
 #include "Logger.hpp"
 #include "socket/Socket.hpp"
 #include "Util.hpp"
+#include "exception/HttpErrorHandler.hpp"
 
 using namespace std;
 
@@ -177,7 +178,7 @@ Util::makeErrorPage(int status)
 	"	</head>\n"
 	"	<body>\n"
 	"		<h1>"
-	+ statusStr + " " + "Error!"
+	+ statusStr + " " + HttpErrorHandler::getErrorMessage(status) +
 	"		</h1>\n"
 	"	</body>\n"
 	"</html>\n";

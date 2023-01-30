@@ -15,31 +15,10 @@ VirtualServer::~VirtualServer()
 {
 }
 
-VirtualServer::VirtualServer(VirtualServer const& server)
-{
-	*this = server;
-}
-
-VirtualServer&
-VirtualServer::operator=(const VirtualServer& server)
-{
-	m_index = server.m_index;
-	m_serverNames = server.m_serverNames;
-	m_errorCode = server.m_errorCode;
-	m_root = server.m_root;
-	// m_errorPages = server.m_errorPage;
-	m_listen = server.m_listen;
-	m_clientMaxBodySize = server.m_clientMaxBodySize;
-	m_uriBufferSize = server.m_uriBufferSize;
-	m_errorPage = server.m_errorPage;
-	// m_locationTable = server.m_locationTable;
-	return *this;
-}
-
 void
 VirtualServer::setToDefault()
 {
-//	m_index;
+	// m_index;
 	m_serverNames = vector<string>(1, "");
 //	m_errorCode;
 //	m_root;
@@ -66,7 +45,7 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	   << ((addr & 0xff00) >> 8) << '.'
 	   << (addr & 0xff) << ':'
 	   << ntohs(server.m_listen.sin_port) << '\n';
-	os << "\tindex " << server.m_index << '\n';
+	// os << "\tindex " << server.m_index << '\n';
 	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
 	for (map<string, Location>::const_iterator itr = server.m_locationTable.begin();
 			itr != server.m_locationTable.end();

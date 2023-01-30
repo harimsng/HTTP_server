@@ -11,8 +11,6 @@ void
 LocationParser::setLocationSetterMap()
 {
 	s_locationSetterMap["index"] = &LocationParser::setIndex;
-	s_locationSetterMap["expires"] = &LocationParser::setExpires;
-	s_locationSetterMap["proxy_pass"] = &LocationParser::setProxyPass;
 	s_locationSetterMap["limit_except"] = &LocationParser::setLimitExcept;
 	s_locationSetterMap["path"] = &LocationParser::setPath;
 	s_locationSetterMap["root"] = &LocationParser::setRoot;
@@ -20,6 +18,8 @@ LocationParser::setLocationSetterMap()
 	s_locationSetterMap["alias"] = &LocationParser::setAlias;
 	s_locationSetterMap["client_max_body_size"] = &LocationParser::setClientMaxBodySize;
 	s_locationSetterMap["error_page"] = &LocationParser::setErrorPage;
+	s_locationSetterMap["autoindex"] = &LocationParser::setAutoIndex;
+
 }
 
 // constructors & destructor
@@ -46,21 +46,10 @@ LocationParser::parse(Location& location)
 void
 LocationParser::setIndex(Location& location)
 {
-	location.m_index = m_tokenizer.get();
-	m_tokenizer.eat(";");
-}
-
-void
-LocationParser::setExpires(Location& location)
-{
-	location.m_expires= m_tokenizer.get();
-	m_tokenizer.eat(";");
-}
-
-void
-LocationParser::setProxyPass(Location& location)
-{
-	location.m_proxyPass= m_tokenizer.get();
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		location.m_index.push_back( m_tokenizer.get());
+	}
 	m_tokenizer.eat(";");
 }
 
@@ -95,7 +84,7 @@ LocationParser::setRoot(Location& location)
 void
 LocationParser::setCgiPass(Location& location)
 {
-	location.m_index = m_tokenizer.get();
+	location.m_cgiPass = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
@@ -109,16 +98,23 @@ LocationParser::setAlias(Location& location)
 void
 LocationParser::setClientMaxBodySize(Location& location)
 {
-	location.m_clientMaxBodySize = m_tokenizer.get();
+	location.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setErrorPage(Location& location)
 {
+	vector<string> token;
+
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		location.m_errorPage.push_back(m_tokenizer.get());
+		token.push_back(m_tokenizer.get());
+	}
+	for (size_t i = 0; i < token.size() - 1; i++)
+	{
+		location.m_errorPageTable[Util::toInt(token[i])] = token.back();
 	}
 	m_tokenizer.eat(";");
+
 }

@@ -53,9 +53,10 @@ AutoIndex::autoIndex(const std::string& path, const std::string& uri) {
 		link = file_info->d_name;
 		if (file_info->d_type == DT_DIR)
 			link += "/";
+		page_content += "<div style=\"margin-top:10px; font-size:20px;\">\n";
 		page_content += "<a href=\"" + uri + link + "\">";
 		page_content += link;
-		page_content += "</a>\n";
+		page_content += "</a>\n</div>\n";
 	}
 	page_content =
 "<!DOCTYPE html>\n"

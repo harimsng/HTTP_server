@@ -2,10 +2,13 @@
 #include "AMethod.hpp"
 #include "VirtualServer.hpp"
 
+#include <_stdio.h>
 #include <algorithm>
 #include <iostream>
 
 using namespace std;
+
+#define FILE_BUFFER_SIZE (8192)
 
 // constructors & destructor
 AMethod::AMethod(RequestHandler& requestHandler)
@@ -42,7 +45,7 @@ AMethod::readFile(std::string& readBody)
 {
 	struct stat		fileStatus;
 	std::fstream	file;
-	std::string		readLine;
+	std::string		fileBuffer;
 	std::string 	filePath = m_request.m_path + m_request.m_file;
 
 	if (m_request.m_status != 200)
@@ -82,13 +85,11 @@ AMethod::readFile(std::string& readBody)
 	// INFO: it doesn't send raw content of resource.
 	while (!file.eof())
 	{
-		std::getline(file, readLine);
-		if (readLine == "")
-			continue;
-		readBody += readLine + "\n";
+		fileBuffer.resize(FILE_BUFFER_SIZE);
+		file.read(&fileBuffer[0], FILE_BUFFER_SIZE);
+		fileBuffer.resize(file.gcount());
+		readBody += fileBuffer + "\n";
 	}
-	if (readBody.size() != 0)
-		readBody.erase(readBody.end() - 1);
 	file.close();
 }
 
