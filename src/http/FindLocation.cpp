@@ -40,24 +40,28 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
     string tmpUri = uri;
     int count = 0;
 
-    while (tmpUri != "/" && tmpUri != "") {
-        if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
+	// uri = /favicon.ico
+	if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
+		m_locationBlock = &locationTable[tmpUri];
+		if (locationTable.find(tmpUri + "/") != locationTable.end()) {
+			m_locationBlock = &locationTable[tmpUri + "/"];
+		}
+		m_remainUri = uri.substr(tmpUri.length());
+		request.m_locationBlock = m_locationBlock;
+		return true;
+	}
+    while (tmpUri != "") {
+        if (locationTable.find(tmpUri) != locationTable.end() ) {
             m_locationBlock = &locationTable[tmpUri];
-            if (locationTable.find(tmpUri + "/") != locationTable.end()) {
-                m_locationBlock = &locationTable[tmpUri + "/"];
-            }
             m_remainUri = uri.substr(tmpUri.length());
             request.m_locationBlock = m_locationBlock;
             return true;
         }
-        if (locationTable.find(tmpUri + "/") != locationTable.end() ) {
-            m_locationBlock = &locationTable[tmpUri + "/"];
-            m_remainUri = uri.substr(tmpUri.length());
-            request.m_locationBlock = m_locationBlock;
-            return true;
-        }
-        tmpUri = tmpUri.substr(0, tmpUri.rfind("/"));
+		if (tmpUri == "/")
+			return false;
+        tmpUri = tmpUri.substr(0, tmpUri.rfind("/", tmpUri.size() - 2) + 1);
         count++;
+		LOG(DEBUG, "%s", tmpUri.c_str());
     }
     return false;
 }

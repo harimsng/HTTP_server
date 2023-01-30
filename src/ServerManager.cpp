@@ -20,6 +20,7 @@ void
 ServerManager::parseConfig(const char* path)
 {
 	ConfigParser	configParser;
+	RequestHandler::setMethodConvertTable();
 
 	configParser.init(path, s_virtualServerTable);
 	configParser.parse();
@@ -71,7 +72,6 @@ void
 ServerManager::run() try
 {
 	initServers();
-	RequestHandler::setMethodConvertTable();
 	RequestHandler::initExtensionList();
 
 	while (1)

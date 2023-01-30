@@ -57,11 +57,12 @@ LocationParser::setLimitExcept(Location& location)
 {
 	string	method;
 
+	location.m_limitExcept = 0;
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
 		method = m_tokenizer.get();
 		location.m_limitExcept |= RequestHandler::s_methodConvertTable[method];
-		LOG(DEBUG, "method = %s, m_limitExcept = %x", method.c_str(), location.m_limitExcept);
+		LOG(DEBUG, "location = %s, method = %s, m_limitExcept = %x", location.m_path.c_str(), method.c_str(), location.m_limitExcept);
 	}
 	m_tokenizer.eat(";");
 }
