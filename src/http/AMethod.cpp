@@ -50,15 +50,17 @@ AMethod::readFile(std::string& readBody)
 
 	if (m_request.m_status != 200)
 	{
-		vector<string> error_page;
+		map<int, string> error_page;
 
 		// filePath = "/Users/soum/webserv/html/error.html";
 		if (m_request.m_locationBlock == NULL)
 		{
-			error_page = m_request.m_virtualServer->m_errorPage;
-			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end() - 1))
-				filePath = m_request.m_virtualServer->m_root + error_page.back();
+			error_page = m_request.m_virtualServer->m_errorPageTable;
+			if(error_page.size() != 0 && error_page.count(m_request.m_status) != 0)
+			{
+				filePath = m_request.m_virtualServer->m_root + error_page[m_request.m_status];
+				filePath.replace(filePath.find('*'), 1, std::to_string(m_request.m_status));
+			}
 			else
 			{
 				readBody = Util::makeErrorPage(m_request.m_status);
@@ -67,10 +69,12 @@ AMethod::readFile(std::string& readBody)
 		}
 		else
 		{
-			error_page = m_request.m_locationBlock->m_errorPage;
-			if(error_page.size() != 0 && (find(error_page.begin(), error_page.end() - 1, Util::toString(m_request.m_status))
-				!= error_page.end() - 1))
-				filePath = m_request.m_locationBlock->m_root + error_page.back();
+			error_page = m_request.m_locationBlock->m_errorPageTable;
+			if(error_page.size() != 0 && error_page.count(m_request.m_status) != 0)
+			{
+				filePath = m_request.m_locationBlock->m_root + error_page[m_request.m_status];
+				filePath.replace(filePath.find('*'), 1, std::to_string(m_request.m_status));
+			}
 			else
 			{
 				readBody = Util::makeErrorPage(m_request.m_status);
