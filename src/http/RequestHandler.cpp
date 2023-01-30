@@ -229,7 +229,9 @@ RequestHandler::createResponseHeader() try
 	m_request.m_virtualServer = virtualServer;
 	resourceLocation = findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	if (m_request.m_locationBlock != NULL)
+	{
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
+	}
 	statusCode = checkResourceStatus(resourceLocation.c_str());
 
 	switch (m_request.m_method)

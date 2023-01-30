@@ -62,6 +62,8 @@ ServerParser::parseLocation(VirtualServer& server)
 
 	Location	location;
 
+	// location.setToDefault();
+
 	location.m_path = locationPath;
 	locationParser.parse(location);
 	server.m_locationTable[locationPath] = location;

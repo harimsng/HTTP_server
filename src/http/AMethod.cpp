@@ -75,6 +75,7 @@ AMethod::readFile(std::string& readBody)
 			}
 		}
 	}
+	cout << filePath << endl;
 	file.open(filePath.c_str());
 	stat(filePath.c_str(), &fileStatus);
 	readBody.clear();
@@ -87,7 +88,8 @@ AMethod::readFile(std::string& readBody)
 			continue;
 		readBody += readLine + "\n";
 	}
-	readBody.erase(readBody.end() - 1);
+	if (readBody.size() != 0)
+		readBody.erase(readBody.end() - 1);
 	file.close();
 }
 

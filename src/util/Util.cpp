@@ -114,6 +114,8 @@ Util::toString(int num)
 	string	str;
 	int		denom = 1000000000;
 
+	if (num == 0)
+		return ("0");
 	while (denom > 0 && num / denom == 0)
 		denom /= 10;
 	while (denom > 0)

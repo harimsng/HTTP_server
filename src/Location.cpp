@@ -8,6 +8,7 @@ using namespace std;
 // constructors & destructor
 Location::Location()
 {
+	setToDefault();
 }
 
 Location::~Location()
