@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "Logger.hpp"
+#include "VirtualServer.hpp"
 #include "util/Util.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "event/Server.hpp"
@@ -20,12 +21,11 @@ void	ServerParser::setServerSetterMap()
 {
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
 	s_serverSetterMap["server_name"] = &ServerParser::setServerNames;
-	s_serverSetterMap["error_code"] = &ServerParser::setErrorCode;
 	s_serverSetterMap["error_page"] = &ServerParser::setErrorPage;
 	s_serverSetterMap["root"] = &ServerParser::setRoot;
 	s_serverSetterMap["listen"] = &ServerParser::setListenAddress;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
-	s_serverSetterMap["uri_buffer_size"] = &ServerParser::setUriBufferSize;
+	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 }
 
@@ -49,6 +49,7 @@ ServerParser::parse(VirtualServer& server)
 	{
 		(this->*s_serverSetterMap[m_tokenizer.get()])(server);
 	}
+	setInheritedAttr(server);
 }
 
 void
@@ -72,7 +73,10 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
-	server.m_index = m_tokenizer.get();
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		server.m_index.push_back( m_tokenizer.get());
+	}
 	m_tokenizer.eat(";");
 }
 
@@ -146,30 +150,54 @@ ServerParser::setRoot(VirtualServer& server)
 void
 ServerParser::setErrorPage(VirtualServer& server)
 {
+	vector<string> token;
+
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		server.m_errorPage.push_back(m_tokenizer.get());
+		token.push_back(m_tokenizer.get());
 	}
-	m_tokenizer.eat(";");
-}
-
-void
-ServerParser::setErrorCode(VirtualServer& server)
-{
-	server.m_errorCode = m_tokenizer.get();
+	for (size_t i = 0; i < token.size() - 1; i++)
+	{
+		server.m_errorPageTable[Util::toInt(token[i])] = token.back();
+	}
 	m_tokenizer.eat(";");
 }
 
 void
 ServerParser::setClientMaxBodySize(VirtualServer& server)
 {
+	// NOTE
+	// support 1k or 1m
 	server.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }
 
 void
-ServerParser::setUriBufferSize(VirtualServer& server)
+ServerParser::setAutoIndex(VirtualServer& server)
 {
-	server.m_uriBufferSize = Util::toInt(m_tokenizer.get());
+	server.m_autoindex = m_tokenizer.get() == "on" ? true : false;
 	m_tokenizer.eat(";");
+}
+
+void
+ServerParser::setInheritedAttr(VirtualServer& server)
+{
+	map<string, Location>& locationTable = server.m_locationTable;
+
+	map<string, Location>::iterator mapIt = locationTable.begin();
+	for (; mapIt != locationTable.end(); ++mapIt)
+	{
+		Location& location = mapIt->second;
+
+		if (location.m_autoindex == -1)
+			location.m_autoindex = server.m_autoindex;
+		if (location.m_clientMaxBodySize == 0)
+			location.m_clientMaxBodySize = server.m_clientMaxBodySize;
+		if (location.m_root == "" && location.m_alias == "")
+			location.m_root = server.m_root;
+		if (location.m_index.empty())
+			location.m_index = server.m_index;
+		if (location.m_errorPageTable.empty())
+			location.m_errorPageTable = server.m_errorPageTable;
+	}
 }

@@ -2,6 +2,7 @@
 #define VIRTUALSERVER_HPP
 
 #include <vector>
+#include <map>
 
 #include "Webserv.hpp"
 #include "http/AMethod.hpp"
@@ -18,28 +19,24 @@ public:
 // constructors & destructor
 	VirtualServer();
 	~VirtualServer();
-	VirtualServer(VirtualServer const& server);
-	VirtualServer	&operator=(VirtualServer const& server);
+	// VirtualServer(VirtualServer const& server) = default;
+	// VirtualServer	&operator=(VirtualServer const& server) = default;
 
 // member functions
 private:
 	void	setToDefault();
 
 // member variales - config
-	std::string							m_index;
 	bool								m_autoindex;
-	std::vector<std::string>			m_serverNames;
-	std::string							m_errorCode;
-	std::string							m_root;
-	std::string							m_errorPath;
-	std::vector<std::string>			m_errorPage;
-	// std::string							m_errorPages;
-	sockaddr_in							m_listen;
 	int32_t								m_clientMaxBodySize;
-	int32_t								m_uriBufferSize;
+	std::string							m_root;
+	std::vector<std::string>			m_index;
+	std::vector<std::string>			m_serverNames;
+	std::map<int, std::string>			m_errorPageTable;
 	std::map<std::string, Location>		m_locationTable;
-	uint64_t	m_addrKey;
 
+	uint64_t							m_addrKey;
+	sockaddr_in							m_listen;
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;

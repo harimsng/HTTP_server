@@ -43,18 +43,11 @@ SRC			+=	main.cpp\
 				http/PostMethod.cpp\
 				http/DeleteMethod.cpp\
 				http/FindLocation.cpp\
+				http/AutoIndex.cpp\
 \
 				io/Buffer.cpp\
 \
 				util/Util.cpp\
-
-#				communicator/Communicator.cpp\
-#				communicator/Request.cpp\
-#				communicator/Response.cpp\
-#\
-#				socket/ClientSocket.cpp\
-#				socket/ServerSocket.cpp\
-
 
 OBJ			:=	$(SRC:%.cpp=%.o)
 DEP			:=	$(OBJ:%.o=%.d)
@@ -72,9 +65,6 @@ endif
 
 
 .PHONY: all debug release clean fclean re
-
-test:
-	echo $(WORKING_DIR)
 
 all: $(COMPILE_MODE)
 	$(MAKE) $(NAME)

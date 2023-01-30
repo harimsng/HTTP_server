@@ -28,8 +28,6 @@ public:
 
 	void		setIndex(Location& location);
 	void		setAutoIndex(Location& location);
-	void		setExpires(Location& location);
-	void		setProxyPass(Location& location);
 	void		setLimitExcept(Location& location);
 	void		setPath(Location& location);
 	void		setRoot(Location& location);
