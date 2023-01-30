@@ -1,7 +1,10 @@
 NAME		=	webserv
 
+WORKING_DIR	=	$(shell pwd)
+WORKING_DIR	:=	$(WORKING_DIR:%/src=%)
+
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD -DWORKING_DIR="$(WORKING_DIR)/"
 DEBUGFLAGS	=	-g -fsanitize=address #-fsanitize=undefined
 RM			=	rm -f
 
@@ -69,6 +72,9 @@ endif
 
 
 .PHONY: all debug release clean fclean re
+
+test:
+	echo $(WORKING_DIR)
 
 all: $(COMPILE_MODE)
 	$(MAKE) $(NAME)
