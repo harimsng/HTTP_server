@@ -21,7 +21,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
 	s_serverSetterMap["server_name"] = &ServerParser::setServerNames;
 	s_serverSetterMap["error_code"] = &ServerParser::setErrorCode;
-	s_serverSetterMap["error_pages"] = &ServerParser::setErrorPages;
+	s_serverSetterMap["error_page"] = &ServerParser::setErrorPage;
 	s_serverSetterMap["root"] = &ServerParser::setRoot;
 	s_serverSetterMap["listen"] = &ServerParser::setListenAddress;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
@@ -144,9 +144,12 @@ ServerParser::setRoot(VirtualServer& server)
 }
 
 void
-ServerParser::setErrorPages(VirtualServer& server)
+ServerParser::setErrorPage(VirtualServer& server)
 {
-	server.m_errorPages = m_tokenizer.get();
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		server.m_errorPage.push_back(m_tokenizer.get());
+	}
 	m_tokenizer.eat(";");
 }
 

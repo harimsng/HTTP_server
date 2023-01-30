@@ -34,9 +34,9 @@ private:
 		std::string					m_script;
 		std::string					m_query;
 
-		int							m_fromCgiToServer[2];
-		int							m_fromServerToCgi[2];
-		pid_t						m_pid;
+		// int							m_fromCgiToServer[2];
+		// int							m_fromServerToCgi[2];
+		// pid_t						m_pid;
 		bool						m_bodyFlag;
 };
 
