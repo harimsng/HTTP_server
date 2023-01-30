@@ -40,7 +40,7 @@ GetMethod::completeResponse()
 		case BODY:
 			readBody = "";
 			if (m_request.m_file == "")
-				readBody = AutoIndex::autoIndex(m_request.m_path);
+				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else
 				readFile(readBody);
 			m_sendBuffer.append("Content-Length: ");

@@ -27,9 +27,10 @@ AutoIndex::~AutoIndex()
 }
 
 std::string
-AutoIndex::autoIndex(const std::string& path) {
+AutoIndex::autoIndex(const std::string& path, const std::string& uri) {
 	DIR*			directory;
 	std::string		page_content;
+	std::string		link;
 	struct dirent*	file_info;
 
 	directory = opendir(path.c_str());
@@ -44,11 +45,12 @@ AutoIndex::autoIndex(const std::string& path) {
 	// save to string and return it OR write to socket
 	page_content.reserve(2048);
 	while ((file_info = readdir(directory)) != NULL) {
-		page_content += "<p>";
-		page_content += file_info->d_name;
+		link = file_info->d_name;
 		if (file_info->d_type == DT_DIR)
-			page_content += "/";
-		page_content += "</p>\n";
+			link += "/";
+		page_content += "<a href=\"" + uri + link + "\">";
+		page_content += link;
+		page_content += "</a>\n";
 	}
 	page_content =
 "<!DOCTYPE html>\n"
