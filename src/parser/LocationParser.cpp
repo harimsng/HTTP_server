@@ -19,6 +19,7 @@ LocationParser::setLocationSetterMap()
 	s_locationSetterMap["cgi_pass"] = &LocationParser::setCgiPass;
 	s_locationSetterMap["alias"] = &LocationParser::setAlias;
 	s_locationSetterMap["client_max_body_size"] = &LocationParser::setClientMaxBodySize;
+	s_locationSetterMap["error_page"] = &LocationParser::setErrorPage;
 }
 
 // constructors & destructor
@@ -109,5 +110,15 @@ void
 LocationParser::setClientMaxBodySize(Location& location)
 {
 	location.m_clientMaxBodySize = m_tokenizer.get();
+	m_tokenizer.eat(";");
+}
+
+void
+LocationParser::setErrorPage(Location& location)
+{
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		location.m_errorPage.push_back(m_tokenizer.get());
+	}
 	m_tokenizer.eat(";");
 }
