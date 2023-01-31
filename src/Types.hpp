@@ -1,8 +1,8 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
-//typedef unsigned long	uint64_t;
-typedef unsigned int	uint32_t;
-typedef unsigned short	uint16_t;
+typedef unsigned long	t_uint64;
+typedef unsigned int	t_uint32;
+typedef unsigned short	t_uint16;
 
 #endif

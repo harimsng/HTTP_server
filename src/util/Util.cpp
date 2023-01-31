@@ -4,9 +4,7 @@
 #include <cctype>
 
 #include "Logger.hpp"
-#include "socket/Socket.hpp"
 #include "Util.hpp"
-#include "exception/HttpErrorHandler.hpp"
 
 using namespace std;
 
@@ -37,52 +35,6 @@ Util::parseArgument(int argc, char **argv)
 	}
 	Logger::initLogger(logLevel);
 	return true;
-}
-
-uint64_t
-Util::convertAddrKey(uint32_t addr, uint16_t port)
-{
-	return (static_cast<uint64_t>(port) << 32) + addr;
-}
-
-void
-Util::convertAddrKey(uint64_t addrKey, uint32_t& addr, uint16_t& port)
-{
-	addr = addrKey & 0xffffffff;
-	port = addrKey >> 32;
-}
-
-string
-Util::getFormattedAddress(uint32_t addr, uint16_t port)
-{
-	stringstream	ss;
-	uint32_t		bitshift = 24;
-	int64_t			bitmask = 0xff000000;
-
-	for (; bitshift > 0; bitmask >>= 8, bitshift -= 8)
-	{
-		ss << ((addr & bitmask) >> bitshift) << '.';
-	}
-	ss << (addr & bitmask);
-	if (port != 0)
-		ss << ':' << port;
-	return ss.str();
-}
-
-string
-Util::getFormattedAddress(sockaddr_in& addr)
-{
-	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
-}
-
-string
-Util::getFormattedAddress(int fd)
-{
-	sockaddr_in		addr;
-	socklen_t		addrLen = Tcp::socketAddrLen;
-
-	getsockname(fd, reinterpret_cast<sockaddr*>(&addr), &addrLen);
-	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 }
 
 const string
@@ -161,27 +113,3 @@ Util::checkFileStat(const char* path)
 	return ((buffer.st_mode & S_IFREG) == S_IFREG);
 }
 
-string
-Util::makeErrorPage(int status)
-{
-	string buf;
-	ostringstream ss;
-	ss << status;
-	string statusStr = ss.str();
-
-	buf =
-	"<!DOCTYPE html>\n"
-	"<html>\n"
-	"	<head>\n"
-	"<meta charset=\"utf-8\">\n"
-	"		<title>" + statusStr + "</title>\n"
-	"	</head>\n"
-	"	<body>\n"
-	"		<h1>"
-	+ statusStr + " " + HttpErrorHandler::getErrorMessage(status) +
-	"		</h1>\n"
-	"	</body>\n"
-	"</html>\n";
-
-	return buf;
-}

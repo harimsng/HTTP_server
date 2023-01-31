@@ -1,23 +1,48 @@
 #include "PostResponder.hpp"
 
 // constructors & destructor
-PostResponder::PostResponder()
+PostResponder::PostResponder(RequestHandler& requestHandler)
+:	AResponder(requestHandler)
 {
 }
-
 PostResponder::~PostResponder()
 {
 }
 
-PostResponder::PostResponder(const PostResponder& postresponder)
-{
-	(void)postresponder;
-}
-
 // operators
 PostResponder&
-PostResponder::operator=(const PostResponder& postresponder)
+PostResponder::operator=(const PostResponder& postResponder)
 {
-	(void)postresponder;
+	(void)postResponder;
 	return *this;
 }
+
+void
+PostResponder::respond()
+{
+	switch (m_methodStatus)
+	{
+		case AResponder::HEADER:
+		case AResponder::BODY:
+		case AResponder::DONE:
+			;
+	}
+}
+
+/*
+ * event notified
+ *
+ * read
+ * 		server
+ * 				accept()
+ * 		client
+ *				requestHandler
+ *				clientSocket ->   receiveRequest()
+ *				parsed request -> createResponseHeader()
+ *				method
+ *				clientSocket ->	  method->respond()
+				
+ *										respond
+ *
+ * write
+ */

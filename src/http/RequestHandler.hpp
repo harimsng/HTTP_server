@@ -11,7 +11,7 @@
 
 extern const char*	g_httpVersion;
 
-class	AMethod;
+class	AResponder;
 class	VirtualServer;
 
 /*
@@ -20,7 +20,8 @@ class	VirtualServer;
 class	RequestHandler
 {
 	friend class	HttpRequestParser;
-	friend class	AMethod;
+	friend class	AResponder;
+	friend class	AResponder;
 
 // deleted
 	RequestHandler(const RequestHandler& requestHandler);
@@ -41,7 +42,7 @@ public:
 		TRACE = 0x80
 	};
 
-	enum	e_receiveStatus
+	enum	e_ioStatus
 	{
 		RECV_END = 0,
 		RECV_ERROR = 1,
@@ -64,7 +65,7 @@ public:
 	void	resetStates();
 
 	void	createResponseHeader();
-	std::string	findContentType(std::string content);
+	std::string	findContentType(std::string& content);
 private:
 	VirtualServer*	resolveVirtualServer(const std::string& host);
 	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
@@ -87,10 +88,12 @@ private:
 	HttpRequestParser	m_parser;
 
 	Request				m_request;
-	AMethod*			m_method;
+	AResponder*			m_method;
 public:
+
+	static std::string			makeErrorPage(int status);
 // static members
-	static std::vector<std::pair<std::string, std::string> > s_extensionTypeTable;
+	static std::map<std::string, std::string>	s_extensionTypeTable;
 	static void		initExtensionList();
 
 	static std::map<std::string, uint16_t>	s_methodConvertTable;

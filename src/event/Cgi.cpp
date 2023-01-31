@@ -40,6 +40,7 @@ Cgi::initCgi(const Request &request)
 {
 	m_cgiPath = request.m_cgi;
 	m_path = request.m_path + request.m_file;
+#ifdef HIDDEN // remove this
 
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
@@ -108,5 +109,6 @@ Cgi::initCgi(const Request &request)
 		m_envChar.push_back(&m_env[i][0]);
 	}
     m_envChar.push_back(0);
+#endif
 }
 

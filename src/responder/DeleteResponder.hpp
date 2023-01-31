@@ -1,17 +1,19 @@
 #ifndef DELETERESPONDER_HPP
 #define DELETERESPONDER_HPP
 
-class	DeleteResponder
+#include "responder/AResponder.hpp"
+
+class	DeleteResponder : public AResponder
 {
 public:
 // constructors & destructor
-	DeleteResponder();
+	DeleteResponder(RequestHandler& requestHandler);
 	~DeleteResponder();
-	DeleteResponder(const DeleteResponder& deleteresponder);
 
 // operators
-	DeleteResponder	&operator=(const DeleteResponder& deleteresponder);
+	DeleteResponder	&operator=(const DeleteResponder& deleteMethod);
 
+	virtual void	respond();
 // member functions
 };
 

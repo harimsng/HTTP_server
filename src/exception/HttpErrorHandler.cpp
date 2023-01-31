@@ -74,6 +74,7 @@ HttpErrorHandler::getErrorMessage()
 
 // constructors & destructor
 HttpErrorHandler::HttpErrorHandler(int errorCode)
+:	m_errorCode(errorCode)
 {
 	setErrorMessageTable();
 	m_errorMessage = s_errorMessageTable[errorCode];
@@ -82,17 +83,4 @@ HttpErrorHandler::HttpErrorHandler(int errorCode)
 }
 HttpErrorHandler::~HttpErrorHandler()
 {
-}
-
-HttpErrorHandler::HttpErrorHandler(const HttpErrorHandler& httpErrorHandler)
-{
-	*this = httpErrorHandler;
-}
-
-// operators
-HttpErrorHandler&
-HttpErrorHandler::operator=(const HttpErrorHandler& httpErrorHandler)
-{
-	m_errorMessage = httpErrorHandler.m_errorMessage;
-	return *this;
 }

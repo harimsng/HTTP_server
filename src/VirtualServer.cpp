@@ -27,13 +27,13 @@ VirtualServer::setToDefault()
 	m_clientMaxBodySize = 1 << 13; // 8kb
 //	m_uriBufferSize;
 //
-	m_addrKey = Util::convertAddrKey(listenIp, listenPort);
+	m_addrKey.setAddrKey(listenIp, listenPort);
 }
 
 std::ostream&
 operator<<(std::ostream& os, const VirtualServer& server)
 {
-	uint32_t	addr = ntohl(server.m_listen.sin_addr.s_addr);
+	t_uint32	addr = ntohl(server.m_listen.sin_addr.s_addr);
 
 	os << "server\n{\n";
 	os << "\tserver_name    ";
@@ -53,7 +53,7 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	{
 		os << itr->second;
 	}
-	// for (uint32_t i = 0; i < server.m_locationList.size(); ++i)
+	// for (t_uint32 i = 0; i < server.m_locationList.size(); ++i)
 	//     os << server.m_locationList[i];
 	os << "}\n";
 	return os;

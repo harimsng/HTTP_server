@@ -1,7 +1,10 @@
 #include "DeleteResponder.hpp"
 
+using namespace std;
+
 // constructors & destructor
-DeleteResponder::DeleteResponder()
+DeleteResponder::DeleteResponder(RequestHandler& requestHandler)
+:	AResponder(requestHandler)
 {
 }
 
@@ -9,15 +12,25 @@ DeleteResponder::~DeleteResponder()
 {
 }
 
-DeleteResponder::DeleteResponder(const DeleteResponder& deleteresponder)
-{
-	(void)deleteresponder;
-}
-
 // operators
 DeleteResponder&
-DeleteResponder::operator=(const DeleteResponder& deleteresponder)
+DeleteResponder::operator=(const DeleteResponder& deleteMethod)
 {
-	(void)deleteresponder;
+	(void)deleteMethod;
 	return *this;
+}
+
+void
+DeleteResponder::respond()
+{
+	/*
+	int deleteStatus;
+
+	string filePath = m_request.m_path + m_request.m_file;
+
+	readFile(m_sendBuffer); // 파일 읽기
+	deleteStatus = unlink(filePath.c_str());
+	if (deleteStatus == -1)
+		m_statusCode = 202;
+	*/
 }

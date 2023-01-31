@@ -5,22 +5,39 @@
 
 class	AResponder
 {
-// deleted
-	AResponder(const AResponder& aresponder);
-	AResponder	&operator=(const AResponder& aresponder);
+private:
+	AResponder();
+	AResponder(const AResponder& method);
 
 public:
+	enum e_methodStatus{
+		HEADER = 0,
+		BODY,
+		DONE
+	};
+public:
 // constructors & destructor
-	AResponder(const RequestHandler& requestHandler);
-	~AResponder();
+	AResponder(RequestHandler& requestHandler);
+	virtual ~AResponder();
+
+// operators
+	AResponder	&operator=(const AResponder& aMethod);
 
 // member functions
-	void	bufferResponsedHeader();
-	void	bufferResponseContent();
+	virtual void	respond() = 0;
+	void			respondHeader();
+	void			endResponse();
 
-// member variables
-private:
-	const RequestHandler* const	m_requestHandler;
+	void			readFile(std::string& readBody);
+	bool			checkFileExists(const std::string& filePath);
+	bool			checkDirExists(const std::string& filePath);
+
+protected:
+	RequestHandler&		m_requestHandler;
+	Request&			m_request;
+	SendBuffer&			m_sendBuffer;
+	ReceiveBuffer&		m_recvBuffer;
+	e_methodStatus		m_methodStatus;
 };
 
 #endif
