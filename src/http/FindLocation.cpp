@@ -40,24 +40,28 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
     string tmpUri = uri;
     int count = 0;
 
-    while (tmpUri != "/" && tmpUri != "") {
-        if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
+	// uri = /favicon.ico
+	if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
+		m_locationBlock = &locationTable[tmpUri];
+		if (locationTable.find(tmpUri + "/") != locationTable.end()) {
+			m_locationBlock = &locationTable[tmpUri + "/"];
+		}
+		m_remainUri = uri.substr(tmpUri.length());
+		request.m_locationBlock = m_locationBlock;
+		return true;
+	}
+    while (tmpUri != "") {
+        if (locationTable.find(tmpUri) != locationTable.end() ) {
             m_locationBlock = &locationTable[tmpUri];
-            if (locationTable.find(tmpUri + "/") != locationTable.end()) {
-                m_locationBlock = &locationTable[tmpUri + "/"];
-            }
             m_remainUri = uri.substr(tmpUri.length());
             request.m_locationBlock = m_locationBlock;
             return true;
         }
-        if (locationTable.find(tmpUri + "/") != locationTable.end() ) {
-            m_locationBlock = &locationTable[tmpUri + "/"];
-            m_remainUri = uri.substr(tmpUri.length());
-            request.m_locationBlock = m_locationBlock;
-            return true;
-        }
-        tmpUri = tmpUri.substr(0, tmpUri.rfind("/"));
+		if (tmpUri == "/")
+			return false;
+        tmpUri = tmpUri.substr(0, tmpUri.rfind("/", tmpUri.size() - 2) + 1);
         count++;
+		LOG(DEBUG, "%s", tmpUri.c_str());
     }
     return false;
 }
@@ -89,33 +93,86 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     LOG(DEBUG, "uri is %s", uri.data());
     if (uri == "/") // 0. root 요청
     {
-        this->m_path = server->m_root;
-        if (server->m_index.size() != 0)
+        if ((locationTable.find("/") != locationTable.end()))
         {
-            this->m_file = server->m_index[0];
-        }
-        if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
-                m_path = m_path + "/";
-        if (lstat(m_path.c_str(), &d_stat) == -1) {
-            request.m_path = m_path;
-            request.m_file = m_file;
-            request.m_status = 404;
-            LOG(DEBUG, "0-1. no file, no path %s", (request.m_path + request.m_file).data());
-            return request.m_path + request.m_file;
-        }
-        string realPath = m_path + m_file;
-        if (lstat(realPath.c_str(), &d_stat) == -1) {
+            m_locationBlock = &locationTable["/"];
+            request.m_locationBlock = m_locationBlock;
+            this->m_root = m_locationBlock->m_root;
+            this->m_alias = m_locationBlock->m_alias;
+            if (this->m_root.length() != 0) {
+                this->m_root = removeTrailingSlash(this->m_root, uri);
+                this->m_path = this->m_root + uri;
+            }
+            else if (this->m_alias.length() != 0) {
+                this->m_path = this->m_alias + m_remainUri;
+            }
+            else {
+                this->m_root = removeTrailingSlash(server->m_root, uri);
+                this->m_path = server->m_root + uri;
+            }
+            if (m_locationBlock->m_index.size() != 0)
+            {
+                for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
+                {
+                    this->m_file = m_locationBlock->m_index[i];
+                    if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
+                        m_path = m_path + "/";
+                    if (lstat(m_path.c_str(), &d_stat) == -1) {
+                        request.m_path = m_path;
+                        request.m_file = m_file;
+                        request.m_status = 404;
+                        LOG(DEBUG, "0-1-1. no file, no path %s", (request.m_path + request.m_file).data());
+                        return request.m_path + request.m_file;
+                    }
+                    string realPath = m_path + m_file;
+                    if (lstat(realPath.c_str(), &d_stat) != -1) {
+                        request.m_path = m_path;
+                        request.m_file = m_file;
+                        LOG(DEBUG, "0-1-2. %s", (request.m_path + request.m_file).data());
+                        return request.m_path + request.m_file;
+                    }
+                }
+            }
             this->m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
             request.m_status = 404;
-            LOG(DEBUG, "0-1. no file, only path %s", (request.m_path + request.m_file).data());
+            LOG(DEBUG, "0-1-2. no file, only path %s", (request.m_path + request.m_file).data());
             return request.m_path + request.m_file;
         }
-        LOG(DEBUG, "0-2. default root %s", (m_path + m_file).data());
-        request.m_path = m_path;
-        request.m_file = m_file;
-        return m_path + m_file;
+        else
+        {
+            this->m_path = server->m_root;
+            if (server->m_index.size() != 0)
+            {
+                for (size_t i = 0; i < server->m_index.size(); i++)
+                {
+                    this->m_file = server->m_index[i];
+                    if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
+                        m_path = m_path + "/";
+                    if (lstat(m_path.c_str(), &d_stat) == -1) {
+                        request.m_path = m_path;
+                        request.m_file = m_file;
+                        request.m_status = 404;
+                        LOG(DEBUG, "0-2-1. no file, no path %s", (m_path + m_file).data());
+                        return request.m_path + request.m_file;
+                    }
+                    string realPath = m_path + m_file;
+                    if (lstat(realPath.c_str(), &d_stat) != -1) {
+                        request.m_path = m_path;
+                        request.m_file = m_file;
+                        LOG(DEBUG, "0-2-2. %s", (m_path + m_file).data());
+                        return request.m_path + request.m_file;
+                    }
+                }
+            }
+            this->m_file = "";
+            request.m_path = m_path;
+            request.m_file = m_file;
+            request.m_status = 404;
+            LOG(DEBUG, "0-2-1. no file, only path %s", (m_path + m_file).data());
+            return m_path + m_file;
+        }
     }
     if (uri.at(uri.size() - 1) != '/') // 1. trailing slash 없이 요청
     {
@@ -243,11 +300,11 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         this->m_root = removeTrailingSlash(this->m_root, uri);
         this->m_path = this->m_root + uri;
 
-        if (m_locationBlock->m_index.size() != 0)
+        if (server->m_index.size() != 0)
         {
-            for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
+            for (size_t i = 0; i < server->m_index.size(); i++)
             {
-                this->m_file = m_locationBlock->m_index[i];
+                this->m_file = server->m_index[i];
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                     m_path = m_path + "/";
                 if (lstat(m_path.c_str(), &d_stat) == -1) {

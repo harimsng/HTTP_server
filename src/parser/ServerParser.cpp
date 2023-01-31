@@ -26,6 +26,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["listen"] = &ServerParser::setListenAddress;
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
+	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
 	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 }
 
@@ -75,7 +76,7 @@ ServerParser::setIndex(VirtualServer& server)
 {
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		server.m_index.push_back( m_tokenizer.get());
+		server.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }
@@ -176,6 +177,19 @@ void
 ServerParser::setAutoIndex(VirtualServer& server)
 {
 	server.m_autoindex = m_tokenizer.get() == "on" ? true : false;
+	m_tokenizer.eat(";");
+}
+
+void
+ServerParser::setCgiPass(VirtualServer& server)
+{
+	vector<string> token;
+
+	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
+	{
+		token.push_back(m_tokenizer.get());
+	}
+		server.m_cgiPass[token[0]] = token.back();
 	m_tokenizer.eat(";");
 }
 

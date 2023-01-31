@@ -25,17 +25,16 @@ private:
 
 // member variables
 public:
-	int							m_autoindex;
-	uint16_t					m_limitExcept;
-	int32_t						m_clientMaxBodySize;
-	std::string					m_cgiPass;
-	std::string					m_path;
-	std::string					m_root;
-	std::string					m_alias;
-	std::vector<std::string>	m_index;
-	std::map<int, std::string>	m_errorPageTable;
+	int									m_autoindex;
+	uint16_t							m_limitExcept;
+	int32_t								m_clientMaxBodySize;
+	std::string							m_path;
+	std::string							m_root;
+	std::string							m_alias;
+	std::vector<std::string>			m_index;
+	std::map<int, std::string>			m_errorPageTable;
 
-	std::vector<std::string>	m_cgiExt;
+	//std::vector<std::string>	m_cgiExt;
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };
