@@ -1,10 +1,9 @@
-#include "Webserv.hpp"
-#include "AMethod.hpp"
-#include "VirtualServer.hpp"
-
-#include <_stdio.h>
 #include <algorithm>
 #include <iostream>
+
+#include "Webserv.hpp"
+#include "VirtualServer.hpp"
+#include "AMethod.hpp"
 
 using namespace std;
 

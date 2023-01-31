@@ -2,9 +2,9 @@
 #include <iostream>
 
 #include "ServerManager.hpp"
-#include "tokenizer/HttpStreamTokenizer.hpp"
-#include "GetMethod.hpp"
+#include "tokenizer/HttpStreamTokenizer.hpp" // is it necessary?
 #include "AutoIndex.hpp"
+#include "GetMethod.hpp"
 
 using namespace std;
 

@@ -1,4 +1,3 @@
-#include "http/AMethod.hpp"
 #include "PostMethod.hpp"
 
 // constructors & destructor
@@ -21,5 +20,11 @@ PostMethod::operator=(const PostMethod& postMethod)
 void
 PostMethod::completeResponse()
 {
+	switch (m_methodStatus)
+	{
+		case AMethod::HEADER:
+		case AMethod::BODY:
+		case AMethod::DONE:
+			;
+	}
 }
-
