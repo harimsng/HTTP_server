@@ -60,11 +60,9 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	cout << "recv Buffer :"<< m_recvBuffer << "$" << endl;
-	cout << m_parser.m_readStatus << endl;
 	if (count == 0)
 	{
-
+		cout << "eof" << endl;
 		return RECV_END;
 	}
 	else if (count == -1)
@@ -103,7 +101,6 @@ RequestHandler::createResponseHeader() try
 {
 	int&			statusCode = m_request.m_status;
 
-	cout << m_request << endl;
 	checkRequestMessage();
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
@@ -236,7 +233,6 @@ RequestHandler::checkResourceStatus()
 	struct stat	status;
 	int			statusCode = 0;
 	string		path = m_request.m_path + m_request.m_file;
-	cout << path << endl;
 
 	if (m_request.m_method == PUT)
 		return;
@@ -327,6 +323,7 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	cout << m_sendBuffer << endl;
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)

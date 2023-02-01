@@ -20,7 +20,8 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_request(m_requestHandler.m_request),
 	m_sendBuffer(m_requestHandler.m_sendBuffer),
 	m_recvBuffer(m_requestHandler.m_recvBuffer),
-	m_methodStatus(HEADER)
+	m_methodStatus(HEADER),
+	m_chunkedSize(-1)
 {
 }
 
@@ -89,16 +90,15 @@ AResponder::readFile(std::string& readBody)
 }
 
 void
-AResponder::writeFile()
+AResponder::writeFile(int writeSize)
 {
 	ofstream file;
 	string	filePath = m_request.m_path + m_request.m_file;
 
-	file.open(filePath);
-	cout << filePath << endl;
+	file.open(filePath, ios::app);
 	if (file.fail())
 		throw runtime_error("file open error");
-	file << m_recvBuffer;
+	file.write(m_recvBuffer.data(), writeSize);
 	file.close();
 }
 
@@ -171,25 +171,61 @@ AResponder::readRequestBody()
 	}
 }
 
+string
+AResponder::parseChunkSize()
+{
+	string hex;
+	size_t crlfPos = m_recvBuffer.find(g_CRLF);
+
+	if (crlfPos == string::npos)
+		return ("");
+	hex = m_recvBuffer.substr(0, crlfPos);
+	m_recvBuffer.erase(0, crlfPos + 2);
+	return (hex);
+}
+
 int
 AResponder::chunkedReadBody()
 {
+	while(m_recvBuffer.size() != 0)
+	{
+		if (m_chunkedSize == -1)
+		{
+			cout << "before buffer size : " << m_recvBuffer.size() << endl;
+			cout << "before Buffer : " << m_recvBuffer << "$" << endl;
+			m_chunkedSize = Util::hexToDecimal(parseChunkSize());
+			cout << "chunked size : "<< m_chunkedSize << endl;
+			cout << "buffer size : " << m_recvBuffer.size() << endl;
+			cout << "after Buffer : " << m_recvBuffer << "$" << endl;
+		}
+		if (m_chunkedSize == 0)
+		{
+			cout << "buffer size : " << m_recvBuffer.size() << endl;
+			return (1);
+		}
+		if (m_chunkedSize != -1 && m_chunkedSize + 2 <= (int)m_recvBuffer.size())
+		{
+			writeFile(m_chunkedSize);
+			m_recvBuffer.erase(0, m_chunkedSize + 2);
+			m_chunkedSize = -1;
+		}
+		else
+			return (0);
+	}
 	return (0);
 }
 
 int
 AResponder::normalReadBody()
 {
-	size_t contentLen;
+	size_t contentSize;
 
-	contentLen = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
-	cout << "put recv buffer :" << m_recvBuffer << endl;
-	cout << contentLen << endl;
-
-	if (m_recvBuffer.size() == contentLen)
+	contentSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+	if (m_recvBuffer.size() == contentSize)
 	{
-		writeFile();
+		writeFile(contentSize);
 		return (1);
 	}
 	return (0);
 }
+

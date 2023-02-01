@@ -27,6 +27,9 @@ PutResponder::respond()
 			respondHeader();
 			m_methodStatus = BODY;
 		case BODY:
+			// if (isCgi)
+			// cgiReadRequestBody();
+			// else
 			readRequestBody();
 			if (m_methodStatus == BODY)
 				break;

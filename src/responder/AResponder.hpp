@@ -28,7 +28,8 @@ public:
 	void			respondHeader();
 	void			endResponse();
 
-	void			writeFile();
+	std::string		parseChunkSize();
+	void			writeFile(int writeSize);
 	void			readRequestBody();
 	int				normalReadBody();
 	int				chunkedReadBody();
@@ -42,6 +43,7 @@ protected:
 	SendBuffer&			m_sendBuffer;
 	ReceiveBuffer&		m_recvBuffer;
 	e_methodStatus		m_methodStatus;
+	int					m_chunkedSize;
 };
 
 #endif

@@ -87,6 +87,8 @@ HttpStreamTokenizer::get()
 	//  if token.size() == 0, m_aheadToken was empty that current call to this method is first call.
 	if (empty() == false && token.size() == 0)
 		return get();
+	if (empty() == true && token.size() == 0)
+		return (m_aheadToken);
 	return token;
 }
 
