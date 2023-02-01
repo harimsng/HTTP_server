@@ -42,7 +42,7 @@ Client::handleEventWork()
 
 				case RequestHandler::RECV_EVENT:
 					LOG(DEBUG, "registering write event for fd=%d\n", m_socket.m_fd);
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::ADD,
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::MODIFY,
 							IoEventPoller::WRITE, this);
 					break;
 

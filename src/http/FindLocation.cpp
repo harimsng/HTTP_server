@@ -19,18 +19,18 @@ FindLocation::removeTrailingSlash(string first, string second)
 void
 FindLocation::setRootAlias(string const &uri, VirtualServer* server)
 {
-    this->m_root = m_locationBlock->m_root;
-    this->m_alias = m_locationBlock->m_alias;
-    if (this->m_root.length() != 0) {
-        this->m_root = removeTrailingSlash(this->m_root, uri);
-        this->m_path = this->m_root + uri;
+    m_root = m_locationBlock->m_root;
+    m_alias = m_locationBlock->m_alias;
+    if (m_root.length() != 0) {
+        m_root = removeTrailingSlash(m_root, uri);
+        m_path = m_root + uri;
     }
-    else if (this->m_alias.length() != 0) {
-        this->m_path = this->m_alias + m_remainUri;
+    else if (m_alias.length() != 0) {
+        m_path = m_alias + m_remainUri;
     }
     else {
-        this->m_root = removeTrailingSlash(server->m_root, uri);
-        this->m_path = server->m_root + uri;
+        m_root = removeTrailingSlash(server->m_root, uri);
+        m_path = server->m_root + uri;
     }
 }
 
@@ -71,14 +71,29 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
 {
     /*
     trailing slash 없이 요청 (/abcd)(/abcd/efgh/ijkl)
-        1. /abcd location block 찾기
-        1-1. 있을 경우 location block의 내용으로 치환 > end
+		0. / (root) 에 대한 요청
+		/ location 찾기
+		0-1.
+			0-1-1.
+			0-1-2.
+		0-2.
+			0-2-1.
+			0-2-2.
+        1. trailing slash 없는 요청 (/abcd)
+		location 찾기
+        1-1. 있을 경우
+			root, alias, uri 조합해서 경로 결정
+			1-1-0. 존재하지 않는 경로. 404
+			1-1-1. 파일 존재
+			1-1-2. 디렉토리 존재
+			1-1-2-0.
+			1-1-2-1.
         1-2. 없을 경우 abcd라는 파일 or 디렉토리를 찾는다
+            1-2-1. abcd 파일이 있을 경우 path에 root + uri 파일부분 전까지, file에 uri 파일부분
+            1-2-2. abcd가 디렉토리일 경우 2로 이동
 
-            1-2-1. abcd 파일이 있을경우 = path에 root + uri 파일부분 전까지, file에 uri 파일부분 > end
-            1-2-2. abcd가 디렉토리일 경우 = 2로 이동
-
-        2. /abcd/ location block 찾기
+        2. trailing slash 있는 요청 (/abcd/)
+		location block 찾기
         2-1. 있을 경우 location block의 내용으로 치환
             2-1-1. 블록 내에 index가 존재 = file에 index추가
             2-1-2. 없을경우 최상위의 index를 file에 추가
@@ -97,24 +112,24 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         {
             m_locationBlock = &locationTable["/"];
             request.m_locationBlock = m_locationBlock;
-            this->m_root = m_locationBlock->m_root;
-            this->m_alias = m_locationBlock->m_alias;
-            if (this->m_root.length() != 0) {
-                this->m_root = removeTrailingSlash(this->m_root, uri);
-                this->m_path = this->m_root + uri;
+            m_root = m_locationBlock->m_root;
+            m_alias = m_locationBlock->m_alias;
+            if (m_root.length() != 0) {
+                m_root = removeTrailingSlash(m_root, uri);
+                m_path = m_root + uri;
             }
-            else if (this->m_alias.length() != 0) {
-                this->m_path = this->m_alias + m_remainUri;
+            else if (m_alias.length() != 0) {
+                m_path = m_alias + m_remainUri;
             }
             else {
-                this->m_root = removeTrailingSlash(server->m_root, uri);
-                this->m_path = server->m_root + uri;
+                m_root = removeTrailingSlash(server->m_root, uri);
+                m_path = server->m_root + uri;
             }
             if (m_locationBlock->m_index.size() != 0)
             {
                 for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
                 {
-                    this->m_file = m_locationBlock->m_index[i];
+                    m_file = m_locationBlock->m_index[i];
                     if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                         m_path = m_path + "/";
                     if (lstat(m_path.c_str(), &d_stat) == -1) {
@@ -133,7 +148,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                     }
                 }
             }
-            this->m_file = "";
+            m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
             request.m_status = 404;
@@ -142,12 +157,12 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         }
         else
         {
-            this->m_path = server->m_root;
+            m_path = server->m_root;
             if (server->m_index.size() != 0)
             {
                 for (size_t i = 0; i < server->m_index.size(); i++)
                 {
-                    this->m_file = server->m_index[i];
+                    m_file = server->m_index[i];
                     if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                         m_path = m_path + "/";
                     if (lstat(m_path.c_str(), &d_stat) == -1) {
@@ -166,7 +181,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                     }
                 }
             }
-            this->m_file = "";
+            m_file = "";
             request.m_path = m_path;
             request.m_file = m_file;
             request.m_status = 404;
@@ -179,8 +194,9 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         if (findLocationBlock(request, uri, locationTable) == true) // 1-1. 있을 경우 location block의 내용으로 치환 > end
         {
             setRootAlias(uri, server);
-            this->m_file = this->m_path.substr(this->m_path.rfind("/") + 1);
+            m_file = m_path.substr(m_path.rfind("/") + 1);
             LOG(DEBUG, "1. %s", m_path.data());
+			// findLocation == true && lstat() == false
             if (lstat(m_path.c_str(), &d_stat) == -1) { // abcd가 없을경우
                 request.m_path = m_path.substr(0, uri.find_last_of("/")) + "/";
                 request.m_file = m_file;
@@ -198,11 +214,13 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 return m_path + m_file;
             }
             else  { // 1-1-2 디렉토리일 경우
+				
+				// INFO: is this necessary if?
                 if (m_locationBlock->m_index.size() != 0)
                 {
                     for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
                     {
-                        this->m_file = m_locationBlock->m_index[i];
+                        m_file = m_locationBlock->m_index[i];
                         if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                             m_path = m_path + "/";
                         if (lstat(m_path.c_str(), &d_stat) == -1) {
@@ -221,7 +239,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                         }
                     }
                 }
-                this->m_file = "";
+                m_file = "";
                 request.m_path = m_path;
                 request.m_file = m_file;
                 request.m_status = 404;
@@ -231,12 +249,12 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         }
         else // 1-2. 없을 경우 abcd라는 파일 or 디렉토리를 찾는다
         {
-            this->m_root = server->m_root;
-            this->m_root = removeTrailingSlash(this->m_root, uri);
+            m_root = server->m_root;
+            m_root = removeTrailingSlash(m_root, uri);
             string realPath = m_root + uri;
             if (lstat(realPath.c_str(), &d_stat) == -1) { // abcd가 없을경우
-                this->m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
-                this->m_file = realPath.substr(realPath.rfind("/") + 1);
+                m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
+                m_file = realPath.substr(realPath.rfind("/") + 1);
                 if (request.m_method != RequestHandler::PUT)
                 {
                     request.m_status = 404;
@@ -248,8 +266,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 return request.m_path + request.m_file;
             }
             if (S_ISDIR(d_stat.st_mode) == false) { // 1-2-1  abcd 파일이 있을경우 = path에 root + uri 파일부분 전까지, file에 uri 파일부분 > end
-                this->m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
-                this->m_file = uri.substr(uri.rfind("/") + 1);
+                m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
+                m_file = uri.substr(uri.rfind("/") + 1);
                 request.m_path = m_path;
                 request.m_file = m_file;
                 LOG(DEBUG, "1-2-1. %s", (m_path + m_file).data());
@@ -268,7 +286,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         {
             for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
             {
-                this->m_file = m_locationBlock->m_index[i];
+                m_file = m_locationBlock->m_index[i];
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                     m_path = m_path + "/";
                 if (lstat(m_path.c_str(), &d_stat) == -1) {
@@ -287,7 +305,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 }
             }
         }
-        this->m_file = "";
+        m_file = "";
         request.m_path = m_path;
         request.m_file = m_file;
         request.m_status = 404;
@@ -296,15 +314,15 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     }
     else // 2-2
     {
-        this->m_root = server->m_root;
-        this->m_root = removeTrailingSlash(this->m_root, uri);
-        this->m_path = this->m_root + uri;
+        m_root = server->m_root;
+        m_root = removeTrailingSlash(m_root, uri);
+        m_path = m_root + uri;
 
         if (server->m_index.size() != 0)
         {
             for (size_t i = 0; i < server->m_index.size(); i++)
             {
-                this->m_file = server->m_index[i];
+                m_file = server->m_index[i];
                 if (*(m_path.end() - 1) != '/' && *(m_file.begin()) != '/')
                     m_path = m_path + "/";
                 if (lstat(m_path.c_str(), &d_stat) == -1) {
@@ -323,7 +341,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 }
             }
         }
-        this->m_file = "";
+        m_file = "";
         request.m_path = m_path;
         request.m_file = m_file;
         request.m_status = 404;

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdexcept>
+#include <errno.h>
 
 #include "Logger.hpp"
 #include "event/EventObject.hpp"
@@ -42,6 +43,7 @@ Epoll::addWork(int fd, e_operation op, e_filters filter, EventObject* object)
 	static const uint32_t	filterTable[3] = {EPOLLIN, EPOLLOUT, EPOLLERR};
 	Event	newEvent;
 
+	::memset(&newEvent, 0, sizeof(newEvent));
 	newEvent.data.ptr = object;
 	for (int count = 0, bitmask = 0x1; count < 3; ++count, bitmask <<= 1)
 	{
@@ -93,9 +95,7 @@ Epoll::pollWork()
 		if (status == END)
 		{
 			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
-			// INFO: is this right?
 			delete object;
-//			registerEvent(event.getFd(), IoEventPoller::DELETE, IoEventPoller::NONE, NULL);
 		}
 	}
 	return 0;

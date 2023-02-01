@@ -26,8 +26,8 @@ private:
 // member variables
 public:
 	int									m_autoindex;
-	uint16_t							m_limitExcept;
-	int32_t								m_clientMaxBodySize;
+	t_uint16							m_limitExcept;
+	t_int32								m_clientMaxBodySize;
 	std::string							m_path;
 	std::string							m_root;
 	std::string							m_alias;

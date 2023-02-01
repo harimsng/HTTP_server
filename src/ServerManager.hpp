@@ -3,14 +3,8 @@
 
 #include <set>
 
-#include "OsDependency.hpp"
 #include "Webserv.hpp"
-#include "Logger.hpp"
-#include "exception/HttpErrorHandler.hpp"
-#include "parser/ConfigParser.hpp"
-#include "event/Server.hpp"
-#include "event/Client.hpp"
-#include "event/Cgi.hpp"
+#include IO_EVENT_HEADER
 
 class	ServerManager
 {
@@ -44,7 +38,7 @@ public:
 	static ListenServerTable	s_listenServerTable;
 
 	static void	registerEvent(int fd, IoEventPoller::e_operation op,
-			int filter, EventObject* object);
+			IoEventPoller::e_filters filter, EventObject* object);
 
 // friends
 //	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);

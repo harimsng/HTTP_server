@@ -24,7 +24,7 @@ std::map<std::string, std::string>	RequestHandler::s_extensionTypeTable;
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_socket(NULL),
 	m_parser(m_recvBuffer),
-	m_method(NULL)
+	m_responder(NULL)
 {
 	(void)requestHandler;
 }
@@ -40,7 +40,7 @@ RequestHandler::operator=(const RequestHandler& request)
 RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 :	m_socket(&socket),
 	m_parser(m_recvBuffer),
-	m_method(NULL)
+	m_responder(NULL)
 {
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
@@ -67,25 +67,23 @@ RequestHandler::receiveRequest()
 
 	switch (m_parser.m_readStatus)
 	{
-		case HttpRequestParser::REQUEST_LINE_METHOD:
-			// fall through
-		case HttpRequestParser::REQUEST_LINE:
-			// fall through
+		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
+		case HttpRequestParser::REQUEST_LINE: // fall through
 		case HttpRequestParser::HEADER_FIELDS:
 			m_parser.parse(m_request);
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS)
-				break;
+				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
 			createResponseHeader();
 			receiveStatus = RECV_EVENT;
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
-				break;
+				break; // fall through
 		case HttpRequestParser::CONTENT:
-			m_method->respond();
+			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
-				break;
+				break; // fall through
 		case HttpRequestParser::FINISHED:
-			delete m_method;
+			delete m_responder;
 			resetStates();
 			break;
 		default:
@@ -94,29 +92,63 @@ RequestHandler::receiveRequest()
 	return receiveStatus;
 }
 
-int
-RequestHandler::sendResponse() try
-{
-	int		count = m_sendBuffer.send(m_socket->m_fd);
-
-	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
-	{
-		return SEND_DONE;
-	}
-	return SEND_NORMAL;
-}
-catch (runtime_error& e)
-{
-	LOG(ERROR, "%s", e.what());
-	return SEND_ERROR;
-}
-
+// HOST field could be empty
 void
-RequestHandler::resetStates()
+RequestHandler::createResponseHeader() try
 {
-	m_request.m_headerFieldsMap.clear();
-	m_request = Request();
-	m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE_METHOD;
+	FindLocation	findLocation;
+	VirtualServer*	virtualServer;
+	int&			statusCode = m_request.m_status;
+
+	checkRequestMessage();
+	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
+	m_request.m_virtualServer = virtualServer;
+	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
+	if (m_request.m_locationBlock != NULL)
+	{
+		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
+		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
+	}
+	checkResourceStatus();
+
+	if (statusCode >= 400)
+		throw HttpErrorHandler(statusCode);
+	switch (m_request.m_method)
+	{
+		case GET:
+			m_responder = new GetResponder(*this);
+			break;
+		case HEAD:
+			m_responder = new HeadResponder(*this);
+			break;
+		case POST:
+			m_responder = new PostResponder(*this);
+			break;
+		case PUT:
+			m_responder = new PutResponder(*this);
+			break;
+		case DELETE:
+			m_responder = new DeleteResponder(*this);
+			break;
+		default:
+			// INFO: for OPTION, CONNECT, TRACE
+			UPDATE_REQUEST_ERROR(statusCode, 405);
+			m_responder = new GetResponder(*this);
+	}
+	bufferResponseStatusLine(statusCode);
+	bufferResponseHeaderFields();
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
+}
+catch (HttpErrorHandler& e)
+{
+	LOG(DEBUG, "error response to fd=%d", m_socket->m_fd);
+	if (m_request.m_method != HEAD)
+		m_responder = new GetResponder(*this);
+	else
+		m_responder = new HeadResponder(*this);
+	bufferResponseStatusLine(e.m_errorCode);
+	bufferResponseHeaderFields();
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 void
@@ -154,15 +186,6 @@ RequestHandler::checkHeaderFields()
 		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
-void
-RequestHandler::checkAllowedMethod(uint16_t allowed)
-{
-	if (!(m_request.m_method & allowed))
-		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
-}
-
-// TODO: should be called on method classes
-
 VirtualServer*
 RequestHandler::resolveVirtualServer(const string& host)
 {
@@ -181,6 +204,13 @@ RequestHandler::resolveVirtualServer(const string& host)
 }
 
 void
+RequestHandler::checkAllowedMethod(uint16_t allowed)
+{
+	if (!(m_request.m_method & allowed))
+		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
+}
+
+void
 RequestHandler::checkResourceStatus()
 {
 	int			ret;
@@ -196,7 +226,9 @@ RequestHandler::checkResourceStatus()
 					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
 //					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
 					))
+	{
 		return;
+	}
 		// statusCode = 200;
 
 	switch (errno)
@@ -216,64 +248,7 @@ RequestHandler::checkResourceStatus()
 			break;
 	}
 	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
-
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
-}
-
-// HOST field could be empty
-void
-RequestHandler::createResponseHeader() try
-{
-	FindLocation	findLocation;
-	VirtualServer*	virtualServer;
-	int&			statusCode = m_request.m_status;
-
-	checkRequestMessage();
-	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
-	m_request.m_virtualServer = virtualServer;
-	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
-	if (m_request.m_locationBlock != NULL)
-	{
-		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
-		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	}
-	checkResourceStatus();
-
-	if (statusCode >= 400)
-		throw HttpErrorHandler(statusCode);
-	switch (m_request.m_method)
-	{
-		case GET:
-			m_method = new GetResponder(*this);
-			break;
-		case HEAD:
-			m_method = new HeadResponder(*this);
-			break;
-		case POST:
-			m_method = new PostResponder(*this);
-			break;
-		case PUT:
-			m_method = new PutResponder(*this);
-			break;
-		case DELETE:
-			m_method = new DeleteResponder(*this);
-			break;
-		default:
-			UPDATE_REQUEST_ERROR(statusCode, 400);
-	}
-	bufferResponseStatusLine(statusCode);
-	bufferResponseHeaderFields();
-	m_parser.m_readStatus = HttpRequestParser::CONTENT;
-}
-catch (HttpErrorHandler& e)
-{
-	if (m_request.m_method != HEAD)
-		m_method = new GetResponder(*this);
-	else
-		m_method = new HeadResponder(*this);
-	m_parser.m_readStatus = HttpRequestParser::CONTENT;
-	bufferResponseStatusLine(e.m_errorCode);
-	bufferResponseHeaderFields();
 }
 
 void
@@ -313,6 +288,31 @@ RequestHandler::findContentType(std::string& content)
 		return s_extensionTypeTable[extension];
 	extension = "text/html";
 	return (extension);
+}
+
+void
+RequestHandler::resetStates()
+{
+	m_request.m_headerFieldsMap.clear();
+	m_request = Request();
+	m_parser.m_readStatus = HttpRequestParser::REQUEST_LINE_METHOD;
+}
+
+int
+RequestHandler::sendResponse() try
+{
+	int		count = m_sendBuffer.send(m_socket->m_fd);
+
+	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	{
+		return SEND_DONE;
+	}
+	return SEND_NORMAL;
+}
+catch (runtime_error& e)
+{
+	LOG(ERROR, "%s", e.what());
+	return SEND_ERROR;
 }
 
 std::ostream&

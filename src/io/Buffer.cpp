@@ -3,8 +3,6 @@
 
 #include "Buffer.hpp"
 
-#include <iostream>
-
 using namespace std;
 
 #define BUFFER_SIZE (8192)

@@ -26,7 +26,7 @@ HeadResponder::respond()
 		case HEADER:
 			respondHeader();
 			m_sendBuffer.append(g_CRLF);
-			m_methodStatus = DONE;
+			m_methodStatus = DONE; // fall through
 		case DONE:
 			endResponse();
 			break;

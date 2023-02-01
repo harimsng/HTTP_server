@@ -21,7 +21,6 @@ class	RequestHandler
 {
 	friend class	HttpRequestParser;
 	friend class	AResponder;
-	friend class	AResponder;
 
 // deleted
 	RequestHandler(const RequestHandler& requestHandler);
@@ -88,7 +87,7 @@ private:
 	HttpRequestParser	m_parser;
 
 	Request				m_request;
-	AResponder*			m_method;
+	AResponder*			m_responder;
 public:
 
 	static std::string			makeErrorPage(int status);

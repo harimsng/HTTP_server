@@ -47,23 +47,25 @@ AResponder::readFile(std::string& readBody)
 
 	if (m_request.m_status != 200)
 	{
+		map<int, string>*	error_page;
+		std::string			root;
 		// filePath = "/Users/soum/webserv/html/error.html";
 		// TODO: expand this function and change its name or handle this behavior out of readFile() function.
 		if (m_request.m_locationBlock == NULL)
 		{
-			map<int, string>&	error_page = m_request.m_virtualServer->m_errorPageTable;
-			std::string			filePath = m_request.m_virtualServer->m_root + error_page[m_request.m_status];
+			error_page = &m_request.m_virtualServer->m_errorPageTable;
+			root = m_request.m_virtualServer->m_root;
 		}
 		else
 		{
-			map<int, string>&	error_page = m_request.m_locationBlock->m_errorPageTable;
-			std::string			filePath = m_request.m_locationBlock->m_root + error_page[m_request.m_status];
+			error_page = &m_request.m_locationBlock->m_errorPageTable;
+			root = m_request.m_locationBlock->m_root;
 		}
-		map<int, string>& error_page = m_request.m_locationBlock->m_errorPageTable;
-		if(error_page.size() != 0 && error_page.count(m_request.m_status) != 0)
+		if(error_page->count(m_request.m_status) != 0)
 		{
-			filePath = m_request.m_locationBlock->m_root + error_page[m_request.m_status];
-			filePath.replace(filePath.find('*'), 1, Util::toString(m_request.m_status));
+			filePath = root + (*error_page)[m_request.m_status];
+			// if filePath.find('*') >= size(), exception is thrown.
+			// filePath.replace(filePath.find('*'), 1, Util::toString(m_request.m_status));
 		}
 		else
 		{

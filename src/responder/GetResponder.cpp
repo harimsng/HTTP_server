@@ -34,10 +34,8 @@ GetResponder::respond()
 	{
 		case HEADER:
 			respondHeader();
-			m_methodStatus = BODY;
-
+			m_methodStatus = BODY; // fall through
 		case BODY:
-			readBody = "";
 			if (m_request.m_file == "")
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else
@@ -47,10 +45,11 @@ GetResponder::respond()
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-			m_sendBuffer.append(readBody);
-			m_methodStatus = DONE;
-			// break;
 
+			// TODO: change code to use swap instead of appen
+			m_sendBuffer.append(readBody);
+			m_methodStatus = DONE; // fall through
+			// break; 
 		case DONE:
 		// method must know end of response(content length, chunked)
 			endResponse();

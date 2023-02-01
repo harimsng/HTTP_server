@@ -1,4 +1,10 @@
 #include "Webserv.hpp"
+#include "Logger.hpp"
+#include "event/Server.hpp"
+#include "event/Client.hpp"
+#include "event/Cgi.hpp"
+#include "parser/ConfigParser.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "ServerManager.hpp"
 
 // static member definitions
@@ -63,7 +69,7 @@ catch (std::exception& e)
 		 itr != s_listenServerTable.end();
 		 ++itr)
 	{
-		close(itr->second->m_fd);
+		delete itr->second;
 	}
 	throw;
 }
@@ -83,11 +89,11 @@ ServerManager::run() try
 // TODO: cleanup
 catch (std::runtime_error& e)
 {
-	LOG(ERROR, "%s", e.what());
+	LOG(ERROR, "runtime_error: %s", e.what());
 }
-catch (HttpErrorHandler& e)
+catch (std::exception& e)
 {
-	LOG(ERROR, "%s", e.getErrorMessage().data());
+	LOG(ERROR, "exception: %s", e.what());
 }
 catch (...)
 {
@@ -96,7 +102,7 @@ catch (...)
 
 void
 ServerManager::registerEvent(int fd, IoEventPoller::e_operation op,
-			int filter, EventObject* object)
+			IoEventPoller::e_filters filter, EventObject* object)
 {
-	s_ioEventPoller.add(fd, op, static_cast<IoEventPoller::e_filters>(filter), object);
+	s_ioEventPoller.add(fd, op, filter, object);
 }
