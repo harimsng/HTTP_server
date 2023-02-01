@@ -42,7 +42,7 @@ private:
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;
-	friend void				RequestHandler::createResponseHeader();
+	friend void				RequestHandler::checkRequestMessage();
 	friend std::ostream&	operator<<(std::ostream& os, const VirtualServer& server);
 };
 
