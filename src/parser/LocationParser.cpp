@@ -1,7 +1,9 @@
+#include "ConfigParser.hpp"
 #include "Logger.hpp"
 #include "Location.hpp"
 #include "http/RequestHandler.hpp"
 #include "parser/LocationParser.hpp"
+#include "exception/ConfigParserException.hpp"
 
 using namespace std;
 
@@ -80,6 +82,8 @@ LocationParser::setRoot(Location& location)
 //	static const string	workingDir = WORKING_DIR;
 
 	location.m_root = m_tokenizer.get();
+	if (location.m_alias != "")
+		throw ConfigParser::ConfigParserException("already alias is setted");
 //	if (location.m_root[0] != '/')
 //		location.m_root = workingDir += location.m_root;
 	m_tokenizer.eat(";");
@@ -89,6 +93,9 @@ void
 LocationParser::setAlias(Location& location)
 {
 	location.m_alias = m_tokenizer.get();
+	if (location.m_root != "")
+		throw ConfigParser::ConfigParserException("already root is setted");
+
 	m_tokenizer.eat(";");
 }
 
