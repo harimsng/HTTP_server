@@ -18,6 +18,22 @@ PutResponder::operator=(const PutResponder& putResponder)
 	return *this;
 }
 
-void PutResponder::respond()
+void
+PutResponder::respond()
 {
+	switch (m_methodStatus)
+	{
+		case HEADER:
+			respondHeader();
+			m_methodStatus = BODY;
+		case BODY:
+			readRequestBody();
+			if (m_methodStatus == BODY)
+				break;
+		case DONE:
+			endResponse();
+			break;
+		default:
+			;
+	}
 }

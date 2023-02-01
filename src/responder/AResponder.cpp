@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <sys/stat.h>
 #include <algorithm>
 #include <iostream>
@@ -87,6 +88,20 @@ AResponder::readFile(std::string& readBody)
 	file.close();
 }
 
+void
+AResponder::writeFile()
+{
+	ofstream file;
+	string	filePath = m_request.m_path + m_request.m_file;
+
+	file.open(filePath);
+	cout << filePath << endl;
+	if (file.fail())
+		throw runtime_error("file open error");
+	file << m_recvBuffer;
+	file.close();
+}
+
 bool
 AResponder::checkFileExists(const std::string& filePath)
 {
@@ -129,4 +144,52 @@ AResponder::respondHeader()
 	else
 		m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);
 	m_sendBuffer.append(g_CRLF);
+}
+
+void
+AResponder::readRequestBody()
+{
+	int status = 0;
+
+	if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
+		status = normalReadBody();
+	else
+		status = chunkedReadBody();
+	if (status)
+	{
+		string readBody;
+
+		m_request.m_status = 201;
+		readFile(readBody);
+		m_sendBuffer.append("Content-Length: ");
+		m_sendBuffer.append(Util::toString(readBody.size()));
+		m_sendBuffer.append(g_CRLF);
+		m_sendBuffer.append(g_CRLF);
+		m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
+		m_sendBuffer.append(readBody);
+		m_methodStatus = DONE;
+	}
+}
+
+int
+AResponder::chunkedReadBody()
+{
+	return (0);
+}
+
+int
+AResponder::normalReadBody()
+{
+	size_t contentLen;
+
+	contentLen = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+	cout << "put recv buffer :" << m_recvBuffer << endl;
+	cout << contentLen << endl;
+
+	if (m_recvBuffer.size() == contentLen)
+	{
+		writeFile();
+		return (1);
+	}
+	return (0);
 }
