@@ -1,7 +1,8 @@
 #include "HeadResponder.hpp"
 
 // constructors & destructor
-HeadResponder::HeadResponder()
+HeadResponder::HeadResponder(RequestHandler& requesthandler)
+:	AResponder(requesthandler)
 {
 }
 
@@ -9,15 +10,27 @@ HeadResponder::~HeadResponder()
 {
 }
 
-HeadResponder::HeadResponder(const HeadResponder& headresponder)
-{
-	(void)headresponder;
-}
-
 // operators
 HeadResponder&
-HeadResponder::operator=(const HeadResponder& headresponder)
+HeadResponder::operator=(const HeadResponder& HeadResponder)
 {
-	(void)headresponder;
+	(void)HeadResponder;
 	return *this;
+}
+
+void
+HeadResponder::respond()
+{
+	switch(m_methodStatus)
+	{
+		case HEADER:
+			respondHeader();
+			m_sendBuffer.append(g_CRLF);
+			m_methodStatus = DONE; // fall through
+		case DONE:
+			endResponse();
+			break;
+		default:
+			;
+	}
 }

@@ -2,6 +2,7 @@
 #define SOCKET_HPP
 
 #include <unistd.h>
+#include <string>
 
 #include "SocketTypes.hpp"
 
@@ -35,6 +36,11 @@ public:
 
 // member variables
 	const int	m_fd;
+
+// static members
+	static std::string	getFormattedAddress(uint32_t addr, uint16_t port);
+	static std::string	getFormattedAddress(sockaddr_in& addr);
+	static std::string	getFormattedAddress(int fd);
 };
 
 template <typename SocketType>

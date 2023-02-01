@@ -41,7 +41,7 @@ Server::initServer(uint32_t addr, uint16_t port)
 
 	Tcp::SocketAddr	sockaddr = GET_SOCKADDR_IN(addr, port);
 	LOG(DEBUG, "listen server trying to bind and listen on: %s",
-			Util::getFormattedAddress(addr, port).data());
+			Socket<Tcp>::getFormattedAddress(addr, port).data());
 	if (m_socket.bind(&sockaddr) < 0)
 	{
 		close(m_socket.m_fd);
@@ -68,7 +68,7 @@ Server::handleEventWork()
 
 			Client* client;
 			client = new Client(clientFd);
-			LOG(DEBUG, "read event to server toward %s", Util::getFormattedAddress(clientFd).data());
+			LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
 			ServerManager::registerEvent(clientFd, IoEventPoller::ADD,
 					IoEventPoller::READ, client);
 			break;

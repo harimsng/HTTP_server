@@ -1,18 +1,20 @@
 #ifndef POSTRESPONDER_HPP
 #define POSTRESPONDER_HPP
 
-class	PostResponder
+#include "responder/AResponder.hpp"
+
+class	PostResponder : public AResponder
 {
 public:
 // constructors & destructor
-	PostResponder();
+	PostResponder(RequestHandler& requestHandler);
 	~PostResponder();
-	PostResponder(const PostResponder& postresponder);
 
 // operators
-	PostResponder	&operator=(const PostResponder& postresponder);
+	PostResponder	&operator=(const PostResponder& postResponder);
 
 // member functions
+	virtual void	respond();
 };
 
 #endif

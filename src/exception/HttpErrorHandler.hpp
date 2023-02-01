@@ -9,10 +9,11 @@ public:
 // constructors & destructor
 	HttpErrorHandler(int errorCode);
 	~HttpErrorHandler();
-	HttpErrorHandler(const HttpErrorHandler& httpErrorHandler);
-	HttpErrorHandler	&operator=(const HttpErrorHandler& httpErrorHandler);
+//	HttpErrorHandler(const HttpErrorHandler& httpErrorHandler) = default;
+//	HttpErrorHandler	&operator=(const HttpErrorHandler& httpErrorHandler) = default;
 
 // member functions
+	const int	m_errorCode;
 private:
 	std::string	m_errorMessage;
 

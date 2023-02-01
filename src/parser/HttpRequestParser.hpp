@@ -18,7 +18,7 @@ typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 
 struct Request
 {
-	Request(): m_status(200), m_locationBlock(NULL) {};
+	Request(): m_status(200), m_locationBlock(NULL), m_virtualServer(NULL) {};
 
 	int					m_method;
 	int					m_status;

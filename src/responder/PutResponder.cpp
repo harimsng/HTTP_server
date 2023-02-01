@@ -1,7 +1,8 @@
 #include "PutResponder.hpp"
 
 // constructors & destructor
-PutResponder::PutResponder()
+PutResponder::PutResponder(RequestHandler& requestHandler)
+:	AResponder(requestHandler)
 {
 }
 
@@ -9,15 +10,14 @@ PutResponder::~PutResponder()
 {
 }
 
-PutResponder::PutResponder(const PutResponder& putresponder)
-{
-	(void)putresponder;
-}
-
 // operators
 PutResponder&
-PutResponder::operator=(const PutResponder& putresponder)
+PutResponder::operator=(const PutResponder& putResponder)
 {
-	(void)putresponder;
+	(void)putResponder;
 	return *this;
+}
+
+void PutResponder::respond()
+{
 }

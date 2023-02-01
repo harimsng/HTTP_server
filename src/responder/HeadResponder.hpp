@@ -1,18 +1,20 @@
 #ifndef HEADRESPONDER_HPP
 #define HEADRESPONDER_HPP
 
-class	HeadResponder
+#include "responder/AResponder.hpp"
+
+class	HeadResponder: public AResponder
 {
 public:
 // constructors & destructor
-	HeadResponder();
+	HeadResponder(RequestHandler& requestHandler);
 	~HeadResponder();
-	HeadResponder(const HeadResponder& headresponder);
 
 // operators
-	HeadResponder	&operator=(const HeadResponder& headresponder);
+	HeadResponder	&operator=(const HeadResponder& HeadResponder);
 
 // member functions
+	virtual void	respond();
 };
 
 #endif

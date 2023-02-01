@@ -1,4 +1,10 @@
 #include "Webserv.hpp"
+#include "Logger.hpp"
+#include "event/Server.hpp"
+#include "event/Client.hpp"
+#include "event/Cgi.hpp"
+#include "parser/ConfigParser.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "ServerManager.hpp"
 
 // static member definitions
@@ -30,18 +36,18 @@ ServerManager::parseConfig(const char* path)
 void
 ServerManager::initServers() try
 {
-	uint64_t	prevPort = 0;
+	t_uint64	prevPort = 0;
 	bool		anyAddrFlag = false;
 
 	for (VirtualServerTable::iterator itr = s_virtualServerTable.begin();
 		 itr != s_virtualServerTable.end();
 		 ++itr)
 	{
-		uint64_t	addrKey = itr->first;
-		uint32_t	addr;
-		uint16_t	port;
+		AddrKey					addrKey = itr->first;
+		Socket<Tcp>::SocketAddr	sockAddr = addrKey.splitAddrKey();
+		t_uint32	addr = sockAddr.sin_addr.s_addr;
+		t_uint16	port = sockAddr.sin_port;
 
-		Util::convertAddrKey(addrKey, addr, port);
 		if (anyAddrFlag == true && prevPort == port)
 			continue;
 
@@ -63,7 +69,7 @@ catch (std::exception& e)
 		 itr != s_listenServerTable.end();
 		 ++itr)
 	{
-		close(itr->second->m_fd);
+		delete itr->second;
 	}
 	throw;
 }
@@ -83,11 +89,11 @@ ServerManager::run() try
 // TODO: cleanup
 catch (std::runtime_error& e)
 {
-	LOG(ERROR, "%s", e.what());
+	LOG(ERROR, "runtime_error: %s", e.what());
 }
-catch (HttpErrorHandler& e)
+catch (std::exception& e)
 {
-	LOG(ERROR, "%s", e.getErrorMessage().data());
+	LOG(ERROR, "exception: %s", e.what());
 }
 catch (...)
 {
@@ -96,7 +102,7 @@ catch (...)
 
 void
 ServerManager::registerEvent(int fd, IoEventPoller::e_operation op,
-			int filter, EventObject* object)
+			IoEventPoller::e_filters filter, EventObject* object)
 {
-	s_ioEventPoller.add(fd, op, static_cast<IoEventPoller::e_filters>(filter), object);
+	s_ioEventPoller.add(fd, op, filter, object);
 }

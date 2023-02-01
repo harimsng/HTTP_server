@@ -1,11 +1,8 @@
-#include <iostream>
-#include <string>
-
 #include "Webserv.hpp"
 #include "Logger.hpp"
 #include "ServerManager.hpp"
-#include "parser/ConfigParser.hpp"
-#include "exception/ConfigParserException.hpp"
+#//include "parser/ConfigParser.hpp"
+//#include "exception/ConfigParserException.hpp"
 #include "util/Util.hpp"
 
 using namespace	std;
@@ -17,6 +14,7 @@ int	main(int argc, char **argv)
 
 	if (Util::parseArgument(argc, argv) == false)
 	{
+		std::cout << "usage: webserv  [--log=option]  config_path\n";
 		return 1;
 	}
 	try
@@ -29,11 +27,5 @@ int	main(int argc, char **argv)
 		LOG(ERROR, "%s", e.what());
 		return 1;
 	}
-	/*
-	catch (int status)
-	{
-		return status;
-	}
-	*/
 	return 0;
 }

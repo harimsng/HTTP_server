@@ -1,17 +1,19 @@
 #ifndef GETRESPONDER_HPP
 #define GETRESPONDER_HPP
 
-class	GetResponder
+#include "responder/AResponder.hpp"
+
+class	GetResponder : public AResponder
 {
 public:
 // constructors & destructor
-	GetResponder();
+	GetResponder(RequestHandler& requestHandler);
 	~GetResponder();
-	GetResponder(const GetResponder& getresponder);
 
 // operators
-	GetResponder	&operator=(const GetResponder& getresponder);
+	GetResponder	&operator=(const GetResponder& getMethod);
 
+	virtual void	respond();
 // member functions
 };
 

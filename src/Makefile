@@ -35,17 +35,20 @@ SRC			+=	main.cpp\
 				exception/ConfigParserException.cpp\
 				exception/HttpErrorHandler.cpp\
 \
-				http/RequestHandler.cpp\
-				http/AMethod.cpp\
-				http/GetMethod.cpp\
-				http/HeadMethod.cpp\
-				http/PutMethod.cpp\
-				http/PostMethod.cpp\
-				http/DeleteMethod.cpp\
 				http/FindLocation.cpp\
 				http/AutoIndex.cpp\
+				http/RequestHandler.cpp\
+\
+				responder/AResponder.cpp\
+				responder/GetResponder.cpp\
+				responder/HeadResponder.cpp\
+				responder/PutResponder.cpp\
+				responder/PostResponder.cpp\
+				responder/DeleteResponder.cpp\
 \
 				io/Buffer.cpp\
+\
+				socket/Socket.cpp\
 \
 				util/Util.cpp\
 

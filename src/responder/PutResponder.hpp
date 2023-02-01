@@ -1,18 +1,20 @@
 #ifndef PUTRESPONDER_HPP
 #define PUTRESPONDER_HPP
 
-class	PutResponder
+#include "responder/AResponder.hpp"
+
+class	PutResponder : public AResponder
 {
 public:
 // constructors & destructor
-	PutResponder();
+	PutResponder(RequestHandler& requestHandler);
 	~PutResponder();
-	PutResponder(const PutResponder& putresponder);
 
 // operators
-	PutResponder	&operator=(const PutResponder& putresponder);
+	PutResponder	&operator=(const PutResponder& putResponder);
 
 // member functions
+	virtual void	respond();
 };
 
 #endif

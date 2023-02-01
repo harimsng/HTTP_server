@@ -37,8 +37,9 @@ AutoIndex::autoIndex(const std::string& path, const std::string& uri) {
 	struct dirent*	file_info;
 
 	directory = opendir(path.c_str());
-	if (directory == NULL)
-		throw HttpErrorHandler(404);
+	// if (directory == NULL)
+	//	throw HttpErrorHandler(404);
+
 	// it can be divided into
 	// ENOENT directory not found -> 404
 	// EACCESS permission denied -> 404
