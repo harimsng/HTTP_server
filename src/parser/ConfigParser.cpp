@@ -9,7 +9,13 @@
 #include "parser/LocationParser.hpp"
 #include "parser/ConfigParser.hpp"
 
+#ifndef WEBSERV_ROOT
+# define WEBSERV_ROOT "/"
+#endif
+
 using namespace std;
+
+extern const string	g_webservDir = WEBSERV_ROOT;
 
 // constructors & destructor
 ConfigParser::ConfigParser()
