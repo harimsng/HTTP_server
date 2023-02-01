@@ -60,8 +60,13 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
+	cout << "recv Buffer :"<< m_recvBuffer << "$" << endl;
+	cout << m_parser.m_readStatus << endl;
 	if (count == 0)
+	{
+
 		return RECV_END;
+	}
 	else if (count == -1)
 		return RECV_SKIPPED;
 
@@ -71,7 +76,7 @@ RequestHandler::receiveRequest()
 		case HttpRequestParser::REQUEST_LINE: // fall through
 		case HttpRequestParser::HEADER_FIELDS:
 			m_parser.parse(m_request);
-			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS)
+			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
 			createResponseHeader();
@@ -98,6 +103,7 @@ RequestHandler::createResponseHeader() try
 {
 	int&			statusCode = m_request.m_status;
 
+	cout << m_request << endl;
 	checkRequestMessage();
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
@@ -131,7 +137,7 @@ RequestHandler::createResponseHeader() try
 }
 catch (HttpErrorHandler& e)
 {
-	LOG(DEBUG, "error response to fd=%d", m_socket->m_fd);
+	LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, e.m_errorCode);
 	if (m_request.m_method != HEAD)
 		m_responder = new GetResponder(*this);
 	else
@@ -180,12 +186,23 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
-	bool check = true;
-
-	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
-
-	if (check == false)
-		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+	if (m_request.m_headerFieldsMap.count("HOST") == 0)
+		// ||
+		//     m_request.m_headerFieldsMap["HOST"].size() == 0 ||
+		//     m_request.m_headerFieldsMap["HOST"][0] == "")
+	{
+		m_request.m_headerFieldsMap["HOST"].push_back("");
+		// UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+		return;
+	}
+	// if (m_request.m_headerFieldsMap.count("CONNECTION") == 0 ||
+	//     m_request.m_headerFieldsMap["CONNECTION"][0] == "")
+	// {
+	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+	//     return;
+	// }
+	// if (check == false)
+	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
 VirtualServer*
@@ -219,7 +236,10 @@ RequestHandler::checkResourceStatus()
 	struct stat	status;
 	int			statusCode = 0;
 	string		path = m_request.m_path + m_request.m_file;
+	cout << path << endl;
 
+	if (m_request.m_method == PUT)
+		return;
 	ret = stat(path.c_str(), &status);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)

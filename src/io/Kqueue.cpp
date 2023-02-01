@@ -105,10 +105,12 @@ Kqueue::pollWork()
 		if (status == END)
 		{
 			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
-			close(object->m_fd);
+			// close(object->m_fd);
 			// INFO: fix deallocate
-			// delete object;
+			delete object;
+			break;
 		}
 	}
+	m_eventList.clear();
 	return 0;
 }

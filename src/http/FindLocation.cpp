@@ -21,14 +21,18 @@ FindLocation::setRootAlias(string const &uri, VirtualServer* server)
 {
     m_root = m_locationBlock->m_root;
     m_alias = m_locationBlock->m_alias;
-    if (m_root.length() != 0) {
+
+	if (m_alias.length() != 0)
+	{
+		m_path = m_alias + m_remainUri;
+	}
+	else if (m_root.length() != 0)
+	{
         m_root = removeTrailingSlash(m_root, uri);
         m_path = m_root + uri;
     }
-    else if (m_alias.length() != 0) {
-        m_path = m_alias + m_remainUri;
-    }
-    else {
+    else
+	{
         m_root = removeTrailingSlash(server->m_root, uri);
         m_path = server->m_root + uri;
     }
@@ -198,23 +202,25 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             LOG(DEBUG, "1. %s", m_path.data());
 			// findLocation == true && lstat() == false
             if (lstat(m_path.c_str(), &d_stat) == -1) { // abcd가 없을경우
-                request.m_path = m_path.substr(0, uri.find_last_of("/")) + "/";
+                request.m_path = m_path.substr(0, m_path.find_last_of("/")) + "/";
                 request.m_file = m_file;
                 if (request.m_method != RequestHandler::PUT)
                 {
                     request.m_status = 404;
                 }
                 LOG(DEBUG, "1-1-0. no file, no path %s", (request.m_path + request.m_file).data());
-                return m_path + m_file;
+                return request.m_path + request.m_file;
             }
             if (S_ISDIR(d_stat.st_mode) == false) { // 1-1-1 파일일 경우 > end
-                request.m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
-                request.m_file = uri.substr(uri.rfind("/") + 1);
+                // request.m_path = m_root + uri.substr(0, uri.find_last_of("/")) + "/";
+                // request.m_file = uri.substr(uri.rfind("/") + 1);
+                request.m_path = m_path.substr(0, m_path.find_last_of("/")) + "/";
+				request.m_file = m_file;
                 LOG(DEBUG, "1-1-1. %s", (request.m_path + request.m_file).data());
-                return m_path + m_file;
+                return request.m_path + request.m_file;
             }
             else  { // 1-1-2 디렉토리일 경우
-				
+
 				// INFO: is this necessary if?
                 if (m_locationBlock->m_index.size() != 0)
                 {

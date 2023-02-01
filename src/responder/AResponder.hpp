@@ -28,6 +28,10 @@ public:
 	void			respondHeader();
 	void			endResponse();
 
+	void			writeFile();
+	void			readRequestBody();
+	int				normalReadBody();
+	int				chunkedReadBody();
 	void			readFile(std::string& readBody);
 	bool			checkFileExists(const std::string& filePath);
 	bool			checkDirExists(const std::string& filePath);
