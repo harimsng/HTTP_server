@@ -94,7 +94,7 @@ AResponder::writeFile()
 	ofstream file;
 	string	filePath = m_request.m_path + m_request.m_file;
 
-	file.open(filePath);
+	file.open(filePath.c_str());
 	cout << filePath << endl;
 	if (file.fail())
 		throw runtime_error("file open error");

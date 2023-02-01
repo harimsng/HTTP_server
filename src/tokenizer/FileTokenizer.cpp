@@ -87,6 +87,7 @@ FileTokenizer::getErrorLog(const char* message)
 	return errorLog;
 }
 
+#include "Logger.hpp"
 void
 FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 {
@@ -95,7 +96,9 @@ FileTokenizer::tokenize(const std::string& chunk, int lineNumber)
 		if (chunk[end] == ';' || chunk[end] == '{' || chunk[end] == '}')
 		{
 			if (start != end)
+			{
 				m_tokenArr.push_back(make_pair(chunk.substr(start, end - start), lineNumber));
+			}
 			m_tokenArr.push_back(make_pair(string(1, chunk[end]), lineNumber));
 			start = end + 1;
 		}
@@ -124,7 +127,10 @@ FileTokenizer::init(const string& path)
 
 		while (ss.good())
 		{
+			chunk.clear();
 			ss >> chunk;
+			if (chunk.size() == 0 || chunk[0] == '#')
+				break;
 			chunk.push_back('\0');
 			tokenize(chunk, lineNumber);
 		}

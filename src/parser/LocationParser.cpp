@@ -2,10 +2,12 @@
 #include "Logger.hpp"
 #include "Location.hpp"
 #include "http/RequestHandler.hpp"
-#include "parser/LocationParser.hpp"
 #include "exception/ConfigParserException.hpp"
+#include "parser/LocationParser.hpp"
 
 using namespace std;
+
+extern const string	g_webservDir;
 
 map<string, LocationParser::t_setter>	LocationParser::s_locationSetterMap;
 
@@ -47,9 +49,13 @@ LocationParser::parse(Location& location)
 void
 LocationParser::setIndex(Location& location)
 {
+	string	index;
+
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		location.m_index.push_back( m_tokenizer.get());
+		index = m_tokenizer.get();
+		location.m_index.push_back(index[0] == '/'
+				? index : g_webservDir + index);
 	}
 	m_tokenizer.eat(";");
 }
@@ -79,23 +85,25 @@ LocationParser::setPath(Location& location)
 void
 LocationParser::setRoot(Location& location)
 {
-//	static const string	workingDir = WORKING_DIR;
+	string	root;
 
-	location.m_root = m_tokenizer.get();
+//	static const string	workingDir = WORKING_DIR;
 	if (location.m_alias != "")
-		throw ConfigParser::ConfigParserException("already alias is setted");
-//	if (location.m_root[0] != '/')
-//		location.m_root = workingDir += location.m_root;
+		throw ConfigParser::ConfigParserException("alias is already setted");
+	root = m_tokenizer.get();
+	location.m_root = root[0] == '/' ? root : g_webservDir + root;
 	m_tokenizer.eat(";");
 }
 
 void
 LocationParser::setAlias(Location& location)
 {
-	location.m_alias = m_tokenizer.get();
-	if (location.m_root != "")
-		throw ConfigParser::ConfigParserException("already root is setted");
+	string	root;
 
+	if (location.m_root != "")
+		throw ConfigParser::ConfigParserException("root is already setted");
+	root = m_tokenizer.get();
+	location.m_alias = root[0] == '/' ? root : g_webservDir + root;
 	m_tokenizer.eat(";");
 }
 

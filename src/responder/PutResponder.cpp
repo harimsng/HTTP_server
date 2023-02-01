@@ -25,11 +25,11 @@ PutResponder::respond()
 	{
 		case HEADER:
 			respondHeader();
-			m_methodStatus = BODY;
+			m_methodStatus = BODY; // fall through
 		case BODY:
 			readRequestBody();
 			if (m_methodStatus == BODY)
-				break;
+				break; // fall through
 		case DONE:
 			endResponse();
 			break;
