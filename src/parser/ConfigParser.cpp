@@ -36,18 +36,6 @@ ConfigParser::init(string configPath, VirtualServerTable& serverTable)
 	m_tokenizer.init(configPath);
 }
 
-// TODO
-// this function have to move to Util class member function
-// bool
-// ConfigParser::checkFileStat(const char* path)
-// {
-//     struct stat	buffer;
-//
-//     if (stat(path, &buffer) == -1)
-//         return (false);
-//         // throw ConfigParserException("file doesn't exist");
-//     return (buffer.st_mode & S_IFREG) == S_IFREG;
-// }
 
 void
 ConfigParser::parse() try
