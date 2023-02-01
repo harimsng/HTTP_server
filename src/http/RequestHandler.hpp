@@ -63,14 +63,14 @@ public:
 	int		sendResponse();
 	void	resetStates();
 
-	void	createResponseHeader();
 	std::string	findContentType(std::string& content);
+	void	checkRequestMessage();
 private:
 	VirtualServer*	resolveVirtualServer(const std::string& host);
 	int				resolveResourceLocation(std::map<std::string, Location>& locationTable);
 
+	void	createResponseHeader();
 	void	checkResourceStatus();
-	void	checkRequestMessage();
 	void	checkStatusLine();
 	void	checkHeaderFields();
 	void	checkAllowedMethod(uint16_t allowed);
@@ -79,6 +79,8 @@ private:
 	void	bufferResponseHeaderFields();
 
 	void	makeErrorResponse(const std::string& errorMessage);
+
+	std::string methodToString(uint16_t allowed);
 
 // member variables
 	const Socket<Tcp>*	m_socket;

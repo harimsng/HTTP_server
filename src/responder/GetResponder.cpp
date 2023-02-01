@@ -49,7 +49,7 @@ GetResponder::respond()
 			// TODO: change code to use swap instead of appen
 			m_sendBuffer.append(readBody);
 			m_methodStatus = DONE; // fall through
-			// break; 
+			// break;
 		case DONE:
 		// method must know end of response(content length, chunked)
 			endResponse();

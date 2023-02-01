@@ -60,8 +60,13 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
+	cout << "recv Buffer :"<< m_recvBuffer << "$" << endl;
+	cout << m_parser.m_readStatus << endl;
 	if (count == 0)
+	{
+
 		return RECV_END;
+	}
 	else if (count == -1)
 		return RECV_SKIPPED;
 
@@ -71,7 +76,7 @@ RequestHandler::receiveRequest()
 		case HttpRequestParser::REQUEST_LINE: // fall through
 		case HttpRequestParser::HEADER_FIELDS:
 			m_parser.parse(m_request);
-			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS)
+			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
 			createResponseHeader();
@@ -96,23 +101,14 @@ RequestHandler::receiveRequest()
 void
 RequestHandler::createResponseHeader() try
 {
-	FindLocation	findLocation;
-	VirtualServer*	virtualServer;
 	int&			statusCode = m_request.m_status;
 
+	cout << m_request << endl;
 	checkRequestMessage();
-	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
-	m_request.m_virtualServer = virtualServer;
-	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
-	if (m_request.m_locationBlock != NULL)
-	{
-		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
-		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	}
-	checkResourceStatus();
-
 	if (statusCode >= 400)
 		throw HttpErrorHandler(statusCode);
+	// NOTE
+	// request message가 제대로 왔을때
 	switch (m_request.m_method)
 	{
 		case GET:
@@ -141,7 +137,7 @@ RequestHandler::createResponseHeader() try
 }
 catch (HttpErrorHandler& e)
 {
-	LOG(DEBUG, "error response to fd=%d", m_socket->m_fd);
+	LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, e.m_errorCode);
 	if (m_request.m_method != HEAD)
 		m_responder = new GetResponder(*this);
 	else
@@ -154,6 +150,9 @@ catch (HttpErrorHandler& e)
 void
 RequestHandler::checkRequestMessage()
 {
+	FindLocation	findLocation;
+	VirtualServer*	virtualServer;
+
 	// 1. check method
 	// 2. check uri length
 	// 3. check http version
@@ -165,12 +164,21 @@ RequestHandler::checkRequestMessage()
 	//     throw HttpErrorHandler(400);
 	checkStatusLine(); // 1, 2, 3
 	checkHeaderFields(); // 4
+	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
+	m_request.m_virtualServer = virtualServer;
+	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
+	if (m_request.m_locationBlock != NULL)
+	{
+		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
+		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
+	}
+	checkResourceStatus();
+
 }
 
 void
 RequestHandler::checkStatusLine()
 {
-	// if (m_request.m_uri >= uri_size) // check uri length
 	if (m_request.m_protocol != "HTTP/1.1") // check http version
 		UPDATE_REQUEST_ERROR(m_request.m_status, 505);
 }
@@ -178,12 +186,23 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
-	bool check = true;
-
-	check &= m_request.m_headerFieldsMap.count("HOST") > 0;
-
-	if (check == false)
-		UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+	if (m_request.m_headerFieldsMap.count("HOST") == 0)
+		// ||
+		//     m_request.m_headerFieldsMap["HOST"].size() == 0 ||
+		//     m_request.m_headerFieldsMap["HOST"][0] == "")
+	{
+		m_request.m_headerFieldsMap["HOST"].push_back("");
+		// UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+		return;
+	}
+	// if (m_request.m_headerFieldsMap.count("CONNECTION") == 0 ||
+	//     m_request.m_headerFieldsMap["CONNECTION"][0] == "")
+	// {
+	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
+	//     return;
+	// }
+	// if (check == false)
+	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
 VirtualServer*
@@ -217,7 +236,10 @@ RequestHandler::checkResourceStatus()
 	struct stat	status;
 	int			statusCode = 0;
 	string		path = m_request.m_path + m_request.m_file;
+	cout << path << endl;
 
+	if (m_request.m_method == PUT)
+		return;
 	ret = stat(path.c_str(), &status);
 	if (ret == 0
 		&& S_ISREG(status.st_mode)
@@ -268,13 +290,17 @@ RequestHandler::bufferResponseHeaderFields()
 {
 	m_sendBuffer.append("Server: webserv/2.0");
 	m_sendBuffer.append(g_CRLF);
-	// TODO : should be moved to method class
-	// m_sendBuffer.append("Content-Type: " + findContentType(m_request.m_file));
-	// m_sendBuffer.append(g_CRLF);
-	// m_sendBuffer.append("Connection: keep-alive");
-	// m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_sendBuffer.append(g_CRLF);
+	if (m_request.m_status == 405)
+	{
+		if (m_request.m_locationBlock != NULL)
+			m_sendBuffer.append("Allow:" + methodToString(m_request.m_locationBlock->m_limitExcept));
+		else
+			m_sendBuffer.append("Allow:" + methodToString(0x1f));
+
+		m_sendBuffer.append(g_CRLF);
+	}
 }
 
 
@@ -417,4 +443,22 @@ RequestHandler::makeErrorPage(int status)
 	"</html>\n";
 
 	return buf;
+}
+
+std::string
+RequestHandler::methodToString(uint16_t allowed)
+{
+	string methodString;
+	if (allowed & RequestHandler::GET)
+		methodString += " GET,";
+	if (allowed & RequestHandler::HEAD)
+		methodString += " HEAD,";
+	if (allowed & RequestHandler::POST)
+		methodString += " POST,";
+	if (allowed & RequestHandler::PUT)
+		methodString += " PUT,";
+	if (allowed & RequestHandler::DELETE)
+		methodString += " DELETE,";
+	methodString.pop_back();
+	return (methodString);
 }

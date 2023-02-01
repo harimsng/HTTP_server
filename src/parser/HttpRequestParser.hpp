@@ -50,6 +50,7 @@ public:
 		HEADER_FIELDS_END,
 		CONTENT,
 		FINISHED,
+		ERROR
 	};
 
 // constructors & destructor
