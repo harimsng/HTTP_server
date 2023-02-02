@@ -42,9 +42,10 @@ bool
 FindLocation::findLocationBlock(Request &request, string const &uri, map<string, Location>& locationTable)
 {
     string tmpUri = uri;
+    string originUri = uri;
     int count = 0;
 
-	if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
+	if (((locationTable.find(tmpUri) != locationTable.end()) || (locationTable.find(tmpUri + "/") != locationTable.end())) && (count == 0)) {
 		m_locationBlock = &locationTable[tmpUri];
 		if (locationTable.find(tmpUri + "/") != locationTable.end()) {
 			m_locationBlock = &locationTable[tmpUri + "/"];
@@ -56,7 +57,7 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
     while (tmpUri != "") {
         if (locationTable.find(tmpUri) != locationTable.end() ) {
             m_locationBlock = &locationTable[tmpUri];
-            m_remainUri = uri.substr(tmpUri.length());
+            m_remainUri = originUri.substr(tmpUri.length());
             request.m_locationBlock = m_locationBlock;
             return true;
         }
@@ -64,7 +65,6 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
 			return false;
         tmpUri = tmpUri.substr(0, tmpUri.rfind("/", tmpUri.size() - 2) + 1);
         count++;
-		LOG(DEBUG, "%s", tmpUri.c_str());
     }
     return false;
 }

@@ -85,6 +85,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 	size_t			spacePos;
 	size_t			queryStringPos;
 
+	LOG(DEBUG, "status line \"%s\"", statusLine.c_str());
 	m_readStatus = HEADER_FIELDS;
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
