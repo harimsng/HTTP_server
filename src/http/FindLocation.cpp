@@ -192,7 +192,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     {
         if (findLocationBlock(request, uri, locationTable) == true) // 1-1. 있을 경우 location block의 내용으로 치환 > end
         {
-            setRootAlias(uri, server);
+            setRootAlias(uri);
             m_file = m_path.substr(m_path.rfind("/") + 1);
             LOG(DEBUG, "1. %s", m_path.data());
 			// findLocation == true && lstat() == false
@@ -281,7 +281,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     }
     if (findLocationBlock(request, uri, locationTable) == true) // 2-1
     {
-        setRootAlias(uri, server);
+        setRootAlias(uri);
 
         if (m_locationBlock->m_index.size() != 0)
         {
