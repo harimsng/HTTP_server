@@ -47,6 +47,7 @@ HttpStreamTokenizer::updateBuffer()
 	string::size_type	pos;
 
 	flush();
+	LOG(DEBUG, "buffer=\"%s\"", m_buffer->c_str());
 	pos = m_buffer->rfind(g_CRLF);
 	if (pos == string::npos)
 	{
