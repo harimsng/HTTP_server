@@ -17,6 +17,7 @@ Cgi&	Cgi::operator=(Cgi const& cgi)
 }
 
 Cgi::Cgi(Cgi const& cgi)
+:	EventObject()
 {
 	(void)cgi;
 }
@@ -40,7 +41,7 @@ Cgi::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			receiveCgiResponse();
+			receiveCgiResponse(); // fall through
 		case IoEventPoller::FILT_WRITE:
 			return IoEventPoller::STAT_ERROR;
 		default:

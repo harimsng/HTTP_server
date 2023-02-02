@@ -75,24 +75,24 @@ Epoll::pollWork()
 	{
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
-		int				status = NORMAL;
+		int				status = STAT_NORMAL;
 
 		if (MATCH_EVENT(event.events, EPOLLIN))
 		{
-			object->m_filter = READ;
+			object->m_filter = FILT_READ;
 			status |= object->handleEvent();
 		}
 		if (MATCH_EVENT(event.events, EPOLLOUT))
 		{
-			object->m_filter = WRITE;
+			object->m_filter = FILT_WRITE;
 			status |= object->handleEvent();
 		}
 		if (MATCH_EVENT(event.events, EPOLLERR))
 		{
-			object->m_filter = ERROR;
+			object->m_filter = FILT_ERROR;
 			status |= object->handleEvent();
 		}
-		if (status == END)
+		if (status == STAT_END)
 		{
 			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
 			delete object;

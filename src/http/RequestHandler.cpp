@@ -226,11 +226,9 @@ RequestHandler::checkAllowedMethod(uint16_t allowed)
 void
 RequestHandler::checkResourceStatus()
 {
-	int			ret;
 	struct stat	status;
 	int			statusCode = 0;
-	string		path = m_request.m_path + m_request.m_file;
-	int			permission;
+	unsigned int	permission;
 
 	// NOTE
 	// check autoindex?
@@ -247,8 +245,7 @@ RequestHandler::checkResourceStatus()
 		case DELETE:
 			permission = S_IWUSR | S_IWGRP | S_IWOTH; break;
 	}
-	ret = stat(path.c_str(), &status);
-	if (ret == 0 && S_ISREG(status.st_mode) // INFO: always regular?
+	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode) // INFO: always regular?
 		&& CHECK_PERMISSION(status.st_mode, permission))
 		return;
 
