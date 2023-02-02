@@ -62,7 +62,7 @@ RequestHandler::receiveRequest()
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
 	{
-
+		cout << "eof" << endl;
 		return RECV_END;
 	}
 	else if (count == -1)
@@ -97,15 +97,17 @@ RequestHandler::receiveRequest()
 
 // HOST field could be empty
 void
-RequestHandler::createResponseHeader() try
+RequestHandler::createResponseHeader()
 {
 	int&			statusCode = m_request.m_status;
 
 	checkRequestMessage();
 	if (statusCode >= 400)
-		throw HttpErrorHandler(statusCode);
-	// NOTE
-	// request message가 제대로 왔을때
+	{
+		LOG(DEBUG, "error response to fd=%d, status code=%d",
+				m_socket->m_fd, statusCode);
+		m_request.m_method = m_request.m_method == HEAD ? HEAD : GET;
+	}
 	switch (m_request.m_method)
 	{
 		case GET:
@@ -129,17 +131,6 @@ RequestHandler::createResponseHeader() try
 			m_responder = new GetResponder(*this);
 	}
 	bufferResponseStatusLine(statusCode);
-	bufferResponseHeaderFields();
-	m_parser.m_readStatus = HttpRequestParser::CONTENT;
-}
-catch (HttpErrorHandler& e)
-{
-	LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, e.m_errorCode);
-	if (m_request.m_method != HEAD)
-		m_responder = new GetResponder(*this);
-	else
-		m_responder = new HeadResponder(*this);
-	bufferResponseStatusLine(e.m_errorCode);
 	bufferResponseHeaderFields();
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
@@ -169,7 +160,8 @@ RequestHandler::checkRequestMessage()
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	checkResourceStatus();
+	// if (autoindex on && m_file == "")
+		checkResourceStatus();
 
 }
 
@@ -233,37 +225,37 @@ RequestHandler::checkResourceStatus()
 	struct stat	status;
 	int			statusCode = 0;
 	string		path = m_request.m_path + m_request.m_file;
+	int			permission;
 
-	if (m_request.m_method == PUT)
-		return;
-	ret = stat(path.c_str(), &status);
-	if (ret == 0
-		&& S_ISREG(status.st_mode)
-		&& CHECK_PERMISSION(status.st_mode,
-//					S_IWUSR | S_IWGRP | S_IWOTH // for DELETE
-					S_IRUSR | S_IRGRP | S_IROTH // for GET, HEAD
-//					S_IXUSR | S_IXGRP | S_IXOTH // for POST, PUT
-					))
+	// NOTE
+	// check autoindex?
+	switch (m_request.m_method)
 	{
-		return;
+		case GET: // fall through
+		case HEAD: // fall through
+			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
+		case POST:
+			permission = S_IXUSR | S_IXGRP | S_IXOTH; break;
+		case PUT:
+			return;
+		case DELETE:
+			permission = S_IWUSR | S_IWGRP | S_IWOTH; break;
 	}
-		// statusCode = 200;
+	ret = stat(path.c_str(), &status);
+	if (ret == 0 && S_ISREG(status.st_mode) // INFO: always regular?
+		&& CHECK_PERMISSION(status.st_mode, permission))
+		return;
 
 	switch (errno)
 	{
-		case EACCES:
-			// fall through
-		case ENOENT:
-			// fall through
+		case EACCES: // fall through
+		case ENOENT: // fall through
 		case ENOTDIR:
-			statusCode = 404;
-			break;
+			statusCode = 404; break;
 		case ENAMETOOLONG:
-			statusCode = 414;
-			break;
+			statusCode = 414; break;
 		default:
-			statusCode = 500;
-			break;
+			statusCode = 500; break;
 	}
 	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
@@ -323,6 +315,7 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	cout << m_sendBuffer << endl;
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
