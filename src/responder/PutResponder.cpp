@@ -25,6 +25,7 @@ PutResponder::respond()
 	{
 		case HEADER:
 			respondHeader();
+			openFile();
 			m_methodStatus = BODY; // fall through
 		case BODY:
 			// if (isCgi)
