@@ -73,13 +73,9 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
-	string	index;
-
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		index = m_tokenizer.get();
-		server.m_index.push_back(index[0] == '/'
-				? index : g_webservDir + index);
+		server.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }
