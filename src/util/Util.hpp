@@ -12,6 +12,7 @@ class Util
 public:
 	static bool					parseArgument(int argc, char **argv);
 
+	static int					hexToDecimal(const std::string& str);
 	static int					toInt(const std::string& str);
 	static std::string			toString(int num);
 	static std::string			toUpper(std::string str);

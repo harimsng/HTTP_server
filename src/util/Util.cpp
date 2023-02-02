@@ -49,6 +49,24 @@ Util::getDate(const char* format)
 }
 
 int
+Util::hexToDecimal(const std::string& str)
+{
+	int decimal = 0;
+
+	if (str == "")
+		return (-1);
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		decimal *= 16;
+		if (std::isdigit(str[i]))
+			decimal += str[i] - '0';
+		else
+			decimal += str[i] - 'a' + 10;
+	}
+	return (decimal);
+}
+
+int
 Util::toInt(const string& str)
 {
 	stringstream	ss(str);
@@ -110,4 +128,5 @@ Util::checkFileStat(const char* path)
 		return (false);
 	return ((buffer.st_mode & S_IFREG) == S_IFREG);
 }
+
 
