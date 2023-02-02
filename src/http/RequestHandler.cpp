@@ -251,7 +251,7 @@ RequestHandler::checkResourceStatus()
 		case EACCES: // fall through
 		case ENOENT: // fall through
 		case ENOTDIR:
-dw			statusCode = 404; break;
+			statusCode = 404; break;
 		case ENAMETOOLONG:
 			statusCode = 414; break;
 		default:

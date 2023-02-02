@@ -49,13 +49,9 @@ LocationParser::parse(Location& location)
 void
 LocationParser::setIndex(Location& location)
 {
-	string	index;
-
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		index = m_tokenizer.get();
-		location.m_index.push_back(index[0] == '/'
-				? index : g_webservDir + index);
+		location.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }
@@ -98,12 +94,12 @@ LocationParser::setRoot(Location& location)
 void
 LocationParser::setAlias(Location& location)
 {
-	string	root;
+	string	alias;
 
 	if (location.m_root != "")
 		throw ConfigParser::ConfigParserException("root is already setted");
-	root = m_tokenizer.get();
-	location.m_alias = root[0] == '/' ? root : g_webservDir + root;
+	alias = m_tokenizer.get();
+	location.m_alias = alias[0] == '/' ? alias : g_webservDir + alias;
 	m_tokenizer.eat(";");
 }
 

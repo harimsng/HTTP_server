@@ -46,9 +46,7 @@ HttpStreamTokenizer::updateBuffer()
 {
 	string::size_type	pos;
 
-	if (m_cur > m_start)
-		m_start = m_cur;
-
+	flush();
 	pos = m_buffer->rfind(g_CRLF);
 	if (pos == string::npos)
 	{
@@ -84,8 +82,8 @@ HttpStreamTokenizer::get()
 	m_aheadToken = m_buffer->substr(m_cur, pos - m_cur);
 	m_cur = pos + 2;
 
-	//  if token.size() == 0, m_aheadToken was empty that current call to this method is first call.
-	if (empty() == false && token.size() == 0)
+	//  if token.size() == 0 (m_aheadToken was empty) current call to this method is first call.
+	if (token.size() == 0)
 		return get();
 	if (empty() == true && token.size() == 0)
 		return (m_aheadToken);

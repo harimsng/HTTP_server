@@ -20,6 +20,7 @@ map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;
 
 void	ServerParser::setServerSetterMap()
 {
+	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
 	s_serverSetterMap["server_name"] = &ServerParser::setServerNames;
 	s_serverSetterMap["error_page"] = &ServerParser::setErrorPage;
@@ -28,7 +29,6 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
-	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 }
 
 // constructors & destructor
@@ -190,7 +190,7 @@ ServerParser::setCgiPass(VirtualServer& server)
 	{
 		token.push_back(m_tokenizer.get());
 	}
-		server.m_cgiPass[token[0]] = token.back();
+	server.m_cgiPass[token[0]] = token.back();
 	m_tokenizer.eat(";");
 }
 
