@@ -56,7 +56,7 @@ ServerManager::initServers() try
 		Server*	newServer = new Server();
 
 		newServer->initServer(addr, port);
-		registerEvent(newServer->m_fd, IoEventPoller::ADD, IoEventPoller::READ, newServer);
+		registerEvent(newServer->m_fd, IoEventPoller::OP_ADD, IoEventPoller::FILT_READ, newServer);
 		s_listenServerTable[addrKey] = newServer;
 		prevPort = port;
 	}

@@ -184,13 +184,17 @@ ServerParser::setAutoIndex(VirtualServer& server)
 void
 ServerParser::setCgiPass(VirtualServer& server)
 {
-	vector<string> token;
+	vector<string>	token;
+	string			cgiPath;
 
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
 		token.push_back(m_tokenizer.get());
 	}
-	server.m_cgiPass[token[0]] = token.back();
+	cgiPath = token.back();
+	cgiPath = cgiPath[0] == '/' ? cgiPath : g_webservDir + cgiPath;
+	for (size_t i = 0; i < token.size() - 1; ++i)
+		server.m_cgiPass[token[i]] = cgiPath;
 	m_tokenizer.eat(";");
 }
 

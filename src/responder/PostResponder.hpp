@@ -15,6 +15,9 @@ public:
 
 // member functions
 	virtual void	respond();
+	void			constructCgi();
+
+private:
 };
 
 #endif

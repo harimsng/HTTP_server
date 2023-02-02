@@ -21,20 +21,20 @@ PutResponder::operator=(const PutResponder& putResponder)
 void
 PutResponder::respond()
 {
-	switch (m_methodStatus)
+	switch (m_responseStatus)
 	{
-		case HEADER:
+		case RES_HEADER:
 			respondHeader();
 			openFile();
-			m_methodStatus = BODY; // fall through
-		case BODY:
+			m_responseStatus = RES_CONTENT; // fall through
+		case RES_CONTENT:
 			// if (isCgi)
 			// cgiReadRequestBody();
 			// else
 			readRequestBody();
-			if (m_methodStatus == BODY)
+			if (m_responseStatus == RES_CONTENT)
 				break; // fall through
-		case DONE:
+		case RES_DONE:
 			endResponse();
 			break;
 		default:

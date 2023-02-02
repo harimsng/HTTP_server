@@ -24,6 +24,7 @@ public:
 	// VirtualServer	&operator=(VirtualServer const& server) = default;
 
 // member functions
+	std::map<std::string, std::string>	m_cgiPass;
 private:
 	void	setToDefault();
 
@@ -32,7 +33,6 @@ private:
 	int32_t								m_clientMaxBodySize;
 	std::string							m_root;
 	std::vector<std::string>			m_index;
-	std::map<std::string, std::string>	m_cgiPass;
 	std::vector<std::string>			m_serverNames;
 	std::map<int, std::string>			m_errorPageTable;
 	std::map<std::string, Location>		m_locationTable;

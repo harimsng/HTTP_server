@@ -11,26 +11,26 @@ class	IoMultiplex
 public:
 	enum	e_eventStatus
 	{
-		NORMAL = 0x0,
-		END = 0x1,
-		NON_BLOCK = 0x2,
+		STAT_NORMAL = 0x0,
+		STAT_END = 0x1,
+		STAT_NONBLOCK = 0x2,
 		STAT_ERROR = 0x4,
 	};
 
 	enum	e_operation
 	{
-		ADD = 1,
-		DELETE = 2,
-		MODIFY = 3,
+		OP_ADD = 1,
+		OP_DELETE = 2,
+		OP_MODIFY = 3,
 	};
 
 	enum	e_filters
 	{
-		NONE = 0x0,
-		READ = 0x1,
-		WRITE = 0x2,
-		READWRITE = 0x3,
-		ERROR = 0x4
+		FILT_NONE = 0x0,
+		FILT_READ = 0x1,
+		FILT_WRITE = 0x2,
+		FILT_READWRITE = 0x3,
+		FILT_ERROR = 0x4
 	};
 
 	typedef T					Event;

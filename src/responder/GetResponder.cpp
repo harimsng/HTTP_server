@@ -30,12 +30,12 @@ GetResponder::respond()
 {
 	string readBody;
 
-	switch (m_methodStatus)
+	switch (m_responseStatus)
 	{
-		case HEADER:
+		case RES_HEADER:
 			respondHeader();
-			m_methodStatus = BODY; // fall through
-		case BODY:
+			m_responseStatus = RES_CONTENT; // fall through
+		case RES_CONTENT:
 			if (m_request.m_file == "")
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else
@@ -48,9 +48,9 @@ GetResponder::respond()
 
 			// TODO: change code to use swap instead of appen
 			m_sendBuffer.append(readBody);
-			m_methodStatus = DONE; // fall through
+			m_responseStatus = RES_DONE; // fall through
 			// break;
-		case DONE:
+		case RES_DONE:
 		// method must know end of response(content length, chunked)
 			endResponse();
 			break;

@@ -22,9 +22,9 @@ std::map<std::string, std::string>	RequestHandler::s_extensionTypeTable;
 
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
-:	m_socket(NULL),
-	m_parser(m_recvBuffer),
-	m_responder(NULL)
+:	m_parser(m_recvBuffer),
+	m_responder(NULL),
+	m_socket(NULL)
 {
 	(void)requestHandler;
 }
@@ -38,9 +38,9 @@ RequestHandler::operator=(const RequestHandler& request)
 
 // constructors & destructor
 RequestHandler::RequestHandler(const Socket<Tcp>& socket)
-:	m_socket(&socket),
-	m_parser(m_recvBuffer),
-	m_responder(NULL)
+:	m_parser(m_recvBuffer),
+	m_responder(NULL),
+	m_socket(&socket)
 {
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
@@ -50,12 +50,14 @@ RequestHandler::~RequestHandler()
 {
 }
 
+// TODO: runtime error to server error
 int
 RequestHandler::receiveRequest()
 {
 	int		count;
 	int		receiveStatus = RECV_NORMAL;
 
+	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
 
@@ -77,11 +79,13 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
+			LOG(DEBUG, "Header fields parsing ends");
 			createResponseHeader();
 			receiveStatus = RECV_EVENT;
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 				break; // fall through
 		case HttpRequestParser::CONTENT:
+			LOG(DEBUG, "responding with content");
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
@@ -160,7 +164,8 @@ RequestHandler::checkRequestMessage()
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	// if (autoindex on && m_file == "")
+	// TODO: cleanup hardcodings
+	if (m_request.m_file != "")
 		checkResourceStatus();
 
 }
@@ -231,11 +236,12 @@ RequestHandler::checkResourceStatus()
 	// check autoindex?
 	switch (m_request.m_method)
 	{
+		// INFO: there is permission problem
 		case GET: // fall through
 		case HEAD: // fall through
 			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
 		case POST:
-			permission = S_IXUSR | S_IXGRP | S_IXOTH; break;
+			permission = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH; break;
 		case PUT:
 			return;
 		case DELETE:
@@ -297,6 +303,7 @@ RequestHandler::findContentType(std::string& content)
 {
 	std::string extension;
 
+	// INFO: npos?
 	extension = content.substr(content.find('.') + 1);
 	if (s_extensionTypeTable.count(extension) == 1)
 		return s_extensionTypeTable[extension];
