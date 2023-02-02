@@ -29,7 +29,6 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
-	s_serverSetterMap["cgi_ext"] = &ServerParser::setCgiPass;
 }
 
 // constructors & destructor
@@ -193,12 +192,6 @@ ServerParser::setCgiPass(VirtualServer& server)
 	}
 	server.m_cgiPass[token[0]] = token.back();
 	m_tokenizer.eat(";");
-}
-
-void
-ServerParser::setCgiExt(VirtualServer& server)
-{
-
 }
 
 void

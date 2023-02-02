@@ -22,8 +22,6 @@ LocationParser::setLocationSetterMap()
 	s_locationSetterMap["client_max_body_size"] = &LocationParser::setClientMaxBodySize;
 	s_locationSetterMap["error_page"] = &LocationParser::setErrorPage;
 	s_locationSetterMap["autoindex"] = &LocationParser::setAutoIndex;
-	s_locationSetterMap["cgi_pass"] = &LocationParser::setCgiPass;
-	s_locationSetterMap["cgi_ext"] = &LocationParser::setCgiExt;
 
 }
 
@@ -134,14 +132,4 @@ LocationParser::setAutoIndex(Location& location)
 {
 	location.m_autoindex = m_tokenizer.get() == "on" ? true : false;
 	m_tokenizer.eat(";");
-}
-
-void
-LocationParser::setCgiPass(Location& location)
-{
-}
-
-void
-LocationParser::setCgiExt(Location& location)
-{
 }

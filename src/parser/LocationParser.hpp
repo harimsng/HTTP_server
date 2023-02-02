@@ -34,8 +34,6 @@ public:
 	void		setAlias(Location& location);
 	void		setClientMaxBodySize(Location& location);
 	void		setErrorPage(Location& location);
-	void		setCgiPass(Location& location);
-	void		setCgiExt(Location& location);
 
 private:
 // member variables
