@@ -6,7 +6,6 @@
 #include "util/Util.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "event/Server.hpp"
-#include "parser/ConfigParser.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
 
@@ -14,6 +13,8 @@
 // 		some variables in location block take default value from server block
 
 using namespace std;
+
+extern const string	g_webservDir;
 
 map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;
 
@@ -39,8 +40,6 @@ ServerParser::ServerParser(FileTokenizer& m_tokenizer)
 ServerParser::~ServerParser()
 {
 }
-
-#include <iostream>
 
 // member functions
 void
@@ -74,9 +73,13 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
+	string	index;
+
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		server.m_index.push_back(m_tokenizer.get());
+		index = m_tokenizer.get();
+		server.m_index.push_back(index[0] == '/'
+				? index : g_webservDir + index);
 	}
 	m_tokenizer.eat(";");
 }
@@ -144,7 +147,9 @@ ServerParser::setListenAddress(VirtualServer& server)
 void
 ServerParser::setRoot(VirtualServer& server)
 {
-	server.m_root = m_tokenizer.get();
+	string	root = m_tokenizer.get();
+
+	server.m_root = root[0] == '/' ? root : g_webservDir + root;
 	m_tokenizer.eat(";");
 }
 

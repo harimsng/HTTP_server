@@ -1,10 +1,7 @@
 NAME		=	webserv
 
-WORKING_DIR	=	$(shell pwd)
-WORKING_DIR	:=	$(WORKING_DIR:%/src=%)
-
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD -DWORKING_DIR="$(WORKING_DIR)/"
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
 DEBUGFLAGS	=	-g -fsanitize=address #-fsanitize=undefined
 RM			=	rm -f
 
@@ -52,11 +49,13 @@ SRC			+=	main.cpp\
 \
 				util/Util.cpp\
 
+
 OBJ			:=	$(SRC:%.cpp=%.o)
 DEP			:=	$(OBJ:%.o=%.d)
 
 INCL_PATH	=	-I./\
 				-I../include\
+
 
 STATUS		=	$(shell ls DEBUG.mode 2>/dev/null)
 ifeq ($(STATUS), DEBUG.mode)
@@ -65,6 +64,13 @@ COMPILE_MODE=	DEBUG.mode
 else
 COMPILE_MODE=	RELEASE.mode
 endif
+
+
+ifndef WEBSERV_ROOT
+WEBSERV_ROOT=	$(shell pwd)
+WEBSERV_ROOT:=	$(WEBSERV_ROOT:%/src=%)
+endif
+CXXFLAGS	+=	-DWEBSERV_ROOT='"$(WEBSERV_ROOT)/"'
 
 
 .PHONY: all debug release clean fclean re

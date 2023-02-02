@@ -456,6 +456,6 @@ RequestHandler::methodToString(uint16_t allowed)
 		methodString += " PUT,";
 	if (allowed & RequestHandler::DELETE)
 		methodString += " DELETE,";
-	methodString.pop_back();
+	methodString.erase(methodString.end() - 1);
 	return (methodString);
 }

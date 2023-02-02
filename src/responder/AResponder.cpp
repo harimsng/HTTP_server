@@ -95,7 +95,8 @@ AResponder::writeFile(int writeSize)
 	ofstream file;
 	string	filePath = m_request.m_path + m_request.m_file;
 
-	file.open(filePath, ios::app);
+	file.open(filePath.c_str());
+	cout << filePath << endl;
 	if (file.fail())
 		throw runtime_error("file open error");
 	file.write(m_recvBuffer.data(), writeSize);
