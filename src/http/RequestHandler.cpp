@@ -85,7 +85,6 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
 				break; // fall through
 		case HttpRequestParser::CONTENT:
-			LOG(DEBUG, "responding with content");
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
@@ -319,12 +318,15 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	cout << m_sendBuffer << endl;
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
 	{
 		return SEND_DONE;
+	}
+	if (count > 0)
+	{
+		LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
 	}
 	return SEND_NORMAL;
 }

@@ -25,8 +25,7 @@ PutResponder::respond()
 	{
 		case RES_HEADER:
 			respondHeader();
-			openFile();
-			m_responseStatus = RES_CONTENT; // fall through
+			openFile(); // fall through
 		case RES_CONTENT:
 			// if (isCgi)
 			// cgiReadRequestBody();

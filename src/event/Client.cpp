@@ -52,7 +52,6 @@ Client::handleEventWork()
 			break;
 
 		case IoEventPoller::FILT_WRITE:
-			LOG(DEBUG, "write event to client(fd=%d)", m_socket.m_fd);
 			status = m_requestHandler.sendResponse();
 			switch (status)
 			{

@@ -34,7 +34,7 @@ public:
 protected:
 	std::string		parseChunkSize();
 
-	void			openFile(std::string path);
+	void			openFile(const std::string& path);
 	void			openFile();
 	void			writeFile(int writeSize);
 	void			readFile(std::string& readBody);
@@ -51,9 +51,9 @@ protected:
 	RequestHandler&		m_requestHandler;
 	Request&			m_request;
 	Buffer&				m_sendBuffer;
-	ReceiveBuffer&		m_recvBuffer;
+	Buffer&				m_recvBuffer;
 	e_responseStatus	m_responseStatus;
-	int					m_chunkedSize;
+	int					m_dataSize;
 	int					m_fileFd;
 	int					m_cgiReadEnd;
 };

@@ -23,7 +23,7 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_sendBuffer(m_requestHandler.m_sendBuffer),
 	m_recvBuffer(m_requestHandler.m_recvBuffer),
 	m_responseStatus(RES_HEADER),
-	m_chunkedSize(-1)
+	m_dataSize(-1)
 {
 }
 
@@ -99,7 +99,7 @@ AResponder::openFile()
 
 
 void
-AResponder::openFile(string path)
+AResponder::openFile(const string& path)
 {
 	// TODO: check permission
 	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH);
@@ -202,30 +202,30 @@ AResponder::chunkedReadBody()
 {
 	while(m_recvBuffer.size() != 0)
 	{
-		if (m_chunkedSize == -1)
+		if (m_dataSize == -1)
 		{
 			cout << "before buffer size : " << m_recvBuffer.size() << endl;
 			cout << "before Buffer : " << m_recvBuffer << "$" << endl;
-			m_chunkedSize = Util::hexToDecimal(parseChunkSize());
-			cout << "chunked size : "<< m_chunkedSize << endl;
+			m_dataSize = Util::hexToDecimal(parseChunkSize());
+			cout << "chunked size : "<< m_dataSize << endl;
 			cout << "buffer size : " << m_recvBuffer.size() << endl;
 			cout << "after Buffer : " << m_recvBuffer << "$" << endl;
 		}
-		if (m_chunkedSize == 0)
+		if (m_dataSize == 0)
 		{
 			cout << "buffer size : " << m_recvBuffer.size() << endl;
 			return (1);
 		}
-		if (m_chunkedSize != -1 && m_chunkedSize + 2 <= (int)m_recvBuffer.size())
+		if (m_dataSize != -1 && m_dataSize + 2 <= (int)m_recvBuffer.size())
 		{
-			writeFile(m_chunkedSize);
-			m_recvBuffer.erase(0, m_chunkedSize + 2);
-			m_chunkedSize = -1;
+			writeFile(m_dataSize);
+			m_recvBuffer.erase(0, m_dataSize + 2);
+			m_dataSize = -1;
 		}
-		else if (m_chunkedSize != -1 && m_chunkedSize > (int)m_recvBuffer.size())
+		else if (m_dataSize != -1 && m_dataSize + 2 > (int)m_recvBuffer.size())
 		{
 			writeFile(m_recvBuffer.size());
-			m_chunkedSize -= m_recvBuffer.size();
+			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();
 		}
 		else
@@ -237,13 +237,12 @@ AResponder::chunkedReadBody()
 int
 AResponder::normalReadBody()
 {
-	size_t contentSize;
+	if (m_dataSize == -1)
+		m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+	if (m_dataSize == 0)
+		return 1;
 
-	contentSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
-	if (m_recvBuffer.size() == contentSize)
-	{
-		writeFile(contentSize);
-		return (1);
-	}
+	int	count = m_recvBuffer.send(m_fileFd);
+	m_dataSize -= count;
 	return (0);
 }
