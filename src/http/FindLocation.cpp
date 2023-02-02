@@ -44,7 +44,6 @@ FindLocation::findLocationBlock(Request &request, string const &uri, map<string,
     string tmpUri = uri;
     int count = 0;
 
-	// uri = /favicon.ico
 	if ((locationTable.find(tmpUri) != locationTable.end()) && (count == 0)) {
 		m_locationBlock = &locationTable[tmpUri];
 		if (locationTable.find(tmpUri + "/") != locationTable.end()) {
