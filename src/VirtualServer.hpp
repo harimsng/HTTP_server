@@ -29,7 +29,7 @@ private:
 	void	setToDefault();
 
 // member variales - config
-	bool								m_autoindex;
+	int									m_autoindex;
 	int32_t								m_clientMaxBodySize;
 	std::string							m_root;
 	std::vector<std::string>			m_index;

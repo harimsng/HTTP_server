@@ -89,7 +89,7 @@ private:
 
 public:
 	const Socket<Tcp>*	m_socket;
-	ReceiveBuffer		m_recvBuffer;
+	Buffer				m_recvBuffer;
 	Buffer				m_sendBuffer;
 
 	static std::string			makeErrorPage(int status);
