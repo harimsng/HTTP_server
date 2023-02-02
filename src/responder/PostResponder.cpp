@@ -1,3 +1,8 @@
+#include <unistd.h>
+
+#include "ServerManager.hpp"
+#include "io/IoMultiplex.hpp"
+#include "event/Cgi.hpp"
 #include "PostResponder.hpp"
 
 // constructors & destructor
@@ -20,13 +25,40 @@ PostResponder::operator=(const PostResponder& postResponder)
 void
 PostResponder::respond()
 {
-	switch (m_methodStatus)
+	switch (m_responseStatus)
 	{
-		case AResponder::HEADER:
-		case AResponder::BODY:
-		case AResponder::DONE:
+		case RES_HEADER:
+			openFile(m_request.m_path + m_request.m_file + ".temp");
+			respondHeader(); // fall through
+		case RES_CONTENT:
+			readRequestBody();
+			if (m_responseStatus != RES_DONE)
+				break; // fall through
+		case RES_CONTENT_FINISHED:
+			constructCgi();
+			break;
+		case RES_RECV_CGI:
+		case RES_DONE:
+			endResponse();
+		default:
 			;
 	}
+}
+
+void
+PostResponder::constructCgi()
+{
+	int	pipeSet[2];
+
+	pipe(pipeSet);
+	m_cgiReadEnd = pipeSet[0];
+
+	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
+
+	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	cgi->initEnv(m_request);
+	cgi->executeCgi(pipeSet);
+	m_responseStatus = RES_RECV_CGI;
 }
 
 /*

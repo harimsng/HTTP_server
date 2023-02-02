@@ -4,55 +4,46 @@
 #include <string>
 #include <vector>
 
-#include "http/RequestHandler.hpp"
+#include "event/EventObject.hpp"
 
-class	Cgi
+class	RequestHandler;
+struct	Request;
+
+class	Cgi: public EventObject
 {
 // deleted
 	Cgi	&operator=(Cgi const& cgi);
+	Cgi(Cgi const& cgi);
 
 public:
 // constructors & destructor
-	Cgi();
+	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
 	~Cgi();
-	Cgi(Cgi const& cgi);
 
 // member functions
-	void	initCgi(const Request &request);
+	void	initEnv(const Request& request);
+	void	executeCgi(int pipe[2]);
+	void	receiveCgiResponse();
 
-	template <typename IoEventPoller>
-	typename IoEventPoller::EventStatus	handleEvent(const typename IoEventPoller::EventData& event);
+	IoEventPoller::EventStatus	handleEventWork();
 
 // member variables;
 private:
 		std::vector<std::string>	m_env;
-		std::vector<char*>			m_envChar;
+		std::vector<char*>			m_envp;
+		std::vector<std::string>	m_argvBase;
+		std::vector<char*>			m_argv;
 		std::string					m_cgiPath;
-		std::string 				m_path;
-		std::string					m_script;
-		std::string					m_query;
+
 
 		// int							m_fromCgiToServer[2];
 		// int							m_fromServerToCgi[2];
 		// pid_t						m_pid;
 		bool						m_bodyFlag;
+		RequestHandler*				m_requestHandler;
+
+		int							m_requestContentFileFd;
+		int							m_readEnd;
 };
-
-template <typename IoEventPoller>
-typename IoEventPoller::EventStatus	Cgi::handleEvent(const typename IoEventPoller::EventData& event)
-{
-	typename IoEventPoller::e_filters	filter = event.getFilter();
-
-	switch (filter)
-	{
-		case IoEventPoller::READ:
-			return IoEventPoller::STAT_ERROR;
-		case IoEventPoller::WRITE:
-			return IoEventPoller::STAT_ERROR;
-		default:
-			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
-	}
-	return IoEventPoller::STAT_ERROR;
-}
 
 #endif

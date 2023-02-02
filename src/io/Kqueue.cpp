@@ -89,20 +89,20 @@ Kqueue::pollWork()
 		switch (event.filter)
 		{
 			case EVFILT_READ:
-				object->m_filter = READ;
+				object->m_filter = FILT_READ;
 				break;
 			case EVFILT_WRITE:
-				object->m_filter = WRITE;
+				object->m_filter = FILT_WRITE;
 				break;
 			case EVFILT_EXCEPT:
-				object->m_filter = ERROR;
+				object->m_filter = FILT_ERROR;
 				break;
 			default:
 				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");
 		}
 
 		EventStatus status = object->handleEvent();
-		if (status == END)
+		if (status == STAT_END)
 		{
 			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
 			// close(object->m_fd);

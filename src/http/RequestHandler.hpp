@@ -83,14 +83,14 @@ private:
 	std::string methodToString(uint16_t allowed);
 
 // member variables
-	const Socket<Tcp>*	m_socket;
-	ReceiveBuffer		m_recvBuffer;
-	SendBuffer			m_sendBuffer;
 	HttpRequestParser	m_parser;
-
 	Request				m_request;
 	AResponder*			m_responder;
+
 public:
+	const Socket<Tcp>*	m_socket;
+	ReceiveBuffer		m_recvBuffer;
+	Buffer				m_sendBuffer;
 
 	static std::string			makeErrorPage(int status);
 // static members

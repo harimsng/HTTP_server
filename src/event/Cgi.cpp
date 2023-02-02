@@ -1,33 +1,19 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "Logger.hpp"
+#include "VirtualServer.hpp"
+#include "http/RequestHandler.hpp"
 #include "Cgi.hpp"
 
-#define READ (0)
-#define WRITE (1)
 #define BUFFER_SIZE (65535)
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
 {
 	(void)cgi;
+	
 	return *this;
-}
-
-// constructors & destructor
-Cgi::Cgi()
-{
-    m_env.clear();
-    m_envChar.clear();
-    m_cgiPath = "";
-    m_path = "";
-    m_script = "";
-    m_query = "";
-	m_bodyFlag = false;
-}
-
-Cgi::~Cgi()
-{
 }
 
 Cgi::Cgi(Cgi const& cgi)
@@ -35,13 +21,55 @@ Cgi::Cgi(Cgi const& cgi)
 	(void)cgi;
 }
 
-void
-Cgi::initCgi(const Request &request)
+// constructors & destructor
+Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
+:	EventObject(writeEnd),
+	m_requestHandler(&requestHandler),
+	m_requestContentFileFd(fileFd)
 {
-	m_cgiPath = request.m_cgi;
-	m_path = request.m_path + request.m_file;
-#ifdef HIDDEN // remove this
+	m_bodyFlag = false;
+}
 
+Cgi::~Cgi()
+{
+}
+
+Cgi::IoEventPoller::EventStatus
+Cgi::handleEventWork()
+{
+	switch (m_filter)
+	{
+		case IoEventPoller::FILT_READ:
+			receiveCgiResponse();
+		case IoEventPoller::FILT_WRITE:
+			return IoEventPoller::STAT_ERROR;
+		default:
+			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
+	}
+	return IoEventPoller::STAT_NORMAL;
+}
+
+void
+Cgi::receiveCgiResponse()
+{
+	// INFO: temporary function
+	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
+
+	sendBuffer.receive(m_readEnd);
+}
+
+void
+Cgi::initEnv(const Request &request)
+{
+	std::string 				m_path;
+	std::string					m_script;
+	std::string					m_query;
+	std::string					ext;
+
+	// INFO: dangerous
+	ext = request.m_file.substr(request.m_file.rfind("."));
+	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
+	m_path = request.m_path + request.m_file;
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
@@ -78,7 +106,7 @@ Cgi::initCgi(const Request &request)
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
-    std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_locationBlock->m_cgiPass;
+    std::string SCRIPT_NAME = "SCRIPT_NAME="; //+ request.m_locationBlock->m_cgiPass;
     std::string SCRIPT_FILENAME = "SCRIPT_FILENAME="; // path of cgi script in file-system
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
@@ -106,9 +134,37 @@ Cgi::initCgi(const Request &request)
 
     for (size_t i = 0; i < m_env.size(); i++)
 	{
-		m_envChar.push_back(&m_env[i][0]);
+		m_envp.push_back(&m_env[i][0]);
 	}
-    m_envChar.push_back(0);
-#endif
+    m_envp.push_back(NULL);
+
+	m_argvBase.push_back(m_path);
+    for (size_t i = 0; i < m_argvBase.size(); i++)
+	{
+		m_argv.push_back(&m_argvBase[i][0]);
+	}
+	m_argv.push_back(NULL);
 }
 
+void
+Cgi::executeCgi(int pipe[2])
+{
+	int	pid = fork();
+
+	m_readEnd = pipe[0];
+	m_fd = pipe[1];
+	if (pid < 0)
+		// 500
+		throw std::runtime_error("Cgi::Cgi() fork failed");
+	if (pid == 0)
+	{
+		close(m_readEnd);
+		dup2(m_requestContentFileFd, STDIN_FILENO);
+		dup2(m_fd, STDOUT_FILENO);
+		LOG(DEBUG, "cgi path = \"%s\"", m_cgiPath.c_str());
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::Cgi() execve failed");
+	}
+//  TODO: close when cgi is done
+//	close(m_fd);
+}

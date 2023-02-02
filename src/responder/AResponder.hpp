@@ -1,8 +1,6 @@
 #ifndef ARESPONDER_HPP
 #define ARESPONDER_HPP
 
-#include <fstream>
-
 #include "http/RequestHandler.hpp"
 
 class	AResponder
@@ -12,12 +10,15 @@ private:
 	AResponder(const AResponder& method);
 
 public:
-	enum e_methodStatus{
-		HEADER = 0,
-		BODY,
-		DONE
+	enum e_responseStatus{
+		RES_HEADER = 0,
+		RES_CONTENT,
+		RES_CONTENT_FINISHED,
+		RES_SEND_CGI,
+		RES_RECV_CGI,
+		RES_DONE
 	};
-public:
+
 // constructors & destructor
 	AResponder(RequestHandler& requestHandler);
 	virtual ~AResponder();
@@ -30,24 +31,31 @@ public:
 	void			respondHeader();
 	void			endResponse();
 
+protected:
 	std::string		parseChunkSize();
+
+	void			openFile(std::string path);
 	void			openFile();
 	void			writeFile(int writeSize);
 	void			readFile(std::string& readBody);
+
 	void			readRequestBody();
 	int				normalReadBody();
 	int				chunkedReadBody();
+
 	bool			checkFileExists(const std::string& filePath);
 	bool			checkDirExists(const std::string& filePath);
 
-protected:
+	void			constructCgi();
+
 	RequestHandler&		m_requestHandler;
 	Request&			m_request;
-	SendBuffer&			m_sendBuffer;
+	Buffer&				m_sendBuffer;
 	ReceiveBuffer&		m_recvBuffer;
-	e_methodStatus		m_methodStatus;
+	e_responseStatus	m_responseStatus;
 	int					m_chunkedSize;
-	std::fstream		m_file;
+	int					m_fileFd;
+	int					m_cgiReadEnd;
 };
 
 #endif

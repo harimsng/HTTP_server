@@ -1,5 +1,7 @@
-#include <stdexcept>
 #include <sys/stat.h>
+#include <fcntl.h>
+
+#include <stdexcept>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -20,7 +22,7 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_request(m_requestHandler.m_request),
 	m_sendBuffer(m_requestHandler.m_sendBuffer),
 	m_recvBuffer(m_requestHandler.m_recvBuffer),
-	m_methodStatus(HEADER),
+	m_responseStatus(RES_HEADER),
 	m_chunkedSize(-1)
 {
 }
@@ -92,18 +94,23 @@ AResponder::readFile(std::string& readBody)
 void
 AResponder::openFile()
 {
-	string	filePath = m_request.m_path + m_request.m_file;
+	openFile(m_request.m_path + m_request.m_file);
+}
 
+
+void
+AResponder::openFile(string path)
+{
 	// TODO: check permission
-	m_file.open(filePath.c_str() , ios::out | ios::trunc);
-	if (m_file.fail())
-		throw runtime_error("file open error");
+	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH);
+	if (m_fileFd < 0)
+		throw runtime_error("AResponder::openFile() open error");
 }
 
 void
 AResponder::writeFile(int writeSize)
 {
-	m_file.write(m_recvBuffer.data(), writeSize);
+	write(m_fileFd, m_recvBuffer.data(), writeSize);
 }
 
 bool
@@ -148,6 +155,7 @@ AResponder::respondHeader()
 	else
 		m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);
 	m_sendBuffer.append(g_CRLF);
+	m_responseStatus = RES_CONTENT; // fall through
 }
 
 void
@@ -171,7 +179,7 @@ AResponder::readRequestBody()
 		m_sendBuffer.append(g_CRLF);
 		m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
 		m_sendBuffer.append(readBody);
-		m_methodStatus = DONE;
+		m_responseStatus = RES_DONE;
 	}
 }
 
@@ -239,4 +247,3 @@ AResponder::normalReadBody()
 	}
 	return (0);
 }
-

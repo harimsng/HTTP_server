@@ -21,13 +21,13 @@ HeadResponder::operator=(const HeadResponder& HeadResponder)
 void
 HeadResponder::respond()
 {
-	switch(m_methodStatus)
+	switch(m_responseStatus)
 	{
-		case HEADER:
+		case RES_HEADER:
 			respondHeader();
 			m_sendBuffer.append(g_CRLF);
-			m_methodStatus = DONE; // fall through
-		case DONE:
+			m_responseStatus = RES_DONE; // fall through
+		case RES_DONE:
 			endResponse();
 			break;
 		default:

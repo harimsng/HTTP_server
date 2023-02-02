@@ -32,18 +32,18 @@ Client::handleEventWork()
 
 	switch (m_filter)
 	{
-		case IoEventPoller::READ:
+		case IoEventPoller::FILT_READ:
 			LOG(DEBUG, "read event to client(fd=%d)", m_socket.m_fd);
 			status = m_requestHandler.receiveRequest();
 			switch (status)
 			{
 				case RequestHandler::RECV_END:
-					return IoEventPoller::END;
+					return IoEventPoller::STAT_END;
 
 				case RequestHandler::RECV_EVENT:
 					LOG(DEBUG, "registering write event for fd=%d\n", m_socket.m_fd);
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::MODIFY,
-							IoEventPoller::WRITE, this);
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
+							IoEventPoller::FILT_WRITE, this);
 					break;
 
 				default:
@@ -51,15 +51,15 @@ Client::handleEventWork()
 			}
 			break;
 
-		case IoEventPoller::WRITE:
+		case IoEventPoller::FILT_WRITE:
 			LOG(DEBUG, "write event to client(fd=%d)", m_socket.m_fd);
 			status = m_requestHandler.sendResponse();
 			switch (status)
 			{
 				case RequestHandler::SEND_DONE:
 					LOG(DEBUG, "deleting write event for fd=%d\n", m_socket.m_fd);
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::DELETE,
-							IoEventPoller::WRITE, this);
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
+							IoEventPoller::FILT_WRITE, this);
 					break;
 
 				default:
@@ -69,7 +69,7 @@ Client::handleEventWork()
 		default:
 			throw std::runtime_error("not handled event filter in Client::handleEvent()");
 	}
-	return (IoEventPoller::NORMAL);
+	return (IoEventPoller::STAT_NORMAL);
 }
 
 // operators

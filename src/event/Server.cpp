@@ -59,7 +59,7 @@ Server::handleEventWork()
 {
 	switch (m_filter)
 	{
-		case IoEventPoller::READ:
+		case IoEventPoller::FILT_READ:
 			int		clientFd;
 			clientFd = m_socket.accept();
 
@@ -69,11 +69,11 @@ Server::handleEventWork()
 			Client* client;
 			client = new Client(clientFd);
 			LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
-			ServerManager::registerEvent(clientFd, IoEventPoller::ADD,
-					IoEventPoller::READ, client);
+			ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
+					IoEventPoller::FILT_READ, client);
 			break;
 		default:
 			throw std::runtime_error("not handled event filter in Server::handleEvent()");
 	}
-	return IoEventPoller::NORMAL;
+	return IoEventPoller::STAT_NORMAL;
 }
