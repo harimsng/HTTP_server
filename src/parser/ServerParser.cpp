@@ -20,6 +20,7 @@ map<string, ServerParser::t_setter>	ServerParser::s_serverSetterMap;
 
 void	ServerParser::setServerSetterMap()
 {
+	s_serverSetterMap["location"] = &ServerParser::parseLocation;
 	s_serverSetterMap["index"] = &ServerParser::setIndex;
 	s_serverSetterMap["server_name"] = &ServerParser::setServerNames;
 	s_serverSetterMap["error_page"] = &ServerParser::setErrorPage;
@@ -28,7 +29,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
-	s_serverSetterMap["location"] = &ServerParser::parseLocation;
+	s_serverSetterMap["cgi_ext"] = &ServerParser::setCgiPass;
 }
 
 // constructors & destructor
@@ -73,13 +74,9 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
-	string	index;
-
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		index = m_tokenizer.get();
-		server.m_index.push_back(index[0] == '/'
-				? index : g_webservDir + index);
+		server.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }
@@ -194,8 +191,14 @@ ServerParser::setCgiPass(VirtualServer& server)
 	{
 		token.push_back(m_tokenizer.get());
 	}
-		server.m_cgiPass[token[0]] = token.back();
+	server.m_cgiPass[token[0]] = token.back();
 	m_tokenizer.eat(";");
+}
+
+void
+ServerParser::setCgiExt(VirtualServer& server)
+{
+
 }
 
 void

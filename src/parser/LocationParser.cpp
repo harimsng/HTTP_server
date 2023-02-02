@@ -22,6 +22,8 @@ LocationParser::setLocationSetterMap()
 	s_locationSetterMap["client_max_body_size"] = &LocationParser::setClientMaxBodySize;
 	s_locationSetterMap["error_page"] = &LocationParser::setErrorPage;
 	s_locationSetterMap["autoindex"] = &LocationParser::setAutoIndex;
+	s_locationSetterMap["cgi_pass"] = &LocationParser::setCgiPass;
+	s_locationSetterMap["cgi_ext"] = &LocationParser::setCgiExt;
 
 }
 
@@ -49,13 +51,9 @@ LocationParser::parse(Location& location)
 void
 LocationParser::setIndex(Location& location)
 {
-	string	index;
-
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		index = m_tokenizer.get();
-		location.m_index.push_back(index[0] == '/'
-				? index : g_webservDir + index);
+		location.m_index.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
 }
@@ -98,12 +96,12 @@ LocationParser::setRoot(Location& location)
 void
 LocationParser::setAlias(Location& location)
 {
-	string	root;
+	string	alias;
 
 	if (location.m_root != "")
 		throw ConfigParser::ConfigParserException("root is already setted");
-	root = m_tokenizer.get();
-	location.m_alias = root[0] == '/' ? root : g_webservDir + root;
+	alias = m_tokenizer.get();
+	location.m_alias = alias[0] == '/' ? alias : g_webservDir + alias;
 	m_tokenizer.eat(";");
 }
 
@@ -136,4 +134,14 @@ LocationParser::setAutoIndex(Location& location)
 {
 	location.m_autoindex = m_tokenizer.get() == "on" ? true : false;
 	m_tokenizer.eat(";");
+}
+
+void
+LocationParser::setCgiPass(Location& location)
+{
+}
+
+void
+LocationParser::setCgiExt(Location& location)
+{
 }

@@ -19,10 +19,10 @@ static const std::string	http_index = "index.html";
 static const bool			autoindex = false;
 
 // ngx_http_proxy_module
-static const std::string	proxyPass = "";
+// static const std::string	proxyPass = "";
 
 // ngx_http_scgi_module
-static const std::string	scgiPass = "";
+static const std::string	cgiPass = "";
 
 // ngx_http_core_module
 static const uint16_t		limitExcept = 0x1f;

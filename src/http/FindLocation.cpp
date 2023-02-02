@@ -173,6 +173,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                         request.m_path = m_path;
                         request.m_file = m_file;
                         request.m_status = 404;
+						LOG(DEBUG, "file=\"%s\", path=\"%s\"", m_path.c_str(), m_file.c_str());
                         LOG(DEBUG, "0-2-1. no file, no path %s", (m_path + m_file).data());
                         return request.m_path + request.m_file;
                     }

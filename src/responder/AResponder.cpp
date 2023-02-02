@@ -95,7 +95,6 @@ AResponder::writeFile()
 	string	filePath = m_request.m_path + m_request.m_file;
 
 	file.open(filePath.c_str());
-	cout << filePath << endl;
 	if (file.fail())
 		throw runtime_error("file open error");
 	file << m_recvBuffer;
@@ -183,8 +182,8 @@ AResponder::normalReadBody()
 	size_t contentLen;
 
 	contentLen = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
-	cout << "put recv buffer :" << m_recvBuffer << endl;
-	cout << contentLen << endl;
+//	cout << "put recv buffer :" << m_recvBuffer << endl;
+//	cout << contentLen << endl;
 
 	if (m_recvBuffer.size() == contentLen)
 	{
