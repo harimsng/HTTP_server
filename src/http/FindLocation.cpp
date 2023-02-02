@@ -17,7 +17,7 @@ FindLocation::removeTrailingSlash(string first, string second)
 }
 
 void
-FindLocation::setRootAlias(string const &uri, VirtualServer* server)
+FindLocation::setRootAlias(string const &uri)
 {
     m_root = m_locationBlock->m_root;
     m_alias = m_locationBlock->m_alias;
@@ -26,15 +26,10 @@ FindLocation::setRootAlias(string const &uri, VirtualServer* server)
 	{
 		m_path = m_alias + m_remainUri;
 	}
-	else if (m_root.length() != 0)
+	else
 	{
         m_root = removeTrailingSlash(m_root, uri);
         m_path = m_root + uri;
-    }
-    else
-	{
-        m_root = removeTrailingSlash(server->m_root, uri);
-        m_path = server->m_root + uri;
     }
 }
 
