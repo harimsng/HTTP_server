@@ -90,16 +90,20 @@ AResponder::readFile(std::string& readBody)
 }
 
 void
-AResponder::writeFile(int writeSize)
+AResponder::openFile()
 {
-	ofstream file;
 	string	filePath = m_request.m_path + m_request.m_file;
 
-	file.open(filePath.c_str());
-	if (file.fail())
+	// TODO: check permission
+	m_file.open(filePath.c_str() , ios::out | ios::trunc);
+	if (m_file.fail())
 		throw runtime_error("file open error");
-	file.write(m_recvBuffer.data(), writeSize);
-	file.close();
+}
+
+void
+AResponder::writeFile(int writeSize)
+{
+	m_file.write(m_recvBuffer.data(), writeSize);
 }
 
 bool
@@ -177,6 +181,7 @@ AResponder::parseChunkSize()
 	string hex;
 	size_t crlfPos = m_recvBuffer.find(g_CRLF);
 
+	// TODO: update buffer
 	if (crlfPos == string::npos)
 		return ("");
 	hex = m_recvBuffer.substr(0, crlfPos);
@@ -208,6 +213,12 @@ AResponder::chunkedReadBody()
 			writeFile(m_chunkedSize);
 			m_recvBuffer.erase(0, m_chunkedSize + 2);
 			m_chunkedSize = -1;
+		}
+		else if (m_chunkedSize != -1 && m_chunkedSize > (int)m_recvBuffer.size())
+		{
+			writeFile(m_recvBuffer.size());
+			m_chunkedSize -= m_recvBuffer.size();
+			m_recvBuffer.clear();
 		}
 		else
 			return (0);

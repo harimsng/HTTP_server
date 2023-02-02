@@ -257,8 +257,8 @@ RequestHandler::checkResourceStatus()
 		default:
 			statusCode = 500; break;
 	}
-	LOG(WARNING, "couldn't find requested resource. status Code = %d", statusCode);
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
+	LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
 }
 
 void
