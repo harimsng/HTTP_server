@@ -1,6 +1,8 @@
 #ifndef ARESPONDER_HPP
 #define ARESPONDER_HPP
 
+#include <fstream>
+
 #include "http/RequestHandler.hpp"
 
 class	AResponder
@@ -29,11 +31,12 @@ public:
 	void			endResponse();
 
 	std::string		parseChunkSize();
+	void			openFile();
 	void			writeFile(int writeSize);
+	void			readFile(std::string& readBody);
 	void			readRequestBody();
 	int				normalReadBody();
 	int				chunkedReadBody();
-	void			readFile(std::string& readBody);
 	bool			checkFileExists(const std::string& filePath);
 	bool			checkDirExists(const std::string& filePath);
 
@@ -44,6 +47,7 @@ protected:
 	ReceiveBuffer&		m_recvBuffer;
 	e_methodStatus		m_methodStatus;
 	int					m_chunkedSize;
+	std::fstream		m_file;
 };
 
 #endif
