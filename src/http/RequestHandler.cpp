@@ -325,6 +325,7 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	LOG(DEBUG, "send response message \"%s\"", m_sendBuffer.c_str());
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
