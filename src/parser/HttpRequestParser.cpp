@@ -30,15 +30,40 @@ HttpRequestParser::~HttpRequestParser()
 {
 }
 
+// void
+// HttpRequestParser::parse(Request& request)
+// {
+//     string::size_type	pos;
+//
+//     pos = m_tokenizer.updateBuffer();
+//     if (pos == string::npos)
+//         return;
+//     while (m_tokenizer.empty() == false)
+//     {
+//         switch (m_readStatus)
+//         {
+//             case REQUEST_LINE_METHOD:
+//             case REQUEST_LINE:
+//                 parseMethod(request);
+//                 parseStatusLine(request);
+//                 break;
+//             case HEADER_FIELDS:
+//                 parseHeaderFields(request.m_headerFieldsMap);
+//                 break;
+//             default:
+//                 ;
+//         }
+//     }
+//     m_tokenizer.flush();
+// }
+//
 void
 HttpRequestParser::parse(Request& request)
 {
 	string::size_type	pos;
 
 	pos = m_tokenizer.updateBuffer();
-	if (pos == string::npos)
-		return;
-	while (m_tokenizer.empty() == false)
+	while (pos != string::npos)
 	{
 		switch (m_readStatus)
 		{
@@ -53,8 +78,11 @@ HttpRequestParser::parse(Request& request)
 			default:
 				;
 		}
+		if (m_readStatus == HEADER_FIELDS_END)
+			return;
+		// m_tokenizer.flush();
+		pos = m_tokenizer.updateBuffer();
 	}
-	m_tokenizer.flush();
 }
 
 void
@@ -75,6 +103,7 @@ HttpRequestParser::parseMethod(Request &request)
 		UPDATE_REQUEST_ERROR(request.m_status, 400);
 	LOG(DEBUG, "request.m_method = %x", request.m_method);
 	m_readStatus = REQUEST_LINE;
+	m_tokenizer.flush();
 }
 
 void
@@ -101,6 +130,7 @@ HttpRequestParser::parseStatusLine(Request &request)
 		request.m_uri = request.m_uri.substr(0, queryStringPos);
 	}
 	request.m_protocol = statusLine.substr(spacePos + 1);
+	m_tokenizer.flush();
 }
 
 void
@@ -112,6 +142,17 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	size_t	pos;
 	size_t	curPos;
 
+	if (headerLine == g_CRLF)
+	{
+		m_readStatus = HEADER_FIELDS_END;
+		m_tokenizer.flush();
+		return;
+	}
+	// if (headerLine == "")
+	// {
+	//     m_readStatus = HEADER_FIELDS_END;
+	//     return;
+	// }
 	if (headerLine.size() != 0 && headerLine[0] == ' ')
 		return ;
 	curPos = 0;
@@ -136,6 +177,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 			value.erase(value.end() - 1);
 		headerFieldsMap[field].push_back(Util::toLower(value));
 	}
-	if (m_tokenizer.peek() == "")
-		m_readStatus = HEADER_FIELDS_END;
+	m_tokenizer.flush();
+	// if (m_tokenizer.peek() == "")
+	//     m_readStatus = HEADER_FIELDS_END;
 }

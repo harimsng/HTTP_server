@@ -53,7 +53,6 @@ AResponder::readFile(std::string& readBody)
 	{
 		map<int, string>*	error_page;
 		std::string			root;
-		// filePath = "/Users/soum/webserv/html/error.html";
 		// TODO: expand this function and change its name or handle this behavior out of readFile() function.
 		if (m_request.m_locationBlock == NULL)
 		{
@@ -142,6 +141,9 @@ void
 AResponder::endResponse()
 {
 	m_requestHandler.m_parser.m_readStatus = HttpRequestParser::FINISHED;
+	if (m_request.m_status >= 300)
+		m_requestHandler.m_parser.m_readStatus = HttpRequestParser::ERROR;
+
 }
 
 void
@@ -203,19 +205,9 @@ AResponder::chunkedReadBody()
 	while(m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
-		{
-			cout << "before buffer size : " << m_recvBuffer.size() << endl;
-			cout << "before Buffer : " << m_recvBuffer << "$" << endl;
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
-			cout << "chunked size : "<< m_dataSize << endl;
-			cout << "buffer size : " << m_recvBuffer.size() << endl;
-			cout << "after Buffer : " << m_recvBuffer << "$" << endl;
-		}
 		if (m_dataSize == 0)
-		{
-			cout << "buffer size : " << m_recvBuffer.size() << endl;
 			return (1);
-		}
 		if (m_dataSize != -1 && m_dataSize + 2 <= (int)m_recvBuffer.size())
 		{
 			writeFile(m_dataSize);
