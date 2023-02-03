@@ -25,6 +25,8 @@ PostResponder::operator=(const PostResponder& postResponder)
 void
 PostResponder::respond()
 {
+	std::string	readBody;
+
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
@@ -35,7 +37,7 @@ PostResponder::respond()
 			if (m_responseStatus != RES_DONE)
 				break; // fall through
 		case RES_CONTENT_FINISHED:
-			constructCgi();
+			constructCgi(readBody);
 			break;
 		case RES_RECV_CGI:
 		case RES_DONE:
@@ -46,7 +48,7 @@ PostResponder::respond()
 }
 
 void
-PostResponder::constructCgi()
+PostResponder::constructCgi(std::string& readBody)
 {
 	int	pipeSet[2];
 
@@ -57,7 +59,7 @@ PostResponder::constructCgi()
 
 	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
-	cgi->executeCgi(pipeSet);
+	cgi->executeCgi(pipeSet, readBody);
 	m_responseStatus = RES_RECV_CGI;
 }
 

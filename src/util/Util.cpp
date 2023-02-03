@@ -129,4 +129,15 @@ Util::checkFileStat(const char* path)
 	return ((buffer.st_mode & S_IFREG) == S_IFREG);
 }
 
+string
+Util::fixDoublelashes(const string& path, const string& file) {
+    string newStr = path;
+    if (*(path.end() - 1) == '/' && *(file.begin()) == '/')
+        newStr = path.substr(0, path.find_last_of('/')) + file;
+    else if (*(path.end() - 1) != '/' && *(file.begin()) != '/')
+        newStr = path + "/" + file;
+	else
+		newStr = path + file;
+    return newStr;
+}
 

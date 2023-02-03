@@ -1,6 +1,9 @@
 #include <fcntl.h>
 #include <iostream>
 
+#include "ServerManager.hpp"
+#include "io/IoMultiplex.hpp"
+#include "event/Cgi.hpp"
 #include "http/AutoIndex.hpp"
 #include "util/Util.hpp"
 #include "responder/GetResponder.hpp"
@@ -39,12 +42,22 @@ GetResponder::respond()
 			if (m_request.m_file == "")
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else
-				readFile(readBody);
+			{
+				if (m_request.m_isCgi == true)
+				{
+					string tmpFile = m_request.m_path + m_request.m_file + ".temp";
+					openFile(tmpFile);
+					constructCgi(readBody);
+					unlink(tmpFile.c_str());
+				}
+				else
+					readFile(readBody);
+			}
 			m_sendBuffer.append("Content-Length: ");
 			m_sendBuffer.append(Util::toString(readBody.size()));
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(g_CRLF);
-			m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
+			//m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
 
 			// TODO: change code to use swap instead of appen
 			m_sendBuffer.append(readBody);
@@ -57,4 +70,20 @@ GetResponder::respond()
 		default:
 			;
 	}
+}
+
+void
+GetResponder::constructCgi(std::string& readBody)
+{
+	int	pipeSet[2];
+
+	pipe(pipeSet);
+	m_cgiReadEnd = pipeSet[0];
+
+	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
+
+	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	cgi->initEnv(m_request);
+	cgi->executeCgi(pipeSet, readBody);
+	m_responseStatus = RES_DONE;
 }

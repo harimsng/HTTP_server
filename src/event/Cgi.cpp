@@ -56,7 +56,8 @@ Cgi::receiveCgiResponse()
 	// INFO: temporary function
 	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
 
-	sendBuffer.receive(m_readEnd);
+	(void) sendBuffer;
+	//sendBuffer.receive(m_readEnd);
 }
 
 void
@@ -107,8 +108,8 @@ Cgi::initEnv(const Request &request)
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
-    std::string SCRIPT_NAME = "SCRIPT_NAME="; //+ request.m_locationBlock->m_cgiPass;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME="; // path of cgi script in file-system
+    std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file; //+ request.m_locationBlock->m_cgiPass;
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // path of cgi script in file-system
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
@@ -148,8 +149,9 @@ Cgi::initEnv(const Request &request)
 }
 
 void
-Cgi::executeCgi(int pipe[2])
+Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
+	/*
 	int	pid = fork();
 
 	m_readEnd = pipe[0];
@@ -166,6 +168,40 @@ Cgi::executeCgi(int pipe[2])
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
 	}
+	else
+	{
+
+	}
 //  TODO: close when cgi is done
 //	close(m_fd);
+	*/
+    pid_t pid;
+	m_readEnd = pipe[0];
+
+    pid = fork();
+    if (pid < 0) {
+        throw std::runtime_error("Cgi::Cgi() fork failed");
+    }
+
+    if (pid == 0) {
+        // Child process
+		dup2(pipe[0], STDIN_FILENO);
+        dup2(m_requestContentFileFd, STDOUT_FILENO);
+        close(pipe[0]);
+		close(pipe[1]);
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::Cgi() execve failed");
+    } else {
+        // Parent process
+        close(pipe[1]);
+		close(pipe[0]);
+		waitpid(-1, NULL, 0);
+		//write(m_requestContentFileFd, buf, n);
+		lseek(m_requestContentFileFd, 0, SEEK_SET);
+		readBody.resize(10000, 0);
+		int n = read(m_requestContentFileFd, (char *)(readBody.data()), 10000);
+		readBody.resize(n);
+		close(m_requestContentFileFd);
+		readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
+    }
 }

@@ -14,6 +14,8 @@ public:
 	GetResponder	&operator=(const GetResponder& getMethod);
 
 	virtual void	respond();
+
+	void			constructCgi(std::string& readBody);
 // member functions
 };
 
