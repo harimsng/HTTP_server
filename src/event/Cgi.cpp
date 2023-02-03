@@ -56,7 +56,8 @@ Cgi::receiveCgiResponse()
 	// INFO: temporary function
 	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
 
-	sendBuffer.receive(m_readEnd);
+	(void) sendBuffer;
+	//sendBuffer.receive(m_readEnd);
 }
 
 void
@@ -175,7 +176,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 //	close(m_fd);
 	*/
     pid_t pid;
-    char buf[1024];
 	m_readEnd = pipe[0];
 
     pid = fork();
@@ -185,18 +185,22 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 
     if (pid == 0) {
         // Child process
+		dup2(pipe[0], STDIN_FILENO);
+        dup2(m_requestContentFileFd, STDOUT_FILENO);
         close(pipe[0]);
-        dup2(pipe[1], STDOUT_FILENO);
+		close(pipe[1]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
     } else {
         // Parent process
         close(pipe[1]);
-        int n = read(pipe[0], buf, sizeof(buf));
-		write(m_requestContentFileFd, buf, n);
+		close(pipe[0]);
+		waitpid(-1, NULL, 0);
+		//write(m_requestContentFileFd, buf, n);
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
-		readBody.resize(n, 0);
-		read(m_requestContentFileFd, (char *)(readBody.data()), n);
+		readBody.resize(10000, 0);
+		int n = read(m_requestContentFileFd, (char *)(readBody.data()), 10000);
+		readBody.resize(n);
 		close(m_requestContentFileFd);
 		readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
     }
