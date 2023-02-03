@@ -28,6 +28,7 @@ struct Request
 	std::string			m_path;
 	std::string			m_file;
 	std::string			m_cgi;
+	bool				m_isCgi;
 	Location*			m_locationBlock;
 	VirtualServer*		m_virtualServer;
 	HeaderFieldsMap		m_headerFieldsMap;

@@ -20,5 +20,6 @@ public:
 
 	static const std::string	getDate(const char* format);
 	static bool					checkFileStat(const char* path);
+	static std::string			fixDoublelashes(const std::string& path, const std::string& file);
 };
 #endif //Util_hpp

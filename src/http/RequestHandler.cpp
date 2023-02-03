@@ -158,6 +158,20 @@ RequestHandler::checkRequestMessage()
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
 	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
+	m_request.m_isCgi = false;
+	if (m_request.m_file != "")
+	{
+		string m_ext = "";
+		if (m_request.m_file.find(".") != string::npos)
+		{
+			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
+			if (virtualServer->m_cgiPass.count(m_ext) == true)
+			{
+				m_request.m_cgi = virtualServer->m_cgiPass[m_ext];
+				m_request.m_isCgi = true;
+			}
+		}
+	}
 	if (m_request.m_locationBlock != NULL)
 	{
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());

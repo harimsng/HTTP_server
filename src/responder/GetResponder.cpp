@@ -39,7 +39,16 @@ GetResponder::respond()
 			if (m_request.m_file == "")
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else
-				readFile(readBody);
+			{
+				if (m_request.m_isCgi == true)
+				{
+					cout << m_request.m_cgi << endl;
+					readFile(readBody);
+				}
+				else
+					readFile(readBody);
+			}
+				
 			m_sendBuffer.append("Content-Length: ");
 			m_sendBuffer.append(Util::toString(readBody.size()));
 			m_sendBuffer.append(g_CRLF);
