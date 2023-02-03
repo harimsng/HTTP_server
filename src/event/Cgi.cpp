@@ -148,8 +148,9 @@ Cgi::initEnv(const Request &request)
 }
 
 void
-Cgi::executeCgi(int pipe[2])
+Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
+	/*
 	int	pid = fork();
 
 	m_readEnd = pipe[0];
@@ -166,6 +167,37 @@ Cgi::executeCgi(int pipe[2])
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
 	}
+	else
+	{
+
+	}
 //  TODO: close when cgi is done
 //	close(m_fd);
+	*/
+    pid_t pid;
+    char buf[1024];
+	m_readEnd = pipe[0];
+
+    pid = fork();
+    if (pid < 0) {
+        throw std::runtime_error("Cgi::Cgi() fork failed");
+    }
+
+    if (pid == 0) {
+        // Child process
+        close(pipe[0]);
+        dup2(pipe[1], STDOUT_FILENO);
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::Cgi() execve failed");
+    } else {
+        // Parent process
+        close(pipe[1]);
+        int n = read(pipe[0], buf, sizeof(buf));
+		write(m_requestContentFileFd, buf, n);
+		lseek(m_requestContentFileFd, 0, SEEK_SET);
+		readBody.resize(n, 0);
+		read(m_requestContentFileFd, (char *)(readBody.data()), n);
+		close(m_requestContentFileFd);
+		readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
+    }
 }
