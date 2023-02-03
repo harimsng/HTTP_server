@@ -314,9 +314,12 @@ RequestHandler::findContentType(std::string& content)
 	std::string extension;
 
 	// INFO: npos?
-	extension = content.substr(content.find('.') + 1);
-	if (s_extensionTypeTable.count(extension) == 1)
-		return s_extensionTypeTable[extension];
+	if (content.find('.') != std::string::npos)
+	{
+		extension = content.substr(content.find('.') + 1);
+		if (s_extensionTypeTable.count(extension) == 1)
+			return s_extensionTypeTable[extension];
+	}
 	extension = "text/html";
 	return (extension);
 }

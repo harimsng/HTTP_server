@@ -22,7 +22,7 @@ public:
 
 // member functions
 	void	initEnv(const Request& request);
-	void	executeCgi(int pipe[2]);
+	void	executeCgi(int pipe[2], std::string& readBody);
 	void	receiveCgiResponse();
 
 	IoEventPoller::EventStatus	handleEventWork();
