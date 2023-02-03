@@ -107,8 +107,8 @@ Cgi::initEnv(const Request &request)
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
-    std::string SCRIPT_NAME = "SCRIPT_NAME="; //+ request.m_locationBlock->m_cgiPass;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME="; // path of cgi script in file-system
+    std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file; //+ request.m_locationBlock->m_cgiPass;
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // path of cgi script in file-system
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
