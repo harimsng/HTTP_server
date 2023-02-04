@@ -110,6 +110,7 @@ RequestHandler::createResponseHeader()
 		LOG(DEBUG, "error response to fd=%d, status code=%d",
 				m_socket->m_fd, statusCode);
 		m_request.m_method = m_request.m_method == HEAD ? HEAD : GET;
+		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
 	{
@@ -138,23 +139,23 @@ RequestHandler::createResponseHeader()
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
+// NOTE
+// check for
+// 1. http version								-> 505
+// 2. request header field is "host" or not
+// 3. find location block
+// 4. request need cgi or not
+// 5. allowed method of location block			-> 405
+// 6. file exists or not and file's permisson	-> 404, 414 500
+
 void
 RequestHandler::checkRequestMessage()
 {
 	FindLocation	findLocation;
 	VirtualServer*	virtualServer;
 
-	// 1. check method
-	// 2. check uri length
-	// 3. check http version
-	// 4. check reqeust header
-	// 4.1 ckeck host field
-	// 5. check reqeust body size
-
-	// if (m_request.m_uri == "/")
-	//     throw HttpErrorHandler(400);
-	checkStatusLine(); // 1, 2, 3
-	checkHeaderFields(); // 4
+	checkStatusLine();
+	checkHeaderFields();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
 	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
@@ -168,7 +169,7 @@ RequestHandler::checkRequestMessage()
 			if (virtualServer->m_cgiPass.count(m_ext) == true)
 			{
 				m_request.m_cgi = virtualServer->m_cgiPass[m_ext];
-				m_request.m_isCgi = true;
+				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 	}
@@ -180,7 +181,7 @@ RequestHandler::checkRequestMessage()
 	// TODO: cleanup hardcodings
 	if (m_request.m_file != "")
 		checkResourceStatus();
-
+	LOG(DEBUG, "check request message finish");
 }
 
 void
@@ -222,7 +223,10 @@ void
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
 	if (!(m_request.m_method & allowed))
+	{
+		LOG(DEBUG, "method not allowed");
 		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
+	}
 }
 
 void
@@ -325,7 +329,11 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	LOG(DEBUG, "send response message \"%s\"", m_sendBuffer.c_str());
+	if (m_sendBuffer.size())
+	{
+		LOG(DEBUG, "send response message \"%s\"", m_sendBuffer.c_str());
+	}
+
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)

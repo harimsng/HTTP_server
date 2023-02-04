@@ -78,7 +78,7 @@ Kqueue::pollWork()
 
 	if (m_eventList.size() > 0)
 	{
-		LOG(DEBUG, "%d events polled", m_eventList.size());
+		// LOG(DEBUG, "%d events polled", m_eventList.size());
 	}
 
 	for (size_t i = 0; i < m_eventList.size(); ++i)

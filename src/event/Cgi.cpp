@@ -6,6 +6,12 @@
 #include "http/RequestHandler.hpp"
 #include "Cgi.hpp"
 
+
+
+#include <iostream>
+
+using namespace std;
+
 #define BUFFER_SIZE (65535)
 
 // deleted
@@ -83,10 +89,11 @@ Cgi::initEnv(const Request &request)
     }
 
 	std::string	HTTP_X_SECRET_HEADER_FOR_TEST;
-    contentIt = request.m_headerFieldsMap.find("X-Secret-Header-For-Test");
+    contentIt = request.m_headerFieldsMap.find("X-SECRET-HEADER-FOR-TEST");
     if (contentIt != request.m_headerFieldsMap.end())
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
+		// LOG(DEBUG, "secret header : \"%s\"", HTTP_X_SECRET_HEADER_FOR_TEST.c_str());
     }
     if (request.m_method == RequestHandler::POST && request.m_bodySize != -1)
     {
@@ -194,7 +201,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
     } else {
         // Parent process
 		close(pipe[0]);
-		
+
 		if (request.m_method == RequestHandler::POST || request.m_method == RequestHandler::PUT)
 		{
 			write(pipe[1], (char *)(request.requestBodyBuf.data()), request.m_bodySize);

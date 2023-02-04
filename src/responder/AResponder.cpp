@@ -149,14 +149,19 @@ AResponder::endResponse()
 void
 AResponder::respondHeader()
 {
+	if (m_sendBuffer.size() == 0)
+	{
+		m_responseStatus = RES_CONTENT; // fall through
+		return;
+	}
 	m_sendBuffer.append("Content-Type: " + m_requestHandler.findContentType(m_request.m_file));
 	m_sendBuffer.append(g_CRLF);
-	if (m_request.m_status >= 300 ||
-			m_request.m_headerFieldsMap.count("CONNECTION") == 0)
-		m_sendBuffer.append("Connection: close");
-	else
-		m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);
-	m_sendBuffer.append(g_CRLF);
+	if (m_request.m_status >= 300)
+	//		m_request.m_headerFieldsMap.count("CONNECTION") == 0)
+		m_sendBuffer.append("Connection: close\r\n");
+	// else
+	//     m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);
+	// m_sendBuffer.append(g_CRLF);
 	m_responseStatus = RES_CONTENT; // fall through
 }
 
@@ -211,6 +216,8 @@ AResponder::chunkedReadBody()
 	{
 		if (m_dataSize == -1)
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
+		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
+			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
 			m_recvBuffer.clear();

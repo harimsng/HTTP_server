@@ -7,6 +7,7 @@
 #include "http/AutoIndex.hpp"
 #include "util/Util.hpp"
 #include "responder/GetResponder.hpp"
+#include "Logger.hpp"
 
 using namespace std;
 
@@ -39,8 +40,13 @@ GetResponder::respond()
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
+			// TODO
+			// check location block's autoindex
 			if (m_request.m_file == "")
+			{
+				cout << "here" << endl;
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
+			}
 			else
 			{
 				if (m_request.m_isCgi == true)
@@ -51,7 +57,9 @@ GetResponder::respond()
 					unlink(tmpFile.c_str());
 				}
 				else
+				{
 					readFile(readBody);
+				}
 			}
 			m_sendBuffer.append("Content-Length: ");
 			m_sendBuffer.append(Util::toString(readBody.size()));
@@ -82,7 +90,7 @@ GetResponder::constructCgi(std::string& readBody)
 
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
-	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	// ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_DONE;
