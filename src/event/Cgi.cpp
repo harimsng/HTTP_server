@@ -177,6 +177,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 	*/
     pid_t pid;
 	m_readEnd = pipe[0];
+	struct stat st;
 
     pid = fork();
     if (pid < 0) {
@@ -198,9 +199,11 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 		waitpid(-1, NULL, 0);
 		//write(m_requestContentFileFd, buf, n);
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
-		readBody.resize(10000, 0);
-		int n = read(m_requestContentFileFd, (char *)(readBody.data()), 10000);
-		readBody.resize(n);
+		fstat(m_requestContentFileFd, &st);
+		off_t fileSize = st.st_size;
+		LOG(DEBUG, "filesize = %d", fileSize);
+		readBody.resize(fileSize, 0);
+		read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
 		close(m_requestContentFileFd);
 		readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
     }

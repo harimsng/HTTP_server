@@ -1,5 +1,5 @@
 #include <unistd.h>
-
+#include <iostream>
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
@@ -34,6 +34,7 @@ PostResponder::respond()
 			respondHeader(); // fall through
 		case RES_CONTENT:
 			readRequestBody();
+			std::cout << "recvbuf = " << m_recvBuffer << std::endl;
 			if (m_responseStatus != RES_DONE)
 				break; // fall through
 		case RES_CONTENT_FINISHED:
