@@ -194,6 +194,11 @@ AResponder::parseChunkSize()
 	// TODO: update buffer
 	if (crlfPos == string::npos)
 		return ("");
+	if (crlfPos == 0)
+	{
+		m_recvBuffer.erase(0, 2);
+		return (parseChunkSize());
+	}
 	hex = m_recvBuffer.substr(0, crlfPos);
 	m_recvBuffer.erase(0, crlfPos + 2);
 	return (hex);
@@ -205,26 +210,23 @@ AResponder::chunkedReadBody()
 	while(m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
-		{
-			cout << "recv buffer : " << m_recvBuffer << "$" << endl;
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
-			cout << "chunked size : " << m_dataSize << endl;
-		}
-		if (m_dataSize == 0)
+		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
+		{
+			m_recvBuffer.clear();
 			return (1);
-		if (m_dataSize != -1 && m_dataSize + 2 <= (int)m_recvBuffer.size())
+		}
+		if (m_dataSize > 0 && m_dataSize + 2 <= (int)m_recvBuffer.size())
 		{
 			writeFile(m_dataSize);
 			m_recvBuffer.erase(0, m_dataSize + 2);
 			m_dataSize = -1;
 		}
-		else if (m_dataSize != -1 && m_dataSize + 2 > (int)m_recvBuffer.size())
+		else if (m_dataSize > 0 && m_dataSize >= (int)m_recvBuffer.size())
 		{
 			writeFile(m_recvBuffer.size());
 			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();
-			// TODO
-			// if m_dataSize is 0 , fix it
 			if (m_dataSize == 0)
 				m_dataSize = -1;
 		}
