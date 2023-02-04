@@ -84,6 +84,6 @@ GetResponder::constructCgi(std::string& readBody)
 
 	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
-	cgi->executeCgi(pipeSet, readBody);
+	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_DONE;
 }

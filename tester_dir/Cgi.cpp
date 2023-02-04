@@ -24,11 +24,10 @@ Cgi::Cgi(Cgi const& cgi)
 
 // constructors & destructor
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
-:	//EventObject(writeEnd),
+:	EventObject(writeEnd),
 	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
 {
-	(void) writeEnd;
 	m_bodyFlag = false;
 }
 
@@ -90,7 +89,6 @@ Cgi::initEnv(const Request &request)
     }
     if (request.m_method == RequestHandler::POST && request.m_bodySize != -1)
     {
-		//TODO: change to_string
         CONTENT_LENGTH += std::to_string(request.m_bodySize);
     }
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
@@ -188,18 +186,24 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		dup2(pipe[0], STDIN_FILENO);
         dup2(m_requestContentFileFd, STDOUT_FILENO);
+        close(pipe[0]);
 		close(pipe[1]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
     } else {
         // Parent process
+		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[0]);
-		
+
 		if (request.m_method == RequestHandler::POST || request.m_method == RequestHandler::PUT)
 		{
-			write(pipe[1], (char *)(request.requestBodyBuf.data()), request.m_bodySize);
+			fstat(m_requestContentFileFd, &st);
+			std::string sendBuf;
+			sendBuf.resize(request.m_bodySize, 0);
+			read(m_requestContentFileFd, (char *)(sendBuf.data()), request.m_bodySize);
+			write(pipe[1], (char *)(sendBuf.data()), request.m_bodySize);
 		}
-		//close(pipe[1]);
+		close(pipe[1]);
 		waitpid(-1, NULL, 0);
 
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
