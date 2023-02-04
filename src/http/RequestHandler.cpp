@@ -63,10 +63,7 @@ RequestHandler::receiveRequest()
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
-	{
-		cout << "eof" << endl;
 		return RECV_END;
-	}
 	else if (count == -1)
 		return RECV_SKIPPED;
 
@@ -88,8 +85,11 @@ RequestHandler::receiveRequest()
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
-		case HttpRequestParser::FINISHED:
+		case HttpRequestParser::ERROR:
 			delete m_responder;
+			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
+				break; // fall through
+		case HttpRequestParser::FINISHED:
 			resetStates();
 			break;
 		default:
@@ -194,22 +194,11 @@ void
 RequestHandler::checkHeaderFields()
 {
 	if (m_request.m_headerFieldsMap.count("HOST") == 0)
-		// ||
-		//     m_request.m_headerFieldsMap["HOST"].size() == 0 ||
-		//     m_request.m_headerFieldsMap["HOST"][0] == "")
 	{
 		m_request.m_headerFieldsMap["HOST"].push_back("");
 		// UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 		return;
 	}
-	// if (m_request.m_headerFieldsMap.count("CONNECTION") == 0 ||
-	//     m_request.m_headerFieldsMap["CONNECTION"][0] == "")
-	// {
-	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
-	//     return;
-	// }
-	// if (check == false)
-	//     UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 }
 
 VirtualServer*
@@ -252,7 +241,8 @@ RequestHandler::checkResourceStatus()
 		case HEAD: // fall through
 			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
 		case POST:
-			permission = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH; break;
+			// permission = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH; break;
+			return;
 		case PUT:
 			return;
 		case DELETE:
@@ -335,6 +325,7 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	LOG(DEBUG, "send response message \"%s\"", m_sendBuffer.c_str());
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
@@ -344,6 +335,8 @@ RequestHandler::sendResponse() try
 	if (count > 0)
 	{
 		LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
+		if (m_request.m_status >= 300)
+			return SEND_ERROR;
 	}
 	return SEND_NORMAL;
 }

@@ -60,6 +60,9 @@ Client::handleEventWork()
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
 							IoEventPoller::FILT_WRITE, this);
 					break;
+				case RequestHandler::SEND_ERROR:
+					LOG(DEBUG, "error write event for fd=%d\n", m_socket.m_fd);
+					return IoEventPoller::STAT_END;
 
 				default:
 					;
