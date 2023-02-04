@@ -18,7 +18,7 @@ typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
 
 struct Request
 {
-	Request(): m_status(200), m_locationBlock(NULL), m_virtualServer(NULL) {};
+	Request(): m_status(200), m_bodySize(0), m_locationBlock(NULL), m_virtualServer(NULL) {};
 
 	int					m_method;
 	int					m_status;
@@ -29,6 +29,8 @@ struct Request
 	std::string			m_file;
 	std::string			m_cgi;
 	bool				m_isCgi;
+	std::string			requestBodyBuf;
+	off_t				m_bodySize;
 	Location*			m_locationBlock;
 	VirtualServer*		m_virtualServer;
 	HeaderFieldsMap		m_headerFieldsMap;
