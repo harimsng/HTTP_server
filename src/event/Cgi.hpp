@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-
+#include <sys/stat.h>
 #include "event/EventObject.hpp"
 
 class	RequestHandler;
