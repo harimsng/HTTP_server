@@ -31,7 +31,7 @@ void
 PostResponder::respond() try
 {
 	std::string	readBody;
-	std::string tmpFile = "/Users/soum/goinfre/" + m_request.m_file + ".temp" + Util::toString(m_requestHandler.m_socket->m_fd);
+	std::string tmpFile = "/Users/gson/goinfre/" + m_request.m_file + ".temp" + Util::toString(m_requestHandler.m_socket->m_fd);
 	struct stat st;
 
 	if (m_request.m_status >= 300)

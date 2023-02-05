@@ -24,7 +24,6 @@ public:
 
 // member functions
 	void			init(std::string configPath, VirtualServerTable& serverTable);
-	// bool			checkFileStat(const char* path);
 
 	virtual void	parse();
 	void			parseServer();

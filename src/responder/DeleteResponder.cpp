@@ -80,27 +80,12 @@ DeleteResponder::respond()
 			m_sendBuffer.append(Util::toString(readBody.size()));
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(g_CRLF);
-			//m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-
-			// TODO: change code to use swap instead of append
 			m_sendBuffer.append(readBody);
 			m_responseStatus = RES_DONE; // fall through
-			// break;
 		case RES_DONE:
-		// method must know end of response(content length, chunked)
 			endResponse();
 			break;
 		default:
 			;
 	}
-	/*
-	int deleteStatus;
-
-	string filePath = m_request.m_path + m_request.m_file;
-
-	readFile(m_sendBuffer); // 파일 읽기
-	deleteStatus = unlink(filePath.c_str());
-	if (deleteStatus == -1)
-		m_statusCode = 202;
-	*/
 }

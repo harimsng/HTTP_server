@@ -30,33 +30,6 @@ HttpRequestParser::~HttpRequestParser()
 {
 }
 
-// void
-// HttpRequestParser::parse(Request& request)
-// {
-//     string::size_type	pos;
-//
-//     pos = m_tokenizer.updateBuffer();
-//     if (pos == string::npos)
-//         return;
-//     while (m_tokenizer.empty() == false)
-//     {
-//         switch (m_readStatus)
-//         {
-//             case REQUEST_LINE_METHOD:
-//             case REQUEST_LINE:
-//                 parseMethod(request);
-//                 parseStatusLine(request);
-//                 break;
-//             case HEADER_FIELDS:
-//                 parseHeaderFields(request.m_headerFieldsMap);
-//                 break;
-//             default:
-//                 ;
-//         }
-//     }
-//     m_tokenizer.flush();
-// }
-//
 void
 HttpRequestParser::parse(Request& request)
 {
@@ -80,7 +53,6 @@ HttpRequestParser::parse(Request& request)
 		}
 		if (m_readStatus == HEADER_FIELDS_END)
 			return;
-		// m_tokenizer.flush();
 		pos = m_tokenizer.updateBuffer();
 	}
 }
@@ -148,11 +120,6 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		m_tokenizer.flush();
 		return;
 	}
-	// if (headerLine == "")
-	// {
-	//     m_readStatus = HEADER_FIELDS_END;
-	//     return;
-	// }
 	if (headerLine.size() != 0 && headerLine[0] == ' ')
 		return ;
 	curPos = 0;
@@ -178,6 +145,4 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		headerFieldsMap[field].push_back(value);
 	}
 	m_tokenizer.flush();
-	// if (m_tokenizer.peek() == "")
-	//     m_readStatus = HEADER_FIELDS_END;
 }

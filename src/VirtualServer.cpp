@@ -18,15 +18,9 @@ VirtualServer::~VirtualServer()
 void
 VirtualServer::setToDefault()
 {
-	// m_index;
 	m_serverNames = vector<string>(1, "");
-//	m_errorCode;
-//	m_root;
-//	m_errorPages;
 	m_listen = GET_SOCKADDR_IN(listenIp, listenPort);
 	m_clientMaxBodySize = 1 << 13; // 8kb
-//	m_uriBufferSize;
-//
 	m_addrKey.setAddrKey(listenIp, listenPort);
 }
 
@@ -45,7 +39,6 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	   << ((addr & 0xff00) >> 8) << '.'
 	   << (addr & 0xff) << ':'
 	   << ntohs(server.m_listen.sin_port) << '\n';
-	// os << "\tindex " << server.m_index << '\n';
 	os << "\tclient_max_body_size " << server.m_clientMaxBodySize << '\n';
 	for (map<string, Location>::const_iterator itr = server.m_locationTable.begin();
 			itr != server.m_locationTable.end();
@@ -53,8 +46,6 @@ operator<<(std::ostream& os, const VirtualServer& server)
 	{
 		os << itr->second;
 	}
-	// for (t_uint32 i = 0; i < server.m_locationList.size(); ++i)
-	//     os << server.m_locationList[i];
 	os << "}\n";
 	return os;
 }

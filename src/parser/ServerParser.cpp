@@ -9,9 +9,6 @@
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
 
-// TODO: alias and root cannot be defined at the same time
-// 		some variables in location block take default value from server block
-
 using namespace std;
 
 extern const string	g_webservDir;
@@ -80,7 +77,6 @@ ServerParser::setIndex(VirtualServer& server)
 	m_tokenizer.eat(";");
 }
 
-// TODO: apply server name rule
 void
 ServerParser::setServerNames(VirtualServer& server)
 {

@@ -37,18 +37,6 @@ AutoIndex::autoIndex(const std::string& path, const std::string& uri) {
 	struct dirent*	file_info;
 
 	directory = opendir(path.c_str());
-	// if (directory == NULL)
-	//	throw HttpErrorHandler(404);
-
-	// it can be divided into
-	// ENOENT directory not found -> 404
-	// EACCESS permission denied -> 404
-	// EMFILE, ENFILE, ENOMEM not enough resource -> 503 or 500
-	// ENOTDIR not a directory -> logic error
-
-	// save to string and return it OR write to socket
-
-	// Users/soum/webserv/html/44/
 	page_content.reserve(2048);
 	while ((file_info = readdir(directory)) != NULL) {
 		link = file_info->d_name;

@@ -22,8 +22,6 @@ public:
 // constructors & destructor
 	VirtualServer();
 	~VirtualServer();
-	// VirtualServer(VirtualServer const& server) = default;
-	// VirtualServer	&operator=(VirtualServer const& server) = default;
 
 // member functions
 	std::map<std::string, std::string>	m_cgiPass;
