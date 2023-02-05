@@ -205,10 +205,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             if (lstat(m_path.c_str(), &d_stat) == -1) { // abcd가 없을경우
                 request.m_path = m_path.substr(0, m_path.find_last_of("/")) + "/";
                 request.m_file = m_file;
-                if (request.m_method != RequestHandler::PUT)
-                {
-                    request.m_status = 404;
-                }
+                request.m_status = 404;
                 LOG(DEBUG, "1-1-0. no file, no path %s", (request.m_path + request.m_file).data());
                 return request.m_path + request.m_file;
             }
@@ -263,11 +260,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             if (lstat(realPath.c_str(), &d_stat) == -1) { // abcd가 없을경우
                 m_path = realPath.substr(0, uri.find_last_of("/")) + "/";
                 m_file = realPath.substr(realPath.rfind("/") + 1);
-                if (request.m_method != RequestHandler::PUT)
-                {
-                    request.m_status = 404;
-
-                }
+                request.m_status = 404;
                 request.m_path = m_path;
                 request.m_file = m_file;
                 LOG(DEBUG, "1-2-0. no file, no path %s", (m_path + m_file).data());

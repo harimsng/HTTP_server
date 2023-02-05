@@ -2,6 +2,7 @@
 #define ARESPONDER_HPP
 
 #include "http/RequestHandler.hpp"
+#include <cerrno>
 
 class	AResponder
 {

@@ -13,6 +13,7 @@ public:
 // operators
 	DeleteResponder	&operator=(const DeleteResponder& deleteMethod);
 
+	void			deleteFile(const std::string& filePath, std::string& readBody);
 	virtual void	respond();
 // member functions
 };
