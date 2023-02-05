@@ -1,22 +1,25 @@
-X-Powered-By: PHP/7.4.10
-Content-type: text/html; charset=UTF-8
+#include <iostream>
+#include <string>
+#include <deque>
+#if 1 //CREATE A REAL STL EXAMPLE
+	#include <map>
+	#include <stack>
+	#include <vector>
+	namespace ft = std;
+#else
+	#include <map.hpp>
+	#include <stack.hpp>
+	#include <vector.hpp>
+#endif
 
-<!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Webserv Project</title>
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,800' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+#include <stdlib.h>
 
-</head>
-<body>
-<main class="container">
-  <div class="cc">
-    <h2>Sorry, there was an error uploading your file.</h2>  </div>
-</main>
-</body>
-</html>ER_SIZE];
+#define MAX_RAM 4294967296
+#define BUFFER_SIZE 4096
+struct Buffer
+{
+	int idx;
+	char buff[BUFFER_SIZE];
 };
 
 
@@ -111,9 +114,3 @@ int main(int argc, char** argv) {
 	std::cout << std::endl;
 	return (0);
 }
-
-------WebKitFormBoundary8WDshqbrKBV48fBM
-Content-Disposition: form-data; name="submit"
-
-Upload Image
-------WebKitFormBoundary8WDshqbrKBV48fBM--

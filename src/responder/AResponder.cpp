@@ -11,6 +11,7 @@
 #include "io/Buffer.hpp"
 #include "util/Util.hpp"
 #include "AResponder.hpp"
+#include "Logger.hpp"
 
 using namespace std;
 
@@ -246,5 +247,7 @@ AResponder::normalReadBody()
 
 	int	count = m_recvBuffer.send(m_fileFd);
 	m_dataSize -= count;
+	if (m_dataSize == 0)
+		return 1;
 	return (0);
 }

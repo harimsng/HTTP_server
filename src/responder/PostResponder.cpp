@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <iostream>
+#include <fcntl.h>
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
@@ -29,18 +30,26 @@ PostResponder::respond()
 	std::string	readBody;
 	std::string tmpFile = m_request.m_path + m_request.m_file + ".temp";
 	struct stat st;
+	int status = 0;
 
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			openFile(tmpFile);
 			respondHeader(); // fall through
+			openFile(tmpFile);
 		case RES_CONTENT:
 			if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
-				normalReadBody();
+				status = normalReadBody();
 			else
-				chunkedReadBody();
-			m_request.m_status = 201;
+				status = chunkedReadBody();
+			if (status)
+			{
+				m_request.m_status = 201;
+				m_responseStatus = RES_CONTENT_FINISHED;
+			}
+			else
+				break; // fall through
+		case RES_CONTENT_FINISHED:
 			if (m_request.m_isCgi == true)
 			{
 				lseek(m_fileFd, 0, SEEK_SET);
@@ -50,7 +59,7 @@ PostResponder::respond()
 				read(m_fileFd, (char *)(m_request.requestBodyBuf.data()), m_request.m_bodySize);
 				openFile(tmpFile);
 				constructCgi(readBody);
-				//unlink(tmpFile.c_str());
+				unlink(tmpFile.c_str());
 			}
 			else
 				readFile(readBody);
@@ -61,12 +70,7 @@ PostResponder::respond()
 			m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
 			m_sendBuffer.append(readBody);
 			m_responseStatus = RES_DONE;
-			if (m_responseStatus != RES_DONE)
-				break; // fall through
 		/*
-		case RES_CONTENT_FINISHED:
-			constructCgi(readBody);
-			break;
 		case RES_RECV_CGI:
 		*/
 		case RES_DONE:
