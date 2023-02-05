@@ -171,6 +171,8 @@ RequestHandler::checkRequestMessage()
 				m_request.m_isCgi = true;
 			}
 		}
+		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
+			m_request.m_status = 200;
 	}
 	if (m_request.m_locationBlock != NULL)
 	{
@@ -178,7 +180,7 @@ RequestHandler::checkRequestMessage()
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
 	// TODO: cleanup hardcodings
-	if (m_request.m_file != "")
+	if (m_request.m_file != "" && m_request.m_method != DELETE)
 		checkResourceStatus();
 
 }
@@ -246,7 +248,8 @@ RequestHandler::checkResourceStatus()
 		case PUT:
 			return;
 		case DELETE:
-			permission = S_IWUSR | S_IWGRP | S_IWOTH; break;
+			permission = S_IWUSR | S_IWGRP | S_IWOTH;
+			break;
 	}
 	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode) // INFO: always regular?
 		&& CHECK_PERMISSION(status.st_mode, permission))
