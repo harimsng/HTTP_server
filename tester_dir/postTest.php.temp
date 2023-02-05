@@ -14,9 +14,9 @@ Content-type: text/html; charset=UTF-8
 <main class="container">
   <div>
     <h2>
-    Welcome <br>
-    Your email address is: <br>
-    The sum of your numbers is 0<br>
+    Welcome tset<br>
+    Your email address is: test<br>
+    The sum of your numbers is 99<br>
   </h2>
     <a class="button-line" href="/">Go back Home</a>
   </div>

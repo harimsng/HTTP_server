@@ -167,7 +167,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		if (pos == string::npos)
 		{
 			value = headerLine.substr(curPos);
-			headerFieldsMap[field].push_back(Util::toLower(value));
+			headerFieldsMap[field].push_back(value);
 			continue;
 		}
 		pos++;
@@ -175,7 +175,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 		curPos = headerLine[pos] == ' ' ? pos + 1 : pos;
 		if (value[value.length() - 1] == ',')
 			value.erase(value.end() - 1);
-		headerFieldsMap[field].push_back(Util::toLower(value));
+		headerFieldsMap[field].push_back(value);
 	}
 	m_tokenizer.flush();
 	// if (m_tokenizer.peek() == "")
