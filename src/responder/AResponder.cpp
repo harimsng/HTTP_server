@@ -7,7 +7,9 @@
 #include <sstream>
 #include <fstream>
 
+#include "exception/HttpErrorHandler.hpp"
 #include "VirtualServer.hpp"
+#include "http/RequestHandler.hpp"
 #include "io/Buffer.hpp"
 #include "util/Util.hpp"
 #include "AResponder.hpp"
@@ -40,6 +42,36 @@ AResponder::operator=(const AResponder& aMethod)
 	(void)aMethod;
 	return *this;
 }
+string
+AResponder::getErrorPage(string& readBody)
+{
+	map<int, string>*	error_page;
+	string				root;
+	string				filePath = "";
+
+	// TODO: expand this function and change its name or handle this behavior out of readFile() function.
+	if (m_request.m_locationBlock == NULL)
+	{
+		error_page = &m_request.m_virtualServer->m_errorPageTable;
+		root = m_request.m_virtualServer->m_root;
+	}
+	else
+	{
+		error_page = &m_request.m_locationBlock->m_errorPageTable;
+		root = m_request.m_locationBlock->m_root;
+	}
+	if(error_page->count(m_request.m_status) != 0)
+	{
+		filePath = root + (*error_page)[m_request.m_status];
+		// if filePath.find('*') >= size(), exception is thrown.
+		// filePath.replace(filePath.find('*'), 1, Util::toString(m_request.m_status));
+	}
+	else
+	{
+		readBody = RequestHandler::makeErrorPage(m_request.m_status);
+	}
+	return (filePath);
+}
 
 // member functions
 void
@@ -50,33 +82,8 @@ AResponder::readFile(std::string& readBody)
 	std::string		fileBuffer;
 	std::string 	filePath = m_request.m_path + m_request.m_file;
 
-	if (m_request.m_status != 200)
-	{
-		map<int, string>*	error_page;
-		std::string			root;
-		// TODO: expand this function and change its name or handle this behavior out of readFile() function.
-		if (m_request.m_locationBlock == NULL)
-		{
-			error_page = &m_request.m_virtualServer->m_errorPageTable;
-			root = m_request.m_virtualServer->m_root;
-		}
-		else
-		{
-			error_page = &m_request.m_locationBlock->m_errorPageTable;
-			root = m_request.m_locationBlock->m_root;
-		}
-		if(error_page->count(m_request.m_status) != 0)
-		{
-			filePath = root + (*error_page)[m_request.m_status];
-			// if filePath.find('*') >= size(), exception is thrown.
-			// filePath.replace(filePath.find('*'), 1, Util::toString(m_request.m_status));
-		}
-		else
-		{
-			readBody = RequestHandler::makeErrorPage(m_request.m_status);
-			return;
-		}
-	}
+	if (readBody.empty() == false)
+		return;
 	file.open(filePath.c_str());
 	stat(filePath.c_str(), &fileStatus);
 	readBody.clear();
@@ -97,7 +104,6 @@ AResponder::openFile()
 	openFile(m_request.m_path + m_request.m_file);
 }
 
-
 void
 AResponder::openFile(const string& path)
 {
@@ -110,6 +116,8 @@ AResponder::openFile(const string& path)
 void
 AResponder::writeFile(int writeSize)
 {
+	// TODO
+	// m_fileFd가 pipe[1] (cgi)
 	write(m_fileFd, m_recvBuffer.data(), writeSize);
 }
 
@@ -144,46 +152,59 @@ AResponder::endResponse()
 	m_requestHandler.m_parser.m_readStatus = HttpRequestParser::FINISHED;
 	if (m_request.m_status >= 300)
 		m_requestHandler.m_parser.m_readStatus = HttpRequestParser::ERROR;
-
 }
 
 void
 AResponder::respondHeader()
 {
+	m_sendBuffer.append("Server: webserv/2.0");
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
+	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Content-Type: " + m_requestHandler.findContentType(m_request.m_file));
 	m_sendBuffer.append(g_CRLF);
-	if (m_request.m_status >= 300 ||
-			m_request.m_headerFieldsMap.count("CONNECTION") == 0)
+	if (m_request.m_status == 405)
+	{
+		if (m_request.m_locationBlock != NULL)
+			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(m_request.m_locationBlock->m_limitExcept));
+		else
+			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(0x1f));
+
+		m_sendBuffer.append(g_CRLF);
+	}
+	if (m_request.m_status >= 300)
+	{
 		m_sendBuffer.append("Connection: close");
-	else
+		m_sendBuffer.append(g_CRLF);
+	}
+	else if (m_request.m_headerFieldsMap.count("CONNECTION") > 0)
+	{
 		m_sendBuffer.append("Connection: " + m_request.m_headerFieldsMap["CONNECTION"][0]);
-	m_sendBuffer.append(g_CRLF);
-	m_responseStatus = RES_CONTENT; // fall through
+		m_sendBuffer.append(g_CRLF);
+	}
+	if (m_request.m_status == 201)
+	{
+		m_sendBuffer.append("Location: " + m_request.m_path + m_request.m_file);
+		m_sendBuffer.append(g_CRLF);
+	}
 }
 
 void
+AResponder::respondBody(const string& readBody)
+{
+	m_sendBuffer.append("Content-Length: ");
+	m_sendBuffer.append(Util::toString(readBody.size()));
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append(g_CRLF);
+	m_sendBuffer.append(readBody);
+}
+
+int
 AResponder::readRequestBody()
 {
-	int status = 0;
-
 	if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
-		status = normalReadBody();
-	else
-		status = chunkedReadBody();
-	if (status)
-	{
-		string readBody;
-
-		m_request.m_status = 201;
-		readFile(readBody);
-		m_sendBuffer.append("Content-Length: ");
-		m_sendBuffer.append(Util::toString(readBody.size()));
-		m_sendBuffer.append(g_CRLF);
-		m_sendBuffer.append(g_CRLF);
-		m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-		m_sendBuffer.append(readBody);
-		m_responseStatus = RES_DONE;
-	}
+		return (normalReadBody());
+	return (chunkedReadBody());
 }
 
 string
@@ -212,6 +233,8 @@ AResponder::chunkedReadBody()
 	{
 		if (m_dataSize == -1)
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
+		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
+			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
 			m_recvBuffer.clear();
@@ -251,3 +274,16 @@ AResponder::normalReadBody()
 		return 1;
 	return (0);
 }
+
+void
+AResponder::respondStatusLine(int statusCode)
+{
+	m_sendBuffer.append(g_httpVersion);
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(Util::toString(statusCode));
+	m_sendBuffer.append(" ");
+	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
+	m_sendBuffer.append(g_CRLF);
+}
+
+

@@ -1,12 +1,14 @@
 #include <fcntl.h>
 #include <iostream>
 
+#include "responder/GetResponder.hpp"
+#include "VirtualServer.hpp"
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
 #include "http/AutoIndex.hpp"
 #include "util/Util.hpp"
-#include "responder/GetResponder.hpp"
+#include "Logger.hpp"
 
 using namespace std;
 
@@ -36,31 +38,26 @@ GetResponder::respond()
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
+			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
-			if (m_request.m_file == "")
+			if (isAutoIndex())
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
-			else
+			else if (m_request.m_isCgi == true)
 			{
-				if (m_request.m_isCgi == true)
-				{
-					string tmpFile = m_request.m_path + m_request.m_file + ".temp";
-					openFile(tmpFile);
-					constructCgi(readBody);
-					unlink(tmpFile.c_str());
-				}
-				else
-					readFile(readBody);
+				string tmpFile = m_request.m_path + m_request.m_file + ".temp";
+				openFile(tmpFile);
+				constructCgi(readBody);
+				unlink(tmpFile.c_str());
 			}
-			m_sendBuffer.append("Content-Length: ");
-			m_sendBuffer.append(Util::toString(readBody.size()));
-			m_sendBuffer.append(g_CRLF);
-			m_sendBuffer.append(g_CRLF);
-			//m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-
+			else if (m_request.m_status != 200)
+			{
+				m_request.m_path = getErrorPage(readBody);
+			}
+			readFile(readBody);
+			respondBody(readBody);
 			// TODO: change code to use swap instead of appen
-			m_sendBuffer.append(readBody);
 			m_responseStatus = RES_DONE; // fall through
 			// break;
 		case RES_DONE:
@@ -86,4 +83,16 @@ GetResponder::constructCgi(std::string& readBody)
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_DONE;
+}
+
+bool
+GetResponder::isAutoIndex()
+{
+	if (m_request.m_file == "")
+	{
+		if (m_request.m_locationBlock != NULL)
+			return (m_request.m_locationBlock->m_autoindex);
+		return (m_request.m_virtualServer->m_autoindex);
+	}
+	return (false);
 }

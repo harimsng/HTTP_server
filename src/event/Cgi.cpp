@@ -6,13 +6,19 @@
 #include "http/RequestHandler.hpp"
 #include "Cgi.hpp"
 
+
+
+#include <iostream>
+
+using namespace std;
+
 #define BUFFER_SIZE (65535)
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
 {
 	(void)cgi;
-	
+
 	return *this;
 }
 
@@ -83,10 +89,11 @@ Cgi::initEnv(const Request &request)
         CONTENT_TYPE += contentIt->second[0];
     }
 	std::string	HTTP_X_SECRET_HEADER_FOR_TEST;
-    contentIt = request.m_headerFieldsMap.find("X-SECRET-HEADER-FOR-TES");
+    contentIt = request.m_headerFieldsMap.find("X-SECRET-HEADER-FOR-TEST");
     if (contentIt != request.m_headerFieldsMap.end())
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
+		// LOG(DEBUG, "secret header : \"%s\"", HTTP_X_SECRET_HEADER_FOR_TEST.c_str());
     }
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
@@ -139,8 +146,6 @@ Cgi::initEnv(const Request &request)
 		m_envp.push_back(&m_env[i][0]);
 	}
     m_envp.push_back(NULL);
-
-	
 	m_argvBase.push_back(m_path);
     for (size_t i = 0; i < m_argvBase.size(); i++)
 	{
@@ -152,39 +157,19 @@ Cgi::initEnv(const Request &request)
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
-	/*
-	int	pid = fork();
-
-	m_readEnd = pipe[0];
-	m_fd = pipe[1];
-	if (pid < 0)
-		// 500
-		throw std::runtime_error("Cgi::Cgi() fork failed");
-	if (pid == 0)
-	{
-		close(m_readEnd);
-		dup2(m_requestContentFileFd, STDIN_FILENO);
-		dup2(m_fd, STDOUT_FILENO);
-		LOG(DEBUG, "cgi path = \"%s\"", m_cgiPath.c_str());
-		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
-		throw std::runtime_error("Cgi::Cgi() execve failed");
-	}
-	else
-	{
-
-	}
 //  TODO: close when cgi is done
 //	close(m_fd);
-	*/
     pid_t pid;
 	m_readEnd = pipe[0];
 	struct stat st;
 
     pid = fork();
-    if (pid < 0) {
+    if (pid < 0)
+	{
         throw std::runtime_error("Cgi::Cgi() fork failed");
     }
-    if (pid == 0) {
+    if (pid == 0)
+	{
         // Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
@@ -193,16 +178,12 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
-    }
-	else if (pid > 0)
-	{
+    } else if (pid > 0) {
         // Parent process
 		close(pipe[0]);
-		
 		if (request.m_bodySize && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
 			return;
 		close(pipe[1]);
-
 		int status;
 		pid_t wpid = waitpid(pid, &status, 0);
 		if (wpid == -1)
@@ -214,7 +195,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	LOG(DEBUG, "filesize = %d", fileSize);
 	readBody.resize(fileSize, 0);
 	read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
-
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }

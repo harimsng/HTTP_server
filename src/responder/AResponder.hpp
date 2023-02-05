@@ -33,6 +33,9 @@ public:
 	void			endResponse();
 
 protected:
+	void			respondStatusLine(int statusCode);
+	void			respondBody(const std::string& readBody);
+
 	std::string		parseChunkSize();
 
 	void			openFile(const std::string& path);
@@ -40,7 +43,7 @@ protected:
 	void			writeFile(int writeSize);
 	void			readFile(std::string& readBody);
 
-	void			readRequestBody();
+	int				readRequestBody();
 	int				normalReadBody();
 	int				chunkedReadBody();
 
@@ -48,6 +51,8 @@ protected:
 	bool			checkDirExists(const std::string& filePath);
 
 	void			constructCgi();
+
+	std::string		getErrorPage(std::string& readBody);
 
 	RequestHandler&		m_requestHandler;
 	Request&			m_request;

@@ -82,6 +82,7 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         1-1. 있을 경우
 			root, alias, uri 조합해서 경로 결정
 			1-1-0. 존재하지 않는 경로. 404
+				put post는 제외
 			1-1-1. 파일 존재
 			1-1-2. 디렉토리 존재
 			1-1-2-0.
@@ -102,6 +103,9 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             2-2-2. 없을경우 index.html를 file에 추가
             2-1-4. 만약 path + file 가 존재 하지 않을경우 = path만 변수에 저장, file 비움 > end
     */
+
+	// m_path, m_file, m_locationBlcok, m_status 갱신
+	//
     string uri = request.m_uri;
     LOG(DEBUG, "uri is %s", uri.data());
     if (uri == "/") // 0. root 요청
@@ -123,7 +127,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
                 m_root = removeTrailingSlash(server->m_root, uri);
                 m_path = server->m_root + uri;
             }
-            if (m_locationBlock->m_index.size() != 0)
+            if (m_locationBlock->m_index.size() != 0 &&
+					(request.m_method != RequestHandler::PUT && request.m_method != RequestHandler::POST))
             {
                 for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
                 {
@@ -156,7 +161,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         else
         {
             m_path = server->m_root;
-            if (server->m_index.size() != 0)
+            if (server->m_index.size() != 0 &&
+					(request.m_method != RequestHandler::PUT && request.m_method != RequestHandler::POST))
             {
                 for (size_t i = 0; i < server->m_index.size(); i++)
                 {
@@ -214,7 +220,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
             else  { // 1-1-2 디렉토리일 경우
 
 				// INFO: is this necessary if?
-                if (m_locationBlock->m_index.size() != 0)
+                if (m_locationBlock->m_index.size() != 0 &&
+						(request.m_method != RequestHandler::PUT && request.m_method != RequestHandler::POST))
                 {
                     for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
                     {
@@ -276,7 +283,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
     {
         setRootAlias(uri);
 
-        if (m_locationBlock->m_index.size() != 0)
+        if (m_locationBlock->m_index.size() != 0 &&
+				(request.m_method != RequestHandler::PUT && request.m_method != RequestHandler::POST))
         {
             for (size_t i = 0; i < m_locationBlock->m_index.size(); i++)
             {
@@ -312,7 +320,8 @@ FindLocation::saveRealPath(Request &request, map<string, Location>& locationTabl
         m_root = removeTrailingSlash(m_root, uri);
         m_path = m_root + uri;
 
-        if (server->m_index.size() != 0)
+        if (server->m_index.size() != 0 &&
+				(request.m_method != RequestHandler::PUT && request.m_method != RequestHandler::POST))
         {
             for (size_t i = 0; i < server->m_index.size(); i++)
             {
