@@ -8,11 +8,13 @@
 #include "Webserv.hpp"
 #include "responder/AResponder.hpp"
 #include "http/RequestHandler.hpp"
+#include "responder/GetResponder.hpp"
 
 class	VirtualServer
 {
 	friend class	FindLocation;
 	friend class	AResponder;
+	friend class	GetResponder;
 
 	typedef	std::map<std::string, Location>	LocationTable;
 

@@ -109,7 +109,7 @@ RequestHandler::createResponseHeader()
 	{
 		LOG(DEBUG, "error response to fd=%d, status code=%d",
 				m_socket->m_fd, statusCode);
-		m_request.m_method = m_request.m_method == HEAD ? HEAD : GET;
+		// m_request.m_method = m_request.m_method == HEAD ? HEAD : ;
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -134,8 +134,10 @@ RequestHandler::createResponseHeader()
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
-	bufferResponseStatusLine(statusCode);
-	bufferResponseHeaderFields();
+	// NOTE
+	// this functions moved to AResponder
+	// bufferResponseStatusLine(statusCode);
+	// bufferResponseHeaderFields();
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
@@ -159,20 +161,7 @@ RequestHandler::checkRequestMessage()
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
 	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
-	m_request.m_isCgi = false;
-	if (m_request.m_file != "")
-	{
-		string m_ext = "";
-		if (m_request.m_file.find(".") != string::npos)
-		{
-			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
-			if (virtualServer->m_cgiPass.count(m_ext) == true)
-			{
-				m_request.m_cgi = virtualServer->m_cgiPass[m_ext];
-				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
-			}
-		}
-	}
+	checkIsCgi();
 	if (m_request.m_locationBlock != NULL)
 	{
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
@@ -181,7 +170,25 @@ RequestHandler::checkRequestMessage()
 	// TODO: cleanup hardcodings
 	if (m_request.m_file != "")
 		checkResourceStatus();
-	LOG(DEBUG, "check request message finish");
+}
+void
+RequestHandler::checkIsCgi()
+{
+	m_request.m_isCgi = false;
+	if (m_request.m_file != "" && (m_request.m_method == GET || m_request.m_method == POST))
+	{
+		string m_ext = "";
+		if (m_request.m_file.find(".") != string::npos)
+		{
+			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
+			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
+			{
+				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
+				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
+			}
+		}
+	}
+
 }
 
 void
@@ -225,6 +232,8 @@ RequestHandler::checkAllowedMethod(uint16_t allowed)
 	if (!(m_request.m_method & allowed))
 	{
 		LOG(DEBUG, "method not allowed");
+		if (m_request.m_status == 404)
+			m_request.m_status = 405;
 		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
 	}
 }
@@ -271,37 +280,6 @@ RequestHandler::checkResourceStatus()
 	LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
 }
 
-void
-RequestHandler::bufferResponseStatusLine(int statusCode)
-{
-	// status-line
-	m_sendBuffer.append(g_httpVersion);
-	m_sendBuffer.append(" ");
-	m_sendBuffer.append(Util::toString(statusCode));
-	m_sendBuffer.append(" ");
-	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
-	m_sendBuffer.append(g_CRLF);
-}
-
-void
-RequestHandler::bufferResponseHeaderFields()
-{
-	m_sendBuffer.append("Server: webserv/2.0");
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
-	m_sendBuffer.append(g_CRLF);
-	if (m_request.m_status == 405)
-	{
-		if (m_request.m_locationBlock != NULL)
-			m_sendBuffer.append("Allow:" + methodToString(m_request.m_locationBlock->m_limitExcept));
-		else
-			m_sendBuffer.append("Allow:" + methodToString(0x1f));
-
-		m_sendBuffer.append(g_CRLF);
-	}
-}
-
-
 std::string
 RequestHandler::findContentType(std::string& content)
 {
@@ -331,9 +309,8 @@ RequestHandler::sendResponse() try
 {
 	if (m_sendBuffer.size())
 	{
-		LOG(DEBUG, "send response message \"%s\"", m_sendBuffer.c_str());
+		// LOG(INFO, "send response message \"%s\"", m_sendBuffer.c_str());
 	}
-
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)

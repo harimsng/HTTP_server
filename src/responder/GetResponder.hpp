@@ -16,6 +16,7 @@ public:
 	virtual void	respond();
 
 	void			constructCgi(std::string& readBody);
+	bool			isAutoIndex();
 // member functions
 };
 

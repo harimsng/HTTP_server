@@ -74,13 +74,11 @@ private:
 	void	checkStatusLine();
 	void	checkHeaderFields();
 	void	checkAllowedMethod(uint16_t allowed);
-
-	void	bufferResponseStatusLine(int statusCode);
-	void	bufferResponseHeaderFields();
+	void	checkIsCgi();
 
 	void	makeErrorResponse(const std::string& errorMessage);
 
-	std::string methodToString(uint16_t allowed);
+	static std::string methodToString(uint16_t allowed);
 
 // member variables
 	HttpRequestParser	m_parser;

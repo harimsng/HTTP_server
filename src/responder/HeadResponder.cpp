@@ -24,6 +24,7 @@ HeadResponder::respond()
 	switch(m_responseStatus)
 	{
 		case RES_HEADER:
+			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_sendBuffer.append(g_CRLF);
 			m_responseStatus = RES_DONE; // fall through

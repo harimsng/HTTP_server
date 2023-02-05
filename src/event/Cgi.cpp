@@ -146,8 +146,6 @@ Cgi::initEnv(const Request &request)
 		m_envp.push_back(&m_env[i][0]);
 	}
     m_envp.push_back(NULL);
-
-	
 	m_argvBase.push_back(m_path);
     for (size_t i = 0; i < m_argvBase.size(); i++)
 	{
@@ -159,30 +157,8 @@ Cgi::initEnv(const Request &request)
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
-	/*
-	int	pid = fork();
-
-	m_readEnd = pipe[0];
-	m_fd = pipe[1];
-	if (pid < 0)
-		// 500
-		throw std::runtime_error("Cgi::Cgi() fork failed");
-	if (pid == 0)
-	{
-		close(m_readEnd);
-		dup2(m_requestContentFileFd, STDIN_FILENO);
-		dup2(m_fd, STDOUT_FILENO);
-		LOG(DEBUG, "cgi path = \"%s\"", m_cgiPath.c_str());
-		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
-		throw std::runtime_error("Cgi::Cgi() execve failed");
-	}
-	else
-	{
-
-	}
 //  TODO: close when cgi is done
 //	close(m_fd);
-	*/
     pid_t pid;
 	m_readEnd = pipe[0];
 	struct stat st;
@@ -213,7 +189,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		if (wpid == -1)
 			return;
     }
-
 	lseek(m_requestContentFileFd, 0, SEEK_SET);
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;

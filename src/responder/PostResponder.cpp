@@ -31,44 +31,42 @@ void
 PostResponder::respond() try
 {
 	std::string	readBody;
-	std::string tmpFile = m_request.m_path + m_request.m_file + ".temp";
+	std::string tmpFile = "/Users/soum/goinfre/" + m_request.m_file + ".temp" + Util::toString(m_requestHandler.m_socket->m_fd);
 	struct stat st;
-	int status = 0;
 
+	if (m_request.m_status >= 300)
+		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			respondHeader(); // fall through
 			openFile(tmpFile);
+			m_responseStatus = RES_CONTENT;
 		case RES_CONTENT:
-			if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
-				status = normalReadBody();
-			else
-				status = chunkedReadBody();
-			if (status)
-				m_responseStatus = RES_CONTENT_FINISHED;
-			else
-				break; // fall through
+			// TODO
+			// cgi 만듦 -> fd 생성
+			// cgi readEvent 등록
+			// cgi 돌림
+			if (!readRequestBody())
+				break;
+			m_responseStatus = RES_CONTENT_FINISHED;
 		case RES_CONTENT_FINISHED:
+			lseek(m_fileFd, 0, SEEK_SET);
+			fstat(m_fileFd, &st);
+			m_request.m_bodySize = st.st_size;
+			m_request.requestBodyBuf.resize(m_request.m_bodySize , 0);
+			read(m_fileFd, (char *)(m_request.requestBodyBuf.data()), m_request.m_bodySize);
+			unlink(tmpFile.c_str());
 			if (m_request.m_isCgi == true)
 			{
-				lseek(m_fileFd, 0, SEEK_SET);
-				fstat(m_fileFd, &st);
-				m_request.m_bodySize = st.st_size;
-				m_request.requestBodyBuf.resize(m_request.m_bodySize , 0);
-				read(m_fileFd, (char *)(m_request.requestBodyBuf.data()), m_request.m_bodySize);
 				openFile(tmpFile);
 				constructCgi(readBody);
-				unlink(tmpFile.c_str());
 			}
 			else
 				readFile(readBody);
-			m_sendBuffer.append("Content-Length: ");
-			m_sendBuffer.append(Util::toString(readBody.size()));
-			m_sendBuffer.append(g_CRLF);
-			m_sendBuffer.append(g_CRLF);
-			m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-			m_sendBuffer.append(readBody);
+			unlink(tmpFile.c_str());
+			respondStatusLine(200);
+			respondHeader();
+			respondBody(readBody);
 			m_responseStatus = RES_DONE;
 		/*
 		case RES_RECV_CGI:
@@ -79,19 +77,17 @@ PostResponder::respond() try
 			;
 	}
 }
-catch(int statusCode)
+catch(int ErrorstatusCode)
 {
-	m_request.m_status = statusCode;
-	m_sendBuffer.clear();
-	m_sendBuffer.append(g_httpVersion);
-	m_sendBuffer.append(" ");
-	m_sendBuffer.append(Util::toString(statusCode));
-	m_sendBuffer.append(" ");
-	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append("Content-Type: text/html");
-	m_sendBuffer.append(g_CRLF);
-	m_sendBuffer.append(g_CRLF);
+	string readBody;
+
+	m_request.m_status = ErrorstatusCode;
+	respondStatusLine(ErrorstatusCode);
+	respondHeader();
+	m_request.m_file.clear();
+	m_request.m_path = getErrorPage(readBody);
+	readFile(readBody);
+	respondBody(readBody);
 	endResponse();
 }
 
@@ -108,5 +104,5 @@ PostResponder::constructCgi(std::string& readBody)
 	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
-	m_responseStatus = RES_RECV_CGI;
+	// m_responseStatus = RES_RECV_CGI;
 }

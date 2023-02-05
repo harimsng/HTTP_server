@@ -27,11 +27,11 @@ private:
 
 public:
 // member functions
-	int		listen(int backlog = 8) throw();
+	int		listen(int backlog = 256) throw();
 	int		bind(SocketAddr* addr) throw();
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();
-	
+
 	SocketAddr	getAddress() const throw();
 
 // member variables
