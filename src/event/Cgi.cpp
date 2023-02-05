@@ -93,7 +93,6 @@ Cgi::initEnv(const Request &request)
     if (contentIt != request.m_headerFieldsMap.end())
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
-		// LOG(DEBUG, "secret header : \"%s\"", HTTP_X_SECRET_HEADER_FOR_TEST.c_str());
     }
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
@@ -110,7 +109,6 @@ Cgi::initEnv(const Request &request)
     std::string REMOTE_HOST = "REMOTE_HOST=";
 
     std::string REDIRECT_STATUS = "REDIRECT_STATUS=200"; // php-cgi direct exec
-//    std::string HTTP_HOST = "HTTP_HOST="; == SERVER_NAME
     std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method]; // 실제 메소드 이름으로 수정 필요
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;

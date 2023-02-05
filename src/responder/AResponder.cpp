@@ -63,8 +63,6 @@ AResponder::getErrorPage(string& readBody)
 	if(error_page->count(m_request.m_status) != 0)
 	{
 		filePath = root + (*error_page)[m_request.m_status];
-		// if filePath.find('*') >= size(), exception is thrown.
-		// filePath.replace(filePath.find('*'), 1, Util::toString(m_request.m_status));
 	}
 	else
 	{
@@ -93,8 +91,9 @@ AResponder::readFile(std::string& readBody)
 		fileBuffer.resize(FILE_BUFFER_SIZE);
 		file.read(&fileBuffer[0], FILE_BUFFER_SIZE);
 		fileBuffer.resize(file.gcount());
-		readBody += fileBuffer + "\n";
+		readBody += fileBuffer;
 	}
+	readBody += "\n";
 	file.close();
 }
 

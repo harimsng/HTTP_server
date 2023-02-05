@@ -66,7 +66,6 @@ Kqueue::pollWork()
 {
 	const int	maxEvent = 64;
 	int			count = 0;
-	// static const timespec	timeSpec = {0, 0};
 
 	m_eventList.resize(maxEvent);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
@@ -75,11 +74,6 @@ Kqueue::pollWork()
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
 	m_eventList.resize(count);
-
-	if (m_eventList.size() > 0)
-	{
-		// LOG(DEBUG, "%d events polled", m_eventList.size());
-	}
 
 	for (size_t i = 0; i < m_eventList.size(); ++i)
 	{
@@ -105,8 +99,6 @@ Kqueue::pollWork()
 		if (status == STAT_END)
 		{
 			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
-			// close(object->m_fd);
-			// INFO: fix deallocate
 			delete object;
 			break;
 		}

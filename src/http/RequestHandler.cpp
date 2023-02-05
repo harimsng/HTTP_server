@@ -98,7 +98,6 @@ RequestHandler::receiveRequest()
 	return receiveStatus;
 }
 
-// HOST field could be empty
 void
 RequestHandler::createResponseHeader()
 {
@@ -109,7 +108,6 @@ RequestHandler::createResponseHeader()
 	{
 		LOG(DEBUG, "error response to fd=%d, status code=%d",
 				m_socket->m_fd, statusCode);
-		// m_request.m_method = m_request.m_method == HEAD ? HEAD : ;
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -205,7 +203,6 @@ RequestHandler::checkHeaderFields()
 	if (m_request.m_headerFieldsMap.count("HOST") == 0)
 	{
 		m_request.m_headerFieldsMap["HOST"].push_back("");
-		// UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 		return;
 	}
 }
@@ -246,16 +243,12 @@ RequestHandler::checkResourceStatus()
 	int			statusCode = 0;
 	unsigned int	permission;
 
-	// NOTE
-	// check autoindex?
 	switch (m_request.m_method)
 	{
-		// INFO: there is permission problem
 		case GET: // fall through
 		case HEAD: // fall through
 			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
 		case POST:
-			// permission = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH; break;
 			return;
 		case PUT:
 			return;
@@ -263,7 +256,7 @@ RequestHandler::checkResourceStatus()
 			permission = S_IWUSR | S_IWGRP | S_IWOTH;
 			break;
 	}
-	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode) // INFO: always regular?
+	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode, permission))
 		return;
 
@@ -309,10 +302,6 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	if (m_sendBuffer.size())
-	{
-		// LOG(INFO, "send response message \"%s\"", m_sendBuffer.c_str());
-	}
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
