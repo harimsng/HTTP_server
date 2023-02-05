@@ -23,15 +23,14 @@ Cgi&	Cgi::operator=(Cgi const& cgi)
 }
 
 Cgi::Cgi(Cgi const& cgi)
-:	EventObject()
+//:	EventObject()
 {
 	(void)cgi;
 }
 
 // constructors & destructor
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
-:	//EventObject(writeEnd),
-	m_requestHandler(&requestHandler),
+:	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
 {
 	(void) writeEnd;
@@ -42,6 +41,7 @@ Cgi::~Cgi()
 {
 }
 
+/*
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
@@ -56,6 +56,7 @@ Cgi::handleEventWork()
 	}
 	return IoEventPoller::STAT_NORMAL;
 }
+*/
 
 void
 Cgi::receiveCgiResponse()
@@ -82,12 +83,11 @@ Cgi::initEnv(const Request &request)
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
-    contentIt = request.m_headerFieldsMap.find("Content-Type");
+    contentIt = request.m_headerFieldsMap.find("CONTENT-TYPE");
     if (contentIt != request.m_headerFieldsMap.end())
     {
         CONTENT_TYPE += contentIt->second[0];
     }
-
 	std::string	HTTP_X_SECRET_HEADER_FOR_TEST;
     contentIt = request.m_headerFieldsMap.find("X-SECRET-HEADER-FOR-TEST");
     if (contentIt != request.m_headerFieldsMap.end())
@@ -95,7 +95,7 @@ Cgi::initEnv(const Request &request)
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
 		// LOG(DEBUG, "secret header : \"%s\"", HTTP_X_SECRET_HEADER_FOR_TEST.c_str());
     }
-    if (request.m_method == RequestHandler::POST && request.m_bodySize != -1)
+    if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
 		//TODO: change to_string
         CONTENT_LENGTH += std::to_string(request.m_bodySize);
@@ -147,6 +147,7 @@ Cgi::initEnv(const Request &request)
 	}
     m_envp.push_back(NULL);
 
+	
 	m_argvBase.push_back(m_path);
     for (size_t i = 0; i < m_argvBase.size(); i++)
 	{
@@ -187,36 +188,38 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	struct stat st;
 
     pid = fork();
-    if (pid < 0) {
+    if (pid < 0)
+	{
         throw std::runtime_error("Cgi::Cgi() fork failed");
     }
-    if (pid == 0) {
+    if (pid == 0)
+	{
         // Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
+		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
         dup2(m_requestContentFileFd, STDOUT_FILENO);
-		close(pipe[1]);
+		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
-    } else {
+    } else if (pid > 0) {
         // Parent process
 		close(pipe[0]);
-
-		if (request.m_method == RequestHandler::POST || request.m_method == RequestHandler::PUT)
-		{
-			write(pipe[1], (char *)(request.requestBodyBuf.data()), request.m_bodySize);
-		}
-		//close(pipe[1]);
-		waitpid(-1, NULL, 0);
-
-		lseek(m_requestContentFileFd, 0, SEEK_SET);
-		fstat(m_requestContentFileFd, &st);
-		off_t fileSize = st.st_size;
-		LOG(DEBUG, "filesize = %d", fileSize);
-		readBody.resize(fileSize, 0);
-		read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
-
-		close(m_requestContentFileFd);
-		readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
+		if (request.m_bodySize && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
+			return;
+		close(pipe[1]);
+		int status;
+		pid_t wpid = waitpid(pid, &status, 0);
+		if (wpid == -1)
+			return;
     }
+
+	lseek(m_requestContentFileFd, 0, SEEK_SET);
+	fstat(m_requestContentFileFd, &st);
+	off_t fileSize = st.st_size;
+	LOG(DEBUG, "filesize = %d", fileSize);
+	readBody.resize(fileSize, 0);
+	read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
+	close(m_requestContentFileFd);
+	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }

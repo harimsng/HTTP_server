@@ -90,7 +90,7 @@ GetResponder::constructCgi(std::string& readBody)
 
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
-	// ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_DONE;

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <iostream>
+#include <fcntl.h>
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
@@ -32,32 +33,21 @@ PostResponder::respond() try
 	std::string	readBody;
 	std::string tmpFile = m_request.m_path + m_request.m_file + ".temp";
 	struct stat st;
-	int 		status = 0;
+	int status = 0;
 
-	static int hardcodingsCnt = 0;
-
-	if (m_request.m_file == "post_body")
-	{
-		hardcodingsCnt++;
-		cout << hardcodingsCnt << endl;
-		cout << m_sendBuffer << endl;
-		cout << m_recvBuffer << endl;
-		if (hardcodingsCnt >= 9)
-			m_sendBuffer.clear();
-	}
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			openFile(tmpFile);
 			respondHeader(); // fall through
+			openFile(tmpFile);
 		case RES_CONTENT:
 			if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
 				status = normalReadBody();
 			else
 				status = chunkedReadBody();
-			if (status == 1)
-				m_responseStatus = RES_DONE;
-			if (m_responseStatus != RES_DONE)
+			if (status)
+				m_responseStatus = RES_CONTENT_FINISHED;
+			else
 				break; // fall through
 		case RES_CONTENT_FINISHED:
 			if (m_request.m_isCgi == true)
@@ -79,8 +69,10 @@ PostResponder::respond() try
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
 			m_sendBuffer.append(readBody);
-		//     break;
-		// case RES_RECV_CGI:
+			m_responseStatus = RES_DONE;
+		/*
+		case RES_RECV_CGI:
+		*/
 		case RES_DONE:
 			endResponse();
 		default:
@@ -118,21 +110,3 @@ PostResponder::constructCgi(std::string& readBody)
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_RECV_CGI;
 }
-
-/*
- * event notified
- *
- * read
- * 		server
- * 				accept()
- * 		client
- *				requestHandler
- *				clientSocket ->   receiveRequest()
- *				parsed request -> createResponseHeader()
- *				method
- *				clientSocket ->	  method->respond()
-				
- *										respond
- *
- * write
- */
