@@ -18,7 +18,7 @@ using namespace std;
 Cgi&	Cgi::operator=(Cgi const& cgi)
 {
 	(void)cgi;
-	
+
 	return *this;
 }
 
