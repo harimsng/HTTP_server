@@ -1,8 +1,9 @@
 NAME		=	webserv
 
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD -O3
-DEBUGFLAGS	=	-g -fsanitize=address -fsanitize=undefined -O3
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
+CPPFLAGS	=	
+DEBUGFLAGS	=	-g -fsanitize=address -fsanitize=undefined
 RM			=	rm -f
 
 ifeq ($(shell uname), Linux)
@@ -70,7 +71,12 @@ ifndef WEBSERV_ROOT
 WEBSERV_ROOT=	$(shell pwd)
 WEBSERV_ROOT:=	$(WEBSERV_ROOT:%/src=%)
 endif
-CXXFLAGS	+=	-DWEBSERV_ROOT='"$(WEBSERV_ROOT)/"'
+CPPFLAGS	+=	-DWEBSERV_ROOT='"$(WEBSERV_ROOT)/"'
+
+ifndef TEMP_DIR
+TEMP_DIR	=	$(shell echo $(HOME)/goinfre)
+endif
+CPPFLAGS	+=	-DTEMP_DIR='"$(TEMP_DIR)/"'
 
 
 .PHONY: all debug release clean fclean re
@@ -104,9 +110,9 @@ re: fclean
 	$(MAKE) all
 
 $(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(INCL_PATH)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(INCL_PATH)
 
 $(OBJ): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $< $(INCL_PATH)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $< $(INCL_PATH)
 
 -include $(DEP)

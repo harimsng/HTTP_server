@@ -1,5 +1,7 @@
 #include <string>
 
+#include "Logger.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "ServerManager.hpp"
 #include "Client.hpp"
 

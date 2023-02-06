@@ -6,8 +6,6 @@
 #include <iostream>
 
 #include "Webserv.hpp"
-#include "Logger.hpp"
-#include "exception/HttpErrorHandler.hpp"
 #include "event/EventObject.hpp"
 #include "http/RequestHandler.hpp"
 #include "socket/Socket.hpp"

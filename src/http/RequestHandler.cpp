@@ -76,7 +76,6 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
-			LOG(DEBUG, "Header fields parsing ends");
 			createResponseHeader();
 			receiveStatus = RECV_EVENT;
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -86,9 +85,10 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
 		case HttpRequestParser::ERROR:
+			// QUESTION: purpose of ERROR case?
 			delete m_responder;
 			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
-				break; // fall through
+					break; // fall through
 		case HttpRequestParser::FINISHED:
 			resetStates();
 			break;
@@ -165,7 +165,6 @@ RequestHandler::checkRequestMessage()
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	// TODO: cleanup hardcodings
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
@@ -178,6 +177,7 @@ RequestHandler::checkIsCgi()
 		string m_ext = "";
 		if (m_request.m_file.find(".") != string::npos)
 		{
+			// QUESTION: what is extension of abc.def.ghi? ghi or def.ghi
 			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
@@ -344,6 +344,8 @@ operator<<(std::ostream& os, const Request& request)
 	return (os);
 }
 
+// NOTE: static functions below which are initializing table should be removed and
+// instead use initalizer list in C++11 or higher.
 void
 RequestHandler::setMethodConvertTable()
 {
@@ -440,6 +442,7 @@ RequestHandler::methodToString(uint16_t allowed)
 		methodString += " PUT,";
 	if (allowed & RequestHandler::DELETE)
 		methodString += " DELETE,";
-	methodString.erase(methodString.end() - 1);
+	if (methodString.size() > 0)
+		methodString.erase(methodString.end() - 1);
 	return (methodString);
 }
