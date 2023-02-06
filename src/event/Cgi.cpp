@@ -1,18 +1,13 @@
 #include <iostream>
 #include <stdexcept>
+#include <iostream>
 
 #include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
 #include "Cgi.hpp"
 
-
-
-#include <iostream>
-
 using namespace std;
-
-#define BUFFER_SIZE (65535)
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
@@ -39,16 +34,24 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
+#ifdef TEST
+	int	status;
+
+	::waitpid(m_pid, &status, 0);
+	if (status != 0)
+		return;
+#endif
 }
 
-/*
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			receiveCgiResponse(); // fall through
+			if (receiveCgiResponse() == 0) // fall through
+				return IoEventPoller::STAT_END;
+			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
 			return IoEventPoller::STAT_ERROR;
 		default:
@@ -56,16 +59,12 @@ Cgi::handleEventWork()
 	}
 	return IoEventPoller::STAT_NORMAL;
 }
-*/
 
-void
+int
 Cgi::receiveCgiResponse()
 {
 	// INFO: temporary function
-	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
-
-	(void) sendBuffer;
-	//sendBuffer.receive(m_readEnd);
+	return m_requestHandler->m_sendBuffer.receive(m_readEnd);
 }
 
 void
@@ -96,8 +95,7 @@ Cgi::initEnv(const Request &request)
     }
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
-		//TODO: change to_string
-        CONTENT_LENGTH += std::to_string(request.m_bodySize);
+        CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
@@ -152,21 +150,21 @@ Cgi::initEnv(const Request &request)
 	m_argv.push_back(NULL);
 }
 
+#ifndef TEST
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
 //	close(m_fd);
-    pid_t pid;
 	m_readEnd = pipe[0];
 	struct stat st;
 
-    pid = fork();
-    if (pid < 0)
+    m_pid = fork();
+    if (m_pid < 0)
 	{
         throw std::runtime_error("Cgi::Cgi() fork failed");
     }
-    if (pid == 0)
+    if (m_pid == 0)
 	{
         // Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
@@ -176,23 +174,49 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
-    } else if (pid > 0) {
+    } 
         // Parent process
-		close(pipe[0]);
-		if (request.m_bodySize && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
-			return;
-		close(pipe[1]);
-		int status;
-		pid_t wpid = waitpid(pid, &status, 0);
-		if (wpid == -1)
-			return;
-    }
+	close(pipe[0]);
+
+	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
+	if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
+		return;
+	close(pipe[1]);
+	int status;
+	pid_t wpid = waitpid(m_pid, &status, 0);
+	if (wpid == -1)
+		return;
 	lseek(m_requestContentFileFd, 0, SEEK_SET);
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;
 	LOG(DEBUG, "filesize = %d", fileSize);
 	readBody.resize(fileSize, 0);
-	read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
+	// FIX: casting const pointer to normal pointer is UB
+	read(m_requestContentFileFd, &readBody[0], fileSize);
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }
+#else
+void
+Cgi::executeCgi(int pipe[2])
+{
+	pid_t		pid;
+	struct stat	fileStatus;
+
+	m_readEnd = pipe[0];
+	pid = fork();
+	if (pid < 0)
+	{
+		throw std::runtime_error("Cgi::executeCgi() fork() fail");
+	}
+	else if (pid == 0)
+	{
+		close(pipe[0]);
+		dup2(m_requestContentFileFd, STDIN_FILENO);
+		dup2(pipe[1], STDOUT_FILENO);
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::executeCgi() execve() fail");
+	}
+	close(pipe[1]);
+}
+#endif
