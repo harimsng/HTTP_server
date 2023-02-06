@@ -1,8 +1,6 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-#include <set>
-
 #include "Webserv.hpp"
 #include IO_EVENT_HEADER
 

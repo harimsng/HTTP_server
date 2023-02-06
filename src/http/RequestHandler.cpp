@@ -182,10 +182,12 @@ RequestHandler::checkIsCgi()
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
 				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
+				// TODO
 				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
+			// TODO
 			m_request.m_status = 200;
 	}
 }

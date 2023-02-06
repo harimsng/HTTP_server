@@ -102,6 +102,7 @@ Buffer::send(int fd)
 
 	if (size() == 0)
 		return 0;
+	// NOTE: what if write is not fast enough? could there be problem?
 	count = ::write(fd, data() + m_writePos, size() - m_writePos);
 	if (count == -1)
 		throw std::runtime_error("write() fail in Buffer::send()");

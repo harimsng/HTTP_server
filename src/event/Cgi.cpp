@@ -49,7 +49,9 @@ Cgi::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			receiveCgiResponse(); // fall through
+			if (receiveCgiResponse() == 0) // fall through
+				return IoEventPoller::STAT_END;
+			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
 			return IoEventPoller::STAT_ERROR;
 		default:
@@ -58,16 +60,11 @@ Cgi::handleEventWork()
 	return IoEventPoller::STAT_NORMAL;
 }
 
-void
+int
 Cgi::receiveCgiResponse()
 {
 	// INFO: temporary function
-	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
-	int		count;
-
-	count = sendBuffer.receive(m_readEnd);
-	if (count == 0)
-		return IoEventPoller::STAT_END;
+	return m_requestHandler->m_sendBuffer.receive(m_readEnd);
 }
 
 void
@@ -218,7 +215,7 @@ Cgi::executeCgi(int pipe[2])
 		dup2(m_requestContentFileFd, STDIN_FILENO);
 		dup2(pipe[1], STDOUT_FILENO);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
-		throw std::runtime_error("Cgi::executeCgi() executeCgi() fail");
+		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
 	close(pipe[1]);
 }

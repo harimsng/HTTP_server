@@ -26,7 +26,7 @@ public:
 #ifdef TEST
 	void	executeCgi(int pipe[2]);
 #endif
-	void	receiveCgiResponse();
+	int		receiveCgiResponse();
 
 	IoEventPoller::EventStatus	handleEventWork();
 
