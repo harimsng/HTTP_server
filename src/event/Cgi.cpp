@@ -6,6 +6,8 @@
 #include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
+#include "io/IoMultiplex.hpp"
+#include "tokenizer/HttpStreamTokenizer.hpp"
 #include "Cgi.hpp"
 
 using namespace std;
@@ -26,12 +28,12 @@ Cgi::Cgi(Cgi const& cgi)
 
 // constructors & destructor
 Cgi::Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler)
-:	m_requestHandler(&requestHandler),
-	m_readEnd(readEnd),
-	m_writeEnd(writeEnd)
+:	EventObject(writeEnd[0]),
+	m_requestHandler(&requestHandler),
+	m_readEnd(readEnd[0]),
+	m_writeEnd(writeEnd[1])
 {
 	m_bodyFlag = false;
-	(void)m_writeEnd;
 }
 
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
@@ -74,7 +76,36 @@ int
 Cgi::receiveCgiResponse()
 {
 	// INFO: temporary function
-	return m_requestHandler->m_sendBuffer.receive(*m_readEnd);
+	// return m_requestHandler->m_sendBuffer.receive(m_fd);
+
+	int cnt;
+
+	cnt = m_cgiBodyBuffer.receive(m_fd);
+	switch (m_status)
+	{
+		case Cgi::CGI_HEADER:
+			parseCgiHeader();
+			if (m_status != CGI_CONTENT)
+				break;
+			respondStatusLine(200);
+			respondHeader();
+			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
+			m_requestHandler->m_sendBuffer.append(g_CRLF);
+			m_requestHandler->m_sendBuffer.append(g_CRLF); // fall through
+			break;
+		case Cgi::CGI_CONTENT:
+			m_requestHandler->m_sendBuffer.append(Util::toHex(cnt));
+			m_requestHandler->m_sendBuffer.append(g_CRLF);
+			m_requestHandler->m_sendBuffer.append(m_cgiBodyBuffer);
+			m_requestHandler->m_sendBuffer.append(g_CRLF);
+			m_cgiBodyBuffer.clear();
+			if (cnt == 0)
+			{
+				m_requestHandler->resetStates();
+			}
+			break;
+	}
+	return (cnt);
 }
 
 void
@@ -89,7 +120,7 @@ Cgi::initEnv(const Request &request)
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
-    std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
+    std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
     contentIt = request.m_headerFieldsMap.find("CONTENT-TYPE");
@@ -160,33 +191,32 @@ Cgi::initEnv(const Request &request)
 	m_argv.push_back(NULL);
 }
 
-#ifndef TEST
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
 //	close(m_fd);
-	m_readEnd = pipe;
+	m_readEnd = pipe[0];
 	struct stat st;
 
-    m_pid = fork();
-    if (m_pid < 0)
+	m_pid = fork();
+	if (m_pid < 0)
 	{
-        throw std::runtime_error("Cgi::Cgi() fork failed");
-    }
-    if (m_pid == 0)
+		throw std::runtime_error("Cgi::Cgi() fork failed");
+	}
+	if (m_pid == 0)
 	{
-        // Child process
+		// Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
 
-        dup2(m_requestContentFileFd, STDOUT_FILENO);
+		dup2(m_requestContentFileFd, STDOUT_FILENO);
 		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
-    }
-        // Parent process
+	}
+		// Parent process
 	close(pipe[0]);
 
 	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
@@ -207,14 +237,12 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }
-#else
+
 void
-Cgi::executeCgi(int pipe[2])
+Cgi::executeCgi()
 {
 	pid_t		pid;
-	struct stat	fileStatus;
 
-	m_readEnd = pipe[0];
 	pid = fork();
 	if (pid < 0)
 	{
@@ -222,12 +250,12 @@ Cgi::executeCgi(int pipe[2])
 	}
 	else if (pid == 0)
 	{
-		close(pipe[0]);
-		dup2(m_requestContentFileFd, STDIN_FILENO);
-		dup2(pipe[1], STDOUT_FILENO);
+		// child process
+		dup2(m_readEnd, STDIN_FILENO);
+		dup2(m_writeEnd, STDOUT_FILENO);
+		close(m_readEnd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
-	close(pipe[1]);
 }
-#endif
+// #endif

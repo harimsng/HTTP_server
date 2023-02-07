@@ -4,13 +4,20 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
+
 #include "event/EventObject.hpp"
+#include "io/Buffer.hpp"
 
 class	RequestHandler;
 struct	Request;
 
 class	Cgi: public EventObject
 {
+	enum	e_status
+	{
+		CGI_HEADER = 1,
+		CGI_CONTENT
+	};
 // deleted
 	Cgi	&operator=(Cgi const& cgi);
 	Cgi(Cgi const& cgi);
@@ -24,9 +31,9 @@ public:
 // member functions
 	void	initEnv(const Request& request);
 	void	executeCgi(int pipe[2], std::string& readBody, const Request &request);
-#ifdef TEST
-	void	executeCgi(int pipe[2]);
-#endif
+// #ifdef TEST
+	void	executeCgi();
+// #endif
 	int		receiveCgiResponse();
 
 	IoEventPoller::EventStatus	handleEventWork();
@@ -52,8 +59,11 @@ private:
 
 
 
-		int*							m_readEnd;
-		int*							m_writeEnd;
+		int					m_readEnd;
+		int					m_writeEnd;
+
+		Buffer				m_cgiBodyBuffer;
+		e_status			m_status;
 };
 
 #endif

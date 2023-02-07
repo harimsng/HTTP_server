@@ -2,7 +2,7 @@
 
 export REDIRECT_STATUS=404
 export CONTENT_TYPE=
-export CONTENT_LENGTH=
+export CONTENT_LENGTH=-1
 export SERVER_PROTOCOL=HTTP/1.1
 export GATEWAY_INTERFACE=CGI/1.1
 export REQUEST_METHOD=POST
@@ -22,4 +22,4 @@ export REMOTE_HOST=
 export REMOTE_IDENT=
 export SERVER_SOFTWARE=webserv/1.0
 
-# ./cgi_tester
+./cgi_tester

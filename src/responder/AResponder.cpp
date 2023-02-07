@@ -126,8 +126,6 @@ AResponder::openFile(const string& path)
 void
 AResponder::writeToFile(int writeSize)
 {
-	// TODO
-	// m_fileFd가 pipe[1] (cgi)
 	write(m_fileFd, m_recvBuffer.data(), writeSize);
 }
 
@@ -252,6 +250,7 @@ AResponder::receiveContentChunked()
 			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
+			close(m_fileFd);
 			m_recvBuffer.clear();
 			return (1);
 		}

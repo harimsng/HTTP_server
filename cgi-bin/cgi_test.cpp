@@ -15,7 +15,7 @@ int	main(int argc, char** argv, char** envp)
 	char	buf[1000000] = {'\0', };
 	int		fileFd = open(PATH, O_RDONLY);
 	struct stat	fileStatus;
-	
+
 	char**	envpTemp = envp;
 	while (*envpTemp != NULL)
 	{
