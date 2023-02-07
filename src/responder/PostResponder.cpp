@@ -77,6 +77,7 @@ PostResponder::respond() try
 			respondBody(readBody);
 			m_responseStatus = RES_DONE;
 #else
+			// WARNING: tempfile leaks could happen
 			if (m_request.m_isCgi == true)
 			{
 				openFile(g_tempDir + m_request.m_file);
@@ -125,13 +126,13 @@ PostResponder::constructCgi(std::string& readBody)
 #endif
 
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
+	// NOTE: deallcation
 
 #ifdef TEST
 	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet);
 #endif
-	// NOTE: deallcation
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 #ifdef TEST
