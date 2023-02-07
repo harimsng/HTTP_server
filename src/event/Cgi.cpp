@@ -32,8 +32,8 @@ Cgi::Cgi(Cgi const& cgi)
 Cgi::Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler)
 :	EventObject(writeEnd[0]),
 	m_requestHandler(&requestHandler),
-	m_readEnd(readEnd[0]),
-	m_writeEnd(writeEnd[1]),
+	m_readEnd(readEnd),
+	m_writeEnd(writeEnd),
 	m_status(CGI_HEADER)
 {
 	m_bodyFlag = false;
@@ -77,7 +77,6 @@ Cgi::receiveCgiResponse()
 
 	int cnt;
 	int statusCode;
-	static int totalCnt = 0;
 
 	cnt = m_cgiBodyBuffer.receive(m_fd);
 	switch (m_status)
@@ -227,7 +226,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
 //	close(m_fd);
-	m_readEnd = pipe[0];
 	struct stat st;
 
 	m_pid = fork();
@@ -282,9 +280,12 @@ Cgi::executeCgi()
 	else if (pid == 0)
 	{
 		// child process
-		dup2(m_readEnd, STDIN_FILENO);
-		dup2(m_writeEnd, STDOUT_FILENO);
-		close(m_readEnd);
+		close(m_readEnd[1]);
+		close(m_writeEnd[0]);
+		dup2(m_readEnd[0], STDIN_FILENO);
+		dup2(m_writeEnd[1], STDOUT_FILENO);
+		close(m_readEnd[0]);
+		close(m_writeEnd[1]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
