@@ -160,7 +160,6 @@ PostResponder::constructCgi()
 	pipe(writeEnd);
 	pipe(readEnd);
 
-	//close(readEnd[0]);
 	m_fileFd = readEnd[1];
 
 	Cgi*	cgi = new Cgi(writeEnd, readEnd, m_requestHandler);

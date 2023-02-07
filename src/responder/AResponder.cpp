@@ -61,7 +61,6 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
-	// TODO: expand this function and change its name or handle this behavior out of readFile() function.
 	if (m_request.m_locationBlock == NULL)
 	{
 		error_page = &m_request.m_virtualServer->m_errorPageTable;
