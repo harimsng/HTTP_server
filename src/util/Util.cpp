@@ -157,6 +157,4 @@ Util::toHex(unsigned int num)
 	ss.flags(ios_base::hex);
 	ss << num;
 	return ss.str();
-#if 0
-#endif
 }

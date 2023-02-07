@@ -78,25 +78,17 @@ PostResponder::respond() try
 //             respondBody(readBody);
 //             m_responseStatus = RES_DONE;
 // #else
-			if (m_request.m_isCgi == true)
+			if (m_request.m_isCgi == false)
 			{
+				string	readBody;
+				readFile(readBody);
 				respondStatusLine(200);
 				respondHeader();
-				m_sendBuffer.append("Transfer-Encoding: chunked");
-				m_sendBuffer.append(g_CRLF);
-				m_sendBuffer.append(g_CRLF);
-				m_responseStatus = RES_RECV_CGI;
-				// endResponse();
+				respondBody(readBody);
+				m_responseStatus = RES_DONE;
+			}
+			else
 				break;
-			}
-			else {
-			string	readBody;
-			readFile(readBody);
-			respondStatusLine(200);
-			respondHeader();
-			respondBody(readBody);
-			m_responseStatus = RES_DONE;
-			}
 			// #endif
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;
@@ -154,17 +146,18 @@ catch(int errorStatusCode)
 void
 PostResponder::constructCgi()
 {
-	int writeEnd[2];// cgi의 stdout
-	int readEnd[2]; // cgi의 stdin
+	int cgiToServer[2];// cgi의 stdout
+	int serverToCgi[2]; // cgi의 stdin
 
-	pipe(writeEnd);
-	pipe(readEnd);
+	pipe(cgiToServer);
+	pipe(serverToCgi);
 
-	m_fileFd = readEnd[1];
+	m_fileFd = serverToCgi[1];
 
-	Cgi*	cgi = new Cgi(writeEnd, readEnd, m_requestHandler);
-	ServerManager::registerEvent(writeEnd[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler);
+	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
-	close(readEnd[0]);
+	close(serverToCgi[0]);
+	close(cgiToServer[1]);
 }

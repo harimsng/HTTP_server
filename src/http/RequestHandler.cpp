@@ -85,15 +85,13 @@ RequestHandler::receiveRequest()
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
-		case HttpRequestParser::ERROR:
-			// QUESTION: purpose of ERROR case?
-			//
-			delete m_responder;
-			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
-					break; // fall through
 		case HttpRequestParser::FINISHED:
-			resetStates();
-			break;
+			delete m_responder;
+			if (m_parser.m_readStatus != HttpRequestParser::ERROR)
+			{
+				resetStates();
+				break;
+			}
 		default:
 			;
 	}
@@ -303,10 +301,10 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	if (!m_sendBuffer.empty())
-	{
-		cout << "send buffer : "<< m_sendBuffer << endl;
-	}
+	// if (!m_sendBuffer.empty())
+	// {
+	//     cout << "send buffer : "<< m_sendBuffer << endl;
+	// }
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)

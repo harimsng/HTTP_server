@@ -125,6 +125,7 @@ AResponder::openFile(const string& path)
 void
 AResponder::writeToFile(int writeSize)
 {
+	cout << m_recvBuffer << endl;
 	write(m_fileFd, m_recvBuffer.data(), writeSize);
 }
 

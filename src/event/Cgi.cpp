@@ -1,3 +1,5 @@
+#include <functional>
+#include <iostream>
 #include <stdexcept>
 #include <iostream>
 #include <unistd.h>
@@ -8,6 +10,7 @@
 #include "io/IoMultiplex.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "Cgi.hpp"
+#include "exception/HttpErrorHandler.hpp"
 
 using namespace std;
 
@@ -30,7 +33,8 @@ Cgi::Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler)
 :	EventObject(writeEnd[0]),
 	m_requestHandler(&requestHandler),
 	m_readEnd(readEnd[0]),
-	m_writeEnd(writeEnd[1])
+	m_writeEnd(writeEnd[1]),
+	m_status(CGI_HEADER)
 {
 	m_bodyFlag = false;
 }
@@ -45,13 +49,7 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-#ifdef TEST
-	int	status;
-
-	::waitpid(m_pid, &status, 0);
-	if (status != 0)
-		return;
-#endif
+	close(m_fd);
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -78,22 +76,23 @@ Cgi::receiveCgiResponse()
 	// return m_requestHandler->m_sendBuffer.receive(m_fd);
 
 	int cnt;
+	int statusCode;
+	static int totalCnt = 0;
 
 	cnt = m_cgiBodyBuffer.receive(m_fd);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
-			parseCgiHeader();
+			statusCode = parseCgiHeader();
 			if (m_status != CGI_CONTENT)
 				break;
-			respondStatusLine(200);
+			respondStatusLine(statusCode);
 			respondHeader();
 			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(g_CRLF); // fall through
-			break;
 		case Cgi::CGI_CONTENT:
-			m_requestHandler->m_sendBuffer.append(Util::toHex(cnt));
+			m_requestHandler->m_sendBuffer.append(Util::toHex(m_cgiBodyBuffer.size()));
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(m_cgiBodyBuffer);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
@@ -101,10 +100,43 @@ Cgi::receiveCgiResponse()
 			if (cnt == 0)
 			{
 				m_requestHandler->resetStates();
+				// waitpid(m_pid)
 			}
 			break;
 	}
 	return (cnt);
+}
+
+int
+Cgi::parseCgiHeader()
+{
+	int	start = 0, end;
+	int statusCode = 200;
+	string	headerField;
+	string	fieldName;
+	string	fieldValue;
+
+	if (m_cgiBodyBuffer.find("\r\n\r\n") == string::npos)
+		return statusCode;
+
+	while (1)
+	{
+		end = m_cgiBodyBuffer.find(g_CRLF, start);
+		headerField = m_cgiBodyBuffer.substr(start, end - start);
+		if (headerField.empty())
+			break;
+		fieldName = headerField.substr(0, headerField.find(':'));
+		fieldName = Util::toUpper(fieldName);
+		fieldValue = headerField.substr(headerField.find(':') + 1);
+		if (fieldName == "STATUS")
+			statusCode = Util::toInt(fieldValue);
+		else
+			m_responseHeader += headerField + g_CRLF;
+		start = end + 2;
+	}
+	m_cgiBodyBuffer.erase(0, end + 2);
+	m_status = CGI_CONTENT;
+	return (statusCode);
 }
 
 void
@@ -256,5 +288,26 @@ Cgi::executeCgi()
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
+}
+
+void
+Cgi::respondStatusLine(int statusCode)
+{
+	m_requestHandler->m_sendBuffer.append(g_httpVersion);
+	m_requestHandler->m_sendBuffer.append(" ");
+	m_requestHandler->m_sendBuffer.append(Util::toString(statusCode));
+	m_requestHandler->m_sendBuffer.append(" ");
+	m_requestHandler->m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+}
+
+void
+Cgi::respondHeader()
+{
+	m_requestHandler->m_sendBuffer.append("Server: webserv/2.0");
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+	m_requestHandler->m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+	m_requestHandler->m_sendBuffer.append(m_responseHeader);
 }
 // #endif
