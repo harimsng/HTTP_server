@@ -1,8 +1,8 @@
 #include <unistd.h>
-#include <iostream>
 #include <fcntl.h>
 #include <vector>
 
+#include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
@@ -48,14 +48,14 @@ PostResponder::respond() try
 	{
 		case RES_HEADER:
 			if (m_request.m_isCgi == true)
-				 constructCgi();
+				constructCgi();
 			else
 				openFile(tmpFile);
-			m_responseStatus = RES_CONTENT;
+			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
 			if (!(this->*m_recvContentFunc)())
 				break;
-			m_responseStatus = RES_CONTENT_FINISHED;
+			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
 // #ifndef TEST
 //             lseek(m_fileFd, 0, SEEK_SET);
@@ -89,15 +89,19 @@ PostResponder::respond() try
 			}
 			else
 			{
-				close(m_fileFd);
+				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
+				// close(m_fileFd);
+				// break here for cgi to finializes
 				break;
 			}
-			// #endif
+			// fall through
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;
+			// fall through
 		case RES_DONE:
-			close(m_fileFd);
+//			close(m_fileFd);
 			endResponse();
+			break;
 		default:
 			;
 	}
@@ -152,15 +156,16 @@ PostResponder::constructCgi()
 	int cgiToServer[2];// cgi의 stdout
 	int serverToCgi[2]; // cgi의 stdin
 
-	pipe(cgiToServer);
-	pipe(serverToCgi);
+	if (pipe(cgiToServer) < 0
+		|| pipe(serverToCgi) < 0)
+		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
-	m_fileFd = serverToCgi[1];
+	//
+//	m_fileFd = serverToCgi[1];
 
-	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler);
+	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
-	close(serverToCgi[0]);
-	close(cgiToServer[1]);
 }

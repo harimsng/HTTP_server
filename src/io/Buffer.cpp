@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <unistd.h>
 
+#include "Types.hpp"
 #include "Buffer.hpp"
 
 using namespace std;
@@ -24,7 +25,9 @@ Buffer::operator=(const Buffer& buffer)
 // constructors & destructor
 Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0),
-	m_writePos(0)
+	m_writePos(0),
+	// NOTE: initialize enum member
+	m_status(BUF_GOOD)
 {
 	resize(0);
 }
@@ -99,11 +102,17 @@ std::string::size_type
 Buffer::send(int fd)
 {
 	long int	count = 0;
+	t_uint64	writeSize;
 
 	if (size() == 0)
 		return 0;
-	// NOTE: what if write is not fast enough? could there be problem?
-	count = ::write(fd, data() + m_writePos, size() - m_writePos);
+
+	writeSize = size() - m_writePos;
+	// heuristic solution. consider to set the fd non-blocking
+	if (size() - m_writePos > BUFFER_SIZE)
+		writeSize = BUFFER_SIZE;
+
+	count = ::write(fd, data() + m_writePos, writeSize);
 	if (count == -1)
 		throw std::runtime_error("write() fail in Buffer::send()");
 
@@ -120,6 +129,18 @@ std::string::size_type
 Buffer::send()
 {
 	return this->send(m_fd);
+}
+
+Buffer::e_status
+Buffer::status()
+{
+	return m_status;
+}
+
+void
+Buffer::status(e_status stat)
+{
+	m_status = stat;
 }
 
 void

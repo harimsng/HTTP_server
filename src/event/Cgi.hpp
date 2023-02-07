@@ -25,7 +25,7 @@ class	Cgi: public EventObject
 public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
-	Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler);
+	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
 	~Cgi();
 
 // member functions
@@ -35,6 +35,7 @@ public:
 	void	executeCgi();
 // #endif
 	int		receiveCgiResponse();
+	int		sendCgiRequest();
 	int		parseCgiHeader();
 	void	respondStatusLine(int statusCode);
 	void	respondHeader();
@@ -43,7 +44,7 @@ public:
 
 // member variables;
 private:
-		int							m_pid;
+		pid_t						m_pid;
 
 		std::vector<std::string>	m_env;
 		std::vector<char*>			m_envp;
@@ -51,23 +52,18 @@ private:
 		std::vector<char*>			m_argv;
 		std::string					m_cgiPath;
 
+		RequestHandler*	m_requestHandler;
 
-		// int							m_fromCgiToServer[2];
-		// int							m_fromServerToCgi[2];
-		// pid_t						m_pid;
-		bool						m_bodyFlag;
-		RequestHandler*				m_requestHandler;
+		int				m_requestContentFileFd;
 
-		int							m_requestContentFileFd;
+		std::string		m_responseHeader;
 
+		int				m_serverToCgi[2];
+		int				m_cgiToServer[2];
 
-		std::string			m_responseHeader;
-
-		int*					m_readEnd;
-		int*					m_writeEnd;
-
-		Buffer				m_cgiBodyBuffer;
-		e_status			m_status;
+		Buffer			m_fromCgiBuffer;
+		Buffer*			m_toCgiBuffer;
+		e_status		m_status;
 };
 
 #endif

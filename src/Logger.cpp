@@ -4,7 +4,7 @@
 #include "ServerManager.hpp"
 #include "Logger.hpp"
 
-#define	MAX_BUFFER_LEN (1024)
+#define	MAX_BUFFER_LEN (128)
 
 using namespace std;
 

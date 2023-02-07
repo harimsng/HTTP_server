@@ -42,7 +42,8 @@ protected:
 
 	void			openFile(const std::string& path);
 	void			openFile();
-	void			writeToFile(int writeSize);
+	void			writeToFile(size_t writeSize);
+	void			writeToBuffer(size_t writeSize);
 	void			readFile(std::string& readBody);
 
 	int				receiveContentNormal();
@@ -57,6 +58,7 @@ protected:
 	Request&			m_request;
 	Buffer&				m_sendBuffer;
 	Buffer&				m_recvBuffer;
+	Buffer				m_buffer;
 
 	e_responseStatus	m_responseStatus;
 	int					m_dataSize;
@@ -65,8 +67,9 @@ protected:
 	int					m_cgiWriteEnd;
 	int					m_cgiReadEnd;
 
-	int					(AResponder::*m_recvContentFunc)();
-	int					(AResponder::*m_sendContentFunc)();
+	int			(AResponder::*m_recvContentFunc)();
+	int			(AResponder::*m_sendContentFunc)();
+	void		(AResponder::*m_procContentFunc)(size_t size);
 };
 
 #endif

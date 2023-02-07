@@ -7,7 +7,6 @@ using namespace	std;
 const char*	g_CRLF = "\r\n";
 
 // for test
-#include <iostream>
 
 // deleted
 HttpStreamTokenizer::HttpStreamTokenizer(const HttpStreamTokenizer& tokenizer)

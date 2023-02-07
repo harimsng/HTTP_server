@@ -5,7 +5,6 @@
 #include "event/Client.hpp"
 #include "event/Server.hpp"
 
-#include <iostream>
 
 using namespace std;
 // deleted
