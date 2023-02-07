@@ -39,7 +39,12 @@ PostResponder::respond() try
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			openFile(tmpFile);
+			// post -> cgi write (pipe[1])
+			//
+			if (m_request.m_isCgi == true)
+				 constructCgi();
+			else
+				openFile(tmpFile);
 			m_responseStatus = RES_CONTENT;
 		case RES_CONTENT:
 			// TODO
@@ -96,13 +101,40 @@ PostResponder::constructCgi(std::string& readBody)
 {
 	int	pipeSet[2];
 
+	// int fileFd[2];
+
 	pipe(pipeSet);
+	// pipe(fileFd);
+
 	m_cgiReadEnd = pipeSet[0];
 
+
+	// pipeSet[0]  ->
+	// pipeSet[1]
+
+//						cgi 리턴하는곳	안씀
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
 	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	// m_responseStatus = RES_RECV_CGI;
+}
+
+void
+PostResponder::constructCgi()
+{
+	int writeEnd[2];
+	int readEnd[2];
+
+	pipe(writeEnd);
+	pipe(readEnd);
+
+	close(readEnd[0]);
+	m_fileFd = readEnd[1];
+
+	Cgi*	cgi = new Cgi(writeEnd, readEnd, m_requestHandler);
+	ServerManager::registerEvent(writeEnd[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	cgi->initEnv(m_request);
+	cgi->executeCgi();
 }

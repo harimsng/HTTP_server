@@ -9,6 +9,7 @@
 
 
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -23,32 +24,40 @@ Cgi&	Cgi::operator=(Cgi const& cgi)
 }
 
 Cgi::Cgi(Cgi const& cgi)
-//:	EventObject()
+:	EventObject()
 {
 	(void)cgi;
 }
 
 // constructors & destructor
-Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
+Cgi::Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
-	m_requestContentFileFd(fileFd)
+	m_readEnd(readEnd),
+	m_writeEnd(writeEnd)
 {
-	(void) writeEnd;
 	m_bodyFlag = false;
 }
+
+// Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
+// :	m_requestHandler(&requestHandler),
+//     m_requestContentFileFd(fileFd)
+// {
+//     (void) writeEnd;
+//     m_bodyFlag = false;
+// }
 
 Cgi::~Cgi()
 {
 }
 
-/*
+
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			receiveCgiResponse(); // fall through
+			receiveCgiResponse(); //fall through
 		case IoEventPoller::FILT_WRITE:
 			return IoEventPoller::STAT_ERROR;
 		default:
@@ -56,17 +65,16 @@ Cgi::handleEventWork()
 	}
 	return IoEventPoller::STAT_NORMAL;
 }
-*/
 
-void
-Cgi::receiveCgiResponse()
-{
-	// INFO: temporary function
-	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
-
-	(void) sendBuffer;
-	//sendBuffer.receive(m_readEnd);
-}
+// void
+// Cgi::receiveCgiResponse()
+// {
+//     // INFO: temporary function
+//     Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
+//
+//     (void) sendBuffer;
+//     //sendBuffer.receive(m_readEnd);
+// }
 
 void
 Cgi::initEnv(const Request &request)
@@ -154,13 +162,17 @@ Cgi::initEnv(const Request &request)
 	m_argv.push_back(NULL);
 }
 
+// cgi 프로세스
+// pipeSet[0]  -> stdin
+// pipeSet[1]  ->
+
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
 //	close(m_fd);
     pid_t pid;
-	m_readEnd = pipe[0];
+	// m_readEnd = pipe[0];
 	struct stat st;
 
     pid = fork();
@@ -174,6 +186,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
+
         dup2(m_requestContentFileFd, STDOUT_FILENO);
 		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
@@ -197,4 +210,39 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
+}
+
+// void
+// Cgi::executeCgi()
+// {
+//     pid_t pid;
+//
+//     pid = fork();
+//     if (pid < 0)
+//     {
+//         throw std::runtime_error("Cgi::cgi() fork failed");
+//     }
+//     if (pid == 0)
+//     {
+//         close(m_readEnd[1]);
+//         dup2(m_readEnd[0], STDIN_FILENO);
+//
+//         dup2(m_writeEnd[1], STDOUT_FILENO);
+//         close(m_readEnd[0]);
+//         execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+//         throw std::runtime_error("Cgi::Cgi() execve failed");
+//     }
+//     else if (pid > 0)
+//     {
+//
+//     }
+// }
+
+void
+Cgi::receiveCgiResponse()
+{
+	// INFO: temporary function
+	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
+
+	sendBuffer.receive(m_writeEnd[0]);
 }

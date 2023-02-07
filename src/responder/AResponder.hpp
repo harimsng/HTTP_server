@@ -61,6 +61,7 @@ protected:
 	e_responseStatus	m_responseStatus;
 	int					m_dataSize;
 	int					m_fileFd;
+	int					m_cgiWriteEnd;
 	int					m_cgiReadEnd;
 };
 

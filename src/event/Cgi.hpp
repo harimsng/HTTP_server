@@ -9,7 +9,7 @@
 class	RequestHandler;
 struct	Request;
 
-class	Cgi//: public EventObject
+class	Cgi : public EventObject
 {
 // deleted
 	Cgi	&operator=(Cgi const& cgi);
@@ -18,14 +18,16 @@ class	Cgi//: public EventObject
 public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
+	Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler);
 	~Cgi();
 
 // member functions
 	void	initEnv(const Request& request);
 	void	executeCgi(int pipe[2], std::string& readBody, const Request &request);
+	void	executeCgi();
 	void	receiveCgiResponse();
 
-	//IoEventPoller::EventStatus	handleEventWork();
+	IoEventPoller::EventStatus	handleEventWork();
 
 // member variables;
 private:
@@ -43,7 +45,12 @@ private:
 		RequestHandler*				m_requestHandler;
 
 		int							m_requestContentFileFd;
-		int							m_readEnd;
+
+
+
+		int*							m_readEnd;
+		int*							m_writeEnd;
+
 };
 
 #endif
