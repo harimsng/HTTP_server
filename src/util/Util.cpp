@@ -130,13 +130,31 @@ Util::checkFileStat(const char* path)
 }
 
 string
-Util::fixDoublelashes(const string& path, const string& file) {
+Util::fixDoublelashes(const string& path, const string& file)
+{
     string newStr = path;
-    if (*(path.end() - 1) == '/' && *(file.begin()) == '/')
-        newStr = path.substr(0, path.find_last_of('/')) + file;
-    else if (*(path.end() - 1) != '/' && *(file.begin()) != '/')
-        newStr = path + "/" + file;
+
+	if (*(path.end() - 1) == '/' && *(file.begin()) == '/')
+	{
+		newStr = path.substr(0, path.find_last_of('/')) + file;
+	}
+	else if (*(path.end() - 1) != '/' && *(file.begin()) != '/')
+	{
+	newStr = path + "/" + file;
+	}
 	else
+	{
 		newStr = path + file;
-    return newStr;
+	}
+	return newStr;
+}
+
+string
+Util::toHex(unsigned int num)
+{
+	stringstream	ss;
+
+	ss.flags(ios_base::hex);
+	ss << num;
+	return ss.str();
 }

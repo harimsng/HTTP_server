@@ -17,6 +17,7 @@ public:
 	static std::string			toString(int num);
 	static std::string			toUpper(std::string str);
 	static std::string			toLower(std::string str);
+	static std::string			toHex(unsigned int num);
 
 	static const std::string	getDate(const char* format);
 	static bool					checkFileStat(const char* path);

@@ -33,7 +33,8 @@ Cgi::Cgi(int* writeEnd, int* readEnd, RequestHandler& requestHandler)
 :	EventObject(writeEnd[0]),
 	m_requestHandler(&requestHandler),
 	m_readEnd(readEnd[0]),
-	m_writeEnd(writeEnd[1])
+	m_writeEnd(writeEnd[1]),
+	m_status(CGI_HEADER)
 {
 	m_bodyFlag = false;
 }
@@ -48,13 +49,7 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-#ifdef TEST
-	int	status;
-
-	::waitpid(m_pid, &status, 0);
-	if (status != 0)
-		return;
-#endif
+	close(m_fd);
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -82,6 +77,7 @@ Cgi::receiveCgiResponse()
 
 	int cnt;
 	int statusCode;
+	static int totalCnt = 0;
 
 	cnt = m_cgiBodyBuffer.receive(m_fd);
 	switch (m_status)
@@ -104,6 +100,7 @@ Cgi::receiveCgiResponse()
 			if (cnt == 0)
 			{
 				m_requestHandler->resetStates();
+				// waitpid(m_pid)
 			}
 			break;
 	}
@@ -121,10 +118,13 @@ Cgi::parseCgiHeader()
 
 	if (m_cgiBodyBuffer.find("\r\n\r\n") == string::npos)
 		return statusCode;
-	do
+
+	while (1)
 	{
 		end = m_cgiBodyBuffer.find(g_CRLF, start);
 		headerField = m_cgiBodyBuffer.substr(start, end - start);
+		if (headerField.empty())
+			break;
 		fieldName = headerField.substr(0, headerField.find(':'));
 		fieldName = Util::toUpper(fieldName);
 		fieldValue = headerField.substr(headerField.find(':') + 1);
@@ -134,9 +134,9 @@ Cgi::parseCgiHeader()
 			m_responseHeader += headerField + g_CRLF;
 		start = end + 2;
 	}
-	while (headerField.size() != 0);
 	m_cgiBodyBuffer.erase(0, end + 2);
 	m_status = CGI_CONTENT;
+	return (statusCode);
 }
 
 void
@@ -309,6 +309,5 @@ Cgi::respondHeader()
 	m_requestHandler->m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
 	m_requestHandler->m_sendBuffer.append(g_CRLF);
 	m_requestHandler->m_sendBuffer.append(m_responseHeader);
-	m_requestHandler->m_sendBuffer.append(g_CRLF);
 }
 // #endif

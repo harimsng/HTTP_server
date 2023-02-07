@@ -301,10 +301,10 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	if (!m_sendBuffer.empty())
-	{
-		cout << "send buffer : "<< m_sendBuffer << endl;
-	}
+	// if (!m_sendBuffer.empty())
+	// {
+	//     cout << "send buffer : "<< m_sendBuffer << endl;
+	// }
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
