@@ -35,6 +35,9 @@ public:
 	void	executeCgi();
 // #endif
 	int		receiveCgiResponse();
+	int		parseCgiHeader();
+	void	respondStatusLine(int statusCode);
+	void	respondHeader();
 
 	IoEventPoller::EventStatus	handleEventWork();
 
@@ -58,6 +61,7 @@ private:
 		int							m_requestContentFileFd;
 
 
+		std::string			m_responseHeader;
 
 		int					m_readEnd;
 		int					m_writeEnd;

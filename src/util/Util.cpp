@@ -140,4 +140,3 @@ Util::fixDoublelashes(const string& path, const string& file) {
 		newStr = path + file;
     return newStr;
 }
-

@@ -85,15 +85,13 @@ RequestHandler::receiveRequest()
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
-		case HttpRequestParser::ERROR:
-			// QUESTION: purpose of ERROR case?
-			//
-			delete m_responder;
-			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
-					break; // fall through
 		case HttpRequestParser::FINISHED:
-			resetStates();
-			break;
+			delete m_responder;
+			if (m_parser.m_readStatus != HttpRequestParser::ERROR)
+			{
+				resetStates();
+				break;
+			}
 		default:
 			;
 	}
