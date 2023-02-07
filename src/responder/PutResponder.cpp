@@ -31,7 +31,7 @@ PutResponder::respond() try
 			openFile(); // fall through
 			m_responseStatus = RES_CONTENT;
 		case RES_CONTENT:
-			if (!readRequestBody())
+			if (!(this->*m_recvContentFunc)())
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED;// -> client_max_body_size error
 		case RES_CONTENT_FINISHED:

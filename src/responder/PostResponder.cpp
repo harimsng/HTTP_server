@@ -1,14 +1,18 @@
 #include <unistd.h>
 #include <iostream>
 #include <fcntl.h>
+#include <vector>
+
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
 #include "util/Util.hpp"
-#include "PostResponder.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "PostResponder.hpp"
 
 using namespace std;
+
+extern const std::string	g_tempDir;
 
 // constructors & destructor
 PostResponder::PostResponder(RequestHandler& requestHandler)
@@ -30,8 +34,10 @@ PostResponder::operator=(const PostResponder& postResponder)
 void
 PostResponder::respond() try
 {
+#ifndef TEST
 	std::string	readBody;
-	std::string tmpFile = "/Users/soum/goinfre/" + m_request.m_file + ".temp" + Util::toString(m_requestHandler.m_socket->m_fd);
+	std::string tmpFile = g_tempDir + m_request.m_file;
+#endif
 	struct stat st;
 
 	if (m_request.m_status >= 300)
@@ -39,11 +45,9 @@ PostResponder::respond() try
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			// post -> cgi write (pipe[1])
-			//
 			if (m_request.m_isCgi == true)
-				 constructCgi();
-			else
+				 // constructCgi();
+			// else
 				openFile(tmpFile);
 			m_responseStatus = RES_CONTENT;
 		case RES_CONTENT:
@@ -51,15 +55,17 @@ PostResponder::respond() try
 			// cgi 만듦 -> fd 생성
 			// cgi readEvent 등록
 			// cgi 돌림
-			if (!readRequestBody())
+			if (!(this->*m_recvContentFunc)())
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED;
 		case RES_CONTENT_FINISHED:
+#ifndef TEST
 			lseek(m_fileFd, 0, SEEK_SET);
 			fstat(m_fileFd, &st);
 			m_request.m_bodySize = st.st_size;
 			m_request.requestBodyBuf.resize(m_request.m_bodySize , 0);
-			read(m_fileFd, (char *)(m_request.requestBodyBuf.data()), m_request.m_bodySize);
+			// FIX: casting const pointer to normal pointer is UB
+			read(m_fileFd, &m_request.requestBodyBuf[0], m_request.m_bodySize);
 			unlink(tmpFile.c_str());
 			if (m_request.m_isCgi == true)
 			{
@@ -73,21 +79,36 @@ PostResponder::respond() try
 			respondHeader();
 			respondBody(readBody);
 			m_responseStatus = RES_DONE;
-		/*
+#else
+			if (m_request.m_isCgi == true)
+			{
+				openFile(g_tempDir + m_request.m_file);
+				constructCgi();
+				m_responseStatus = RES_RECV_CGI;
+				break;
+			}
+			string	readBody;
+			readFile(readBody);
+			respondStatusLine(200);
+			respondHeader();
+			respondBody(readBody);
+			m_responseStatus = RES_DONE;
+#endif
 		case RES_RECV_CGI:
-		*/
+			m_responseStatus = RES_DONE;
 		case RES_DONE:
+			close(m_fileFd);
 			endResponse();
 		default:
 			;
 	}
 }
-catch(int ErrorstatusCode)
+catch(int errorStatusCode)
 {
 	string readBody;
 
-	m_request.m_status = ErrorstatusCode;
-	respondStatusLine(ErrorstatusCode);
+	m_request.m_status = errorStatusCode;
+	respondStatusLine(errorStatusCode);
 	respondHeader();
 	m_request.m_file.clear();
 	m_request.m_path = getErrorPage(readBody);
@@ -104,37 +125,42 @@ PostResponder::constructCgi(std::string& readBody)
 	// int fileFd[2];
 
 	pipe(pipeSet);
-	// pipe(fileFd);
-
+#ifndef TEST
 	m_cgiReadEnd = pipeSet[0];
-
-
+#endif
 	// pipeSet[0]  ->
 	// pipeSet[1]
 
 //						cgi 리턴하는곳	안씀
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
-	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+#ifdef TEST
+	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	cgi->initEnv(m_request);
+	cgi->executeCgi(pipeSet);
+#endif
+	// NOTE: deallcation
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
-	// m_responseStatus = RES_RECV_CGI;
+#ifdef TEST
+	m_responseStatus = RES_RECV_CGI;
+#endif
 }
 
-void
-PostResponder::constructCgi()
-{
-	int writeEnd[2];
-	int readEnd[2];
-
-	pipe(writeEnd);
-	pipe(readEnd);
-
-	close(readEnd[0]);
-	m_fileFd = readEnd[1];
-
-	Cgi*	cgi = new Cgi(writeEnd, readEnd, m_requestHandler);
-	ServerManager::registerEvent(writeEnd[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	cgi->initEnv(m_request);
-	cgi->executeCgi();
-}
+// void
+// PostResponder::constructCgi()
+// {
+//     int writeEnd[2];
+//     int readEnd[2];
+//
+//     pipe(writeEnd);
+//     pipe(readEnd);
+//
+//     close(readEnd[0]);
+//     m_fileFd = readEnd[1];
+//
+//     Cgi*	cgi = new Cgi(writeEnd, readEnd, m_requestHandler);
+//     ServerManager::registerEvent(writeEnd[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+//     cgi->initEnv(m_request);
+//     // cgi->executeCgi();
+// }

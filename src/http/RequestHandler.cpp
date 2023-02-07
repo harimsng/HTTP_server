@@ -76,7 +76,6 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
-			LOG(DEBUG, "Header fields parsing ends");
 			createResponseHeader();
 			receiveStatus = RECV_EVENT;
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -86,9 +85,10 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
 		case HttpRequestParser::ERROR:
+			// QUESTION: purpose of ERROR case?
 			delete m_responder;
 			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
-				break; // fall through
+					break; // fall through
 		case HttpRequestParser::FINISHED:
 			resetStates();
 			break;
@@ -98,7 +98,6 @@ RequestHandler::receiveRequest()
 	return receiveStatus;
 }
 
-// HOST field could be empty
 void
 RequestHandler::createResponseHeader()
 {
@@ -109,7 +108,6 @@ RequestHandler::createResponseHeader()
 	{
 		LOG(DEBUG, "error response to fd=%d, status code=%d",
 				m_socket->m_fd, statusCode);
-		// m_request.m_method = m_request.m_method == HEAD ? HEAD : ;
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -167,7 +165,6 @@ RequestHandler::checkRequestMessage()
 		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	// TODO: cleanup hardcodings
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
@@ -180,14 +177,17 @@ RequestHandler::checkIsCgi()
 		string m_ext = "";
 		if (m_request.m_file.find(".") != string::npos)
 		{
+			// QUESTION: what is extension of abc.def.ghi? ghi or def.ghi
 			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
 				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
+				// TODO
 				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
+			// TODO
 			m_request.m_status = 200;
 	}
 }
@@ -205,7 +205,6 @@ RequestHandler::checkHeaderFields()
 	if (m_request.m_headerFieldsMap.count("HOST") == 0)
 	{
 		m_request.m_headerFieldsMap["HOST"].push_back("");
-		// UPDATE_REQUEST_ERROR(m_request.m_status, 400);
 		return;
 	}
 }
@@ -246,16 +245,12 @@ RequestHandler::checkResourceStatus()
 	int			statusCode = 0;
 	unsigned int	permission;
 
-	// NOTE
-	// check autoindex?
 	switch (m_request.m_method)
 	{
-		// INFO: there is permission problem
 		case GET: // fall through
 		case HEAD: // fall through
 			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
 		case POST:
-			// permission = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH; break;
 			return;
 		case PUT:
 			return;
@@ -263,7 +258,7 @@ RequestHandler::checkResourceStatus()
 			permission = S_IWUSR | S_IWGRP | S_IWOTH;
 			break;
 	}
-	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode) // INFO: always regular?
+	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode)
 		&& CHECK_PERMISSION(status.st_mode, permission))
 		return;
 
@@ -309,10 +304,6 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	if (m_sendBuffer.size())
-	{
-		// LOG(INFO, "send response message \"%s\"", m_sendBuffer.c_str());
-	}
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
@@ -355,6 +346,8 @@ operator<<(std::ostream& os, const Request& request)
 	return (os);
 }
 
+// NOTE: static functions below which are initializing table should be removed and
+// instead use initalizer list in C++11 or higher.
 void
 RequestHandler::setMethodConvertTable()
 {
@@ -451,6 +444,7 @@ RequestHandler::methodToString(uint16_t allowed)
 		methodString += " PUT,";
 	if (allowed & RequestHandler::DELETE)
 		methodString += " DELETE,";
-	methodString.erase(methodString.end() - 1);
+	if (methodString.size() > 0)
+		methodString.erase(methodString.end() - 1);
 	return (methodString);
 }

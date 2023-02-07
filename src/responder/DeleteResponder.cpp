@@ -1,3 +1,5 @@
+#include <cerrno>
+
 #include "DeleteResponder.hpp"
 #include "util/Util.hpp"
 
@@ -28,27 +30,34 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 	string	responseText = "File is deleted.";
 
 	deleteStatus = unlink(filePath.c_str());
-	switch (errno)
+	// NOTE: referencing errno when there's no error is UB
+	if (deleteStatus < 0)
 	{
-		case EACCES:
-			responseText = "Permission denied.";
-			break;
-		case EBUSY:
-			responseText = "This file currently being used.";
-			break;
-		case ENOENT:
-			responseText = "File does not exist.";
-			break;
-		case ENOTDIR:
-			responseText = "Path contains none directory.";
-			break;
-		case EPERM:
-			responseText = "Path is a directory";
-			break;
-		default:
-			responseText = "File is deleted.";
-			break;
+		switch (errno)
+		{
+			case EACCES:
+				responseText = "Permission denied.";
+				break;
+			case EBUSY:
+				responseText = "This file currently being used.";
+				break;
+			case ENOENT:
+				responseText = "File does not exist.";
+				break;
+			case ENOTDIR:
+				responseText = "Path contains none directory.";
+				break;
+			case EPERM:
+				responseText = "Path is a directory";
+				break;
+			// NOTE: there're other errors except those above. they will directed here.
+			default:
+				responseText = "unlink error.";
+				break;
+		}
 	}
+	else
+		responseText = "File is deleted.";
 	readBody =
 	"<!DOCTYPE html>\n"
 	"<html>\n"
@@ -80,27 +89,12 @@ DeleteResponder::respond()
 			m_sendBuffer.append(Util::toString(readBody.size()));
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(g_CRLF);
-			//m_sendBuffer.reserve(m_sendBuffer.size() + readBody.size());
-
-			// TODO: change code to use swap instead of append
 			m_sendBuffer.append(readBody);
 			m_responseStatus = RES_DONE; // fall through
-			// break;
 		case RES_DONE:
-		// method must know end of response(content length, chunked)
 			endResponse();
 			break;
 		default:
 			;
 	}
-	/*
-	int deleteStatus;
-
-	string filePath = m_request.m_path + m_request.m_file;
-
-	readFile(m_sendBuffer); // 파일 읽기
-	deleteStatus = unlink(filePath.c_str());
-	if (deleteStatus == -1)
-		m_statusCode = 202;
-	*/
 }

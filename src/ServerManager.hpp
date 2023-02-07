@@ -1,8 +1,6 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-#include <set>
-
 #include "Webserv.hpp"
 #include IO_EVENT_HEADER
 
@@ -28,9 +26,6 @@ public:
 private:
 	void	initServers();
 
-// member variables
-	// std::vector<Server>		m_serverList;
-
 // static members
 public:
 	static IoEventPoller		s_ioEventPoller;
@@ -40,8 +35,6 @@ public:
 	static void	registerEvent(int fd, IoEventPoller::e_operation op,
 			IoEventPoller::e_filters filter, EventObject* object);
 
-// friends
-//	friend std::ostream&	operator<<(std::ostream& os, const ServerManager& manager);
 };
 
 #endif

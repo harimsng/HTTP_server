@@ -1,4 +1,5 @@
 #include "OsDependency.hpp"
+#include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "VirtualServer.hpp"
 #include "event/Client.hpp"
