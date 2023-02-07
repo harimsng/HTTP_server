@@ -60,6 +60,7 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
+	// LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
@@ -86,6 +87,7 @@ RequestHandler::receiveRequest()
 				break; // fall through
 		case HttpRequestParser::ERROR:
 			// QUESTION: purpose of ERROR case?
+			//
 			delete m_responder;
 			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
 					break; // fall through
@@ -132,10 +134,6 @@ RequestHandler::createResponseHeader()
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
-	// NOTE
-	// this functions moved to AResponder
-	// bufferResponseStatusLine(statusCode);
-	// bufferResponseHeaderFields();
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
@@ -178,6 +176,7 @@ RequestHandler::checkIsCgi()
 		if (m_request.m_file.find(".") != string::npos)
 		{
 			// QUESTION: what is extension of abc.def.ghi? ghi or def.ghi
+			// 			usually the extension is the substring which follows the last occurrence, if any, of the dot character.
 			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
@@ -195,7 +194,7 @@ RequestHandler::checkIsCgi()
 void
 RequestHandler::checkStatusLine()
 {
-	if (m_request.m_protocol != "HTTP/1.1") // check http version
+	if (m_request.m_protocol != "HTTP/1.1")
 		UPDATE_REQUEST_ERROR(m_request.m_status, 505);
 }
 
@@ -304,6 +303,10 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	if (!m_sendBuffer.empty())
+	{
+		cout << "send buffer : "<< m_sendBuffer << endl;
+	}
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
