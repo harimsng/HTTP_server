@@ -60,7 +60,7 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
-	// LOG(DEBUG, "not skipped");
+	// // LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
@@ -68,6 +68,7 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		return RECV_SKIPPED;
 
+	// LOG(DEBUG, "receiveRequest() count = %d", count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -106,8 +107,7 @@ RequestHandler::createResponseHeader()
 	checkRequestMessage();
 	if (statusCode >= 400)
 	{
-		LOG(DEBUG, "error response to fd=%d, status code=%d",
-				m_socket->m_fd, statusCode);
+		// LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, statusCode);
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -158,7 +158,7 @@ RequestHandler::checkRequestMessage()
 	checkIsCgi();
 	if (m_request.m_locationBlock != NULL)
 	{
-		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
+		// LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
 	if (m_request.m_file != "")
@@ -228,7 +228,7 @@ RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
 	if (!(m_request.m_method & allowed))
 	{
-		LOG(DEBUG, "method not allowed");
+		// LOG(DEBUG, "method not allowed");
 		if (m_request.m_status == 404)
 			m_request.m_status = 405;
 		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
@@ -271,7 +271,7 @@ RequestHandler::checkResourceStatus()
 			statusCode = 500; break;
 	}
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
-	LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
+	// LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
 }
 
 std::string
@@ -313,7 +313,7 @@ RequestHandler::sendResponse() try
 	}
 	if (count > 0)
 	{
-		LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
+		// LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
 		if (m_request.m_status >= 300)
 			return SEND_ERROR;
 	}
@@ -321,7 +321,7 @@ RequestHandler::sendResponse() try
 }
 catch (runtime_error& e)
 {
-	LOG(ERROR, "%s", e.what());
+	// LOG(ERROR, "%s", e.what());
 	return SEND_ERROR;
 }
 

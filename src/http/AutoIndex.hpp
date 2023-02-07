@@ -1,7 +1,6 @@
 #ifndef AUTOINDEX_HPP
 #define AUTOINDEX_HPP
 
-#include <iostream>
 #include <string>
 
 class	AutoIndex

@@ -2,10 +2,10 @@
 #define LOGGER_HPP
 
 # include <string>
-# include <iostream>
 # include <iomanip>
 # include <cerrno>
 # include <cstring>
+# include <iostream>
 
 # include "util/Util.hpp"
 

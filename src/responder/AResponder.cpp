@@ -1,9 +1,8 @@
 #include <sys/stat.h>
-#include <fcntl.h>
 
+#include <fcntl.h>
 #include <stdexcept>
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 
@@ -40,6 +39,11 @@ AResponder::AResponder(RequestHandler& requestHandler)
 		m_recvContentFunc = &AResponder::receiveContentChunked;
 	else
 		m_recvContentFunc = &AResponder::receiveContentNormal;
+
+	if (m_request.m_isCgi == true && m_request.m_method == RequestHandler::POST)
+		m_procContentFunc = &AResponder::writeToBuffer;
+	else
+		m_procContentFunc = &AResponder::writeToFile;
 }
 
 AResponder::~AResponder()
@@ -61,6 +65,7 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
+	// TODO: resourceLocation
 	if (m_request.m_locationBlock == NULL)
 	{
 		error_page = &m_request.m_virtualServer->m_errorPageTable;
@@ -123,11 +128,15 @@ AResponder::openFile(const string& path)
 }
 
 void
-AResponder::writeToFile(int writeSize)
+AResponder::writeToFile(size_t writeSize)
 {
-	cout << "write" << endl;
 	write(m_fileFd, m_recvBuffer.data(), writeSize);
-	cout << "write fin" << endl;
+}
+
+void
+AResponder::writeToBuffer(size_t writeSize)
+{
+	m_buffer.append(m_recvBuffer.data(), writeSize);
 }
 
 bool
@@ -242,28 +251,37 @@ AResponder::parseChunkSize()
 int
 AResponder::receiveContentChunked()
 {
-	while(m_recvBuffer.size() != 0)
+	while (m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
+		{
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
+			// LOG(DEBUG, "dataSize updated = %d", m_dataSize);
+		}
 		// INFO: clientMaxBodySize may be total content length?
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
-			close(m_fileFd);
+			// NOTE: PostResponder closes m_fileFd twice
+//			close(m_fileFd);
+			// LOG(DEBUG, "chunked receiving finished");
+			m_buffer.status(Buffer::BUF_EOF);
 			m_recvBuffer.clear();
 			return (1);
 		}
-		if (m_dataSize > 0 && m_dataSize + 2 <= (int)m_recvBuffer.size())
+		// LOG(DEBUG, "dataSize = %d, buffersize = %zu", m_dataSize, m_recvBuffer.size());
+		if (m_dataSize > 0 && m_dataSize + 2 <= static_cast<int>(m_recvBuffer.size()))
 		{
-			writeToFile(m_dataSize);
+			(this->*m_procContentFunc)(m_dataSize);
+//			writeToFile(m_dataSize);
 			m_recvBuffer.erase(0, m_dataSize + 2);
 			m_dataSize = -1;
 		}
-		else if (m_dataSize > 0 && m_dataSize >= (int)m_recvBuffer.size())
+		else if (m_dataSize > 0 && m_dataSize >= static_cast<int>(m_recvBuffer.size()))
 		{
-			writeToFile(m_recvBuffer.size());
+			(this->*m_procContentFunc)(m_recvBuffer.size());
+//			writeToFile(m_recvBuffer.size());
 			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();
 			if (m_dataSize == 0)

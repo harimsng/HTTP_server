@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <iostream>
 
 #include "responder/GetResponder.hpp"
 #include "VirtualServer.hpp"

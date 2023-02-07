@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 
+#include "Types.hpp"
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "Location.hpp"
@@ -30,7 +31,7 @@ struct Request
 	std::string			m_cgi;
 	bool				m_isCgi;
 	std::string			requestBodyBuf;
-	off_t				m_bodySize;
+	t_int64				m_bodySize;
 	Location*			m_locationBlock;
 	VirtualServer*		m_virtualServer;
 	HeaderFieldsMap		m_headerFieldsMap;
