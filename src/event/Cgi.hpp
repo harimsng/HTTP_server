@@ -63,8 +63,8 @@ private:
 
 		std::string			m_responseHeader;
 
-		int					m_readEnd;
-		int					m_writeEnd;
+		int*					m_readEnd;
+		int*					m_writeEnd;
 
 		Buffer				m_cgiBodyBuffer;
 		e_status			m_status;

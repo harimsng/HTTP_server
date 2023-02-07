@@ -88,7 +88,10 @@ PostResponder::respond() try
 				m_responseStatus = RES_DONE;
 			}
 			else
+			{
+				close(m_fileFd);
 				break;
+			}
 			// #endif
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;
