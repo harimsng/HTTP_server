@@ -51,10 +51,10 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	int	status;
+	//int	status;
 
-	close(m_fd);
-	waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	//close(m_fd);
+	//waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -86,6 +86,7 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
+	usleep(50);
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
 	switch (m_status)
@@ -111,6 +112,8 @@ Cgi::receiveCgiResponse()
 			m_fromCgiBuffer.clear();
 			if (cnt == 0)
 			{
+				close(m_fd);
+				waitpid(-1, NULL, 0);
 				m_requestHandler->resetStates();
 			}
 			break;
@@ -194,10 +197,12 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
+	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
+	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
