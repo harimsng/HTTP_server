@@ -75,21 +75,20 @@ Cgi::~Cgi()
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
+	// Cgi must be terminated when connection is lost
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			if (receiveCgiResponse() == 0) // fall through
+			if (receiveCgiResponse() == 0)
 			{
 				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
 				return IoEventPoller::STAT_END;
 			}
-			return IoEventPoller::STAT_NORMAL;
+			break;
 		case IoEventPoller::FILT_WRITE:
 			// // LOG(DEBUG, "cgi write event");
-			// Cgi must be terminated when connection is lost
-			if (sendCgiRequest() == -1)
-				return IoEventPoller::STAT_NORMAL;
-			return IoEventPoller::STAT_NORMAL;
+			sendCgiRequest();
+			break;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
 	}
@@ -102,9 +101,8 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
-	usleep(25);
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
+	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -116,9 +114,6 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			// NOTE: if buffer is empty after cgi header parsing, content start with 0\r\n\r\n
-			if (m_fromCgiBuffer.size() == 0)
-				break;
 			// fall through
 		case Cgi::CGI_CONTENT:
 			m_requestHandler->m_sendBuffer.append(Util::toHex(m_fromCgiBuffer.size()));
@@ -129,7 +124,7 @@ Cgi::receiveCgiResponse()
 			if (cnt == 0)
 			{
 				close(m_fd);
-				waitpid(-1, NULL, 0);
+				waitpid(m_pid, NULL, 0);
 				m_requestHandler->resetStates();
 			}
 			break;
@@ -146,11 +141,12 @@ Cgi::sendCgiRequest()
 	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
 	if (count != 0)
 	{
-//		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
+		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_fd, count);
 		return count;
 	}
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
 	{
+		LOG(DEBUG, "[%d] sendCgiRequest() end", m_fd);
 		close(m_serverToCgi[1]);
 		return -1;
 	}

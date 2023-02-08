@@ -19,7 +19,7 @@ HeadResponder::operator=(const HeadResponder& HeadResponder)
 }
 
 void
-HeadResponder::respond()
+HeadResponder::respondWork()
 {
 	switch(m_responseStatus)
 	{

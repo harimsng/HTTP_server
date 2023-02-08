@@ -3,7 +3,7 @@ NAME		=	webserv
 CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
 CPPFLAGS	=	
-DEBUGFLAGS	=	-g -fsanitize=address -fsanitize=undefined
+DEBUGFLAGS	=	-g -fsanitize=undefined #-fsanitize=address
 RM			=	rm -f
 
 ifeq ($(shell uname), Linux)
@@ -18,6 +18,7 @@ SRC			+=	main.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
 \
+				event/EventObject.cpp\
 				event/Client.cpp\
 				event/Server.cpp\
 				event/Cgi.cpp\

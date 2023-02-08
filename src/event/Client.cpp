@@ -38,13 +38,15 @@ Client::handleEventWork()
 			status = m_requestHandler.receiveRequest();
 			switch (status)
 			{
+				// NOTE: EOF can be sent even if there's data to read.
+				// use another poller flags
 				case RequestHandler::RECV_END:
 					return IoEventPoller::STAT_END;
 
 				case RequestHandler::RECV_EVENT:
 					LOG(DEBUG, "registering write event for fd=%d\n", m_socket.m_fd);
 					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
-							IoEventPoller::FILT_WRITE, this);
+							IoEventPoller::FILT_READWRITE, this);
 					break;
 
 				default:
@@ -58,8 +60,9 @@ Client::handleEventWork()
 			{
 				case RequestHandler::SEND_DONE:
 					LOG(DEBUG, "deleting write event for fd=%d\n", m_socket.m_fd);
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
-							IoEventPoller::FILT_WRITE, this);
+					// this can delete fd instead of modifying 
+					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
+							IoEventPoller::FILT_READ, this);
 					break;
 				case RequestHandler::SEND_ERROR:
 					LOG(DEBUG, "error write event for fd=%d\n", m_socket.m_fd);

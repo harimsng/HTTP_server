@@ -27,7 +27,8 @@ public:
 	AResponder	&operator=(const AResponder& aMethod);
 
 // member functions
-	virtual void	respond() = 0;
+	void			respond();
+	virtual	void	respondWork() = 0;
 	void			respondHeader();
 	void			endResponse();
 

@@ -109,6 +109,7 @@ Buffer::send(int fd)
 
 	writeSize = size() - m_writePos;
 	// heuristic solution. consider to set the fd non-blocking
+	// NOTE: is this necessary?
 	if (size() - m_writePos > BUFFER_SIZE)
 		writeSize = BUFFER_SIZE;
 
