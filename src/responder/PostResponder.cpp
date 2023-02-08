@@ -166,8 +166,9 @@ PostResponder::constructCgi()
 //	m_fileFd = serverToCgi[1];
 
 	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
-	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
+	Cgi*	cgi_write = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer, 1);
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi_write);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }

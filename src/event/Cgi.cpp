@@ -42,6 +42,21 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_cgiToServer[1] = cgiToServer[1];
 }
 
+Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
+:	EventObject(serverToCgi[1]),
+	m_requestHandler(&requestHandler),
+//	m_serverToCgi(serverToCgi),
+//	m_cgiToServer(cgiToServer),
+	m_toCgiBuffer(&toCgiBuffer),
+	m_status(CGI_HEADER)
+{
+	(void)for_write;
+	m_serverToCgi[0] = serverToCgi[0];
+	m_serverToCgi[1] = serverToCgi[1];
+	m_cgiToServer[0] = cgiToServer[0];
+	m_cgiToServer[1] = cgiToServer[1];
+}
+
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
@@ -72,7 +87,8 @@ Cgi::handleEventWork()
 		case IoEventPoller::FILT_WRITE:
 			// // LOG(DEBUG, "cgi write event");
 			// Cgi must be terminated when connection is lost
-			sendCgiRequest();
+			if (sendCgiRequest() == -1)
+				return IoEventPoller::STAT_NORMAL;
 			return IoEventPoller::STAT_NORMAL;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
@@ -86,7 +102,7 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
-	usleep(50);
+	usleep(25);
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
 	switch (m_status)
@@ -126,16 +142,18 @@ int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
+	
 	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
-
 	if (count != 0)
 	{
 //		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
 		return count;
 	}
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	{
 		close(m_serverToCgi[1]);
-
+		return -1;
+	}
 	return count;
 }
 

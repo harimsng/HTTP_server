@@ -127,16 +127,17 @@ AResponder::openFile(const string& path)
 		throw runtime_error("AResponder::openFile() open error");
 }
 
-void
+int
 AResponder::writeToFile(size_t writeSize)
 {
-	write(m_fileFd, m_recvBuffer.data(), writeSize);
+	return write(m_fileFd, m_recvBuffer.data(), writeSize);
 }
 
-void
+int
 AResponder::writeToBuffer(size_t writeSize)
 {
 	m_buffer.append(m_recvBuffer.data(), writeSize);
+	return writeSize;
 }
 
 bool
@@ -299,12 +300,20 @@ AResponder::receiveContentNormal()
 	if (m_dataSize == -1)
 		m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
 	if (m_dataSize == 0)
+	{
+		m_buffer.status(Buffer::BUF_EOF);
 		return 1;
+	}
 
-	int	count = m_recvBuffer.send(m_fileFd);
+	int	count = (this->*m_procContentFunc)(m_recvBuffer.size());
+	if (count == -1)
+		return 0;
 	m_dataSize -= count;
 	if (m_dataSize == 0)
+	{
+		m_buffer.status(Buffer::BUF_EOF);
 		return 1;
+	}
 	return (0);
 }
 
