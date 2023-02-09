@@ -60,14 +60,13 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
-	// // LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count == 0 && m_recvBuffer.size() == 0)
+	if (count == 0)
 	{
+		cout << "eof at request message" << endl;
+		cout << m_recvBuffer.size() << endl;
 		cout << m_recvBuffer << endl;
-		LOG(INFO, "recv buffer size : %d", m_recvBuffer.size());
-		LOG(INFO, "client to server send EOF");
 		return RECV_END;
 	}
 	else if (count == -1)

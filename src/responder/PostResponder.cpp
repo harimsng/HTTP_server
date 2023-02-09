@@ -38,7 +38,7 @@ PostResponder::respond() try
 {
 #ifndef TEST
 	std::string	readBody;
-	std::string tmpFile = g_tempDir + m_request.m_file;
+	std::string tmpFile = m_request.m_path + m_request.m_file;
 
 #endif
 	// struct stat st;
@@ -65,6 +65,7 @@ PostResponder::respond() try
 				respondStatusLine(200);
 				respondHeader();
 				respondBody(readBody);
+				close(m_fileFd);
 				m_responseStatus = RES_DONE;
 			}
 			else
@@ -98,6 +99,7 @@ catch(int errorStatusCode)
 	m_request.m_path = getErrorPage(readBody);
 	readFile(readBody);
 	respondBody(readBody);
+	close(m_fileFd);
 	endResponse();
 }
 

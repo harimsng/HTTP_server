@@ -68,7 +68,7 @@ Server::handleEventWork()
 
 			Client* client;
 			client = new Client(clientFd);
-			LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
+			LOG(INFO, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
 			ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
 					IoEventPoller::FILT_READ, client);
 			break;

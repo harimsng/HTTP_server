@@ -94,7 +94,7 @@ Cgi::receiveCgiResponse()
 	// cnt = read(m_fd, &m_fromCgiBuffer[0], 60000);
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	// cout << m_fromCgiBuffer << endl;
-	m_totalCnt += cnt;
+	// m_totalCnt += cnt;
 	// LOG(INFO, "receiveCgiResponse() read after total count : %d cur count : %d", totalCnt, cnt);
 	// LOG(INFO, "m_status : %d", m_status);
 	// LOG(INFO, "cgi read event finished at %d", m_fd);
@@ -166,7 +166,6 @@ Cgi::sendCgiRequest()
 	// }
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
 	{
-		// LOG(INFO, "sendCgiRequest() send eof");
 		cout << ++clearCnt << endl;
 		close(m_serverToCgi[1]);
 		return (-1);
@@ -185,7 +184,6 @@ Cgi::parseCgiHeader()
 
 	if (m_fromCgiBuffer.find("\r\n\r\n") == string::npos)
 		return statusCode;
-
 	while (1)
 	{
 		end = m_fromCgiBuffer.find(g_CRLF, start);
@@ -203,7 +201,6 @@ Cgi::parseCgiHeader()
 	}
 	m_fromCgiBuffer.erase(0, end + 2);
 	m_status = CGI_CONTENT;
-	// cout << m_status << endl;
 	return (statusCode);
 }
 
