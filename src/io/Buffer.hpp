@@ -6,6 +6,12 @@
 class	Buffer: public std::string
 {
 public:
+	enum	e_status
+	{
+		BUF_GOOD = 0x1,
+		BUF_EOF = 0x2
+	};
+
 // constructors & destructor
 	Buffer();
 	~Buffer();
@@ -15,7 +21,6 @@ public:
 	Buffer	&operator=(const Buffer& buffer);
 
 // member functions
-	const std::string&		getBuffer() const;
 	std::string::size_type	read(int fd);
 	std::string::size_type	receive(int fd);
 	std::string::size_type	receive();
@@ -25,6 +30,9 @@ public:
 	std::string::size_type	send();
 	void					setFd(int fd);
 
+	e_status	status();
+	void		status(e_status stat);
+
 	char	front() const;
 	char	back() const;
 	void	pop_back();
@@ -32,6 +40,7 @@ public:
 private:
 	std::string::size_type	m_writePos;
 	int						m_fd;
+	e_status				m_status;
 };
 
 class	ReceiveBuffer: public Buffer

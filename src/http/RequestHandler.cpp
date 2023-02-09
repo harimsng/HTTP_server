@@ -60,6 +60,7 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
+	// // LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
@@ -67,6 +68,7 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		return RECV_SKIPPED;
 
+	// LOG(DEBUG, "receiveRequest() count = %d", count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -76,7 +78,6 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus <= HttpRequestParser::HEADER_FIELDS)
 				break; // fall through
 		case HttpRequestParser::HEADER_FIELDS_END:
-			LOG(DEBUG, "Header fields parsing ends");
 			createResponseHeader();
 			receiveStatus = RECV_EVENT;
 			if (m_parser.m_readStatus == HttpRequestParser::HEADER_FIELDS_END)
@@ -85,13 +86,13 @@ RequestHandler::receiveRequest()
 			m_responder->respond();
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
-		case HttpRequestParser::ERROR:
-			delete m_responder;
-			if (m_parser.m_readStatus == HttpRequestParser::ERROR)
-				break; // fall through
 		case HttpRequestParser::FINISHED:
-			resetStates();
-			break;
+			delete m_responder;
+			if (m_parser.m_readStatus != HttpRequestParser::ERROR)
+			{
+				resetStates();
+				break;
+			}
 		default:
 			;
 	}
@@ -106,8 +107,7 @@ RequestHandler::createResponseHeader()
 	checkRequestMessage();
 	if (statusCode >= 400)
 	{
-		LOG(DEBUG, "error response to fd=%d, status code=%d",
-				m_socket->m_fd, statusCode);
+		// LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, statusCode);
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -132,10 +132,6 @@ RequestHandler::createResponseHeader()
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
-	// NOTE
-	// this functions moved to AResponder
-	// bufferResponseStatusLine(statusCode);
-	// bufferResponseHeaderFields();
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
@@ -162,10 +158,9 @@ RequestHandler::checkRequestMessage()
 	checkIsCgi();
 	if (m_request.m_locationBlock != NULL)
 	{
-		LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
+		// LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
 		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	}
-	// TODO: cleanup hardcodings
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
@@ -178,14 +173,18 @@ RequestHandler::checkIsCgi()
 		string m_ext = "";
 		if (m_request.m_file.find(".") != string::npos)
 		{
+			// QUESTION: what is extension of abc.def.ghi? ghi or def.ghi
+			// 			usually the extension is the substring which follows the last occurrence, if any, of the dot character.
 			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
 				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
+				// TODO
 				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
+			// TODO
 			m_request.m_status = 200;
 	}
 }
@@ -193,7 +192,7 @@ RequestHandler::checkIsCgi()
 void
 RequestHandler::checkStatusLine()
 {
-	if (m_request.m_protocol != "HTTP/1.1") // check http version
+	if (m_request.m_protocol != "HTTP/1.1")
 		UPDATE_REQUEST_ERROR(m_request.m_status, 505);
 }
 
@@ -229,7 +228,7 @@ RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
 	if (!(m_request.m_method & allowed))
 	{
-		LOG(DEBUG, "method not allowed");
+		// LOG(DEBUG, "method not allowed");
 		if (m_request.m_status == 404)
 			m_request.m_status = 405;
 		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
@@ -272,7 +271,7 @@ RequestHandler::checkResourceStatus()
 			statusCode = 500; break;
 	}
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
-	LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
+	// LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
 }
 
 std::string
@@ -302,6 +301,10 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
+	// if (!m_sendBuffer.empty())
+	// {
+	//     cout << "send buffer : "<< m_sendBuffer << endl;
+	// }
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
@@ -310,7 +313,7 @@ RequestHandler::sendResponse() try
 	}
 	if (count > 0)
 	{
-		LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
+		// LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
 		if (m_request.m_status >= 300)
 			return SEND_ERROR;
 	}
@@ -318,7 +321,7 @@ RequestHandler::sendResponse() try
 }
 catch (runtime_error& e)
 {
-	LOG(ERROR, "%s", e.what());
+	// LOG(ERROR, "%s", e.what());
 	return SEND_ERROR;
 }
 
@@ -344,6 +347,8 @@ operator<<(std::ostream& os, const Request& request)
 	return (os);
 }
 
+// NOTE: static functions below which are initializing table should be removed and
+// instead use initalizer list in C++11 or higher.
 void
 RequestHandler::setMethodConvertTable()
 {
@@ -440,6 +445,7 @@ RequestHandler::methodToString(uint16_t allowed)
 		methodString += " PUT,";
 	if (allowed & RequestHandler::DELETE)
 		methodString += " DELETE,";
-	methodString.erase(methodString.end() - 1);
+	if (methodString.size() > 0)
+		methodString.erase(methodString.end() - 1);
 	return (methodString);
 }

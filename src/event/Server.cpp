@@ -1,10 +1,10 @@
 #include "OsDependency.hpp"
+#include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "VirtualServer.hpp"
 #include "event/Client.hpp"
 #include "event/Server.hpp"
 
-#include <iostream>
 
 using namespace std;
 // deleted

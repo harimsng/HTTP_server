@@ -28,14 +28,15 @@ PutResponder::respond() try
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			openFile(); // fall through
-			m_responseStatus = RES_CONTENT;
+			openFile();
+			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
-			if (!readRequestBody())
+			if (!(this->*m_recvContentFunc)())
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED;// -> client_max_body_size error
+		// fall through
 		case RES_CONTENT_FINISHED:
-			throw (201);
+			throw (201); // fall through
 		case RES_DONE:
 			endResponse();
 			break;

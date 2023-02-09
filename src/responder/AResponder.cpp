@@ -1,23 +1,28 @@
 #include <sys/stat.h>
-#include <fcntl.h>
 
+#include <fcntl.h>
 #include <stdexcept>
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 
+#include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
 #include "io/Buffer.hpp"
 #include "util/Util.hpp"
 #include "AResponder.hpp"
-#include "Logger.hpp"
+
+#ifndef TEMP_DIR
+# define TEMP_DIR "/tmp"
+#endif
+
+#define FILE_BUFFER_SIZE (16384)
+
+extern const std::string	g_tempDir = TEMP_DIR;
 
 using namespace std;
-
-#define FILE_BUFFER_SIZE (8192)
 
 // constructors & destructor
 AResponder::AResponder(RequestHandler& requestHandler)
@@ -28,6 +33,17 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_responseStatus(RES_HEADER),
 	m_dataSize(-1)
 {
+	// TODO: condition is not complete.
+	if (m_request.m_headerFieldsMap.count("TRANSFER-ENCODING") == 1
+		&& m_request.m_headerFieldsMap["TRANSFER-ENCODING"].back() == "chunked")
+		m_recvContentFunc = &AResponder::receiveContentChunked;
+	else
+		m_recvContentFunc = &AResponder::receiveContentNormal;
+
+	if (m_request.m_isCgi == true && m_request.m_method == RequestHandler::POST)
+		m_procContentFunc = &AResponder::writeToBuffer;
+	else
+		m_procContentFunc = &AResponder::writeToFile;
 }
 
 AResponder::~AResponder()
@@ -49,7 +65,7 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
-	// TODO: expand this function and change its name or handle this behavior out of readFile() function.
+	// TODO: resourceLocation
 	if (m_request.m_locationBlock == NULL)
 	{
 		error_page = &m_request.m_virtualServer->m_errorPageTable;
@@ -93,7 +109,6 @@ AResponder::readFile(std::string& readBody)
 		fileBuffer.resize(file.gcount());
 		readBody += fileBuffer;
 	}
-	readBody += "\n";
 	file.close();
 }
 
@@ -112,12 +127,17 @@ AResponder::openFile(const string& path)
 		throw runtime_error("AResponder::openFile() open error");
 }
 
-void
-AResponder::writeFile(int writeSize)
+int
+AResponder::writeToFile(size_t writeSize)
 {
-	// TODO
-	// m_fileFd가 pipe[1] (cgi)
-	write(m_fileFd, m_recvBuffer.data(), writeSize);
+	return write(m_fileFd, m_recvBuffer.data(), writeSize);
+}
+
+int
+AResponder::writeToBuffer(size_t writeSize)
+{
+	m_buffer.append(m_recvBuffer.data(), writeSize);
+	return writeSize;
 }
 
 bool
@@ -142,7 +162,6 @@ AResponder::checkDirExists(const std::string& filePath)
 	if (exist == 0 && ((buffer.st_mode & S_IFMT) == S_IFDIR))
 		return (true);
 	return (false);
-
 }
 
 void
@@ -171,6 +190,7 @@ AResponder::respondHeader()
 
 		m_sendBuffer.append(g_CRLF);
 	}
+	// INFO: is reconnecting right when responding with redirection?
 	if (m_request.m_status >= 300)
 	{
 		m_sendBuffer.append("Connection: close");
@@ -199,11 +219,15 @@ AResponder::respondBody(const string& readBody)
 }
 
 int
-AResponder::readRequestBody()
+AResponder::sendContentNormal()
 {
-	if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") > 0)
-		return (normalReadBody());
-	return (chunkedReadBody());
+	return 0;
+}
+
+int
+AResponder::sendContentChunked()
+{
+	return 0;
 }
 
 string
@@ -226,28 +250,39 @@ AResponder::parseChunkSize()
 }
 
 int
-AResponder::chunkedReadBody()
+AResponder::receiveContentChunked()
 {
-	while(m_recvBuffer.size() != 0)
+	while (m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
+		{
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
+			// LOG(DEBUG, "dataSize updated = %d", m_dataSize);
+		}
+		// INFO: clientMaxBodySize may be total content length?
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
+			// NOTE: PostResponder closes m_fileFd twice
+//			close(m_fileFd);
+			// LOG(DEBUG, "chunked receiving finished");
+			m_buffer.status(Buffer::BUF_EOF);
 			m_recvBuffer.clear();
 			return (1);
 		}
-		if (m_dataSize > 0 && m_dataSize + 2 <= (int)m_recvBuffer.size())
+		// LOG(DEBUG, "dataSize = %d, buffersize = %zu", m_dataSize, m_recvBuffer.size());
+		if (m_dataSize > 0 && m_dataSize + 2 <= static_cast<int>(m_recvBuffer.size()))
 		{
-			writeFile(m_dataSize);
+			(this->*m_procContentFunc)(m_dataSize);
+//			writeToFile(m_dataSize);
 			m_recvBuffer.erase(0, m_dataSize + 2);
 			m_dataSize = -1;
 		}
-		else if (m_dataSize > 0 && m_dataSize >= (int)m_recvBuffer.size())
+		else if (m_dataSize > 0 && m_dataSize >= static_cast<int>(m_recvBuffer.size()))
 		{
-			writeFile(m_recvBuffer.size());
+			(this->*m_procContentFunc)(m_recvBuffer.size());
+//			writeToFile(m_recvBuffer.size());
 			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();
 			if (m_dataSize == 0)
@@ -260,17 +295,25 @@ AResponder::chunkedReadBody()
 }
 
 int
-AResponder::normalReadBody()
+AResponder::receiveContentNormal()
 {
 	if (m_dataSize == -1)
 		m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
 	if (m_dataSize == 0)
+	{
+		m_buffer.status(Buffer::BUF_EOF);
 		return 1;
+	}
 
-	int	count = m_recvBuffer.send(m_fileFd);
+	int	count = (this->*m_procContentFunc)(m_recvBuffer.size());
+	if (count == -1)
+		return 0;
 	m_dataSize -= count;
 	if (m_dataSize == 0)
+	{
+		m_buffer.status(Buffer::BUF_EOF);
 		return 1;
+	}
 	return (0);
 }
 
@@ -284,5 +327,3 @@ AResponder::respondStatusLine(int statusCode)
 	m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
 	m_sendBuffer.append(g_CRLF);
 }
-
-

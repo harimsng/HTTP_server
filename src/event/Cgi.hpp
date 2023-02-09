@@ -4,13 +4,20 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
+
 #include "event/EventObject.hpp"
+#include "io/Buffer.hpp"
 
 class	RequestHandler;
 struct	Request;
 
-class	Cgi//: public EventObject
+class	Cgi: public EventObject
 {
+	enum	e_status
+	{
+		CGI_HEADER = 1,
+		CGI_CONTENT
+	};
 // deleted
 	Cgi	&operator=(Cgi const& cgi);
 	Cgi(Cgi const& cgi);
@@ -18,32 +25,47 @@ class	Cgi//: public EventObject
 public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
+	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
+	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write);
 	~Cgi();
 
 // member functions
 	void	initEnv(const Request& request);
 	void	executeCgi(int pipe[2], std::string& readBody, const Request &request);
-	void	receiveCgiResponse();
+// #ifdef TEST
+	void	executeCgi();
+// #endif
+	int		receiveCgiResponse();
+	int		sendCgiRequest();
+	int		parseCgiHeader();
+	void	respondStatusLine(int statusCode);
+	void	respondHeader();
 
-	//IoEventPoller::EventStatus	handleEventWork();
+	IoEventPoller::EventStatus	handleEventWork();
 
 // member variables;
 private:
+		pid_t						m_pid;
+
 		std::vector<std::string>	m_env;
 		std::vector<char*>			m_envp;
 		std::vector<std::string>	m_argvBase;
 		std::vector<char*>			m_argv;
 		std::string					m_cgiPath;
 
+		RequestHandler*	m_requestHandler;
 
-		// int							m_fromCgiToServer[2];
-		// int							m_fromServerToCgi[2];
-		// pid_t						m_pid;
-		bool						m_bodyFlag;
-		RequestHandler*				m_requestHandler;
+		int				m_requestContentFileFd;
 
-		int							m_requestContentFileFd;
-		int							m_readEnd;
+		std::string		m_responseHeader;
+		std::string		m_responseBody;
+
+		int				m_serverToCgi[2];
+		int				m_cgiToServer[2];
+
+		Buffer			m_fromCgiBuffer;
+		Buffer*			m_toCgiBuffer;
+		e_status		m_status;
 };
 
 #endif

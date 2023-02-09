@@ -1,5 +1,7 @@
 #include <string>
 
+#include "Logger.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "ServerManager.hpp"
 #include "Client.hpp"
 
@@ -33,7 +35,6 @@ Client::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			LOG(DEBUG, "read event to client(fd=%d)", m_socket.m_fd);
 			status = m_requestHandler.receiveRequest();
 			switch (status)
 			{

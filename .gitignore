@@ -61,3 +61,6 @@ webserv
 errlog.txt
 *.bla
 .cache
+file_should_exist_after
+multiple_same
+compile_commands.json

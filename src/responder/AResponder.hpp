@@ -2,7 +2,6 @@
 #define ARESPONDER_HPP
 
 #include "http/RequestHandler.hpp"
-#include <cerrno>
 
 class	AResponder
 {
@@ -36,21 +35,22 @@ protected:
 	void			respondStatusLine(int statusCode);
 	void			respondBody(const std::string& readBody);
 
+	int				sendContentNormal();
+	int				sendContentChunked();
+
 	std::string		parseChunkSize();
 
 	void			openFile(const std::string& path);
 	void			openFile();
-	void			writeFile(int writeSize);
+	int				writeToFile(size_t writeSize);
+	int				writeToBuffer(size_t writeSize);
 	void			readFile(std::string& readBody);
 
-	int				readRequestBody();
-	int				normalReadBody();
-	int				chunkedReadBody();
+	int				receiveContentNormal();
+	int				receiveContentChunked();
 
 	bool			checkFileExists(const std::string& filePath);
 	bool			checkDirExists(const std::string& filePath);
-
-	void			constructCgi();
 
 	std::string		getErrorPage(std::string& readBody);
 
@@ -58,10 +58,18 @@ protected:
 	Request&			m_request;
 	Buffer&				m_sendBuffer;
 	Buffer&				m_recvBuffer;
+	Buffer				m_buffer;
+
 	e_responseStatus	m_responseStatus;
 	int					m_dataSize;
+	int					m_totalContentLentgh;
 	int					m_fileFd;
+	int					m_cgiWriteEnd;
 	int					m_cgiReadEnd;
+
+	int			(AResponder::*m_recvContentFunc)();
+	int			(AResponder::*m_sendContentFunc)();
+	int			(AResponder::*m_procContentFunc)(size_t size);
 };
 
 #endif

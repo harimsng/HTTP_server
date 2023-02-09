@@ -1,13 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
-
 #include "Webserv.hpp"
-#include "Logger.hpp"
-#include "exception/HttpErrorHandler.hpp"
 #include "event/EventObject.hpp"
 #include "http/RequestHandler.hpp"
 #include "socket/Socket.hpp"

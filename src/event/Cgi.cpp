@@ -1,18 +1,17 @@
-#include <iostream>
+#include <sys/wait.h>
+
+#include <functional>
 #include <stdexcept>
+#include <unistd.h>
+#include <iostream>
 
 #include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "Cgi.hpp"
 
-
-
-#include <iostream>
-
 using namespace std;
-
-#define BUFFER_SIZE (65535)
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
@@ -23,48 +22,161 @@ Cgi&	Cgi::operator=(Cgi const& cgi)
 }
 
 Cgi::Cgi(Cgi const& cgi)
-//:	EventObject()
+:	EventObject()
 {
 	(void)cgi;
 }
 
 // constructors & destructor
+Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer)
+:	EventObject(cgiToServer[0]),
+	m_requestHandler(&requestHandler),
+//	m_serverToCgi(serverToCgi),
+//	m_cgiToServer(cgiToServer),
+	m_toCgiBuffer(&toCgiBuffer),
+	m_status(CGI_HEADER)
+{
+	m_serverToCgi[0] = serverToCgi[0];
+	m_serverToCgi[1] = serverToCgi[1];
+	m_cgiToServer[0] = cgiToServer[0];
+	m_cgiToServer[1] = cgiToServer[1];
+}
+
+Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
+:	EventObject(serverToCgi[1]),
+	m_requestHandler(&requestHandler),
+//	m_serverToCgi(serverToCgi),
+//	m_cgiToServer(cgiToServer),
+	m_toCgiBuffer(&toCgiBuffer),
+	m_status(CGI_HEADER)
+{
+	(void)for_write;
+	m_serverToCgi[0] = serverToCgi[0];
+	m_serverToCgi[1] = serverToCgi[1];
+	m_cgiToServer[0] = cgiToServer[0];
+	m_cgiToServer[1] = cgiToServer[1];
+}
+
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
 {
 	(void) writeEnd;
-	m_bodyFlag = false;
 }
 
 Cgi::~Cgi()
 {
+	//int	status;
+
+	//close(m_fd);
+	//waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
 }
-/*
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			receiveCgiResponse(); // fall through
+			if (receiveCgiResponse() == 0) // fall through
+			{
+				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
+				return IoEventPoller::STAT_END;
+			}
+			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
-			return IoEventPoller::STAT_ERROR;
+			// // LOG(DEBUG, "cgi write event");
+			// Cgi must be terminated when connection is lost
+			if (sendCgiRequest() == -1)
+				return IoEventPoller::STAT_NORMAL;
+			return IoEventPoller::STAT_NORMAL;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
 	}
 	return IoEventPoller::STAT_NORMAL;
 }
-*/
 
-void
+int
 Cgi::receiveCgiResponse()
 {
-	// INFO: temporary function
-	Buffer&	sendBuffer = m_requestHandler->m_sendBuffer;
+	int cnt;
+	int statusCode;
 
-	(void) sendBuffer;
-	//sendBuffer.receive(m_readEnd);
+	usleep(100);
+	cnt = m_fromCgiBuffer.receive(m_fd);
+	if (cnt == 0)
+	{
+		statusCode = parseCgiHeader();
+		respondStatusLine(statusCode);
+		respondHeader();
+		m_requestHandler->m_sendBuffer.append("Content-Length: ");
+		cout << m_responseBody.size() << endl;
+		m_requestHandler->m_sendBuffer.append(Util::toString(m_responseBody.size()));
+		m_requestHandler->m_sendBuffer.append(g_CRLF);
+		m_requestHandler->m_sendBuffer.append(g_CRLF);
+		m_requestHandler->m_sendBuffer.append(m_responseBody);
+		m_fromCgiBuffer.clear();
+		close(m_fd);
+		m_requestHandler->resetStates();
+		return (0);
+	}
+	else
+	{
+		m_responseBody += m_fromCgiBuffer;
+		m_fromCgiBuffer.clear();
+		return (1);
+	}
+}
+
+// if output is slower than input, the buffer grows up indefinitely.
+int
+Cgi::sendCgiRequest()
+{
+	// NOTE: there's chance for blocking because we don't know pipe memory left.
+	
+	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
+	if (count != 0)
+	{
+//		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
+		return count;
+	}
+	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	{
+		close(m_serverToCgi[1]);
+		return -1;
+	}
+	return count;
+}
+
+int
+Cgi::parseCgiHeader()
+{
+	int	start = 0, end;
+	int statusCode = 200;
+	string	headerField;
+	string	fieldName;
+	string	fieldValue;
+
+	if (m_responseBody.find("\r\n\r\n") == string::npos)
+		return statusCode;
+
+	while (1)
+	{
+		end = m_responseBody.find(g_CRLF, start);
+		headerField = m_responseBody.substr(start, end - start);
+		if (headerField.empty())
+			break;
+		fieldName = headerField.substr(0, headerField.find(':'));
+		fieldName = Util::toUpper(fieldName);
+		fieldValue = headerField.substr(headerField.find(':') + 1);
+		if (fieldName == "STATUS")
+			statusCode = Util::toInt(fieldValue);
+		else
+			m_responseHeader += headerField + g_CRLF;
+		start = end + 2;
+	}
+	m_responseBody.erase(0, end + 2);
+	m_status = CGI_CONTENT;
+	return (statusCode);
 }
 
 void
@@ -79,7 +191,7 @@ Cgi::initEnv(const Request &request)
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
-    std::string CONTENT_LENGTH = "CONTENT_LENGTH=";
+    std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
     contentIt = request.m_headerFieldsMap.find("CONTENT-TYPE");
@@ -93,11 +205,12 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
+	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
-		//TODO: change to_string
-        CONTENT_LENGTH += std::to_string(request.m_bodySize);
+        CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
+	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
@@ -119,6 +232,9 @@ Cgi::initEnv(const Request &request)
     {
         QUERY_STRING += request.m_queryString;
 	}
+	m_env.reserve(32);
+	m_envp.reserve(32);
+	m_argv.reserve(32);
     m_env.push_back(REDIRECT_STATUS);
     m_env.push_back(CONTENT_LENGTH);
     m_env.push_back(CONTENT_TYPE);
@@ -156,42 +272,94 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
 //	close(m_fd);
-    pid_t pid;
-	m_readEnd = pipe[0];
 	struct stat st;
 
-    pid = fork();
-    if (pid < 0)
+	m_pid = fork();
+	if (m_pid < 0)
 	{
-        throw std::runtime_error("Cgi::Cgi() fork failed");
-    }
-    if (pid == 0)
+		throw std::runtime_error("Cgi::Cgi() fork failed");
+	}
+	if (m_pid == 0)
 	{
-        // Child process
+		// Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
-        dup2(m_requestContentFileFd, STDOUT_FILENO);
+
+		dup2(m_requestContentFileFd, STDOUT_FILENO);
 		close(pipe[0]);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
-    } else if (pid > 0) {
-        // Parent process
-		close(pipe[0]);
-		if (request.m_bodySize && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
-			return;
-		close(pipe[1]);
-		int status;
-		pid_t wpid = waitpid(pid, &status, 0);
-		if (wpid == -1)
-			return;
-    }
+	}
+		// Parent process
+	close(pipe[0]);
+
+	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
+	if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
+		return;
+	close(pipe[1]);
+	int status;
+	pid_t wpid = waitpid(m_pid, &status, 0);
+	if (wpid == -1)
+		return;
 	lseek(m_requestContentFileFd, 0, SEEK_SET);
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;
-	LOG(DEBUG, "filesize = %d", fileSize);
+	// LOG(DEBUG, "filesize = %d", fileSize);
 	readBody.resize(fileSize, 0);
-	read(m_requestContentFileFd, (char *)(readBody.data()), fileSize);
+	// FIX: casting const pointer to normal pointer is UB
+	read(m_requestContentFileFd, &readBody[0], fileSize);
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }
+
+void
+Cgi::executeCgi()
+{
+	m_pid = fork();
+	if (m_pid < 0)
+	{
+		throw std::runtime_error("Cgi::executeCgi() fork() fail");
+	}
+	else if (m_pid == 0)
+	{
+		// child process
+		// NOTE: do fd leaks block creating more cgi?
+		close(m_requestHandler->m_socket->m_fd);
+		close(m_serverToCgi[1]);
+		close(m_cgiToServer[0]);
+		if (dup2(m_serverToCgi[0], STDIN_FILENO) != STDIN_FILENO
+			|| dup2(m_cgiToServer[1], STDOUT_FILENO) != STDOUT_FILENO)
+		{
+			throw std::runtime_error("Cgi::executeCgi() dup2() fail");
+		}
+		close(m_serverToCgi[0]);
+		close(m_cgiToServer[1]);
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::executeCgi() execve() fail");
+	}
+	close(m_serverToCgi[0]);
+	close(m_cgiToServer[1]);
+}
+
+void
+Cgi::respondStatusLine(int statusCode)
+{
+	m_requestHandler->m_sendBuffer.append(g_httpVersion);
+	m_requestHandler->m_sendBuffer.append(" ");
+	m_requestHandler->m_sendBuffer.append(Util::toString(statusCode));
+	m_requestHandler->m_sendBuffer.append(" ");
+	m_requestHandler->m_sendBuffer.append(HttpErrorHandler::getErrorMessage(statusCode));
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+}
+
+void
+Cgi::respondHeader()
+{
+	m_requestHandler->m_sendBuffer.append("Server: webserv/2.0");
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+	m_requestHandler->m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
+	m_requestHandler->m_sendBuffer.append(g_CRLF);
+	m_requestHandler->m_sendBuffer.append(m_responseHeader);
+}
+// #endif
