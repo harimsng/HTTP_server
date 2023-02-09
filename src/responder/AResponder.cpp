@@ -1,5 +1,4 @@
 #include <sys/stat.h>
-
 #include <fcntl.h>
 #include <stdexcept>
 #include <algorithm>
@@ -13,6 +12,7 @@
 #include "io/Buffer.hpp"
 #include "util/Util.hpp"
 #include "AResponder.hpp"
+#include "event/Cgi.hpp"
 
 #ifndef TEMP_DIR
 # define TEMP_DIR "/tmp"
@@ -44,12 +44,14 @@ AResponder::AResponder(RequestHandler& requestHandler)
 		m_procContentFunc = &AResponder::writeToBuffer;
 	else
 		m_procContentFunc = &AResponder::writeToFile;
+	m_cgi = NULL;
+	m_totalrecvBufferSize = 0;
 }
 
 AResponder::~AResponder()
 {
+	delete m_cgi;
 }
-
 
 // operators
 AResponder&
@@ -251,6 +253,7 @@ AResponder::parseChunkSize()
 int
 AResponder::receiveContentChunked()
 {
+	// cout << m_buffer.size() << endl;
 	while (m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
@@ -263,9 +266,9 @@ AResponder::receiveContentChunked()
 			throw (413);
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
+			// LOG(INFO, "read finished");
 			// NOTE: PostResponder closes m_fileFd twice
 //			close(m_fileFd);
-			// LOG(DEBUG, "chunked receiving finished");
 			m_buffer.status(Buffer::BUF_EOF);
 			m_recvBuffer.clear();
 			return (1);
@@ -274,6 +277,8 @@ AResponder::receiveContentChunked()
 		if (m_dataSize > 0 && m_dataSize + 2 <= static_cast<int>(m_recvBuffer.size()))
 		{
 			(this->*m_procContentFunc)(m_dataSize);
+			// m_totalrecvBufferSize += m_dataSize + 2;
+			// cout << m_totalrecvBufferSize << endl;
 //			writeToFile(m_dataSize);
 			m_recvBuffer.erase(0, m_dataSize + 2);
 			m_dataSize = -1;
@@ -281,6 +286,8 @@ AResponder::receiveContentChunked()
 		else if (m_dataSize > 0 && m_dataSize >= static_cast<int>(m_recvBuffer.size()))
 		{
 			(this->*m_procContentFunc)(m_recvBuffer.size());
+			// m_totalrecvBufferSize += m_recvBuffer.size();
+			// cout << m_totalrecvBufferSize << endl;
 //			writeToFile(m_recvBuffer.size());
 			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();

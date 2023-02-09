@@ -27,6 +27,7 @@ public:
 
 	std::string::size_type	write(int fd);
 	std::string::size_type	send(int fd);
+	std::string::size_type	mysend(int fd);
 	std::string::size_type	send();
 	void					setFd(int fd);
 

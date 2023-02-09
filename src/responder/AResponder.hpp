@@ -3,6 +3,8 @@
 
 #include "http/RequestHandler.hpp"
 
+class Cgi;
+
 class	AResponder
 {
 private:
@@ -59,6 +61,7 @@ protected:
 	Buffer&				m_sendBuffer;
 	Buffer&				m_recvBuffer;
 	Buffer				m_buffer;
+	Cgi*				m_cgi;
 
 	e_responseStatus	m_responseStatus;
 	int					m_dataSize;
@@ -67,6 +70,8 @@ protected:
 	int					m_cgiWriteEnd;
 	int					m_cgiReadEnd;
 
+	int					m_serverToCgi;
+	int			m_totalrecvBufferSize;
 	int			(AResponder::*m_recvContentFunc)();
 	int			(AResponder::*m_sendContentFunc)();
 	void		(AResponder::*m_procContentFunc)(size_t size);

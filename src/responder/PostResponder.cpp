@@ -1,3 +1,4 @@
+#include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <vector>
@@ -57,27 +58,6 @@ PostResponder::respond() try
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
-// #ifndef TEST
-//             lseek(m_fileFd, 0, SEEK_SET);
-//             fstat(m_fileFd, &st);
-//             m_request.m_bodySize = st.st_size;
-//             m_request.requestBodyBuf.resize(m_request.m_bodySize , 0);
-//             // FIX: casting const pointer to normal pointer is UB
-//             read(m_fileFd, &m_request.requestBodyBuf[0], m_request.m_bodySize);
-//             unlink(tmpFile.c_str());
-//             if (m_request.m_isCgi == true)
-//             {
-//                 openFile(tmpFile);
-//                 constructCgi(readBody);
-//             }
-//             else
-//                 readFile(readBody);
-//             unlink(tmpFile.c_str());
-//             respondStatusLine(200);
-//             respondHeader();
-//             respondBody(readBody);
-//             m_responseStatus = RES_DONE;
-// #else
 			if (m_request.m_isCgi == false)
 			{
 				string	readBody;
@@ -89,6 +69,8 @@ PostResponder::respond() try
 			}
 			else
 			{
+				ServerManager::registerEvent(m_serverToCgi, Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, m_cgi);
+				// m_cgi->executeCgi();
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes
@@ -99,7 +81,6 @@ PostResponder::respond() try
 			m_responseStatus = RES_DONE;
 			// fall through
 		case RES_DONE:
-//			close(m_fileFd);
 			endResponse();
 			break;
 		default:
@@ -120,52 +101,23 @@ catch(int errorStatusCode)
 	endResponse();
 }
 
-// void
-// PostResponder::constructCgi(std::string& readBody)
-// {
-//     int	pipeSet[2];
-//
-//     // int fileFd[2];
-//
-//     pipe(pipeSet);
-// #ifndef TEST
-//     m_cgiReadEnd = pipeSet[0];
-// #endif
-//     // pipeSet[0]  ->
-//     // pipeSet[1]
-//
-// //						cgi 리턴하는곳	안씀
-//     Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
-//
-// #ifdef TEST
-//     ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-//     cgi->initEnv(m_request);
-//     cgi->executeCgi(pipeSet);
-// #endif
-//     // NOTE: deallcation
-//     cgi->initEnv(m_request);
-//     cgi->executeCgi(pipeSet, readBody, m_request);
-// #ifdef TEST
-//     m_responseStatus = RES_RECV_CGI;
-// #endif
-// }
-
 void
 PostResponder::constructCgi()
 {
 	int cgiToServer[2];// cgi의 stdout
 	int serverToCgi[2]; // cgi의 stdin
 
+
 	if (pipe(cgiToServer) < 0
 		|| pipe(serverToCgi) < 0)
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
-	//
-//	m_fileFd = serverToCgi[1];
-
 	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
+
+	m_serverToCgi = serverToCgi[1];
+	m_cgi = cgi;
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
+	// ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }

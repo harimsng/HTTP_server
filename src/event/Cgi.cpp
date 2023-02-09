@@ -1,15 +1,16 @@
 #include <sys/wait.h>
-
 #include <functional>
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "Cgi.hpp"
+#include "ServerManager.hpp"
 
 using namespace std;
 
@@ -40,6 +41,7 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_serverToCgi[1] = serverToCgi[1];
 	m_cgiToServer[0] = cgiToServer[0];
 	m_cgiToServer[1] = cgiToServer[1];
+	m_totalCnt = 0;
 }
 
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
@@ -63,14 +65,15 @@ Cgi::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
+			// LOG(INFO, "cgi read event at %d", m_fd);
 			if (receiveCgiResponse() == 0) // fall through
 			{
 				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
-				return IoEventPoller::STAT_END;
+				// return IoEventPoller::STAT_END;
 			}
 			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
-			// // LOG(DEBUG, "cgi write event");
+			// LOG(INFO, "cgi write event at %d", m_fd);
 			// Cgi must be terminated when connection is lost
 			sendCgiRequest();
 			return IoEventPoller::STAT_NORMAL;
@@ -85,9 +88,18 @@ Cgi::receiveCgiResponse()
 {
 	int cnt;
 	int statusCode;
+	// static int totalCnt = 0;
 
+	// LOG(INFO, "receiveCgiResponse() read before fromCgiBuffer size : %d", m_fromCgiBuffer.size());
+	// cnt = read(m_fd, &m_fromCgiBuffer[0], 60000);
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
+	// cout << m_fromCgiBuffer << endl;
+	m_totalCnt += cnt;
+	// LOG(INFO, "receiveCgiResponse() read after total count : %d cur count : %d", totalCnt, cnt);
+	// LOG(INFO, "m_status : %d", m_status);
+	// LOG(INFO, "cgi read event finished at %d", m_fd);
+	// totalCnt += cnt;
+	// LOG(INFO, "receiveCgiResponse() count = %d, cnt = %d", m_totalCnt, cnt);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -109,9 +121,12 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append(m_fromCgiBuffer);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_fromCgiBuffer.clear();
+			// LOG(INFO, "receiveCgiResponse cnt  %d", cnt);
 			if (cnt == 0)
 			{
+				// LOG(INFO, "cgi read EOF at %d", m_fd);
 				m_requestHandler->resetStates();
+				delete this;
 			}
 			break;
 	}
@@ -123,16 +138,39 @@ int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
-	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
+	int	count = m_toCgiBuffer->mysend(m_serverToCgi[1]);
+	static int clearCnt = 0;
 
-	if (count != 0)
+	// static int totCnt = 0;
+	// int beforeSize = 0;
+	// int writeSize = 65000;
+
+	// if (m_fd == 21 || m_fd == 22)
+		// cout << m_toCgiBuffer->size() << endl;
+	// if (m_toCgiBuffer->size() == 0)
+	//     return 0;
+	// LOG(INFO, "sendCgiRequest() write before size : %d", m_toCgiBuffer->size());
+	// beforeSize = m_toCgiBuffer->size();
+	// if (m_toCgiBuffer->size() <= 65000)
+	//     writeSize = m_toCgiBuffer->size();
+	// cout << m_toCgiBuffer->size() << endl;
+	// int count = write(m_serverToCgi[1], m_toCgiBuffer->c_str(), 8192);
+	// m_toCgiBuffer->erase(0, 8192);
+	// totCnt = totCnt + beforeSize - m_toCgiBuffer->size();
+	// cout << "cgi buffer : "<< m_toCgiBuffer->size() << " cout : " << count << " total cnt : " << totCnt << endl;
+	// m_toCgiBuffer->erase(0, count);
+	// if (count != 0)
+	// {
+	//     // LOG(DEBUG, "sendCgiRequest() count = %d", count);
+	//     return count;
+	// }
+	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
 	{
-//		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
-		return count;
-	}
-	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+		// LOG(INFO, "sendCgiRequest() send eof");
+		cout << ++clearCnt << endl;
 		close(m_serverToCgi[1]);
-
+		return (-1);
+	}
 	return count;
 }
 
@@ -165,6 +203,7 @@ Cgi::parseCgiHeader()
 	}
 	m_fromCgiBuffer.erase(0, end + 2);
 	m_status = CGI_CONTENT;
+	// cout << m_status << endl;
 	return (statusCode);
 }
 

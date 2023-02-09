@@ -94,7 +94,7 @@ Kqueue::pollWork()
 			default:
 				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");
 		}
-
+		// LOG(INFO, "an event(fd: %d) start! fileter : %d", object->m_fd, object->m_filter);
 		EventStatus status = object->handleEvent();
 		if (status == STAT_END)
 		{
