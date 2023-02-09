@@ -1,4 +1,3 @@
-#include "Webserv.hpp"
 #include "Logger.hpp"
 #include "event/Server.hpp"
 #include "event/Client.hpp"
@@ -105,4 +104,15 @@ ServerManager::registerEvent(int fd, IoEventPoller::e_operation op,
 			IoEventPoller::e_filters filter, EventObject* object)
 {
 	s_ioEventPoller.add(fd, op, filter, object);
+}
+
+void
+ServerManager::closeListenServer()
+{
+	for (ListenServerTable::iterator itr = s_listenServerTable.begin();
+		 itr != s_listenServerTable.end();
+		 ++itr)
+	{
+		close(itr->second->m_fd);
+	}
 }

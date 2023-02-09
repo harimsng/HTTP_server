@@ -44,26 +44,30 @@ public:
 
 // member variables;
 private:
-		pid_t						m_pid;
+	pid_t						m_pid;
 
-		std::vector<std::string>	m_env;
-		std::vector<char*>			m_envp;
-		std::vector<std::string>	m_argvBase;
-		std::vector<char*>			m_argv;
-		std::string					m_cgiPath;
+	std::vector<std::string>	m_env;
+	std::vector<char*>			m_envp;
+	std::vector<std::string>	m_argvBase;
+	std::vector<char*>			m_argv;
+	std::string					m_cgiPath;
 
-		RequestHandler*	m_requestHandler;
+	RequestHandler*	m_requestHandler;
 
-		int				m_requestContentFileFd;
+	int				m_requestContentFileFd;
 
-		std::string		m_responseHeader;
+	std::string		m_responseHeader;
 
-		int				m_serverToCgi[2];
-		int				m_cgiToServer[2];
+	int				m_serverToCgi[2];
+	int				m_cgiToServer[2];
 
-		Buffer			m_fromCgiBuffer;
-		Buffer*			m_toCgiBuffer;
-		e_status		m_status;
+	Buffer			m_fromCgiBuffer;
+	Buffer*			m_toCgiBuffer;
+	e_status		m_status;
+
+	static std::vector<std::pair<int, int> >	s_cgiPipeList;
+
+	static void		closePipeList();
 };
 
 #endif

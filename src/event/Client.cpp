@@ -35,6 +35,7 @@ Client::handleEventWork()
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
+			LOG(DEBUG, "client read event");
 			status = m_requestHandler.receiveRequest();
 			switch (status)
 			{

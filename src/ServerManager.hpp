@@ -34,6 +34,7 @@ public:
 
 	static void	registerEvent(int fd, IoEventPoller::e_operation op,
 			IoEventPoller::e_filters filter, EventObject* object);
+	static void closeListenServer();
 
 };
 

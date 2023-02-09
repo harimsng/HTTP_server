@@ -6,12 +6,17 @@
 #include <iostream>
 
 #include "Logger.hpp"
+#include "ServerManager.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "Cgi.hpp"
 
 using namespace std;
+
+std::vector<std::pair<int, int> >	Cgi::s_cgiPipeList;
+
+extern const string	g_webservDir;
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
@@ -87,6 +92,8 @@ Cgi::receiveCgiResponse()
 	int statusCode;
 
 	cnt = m_fromCgiBuffer.receive(m_fd);
+	if (cnt == -1)
+		return -1;
 	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
 	switch (m_status)
 	{
@@ -111,6 +118,7 @@ Cgi::receiveCgiResponse()
 			m_fromCgiBuffer.clear();
 			if (cnt == 0)
 			{
+				m_requestHandler->m_sendBuffer.status(Buffer::BUF_EOF);
 				m_requestHandler->resetStates();
 			}
 			break;
@@ -211,9 +219,9 @@ Cgi::initEnv(const Request &request)
     std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method]; // 실제 메소드 이름으로 수정 필요
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
-    std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
+    std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + g_webservDir + "cgi-bin/cgi_tester"; // request.m_path + request.m_file;
     std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file; //+ request.m_locationBlock->m_cgiPass;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // path of cgi script in file-system
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + g_webservDir + "cgi-bin/cgi_tester"; // request.m_path + request.m_file; // path of cgi script in file-system
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
@@ -312,7 +320,6 @@ Cgi::executeCgi()
 	{
 		// child process
 		// NOTE: do fd leaks block creating more cgi?
-		close(m_requestHandler->m_socket->m_fd);
 		close(m_serverToCgi[1]);
 		close(m_cgiToServer[0]);
 		if (dup2(m_serverToCgi[0], STDIN_FILENO) != STDIN_FILENO
@@ -322,11 +329,15 @@ Cgi::executeCgi()
 		}
 		close(m_serverToCgi[0]);
 		close(m_cgiToServer[1]);
+		ServerManager::closeListenServer();
+		Cgi::closePipeList();
+		close(m_requestHandler->m_socket->m_fd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
 	close(m_serverToCgi[0]);
 	close(m_cgiToServer[1]);
+	s_cgiPipeList.push_back(make_pair(m_serverToCgi[1], m_cgiToServer[0]));
 }
 
 void
@@ -349,4 +360,13 @@ Cgi::respondHeader()
 	m_requestHandler->m_sendBuffer.append(g_CRLF);
 	m_requestHandler->m_sendBuffer.append(m_responseHeader);
 }
-// #endif
+
+void
+Cgi::closePipeList()
+{
+	for (unsigned int i = 0; i < s_cgiPipeList.size(); ++i)
+	{
+		close(s_cgiPipeList[i].first);
+		close(s_cgiPipeList[i].second);
+	}
+}

@@ -68,7 +68,7 @@ RequestHandler::receiveRequest()
 	else if (count == -1)
 		return RECV_SKIPPED;
 
-	// LOG(DEBUG, "receiveRequest() count = %d", count);
+//	LOG(DEBUG, "receiveRequest() count = %d", count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -226,6 +226,7 @@ RequestHandler::resolveVirtualServer(const string& host)
 void
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
+//	LOG(DEBUG, "allowed = %x, method = %x", allowed, m_request.m_method);
 	if (!(m_request.m_method & allowed))
 	{
 		// LOG(DEBUG, "method not allowed");
