@@ -89,6 +89,8 @@ PostResponder::respond() try
 			}
 			else
 			{
+				ServerManager::registerEvent(m_serverToCgi, Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, m_cgi);
+				
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes
@@ -160,14 +162,14 @@ PostResponder::constructCgi()
 		|| pipe(serverToCgi) < 0)
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
+	m_serverToCgi = serverToCgi[1];
 	fcntl(cgiToServer[0], F_SETFL, O_NONBLOCK);
 	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
 //
 //	m_fileFd = serverToCgi[1];
 
-	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
-	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
-	cgi->initEnv(m_request);
-	cgi->executeCgi();
+	m_cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
+	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, m_cgi);
+	m_cgi->initEnv(m_request);
+	m_cgi->executeCgi();
 }

@@ -2,6 +2,7 @@
 #define POSTRESPONDER_HPP
 
 #include "responder/AResponder.hpp"
+#include "event/Cgi.hpp"
 
 class	PostResponder : public AResponder
 {
@@ -19,6 +20,8 @@ public:
 	void			constructCgi();
 
 private:
+	int		m_serverToCgi;
+	Cgi*	m_cgi;
 };
 
 #endif
