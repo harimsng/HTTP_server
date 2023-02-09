@@ -102,39 +102,30 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
-	usleep(25);
+	usleep(100);
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
-	switch (m_status)
+	if (cnt == 0)
 	{
-		case Cgi::CGI_HEADER:
-			statusCode = parseCgiHeader();
-			if (m_status != CGI_CONTENT)
-				break;
-			respondStatusLine(statusCode);
-			respondHeader();
-			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
-			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			// NOTE: if buffer is empty after cgi header parsing, content start with 0\r\n\r\n
-			if (m_fromCgiBuffer.size() == 0)
-				break;
-			// fall through
-		case Cgi::CGI_CONTENT:
-			m_requestHandler->m_sendBuffer.append(Util::toHex(m_fromCgiBuffer.size()));
-			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			m_requestHandler->m_sendBuffer.append(m_fromCgiBuffer);
-			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			m_fromCgiBuffer.clear();
-			if (cnt == 0)
-			{
-				close(m_fd);
-				waitpid(-1, NULL, 0);
-				m_requestHandler->resetStates();
-			}
-			break;
+		statusCode = parseCgiHeader();
+		respondStatusLine(statusCode);
+		respondHeader();
+		m_requestHandler->m_sendBuffer.append("Content-Length: ");
+		cout << m_responseBody.size() << endl;
+		m_requestHandler->m_sendBuffer.append(Util::toString(m_responseBody.size()));
+		m_requestHandler->m_sendBuffer.append(g_CRLF);
+		m_requestHandler->m_sendBuffer.append(g_CRLF);
+		m_requestHandler->m_sendBuffer.append(m_responseBody);
+		m_fromCgiBuffer.clear();
+		close(m_fd);
+		m_requestHandler->resetStates();
+		return (0);
 	}
-	return (cnt);
+	else
+	{
+		m_responseBody += m_fromCgiBuffer;
+		m_fromCgiBuffer.clear();
+		return (1);
+	}
 }
 
 // if output is slower than input, the buffer grows up indefinitely.
@@ -166,13 +157,13 @@ Cgi::parseCgiHeader()
 	string	fieldName;
 	string	fieldValue;
 
-	if (m_fromCgiBuffer.find("\r\n\r\n") == string::npos)
+	if (m_responseBody.find("\r\n\r\n") == string::npos)
 		return statusCode;
 
 	while (1)
 	{
-		end = m_fromCgiBuffer.find(g_CRLF, start);
-		headerField = m_fromCgiBuffer.substr(start, end - start);
+		end = m_responseBody.find(g_CRLF, start);
+		headerField = m_responseBody.substr(start, end - start);
 		if (headerField.empty())
 			break;
 		fieldName = headerField.substr(0, headerField.find(':'));
@@ -184,7 +175,7 @@ Cgi::parseCgiHeader()
 			m_responseHeader += headerField + g_CRLF;
 		start = end + 2;
 	}
-	m_fromCgiBuffer.erase(0, end + 2);
+	m_responseBody.erase(0, end + 2);
 	m_status = CGI_CONTENT;
 	return (statusCode);
 }

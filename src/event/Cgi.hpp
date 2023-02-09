@@ -58,6 +58,7 @@ private:
 		int				m_requestContentFileFd;
 
 		std::string		m_responseHeader;
+		std::string		m_responseBody;
 
 		int				m_serverToCgi[2];
 		int				m_cgiToServer[2];

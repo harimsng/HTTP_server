@@ -160,15 +160,14 @@ PostResponder::constructCgi()
 		|| pipe(serverToCgi) < 0)
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
+	fcntl(cgiToServer[0], F_SETFL, O_NONBLOCK);
 	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
-
 //
 //	m_fileFd = serverToCgi[1];
 
 	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
-	Cgi*	cgi_write = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer, 1);
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi_write);
+	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }
