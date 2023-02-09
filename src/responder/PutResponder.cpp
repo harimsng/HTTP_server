@@ -33,6 +33,7 @@ PutResponder::respond() try
 		case RES_CONTENT:
 			if (!(this->*m_recvContentFunc)())
 				break;
+			close(m_fileFd);
 			m_responseStatus = RES_CONTENT_FINISHED;// -> client_max_body_size error
 		// fall through
 		case RES_CONTENT_FINISHED:

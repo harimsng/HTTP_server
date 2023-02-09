@@ -36,12 +36,8 @@ PostResponder::operator=(const PostResponder& postResponder)
 void
 PostResponder::respond() try
 {
-#ifndef TEST
 	std::string	readBody;
 	std::string tmpFile = g_tempDir + m_request.m_file;
-
-#endif
-	// struct stat st;
 
 	if (m_request.m_status >= 300)
 		throw (m_request.m_status);
@@ -66,6 +62,7 @@ PostResponder::respond() try
 				respondHeader();
 				respondBody(readBody);
 				m_responseStatus = RES_DONE;
+				close(m_fileFd);
 			}
 			else
 			{
@@ -98,6 +95,7 @@ catch(int errorStatusCode)
 	m_request.m_path = getErrorPage(readBody);
 	readFile(readBody);
 	respondBody(readBody);
+	close(m_fileFd);
 	endResponse();
 }
 
