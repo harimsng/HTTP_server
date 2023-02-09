@@ -40,7 +40,6 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 Cgi::~Cgi()
 {
 }
-
 /*
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
