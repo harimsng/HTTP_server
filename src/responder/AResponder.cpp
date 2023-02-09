@@ -18,7 +18,7 @@
 # define TEMP_DIR "/tmp"
 #endif
 
-#define FILE_BUFFER_SIZE (8192)
+#define FILE_BUFFER_SIZE (16384)
 
 extern const std::string	g_tempDir = TEMP_DIR;
 

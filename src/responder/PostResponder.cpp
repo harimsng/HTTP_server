@@ -67,7 +67,6 @@ PostResponder::respond() try
 			else
 			{
 				ServerManager::registerEvent(m_serverToCgi, Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, m_cgi);
-				// m_cgi->executeCgi();
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes

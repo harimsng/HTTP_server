@@ -26,6 +26,7 @@ public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
 	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
+	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write);
 	~Cgi();
 
 // member functions
@@ -56,6 +57,7 @@ public:
 		int				m_requestContentFileFd;
 
 		std::string		m_responseHeader;
+		std::string		m_responseBody;
 
 		int				m_serverToCgi[2];
 		int				m_cgiToServer[2];

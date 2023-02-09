@@ -44,6 +44,21 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_totalCnt = 0;
 }
 
+Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
+:	EventObject(serverToCgi[1]),
+	m_requestHandler(&requestHandler),
+//	m_serverToCgi(serverToCgi),
+//	m_cgiToServer(cgiToServer),
+	m_toCgiBuffer(&toCgiBuffer),
+	m_status(CGI_HEADER)
+{
+	(void)for_write;
+	m_serverToCgi[0] = serverToCgi[0];
+	m_serverToCgi[1] = serverToCgi[1];
+	m_cgiToServer[0] = cgiToServer[0];
+	m_cgiToServer[1] = cgiToServer[1];
+}
+
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
@@ -53,10 +68,10 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	int	status;
+	//int	status;
 
-	close(m_fd);
-	waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	//close(m_fd);
+	//waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -75,7 +90,8 @@ Cgi::handleEventWork()
 		case IoEventPoller::FILT_WRITE:
 			// LOG(INFO, "cgi write event at %d", m_fd);
 			// Cgi must be terminated when connection is lost
-			sendCgiRequest();
+			if (sendCgiRequest() == -1)
+				return IoEventPoller::STAT_NORMAL;
 			return IoEventPoller::STAT_NORMAL;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
@@ -183,13 +199,13 @@ Cgi::parseCgiHeader()
 	string	fieldName;
 	string	fieldValue;
 
-	if (m_fromCgiBuffer.find("\r\n\r\n") == string::npos)
+	if (m_responseBody.find("\r\n\r\n") == string::npos)
 		return statusCode;
 
 	while (1)
 	{
-		end = m_fromCgiBuffer.find(g_CRLF, start);
-		headerField = m_fromCgiBuffer.substr(start, end - start);
+		end = m_responseBody.find(g_CRLF, start);
+		headerField = m_responseBody.substr(start, end - start);
 		if (headerField.empty())
 			break;
 		fieldName = headerField.substr(0, headerField.find(':'));
@@ -201,7 +217,7 @@ Cgi::parseCgiHeader()
 			m_responseHeader += headerField + g_CRLF;
 		start = end + 2;
 	}
-	m_fromCgiBuffer.erase(0, end + 2);
+	m_responseBody.erase(0, end + 2);
 	m_status = CGI_CONTENT;
 	// cout << m_status << endl;
 	return (statusCode);
@@ -233,10 +249,12 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
+	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
+	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
