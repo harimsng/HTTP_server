@@ -44,7 +44,6 @@ public:
 	IoEventPoller::EventStatus	handleEventWork();
 
 // member variables;
-private:
 		pid_t						m_pid;
 
 		std::vector<std::string>	m_env;
@@ -66,6 +65,8 @@ private:
 		Buffer			m_fromCgiBuffer;
 		Buffer*			m_toCgiBuffer;
 		e_status		m_status;
+		int				m_totalCnt;
+private:
 };
 
 #endif
