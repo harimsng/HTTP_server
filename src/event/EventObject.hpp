@@ -11,9 +11,9 @@ public:
 
 	EventObject() {};
 	EventObject(int fd): m_fd(fd) {};
-	virtual ~EventObject() {};
+	virtual ~EventObject();
 
-	IoEventPoller::EventStatus	handleEvent() {return handleEventWork();}
+	IoEventPoller::EventStatus	handleEvent();
 
 private:
 	virtual IoEventPoller::EventStatus	handleEventWork() = 0;

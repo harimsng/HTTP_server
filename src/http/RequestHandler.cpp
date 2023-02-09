@@ -60,15 +60,15 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
-	// // LOG(DEBUG, "not skipped");
+	// LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count == 0)
+	if (count == 0 && m_sendBuffer.status() == Buffer::BUF_EOF)
 		return RECV_END;
 	else if (count == -1)
 		return RECV_SKIPPED;
 
-//	LOG(DEBUG, "receiveRequest() count = %d", count);
+	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -133,6 +133,7 @@ RequestHandler::createResponseHeader()
 			m_responder = new GetResponder(*this);
 	}
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
+	LOG(DEBUG, "[%d] status code = %d", m_socket->m_fd, statusCode);
 }
 
 // NOTE
@@ -310,11 +311,14 @@ RequestHandler::sendResponse() try
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
 	{
+		LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
+		m_sendBuffer.status(Buffer::BUF_EOF);
 		return SEND_DONE;
 	}
 	if (count > 0)
 	{
-		// LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
+		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
+		// NOTE: is it guaranteed that error page reponse is fully sent?
 		if (m_request.m_status >= 300)
 			return SEND_ERROR;
 	}

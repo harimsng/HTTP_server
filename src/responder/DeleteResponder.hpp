@@ -14,7 +14,7 @@ public:
 	DeleteResponder	&operator=(const DeleteResponder& deleteMethod);
 
 	void			deleteFile(const std::string& filePath, std::string& readBody);
-	virtual void	respond();
+	virtual void	respondWork();
 // member functions
 };
 

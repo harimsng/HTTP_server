@@ -33,7 +33,7 @@ PostResponder::operator=(const PostResponder& postResponder)
 }
 
 void
-PostResponder::respond() try
+PostResponder::respondWork()
 {
 #ifndef TEST
 	std::string	readBody;
@@ -57,27 +57,6 @@ PostResponder::respond() try
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
-// #ifndef TEST
-//             lseek(m_fileFd, 0, SEEK_SET);
-//             fstat(m_fileFd, &st);
-//             m_request.m_bodySize = st.st_size;
-//             m_request.requestBodyBuf.resize(m_request.m_bodySize , 0);
-//             // FIX: casting const pointer to normal pointer is UB
-//             read(m_fileFd, &m_request.requestBodyBuf[0], m_request.m_bodySize);
-//             unlink(tmpFile.c_str());
-//             if (m_request.m_isCgi == true)
-//             {
-//                 openFile(tmpFile);
-//                 constructCgi(readBody);
-//             }
-//             else
-//                 readFile(readBody);
-//             unlink(tmpFile.c_str());
-//             respondStatusLine(200);
-//             respondHeader();
-//             respondBody(readBody);
-//             m_responseStatus = RES_DONE;
-// #else
 			if (m_request.m_isCgi == false)
 			{
 				string	readBody;
@@ -105,20 +84,6 @@ PostResponder::respond() try
 		default:
 			;
 	}
-}
-catch(int errorStatusCode)
-{
-	string readBody;
-
-	LOG(INFO, "error response");
-	m_request.m_status = errorStatusCode;
-	respondStatusLine(errorStatusCode);
-	respondHeader();
-	m_request.m_file.clear();
-	m_request.m_path = getErrorPage(readBody);
-	readFile(readBody);
-	respondBody(readBody);
-	endResponse();
 }
 
 // void
@@ -163,7 +128,6 @@ PostResponder::constructCgi()
 
 //	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
 
-	//
 //	m_fileFd = serverToCgi[1];
 
 	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);

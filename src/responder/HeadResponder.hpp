@@ -14,7 +14,7 @@ public:
 	HeadResponder	&operator=(const HeadResponder& HeadResponder);
 
 // member functions
-	virtual void	respond();
+	virtual void	respondWork();
 };
 
 #endif

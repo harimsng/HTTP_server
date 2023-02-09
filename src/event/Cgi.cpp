@@ -47,6 +47,21 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_cgiToServer[1] = cgiToServer[1];
 }
 
+Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
+:	EventObject(serverToCgi[1]),
+	m_requestHandler(&requestHandler),
+//	m_serverToCgi(serverToCgi),
+//	m_cgiToServer(cgiToServer),
+	m_toCgiBuffer(&toCgiBuffer),
+	m_status(CGI_HEADER)
+{
+	(void)for_write;
+	m_serverToCgi[0] = serverToCgi[0];
+	m_serverToCgi[1] = serverToCgi[1];
+	m_cgiToServer[0] = cgiToServer[0];
+	m_cgiToServer[1] = cgiToServer[1];
+}
+
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
@@ -56,29 +71,27 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	int	status;
-
 	close(m_fd);
-	waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	waitpid(m_pid, NULL, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
 }
 
 Cgi::IoEventPoller::EventStatus
 Cgi::handleEventWork()
 {
+	// Cgi must be terminated when connection is lost
 	switch (m_filter)
 	{
 		case IoEventPoller::FILT_READ:
-			if (receiveCgiResponse() == 0) // fall through
+			if (receiveCgiResponse() == 0)
 			{
 				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
 				return IoEventPoller::STAT_END;
 			}
-			return IoEventPoller::STAT_NORMAL;
+			break;
 		case IoEventPoller::FILT_WRITE:
 			// // LOG(DEBUG, "cgi write event");
-			// Cgi must be terminated when connection is lost
 			sendCgiRequest();
-			return IoEventPoller::STAT_NORMAL;
+			break;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
 	}
@@ -94,7 +107,7 @@ Cgi::receiveCgiResponse()
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	if (cnt == -1)
 		return -1;
-	// LOG(DEBUG, "receiveCgiResponse() count = %d", cnt);
+	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -106,9 +119,6 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			// NOTE: if buffer is empty after cgi header parsing, content start with 0\r\n\r\n
-			if (m_fromCgiBuffer.size() == 0)
-				break;
 			// fall through
 		case Cgi::CGI_CONTENT:
 			m_requestHandler->m_sendBuffer.append(Util::toHex(m_fromCgiBuffer.size()));
@@ -131,16 +141,19 @@ int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
+	
 	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
-
 	if (count != 0)
 	{
-//		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
+		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_fd, count);
 		return count;
 	}
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	{
+		LOG(DEBUG, "[%d] sendCgiRequest() end", m_fd);
 		close(m_serverToCgi[1]);
-
+		return -1;
+	}
 	return count;
 }
 
@@ -202,10 +215,12 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
+	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
+	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";

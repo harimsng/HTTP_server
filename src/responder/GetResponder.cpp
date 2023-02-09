@@ -1,13 +1,13 @@
 #include <fcntl.h>
 
-#include "responder/GetResponder.hpp"
+#include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
 #include "http/AutoIndex.hpp"
 #include "util/Util.hpp"
-#include "Logger.hpp"
+#include "responder/GetResponder.hpp"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ GetResponder::operator=(const GetResponder& getMethod)
 }
 
 void
-GetResponder::respond()
+GetResponder::respondWork()
 {
 	string readBody;
 

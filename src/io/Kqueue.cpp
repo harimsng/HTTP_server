@@ -68,6 +68,7 @@ Kqueue::pollWork()
 	int			count = 0;
 
 	m_eventList.resize(maxEvent);
+	// NOTE: may timeout help?
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
 				   m_eventList.data(), m_eventList.size(), 0);
 	m_changeList.clear();
