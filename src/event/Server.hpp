@@ -23,9 +23,9 @@ public:
 // member functions
 	void	initServer(uint32_t addr, uint16_t port);
 
-	IoEventPoller::EventStatus	readEventHandlerWork();
-	IoEventPoller::EventStatus	writeEventHandlerWork();
-	IoEventPoller::EventStatus	errorEventHandlerWork();
+	IoEventPoller::EventStatus	handleReadEventWork();
+	IoEventPoller::EventStatus	handleWriteEventWork();
+	IoEventPoller::EventStatus	handleErrorEventWork();
 private:
 // member variables - socket
 	Socket<Tcp>		m_socket;

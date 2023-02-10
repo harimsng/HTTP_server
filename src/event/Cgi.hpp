@@ -40,9 +40,9 @@ public:
 	void	respondStatusLine(int statusCode);
 	void	respondHeader();
 
-	virtual IoEventPoller::EventStatus	readEventHandlerWork();
-	virtual IoEventPoller::EventStatus	writeEventHandlerWork();
-	virtual IoEventPoller::EventStatus	errorEventHandlerWork();
+	virtual IoEventPoller::EventStatus	handleReadEventWork();
+	virtual IoEventPoller::EventStatus	handleWriteEventWork();
+	virtual IoEventPoller::EventStatus	handleErrorEventWork();
 // member variables;
 private:
 	pid_t						m_pid;

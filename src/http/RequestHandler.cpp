@@ -314,7 +314,7 @@ RequestHandler::sendResponse() try
 		m_sendBuffer.status(Buffer::BUF_EOF);
 		return SEND_END;
 	}
-	if (count > 0)
+	else if (count > 0)
 	{
 		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
 		// NOTE: is it guaranteed that error page reponse is fully sent?

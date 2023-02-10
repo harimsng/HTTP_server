@@ -54,7 +54,7 @@ Server::initServer(uint32_t addr, uint16_t port)
 }
 
 Server::IoEventPoller::EventStatus
-Server::readEventHandlerWork()
+Server::handleReadEventWork()
 {
 	int		clientFd;
 	clientFd = m_socket.accept();
@@ -72,14 +72,14 @@ Server::readEventHandlerWork()
 }
 
 Server::IoEventPoller::EventStatus
-Server::writeEventHandlerWork()
+Server::handleWriteEventWork()
 {
 	throw std::runtime_error("not handled event filter in Server::handleEvent()");
 	return IoEventPoller::STAT_ERROR;
 }
 
 Server::IoEventPoller::EventStatus
-Server::errorEventHandlerWork()
+Server::handleErrorEventWork()
 {
 	throw std::runtime_error("not handled event filter in Server::handleEvent()");
 	return IoEventPoller::STAT_ERROR;

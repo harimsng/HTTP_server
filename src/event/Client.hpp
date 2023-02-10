@@ -22,9 +22,9 @@ public:
 	Client(Client const& client);
 
 // member functions
-	virtual IoEventPoller::EventStatus	readEventHandlerWork();
-	virtual IoEventPoller::EventStatus	writeEventHandlerWork();
-	virtual IoEventPoller::EventStatus	errorEventHandlerWork();
+	virtual IoEventPoller::EventStatus	handleReadEventWork();
+	virtual IoEventPoller::EventStatus	handleWriteEventWork();
+	virtual IoEventPoller::EventStatus	handleErrorEventWork();
 // member variables
 private:
 	Socket<Tcp>		m_socket;

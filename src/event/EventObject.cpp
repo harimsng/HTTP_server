@@ -20,19 +20,19 @@ EventObject::EventObject(int fd)
 }
 
 EventObject::IoEventPoller::EventStatus
-EventObject::readEventHandler()
+EventObject::handleReadEvent()
 {
-	return readEventHandlerWork();
+	return handleReadEventWork();
 }
 
 EventObject::IoEventPoller::EventStatus
-EventObject::writeEventHandler()
+EventObject::handleWriteEvent()
 {
-	return writeEventHandlerWork();
+	return handleWriteEventWork();
 }
 
 EventObject::IoEventPoller::EventStatus
-EventObject::errorEventHandler()
+EventObject::handleErrorEvent()
 {
-	return errorEventHandlerWork();
+	return handleErrorEventWork();
 }

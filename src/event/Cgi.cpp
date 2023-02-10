@@ -36,8 +36,6 @@ Cgi::Cgi(Cgi const& cgi)
 Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer)
 :	EventObject(cgiToServer[0]),
 	m_requestHandler(&requestHandler),
-//	m_serverToCgi(serverToCgi),
-//	m_cgiToServer(cgiToServer),
 	m_toCgiBuffer(&toCgiBuffer),
 	m_status(CGI_HEADER)
 {
@@ -58,35 +56,34 @@ Cgi::~Cgi()
 {
 	static short unsigned int	count = 0;
 
-	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
 	close(m_fd);
-	waitpid(m_pid, NULL, 0); // zero sized receive from pipe guarantee that cgi has exited.
+	waitpid(m_pid, NULL, 0);
+	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
 }
 
 Cgi::IoEventPoller::EventStatus
-Cgi::readEventHandlerWork()
+Cgi::handleReadEventWork()
 {
 	if (receiveCgiResponse() == 0)
 	{
-		// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
 		return IoEventPoller::STAT_END;
 	}
 	return IoEventPoller::STAT_NORMAL;
 }
 
 Cgi::IoEventPoller::EventStatus
-Cgi::writeEventHandlerWork()
+Cgi::handleWriteEventWork()
 {
 	sendCgiRequest();
 	return IoEventPoller::STAT_NORMAL;
 }
 
 Cgi::IoEventPoller::EventStatus
-Cgi::errorEventHandlerWork()
+Cgi::handleErrorEventWork()
 {
 	if (m_eventStatus == EVENT_EOF)
 		return IoEventPoller::STAT_END;
-	return IoEventPoller::STAT_ERROR;
+	return IoEventPoller::STAT_ERROR; // STAT_ERROR is currently ignored.
 }
 
 int
@@ -97,7 +94,7 @@ Cgi::receiveCgiResponse()
 
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
-	if (cnt == -1 || (cnt == 0 && m_eventStatus == EVENT_NORMAL))
+	if (cnt == -1)
 		return -1;
 	switch (m_status)
 	{
@@ -121,7 +118,6 @@ Cgi::receiveCgiResponse()
 			m_fromCgiBuffer.clear();
 			if (cnt == 0)
 			{
-				m_requestHandler->m_sendBuffer.status(Buffer::BUF_EOF);
 				m_requestHandler->resetStates();
 			}
 			break;
@@ -139,7 +135,6 @@ Cgi::sendCgiRequest()
 	if (count != 0)
 	{
 		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_fd, count);
-		return count;
 	}
 	if (m_toCgiBuffer->size() == 0 && m_toCgiBuffer->status() == Buffer::BUF_EOF)
 	{
@@ -208,6 +203,7 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
+	// NOTE: ...
 	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {

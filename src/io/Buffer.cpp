@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE (8192 << 3)
+#define BUFFER_SIZE (8192 << 1)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
@@ -71,7 +71,7 @@ Buffer::receive(int fd)
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (count == -1)
+	if (residue == BUFFER_SIZE - 1 || count == -1)
 		return count;
 
 	resize(residue + count, 0);
@@ -101,27 +101,32 @@ std::string::size_type
 Buffer::send(int fd)
 {
 	t_int64		count = 0;
-//	t_uint64	writeSize;
+	t_uint64	writeSize;
 
-//	writeSize = size() - m_writePos;
+	writeSize = size() - m_writePos;
 	// NOTE: this if stetement and BUFFER_SIZE are important part.
 	// if Cgi has been fed with large size of write, write blocks.
 	// if BUFFER_SIZE not large enough (BUFFER_SIZE < (8192 << 3)), final stage of the test would block.
-//	if (size() - m_writePos > BUFFER_SIZE)
-//		writeSize = BUFFER_SIZE;
+	/*
+	if (size() - m_writePos > BUFFER_SIZE)
+		writeSize = BUFFER_SIZE;
+		*/
 
-//	count = ::write(fd, data() + m_writePos, writeSize);
-	count = ::write(fd, data(), size());
+	count = ::write(fd, data() + m_writePos, writeSize);
 	if (count <= 0)
 		return count;
 	
-	erase(0, count);
-//	m_writePos += count;
-//	if (m_writePos == size())
-//	{
-//		m_writePos = 0;
-//		clear();
-//	}
+	m_writePos += count;
+	if (m_writePos == size())
+	{
+		m_writePos = 0;
+		clear();
+	}
+	if (m_writePos > BUFFER_SIZE)
+	{
+		erase(0, m_writePos);
+		m_writePos = 0;
+	}
 	return count;
 }
 

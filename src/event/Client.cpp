@@ -34,7 +34,7 @@ Client::Client(Client const& client)
 // kqueue: fd, filter, filter options
 // epoll: fd
 Client::IoEventPoller::EventStatus
-Client::readEventHandlerWork()
+Client::handleReadEventWork()
 {
 	int	status;
 
@@ -63,7 +63,7 @@ Client::readEventHandlerWork()
 
 // NOTE: connection: closed issue?
 Client::IoEventPoller::EventStatus
-Client::writeEventHandlerWork()
+Client::handleWriteEventWork()
 {
 	int	status;
 
@@ -88,7 +88,7 @@ Client::writeEventHandlerWork()
 }
 
 Client::IoEventPoller::EventStatus
-Client::errorEventHandlerWork()
+Client::handleErrorEventWork()
 {
 	if (m_eventStatus == EVENT_EOF)
 		return IoEventPoller::STAT_END;

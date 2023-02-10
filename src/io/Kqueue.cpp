@@ -110,13 +110,13 @@ Kqueue::pollWork()
 		switch (event.filter)
 		{
 			case EVFILT_READ:
-				status = object->readEventHandler();
+				status = object->handleReadEvent();
 				break;
 			case EVFILT_WRITE:
-				status = object->writeEventHandler();
+				status = object->handleWriteEvent();
 				break;
 			case EVFILT_EXCEPT:
-				status = object->errorEventHandler();
+				status = object->handleErrorEvent();
 				break;
 			default:
 				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");

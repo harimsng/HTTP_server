@@ -19,14 +19,14 @@ public:
 	EventObject(int fd);
 	virtual ~EventObject();
 
-	IoEventPoller::EventStatus	readEventHandler();
-	IoEventPoller::EventStatus	writeEventHandler();
-	IoEventPoller::EventStatus	errorEventHandler();
+	IoEventPoller::EventStatus	handleReadEvent();
+	IoEventPoller::EventStatus	handleWriteEvent();
+	IoEventPoller::EventStatus	handleErrorEvent();
 
 protected:
-	virtual IoEventPoller::EventStatus	readEventHandlerWork() = 0;
-	virtual IoEventPoller::EventStatus	writeEventHandlerWork() = 0;
-	virtual IoEventPoller::EventStatus	errorEventHandlerWork() = 0;
+	virtual IoEventPoller::EventStatus	handleReadEventWork() = 0;
+	virtual IoEventPoller::EventStatus	handleWriteEventWork() = 0;
+	virtual IoEventPoller::EventStatus	handleErrorEventWork() = 0;
 
 public:
 	int				m_fd;
