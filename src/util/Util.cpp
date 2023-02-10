@@ -26,10 +26,8 @@ Util::parseArgument(int argc, char **argv)
 			// TODO: argument error handling
 			return false;
 		pos = arg.find('=');
-		if (arg.substr(2, pos - 2) != "log")
-			// error
-			return false;
-		logLevel = arg.substr(pos + 1, string::npos);
+		if (arg.substr(2, pos - 2) == "log")
+			logLevel = arg.substr(pos + 1, string::npos);
 	}
 	Logger::initLogger(logLevel);
 	return true;

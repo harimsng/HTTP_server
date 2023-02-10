@@ -47,21 +47,6 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_cgiToServer[1] = cgiToServer[1];
 }
 
-Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
-:	EventObject(serverToCgi[1]),
-	m_requestHandler(&requestHandler),
-//	m_serverToCgi(serverToCgi),
-//	m_cgiToServer(cgiToServer),
-	m_toCgiBuffer(&toCgiBuffer),
-	m_status(CGI_HEADER)
-{
-	(void)for_write;
-	m_serverToCgi[0] = serverToCgi[0];
-	m_serverToCgi[1] = serverToCgi[1];
-	m_cgiToServer[0] = cgiToServer[0];
-	m_cgiToServer[1] = cgiToServer[1];
-}
-
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
@@ -71,31 +56,37 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
+	static short unsigned int	count = 0;
+
+	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
 	close(m_fd);
-	waitpid(m_pid, NULL, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	waitpid(m_pid, NULL, 0); // zero sized receive from pipe guarantee that cgi has exited.
 }
 
 Cgi::IoEventPoller::EventStatus
-Cgi::handleEventWork()
+Cgi::readEventHandlerWork()
 {
-	// Cgi must be terminated when connection is lost
-	switch (m_filter)
+	if (receiveCgiResponse() == 0)
 	{
-		case IoEventPoller::FILT_READ:
-			if (receiveCgiResponse() == 0)
-			{
-				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
-				return IoEventPoller::STAT_END;
-			}
-			break;
-		case IoEventPoller::FILT_WRITE:
-			// // LOG(DEBUG, "cgi write event");
-			sendCgiRequest();
-			break;
-		default:
-			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
+		// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
+		return IoEventPoller::STAT_END;
 	}
 	return IoEventPoller::STAT_NORMAL;
+}
+
+Cgi::IoEventPoller::EventStatus
+Cgi::writeEventHandlerWork()
+{
+	sendCgiRequest();
+	return IoEventPoller::STAT_NORMAL;
+}
+
+Cgi::IoEventPoller::EventStatus
+Cgi::errorEventHandlerWork()
+{
+	if (m_eventStatus == EVENT_EOF)
+		return IoEventPoller::STAT_END;
+	return IoEventPoller::STAT_ERROR;
 }
 
 int
@@ -105,9 +96,9 @@ Cgi::receiveCgiResponse()
 	int statusCode;
 
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	if (cnt == -1)
-		return -1;
 	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
+	if (cnt == -1 || (cnt == 0 && m_eventStatus == EVENT_NORMAL))
+		return -1;
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -119,6 +110,8 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
+			if (m_fromCgiBuffer.size() == 0)
+				break;
 			// fall through
 		case Cgi::CGI_CONTENT:
 			m_requestHandler->m_sendBuffer.append(Util::toHex(m_fromCgiBuffer.size()));
@@ -141,14 +134,14 @@ int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
-	
 	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
+
 	if (count != 0)
 	{
 		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_fd, count);
 		return count;
 	}
-	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	if (m_toCgiBuffer->size() == 0 && m_toCgiBuffer->status() == Buffer::BUF_EOF)
 	{
 		LOG(DEBUG, "[%d] sendCgiRequest() end", m_fd);
 		close(m_serverToCgi[1]);
@@ -295,9 +288,10 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
+		close(pipe[0]);
 
 		dup2(m_requestContentFileFd, STDOUT_FILENO);
-		close(pipe[0]);
+		close(m_requestContentFileFd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
 	}

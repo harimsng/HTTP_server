@@ -38,6 +38,7 @@ PutResponder::respondWork()
 		case RES_CONTENT_FINISHED:
 			throw (201); // fall through
 		case RES_DONE:
+			close(m_fileFd);
 			endResponse();
 			break;
 		default:

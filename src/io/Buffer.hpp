@@ -38,7 +38,7 @@ public:
 	void	pop_back();
 
 private:
-	std::string::size_type	m_writePos;
+//	std::string::size_type	m_writePos;
 	int						m_fd;
 	e_status				m_status;
 };

@@ -33,7 +33,7 @@ public:
 	static ListenServerTable	s_listenServerTable;
 
 	static void	registerEvent(int fd, IoEventPoller::e_operation op,
-			IoEventPoller::e_filters filter, EventObject* object);
+			int filter, EventObject* object);
 	static void closeListenServer();
 
 };

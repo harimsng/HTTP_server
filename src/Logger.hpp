@@ -15,7 +15,7 @@
 # else
 // VERBOSE DEBUG
 #  define LOG(type, fmt, ...)\
-	if (Logger::type == Logger::DEBUG)\
+	if (Logger::type >= Logger::DEBUG)\
 	{\
 		Logger::log(Logger::DEBUG, "%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
 	}\
@@ -77,7 +77,10 @@ Logger::log(e_types type, const T& object)
 		suffix = " (" + Util::toString(errno) + " "
 			+ std::strerror(errno) + ")";
 	}
-	prefix.append(Util::getDate("%F %T "));
+	if (type == VERBOSE)
+	{
+		prefix.append(Util::getDate("%F %T "));
+	}
 	*s_ostream << prefix << object << suffix << std::endl;
 }
 

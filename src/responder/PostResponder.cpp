@@ -126,7 +126,7 @@ PostResponder::constructCgi()
 		|| pipe(serverToCgi) < 0)
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
-//	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
+	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
 
 //	m_fileFd = serverToCgi[1];
 

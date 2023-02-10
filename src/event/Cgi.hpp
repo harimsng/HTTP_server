@@ -26,7 +26,6 @@ public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
 	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
-	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write);
 	~Cgi();
 
 // member functions
@@ -41,8 +40,9 @@ public:
 	void	respondStatusLine(int statusCode);
 	void	respondHeader();
 
-	IoEventPoller::EventStatus	handleEventWork();
-
+	virtual IoEventPoller::EventStatus	readEventHandlerWork();
+	virtual IoEventPoller::EventStatus	writeEventHandlerWork();
+	virtual IoEventPoller::EventStatus	errorEventHandlerWork();
 // member variables;
 private:
 	pid_t						m_pid;

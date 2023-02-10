@@ -228,6 +228,8 @@ AResponder::respondHeader()
 		m_sendBuffer.append("Location: " + m_request.m_path + m_request.m_file);
 		m_sendBuffer.append(g_CRLF);
 	}
+	LOG(DEBUG, "response header");
+	Logger::log(Logger::DEBUG, m_sendBuffer);
 }
 
 void
@@ -283,18 +285,15 @@ AResponder::receiveContentChunked()
 		}
 		// NOTE: clientMaxBodySize is equal to total content length, not size of a chunk
 		// NOTE: what if location is not found from request uri 
-		/*
 		if (m_totalContentLentgh > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
 			LOG(DEBUG, "content length sum = %d, max content size = %d",
 				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize);
 			throw (413);
 		}
-		*/
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
 			// NOTE: PostResponder closes m_fileFd twice
-//			close(m_fileFd);
 			// LOG(DEBUG, "chunked receiving finished");
 			m_buffer.status(Buffer::BUF_EOF);
 			m_recvBuffer.clear();
@@ -305,15 +304,13 @@ AResponder::receiveContentChunked()
 		{
 			m_totalContentLentgh += m_dataSize;
 			(this->*m_procContentFunc)(m_dataSize);
-//			writeToFile(m_dataSize);
 			m_recvBuffer.erase(0, m_dataSize + 2);
 			m_dataSize = -1;
 		}
 		else if (m_dataSize > 0 && m_dataSize >= static_cast<int>(m_recvBuffer.size()))
 		{
-			m_totalContentLentgh += m_dataSize;
+			m_totalContentLentgh += m_recvBuffer.size();
 			(this->*m_procContentFunc)(m_recvBuffer.size());
-//			writeToFile(m_recvBuffer.size());
 			m_dataSize -= m_recvBuffer.size();
 			m_recvBuffer.clear();
 			if (m_dataSize == 0)
@@ -344,6 +341,7 @@ AResponder::receiveContentNormal()
 	if (count == -1)
 		return 0;
 	m_dataSize -= count;
+	m_recvBuffer.erase(0, count);
 	if (m_dataSize == 0)
 	{
 		m_buffer.status(Buffer::BUF_EOF);

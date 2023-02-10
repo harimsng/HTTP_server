@@ -17,6 +17,9 @@ Client::Client(int fd)
 
 Client::~Client()
 {
+	static unsigned short	count = 0;
+
+	LOG(INFO, "[%5hu][%5d] client connection closed", count++, m_fd);
 }
 
 Client::Client(Client const& client)
@@ -27,56 +30,69 @@ Client::Client(Client const& client)
 	m_fd = client.m_fd;
 }
 
+// how poller distinguish events
+// kqueue: fd, filter, filter options
+// epoll: fd
 Client::IoEventPoller::EventStatus
-Client::handleEventWork()
+Client::readEventHandlerWork()
 {
-	int status;
+	int	status;
 
-	switch (m_filter)
+	// there are fd leaks. if second tester execution on running webserv.
+	status = m_requestHandler.receiveRequest();
+	switch (status)
 	{
-		case IoEventPoller::FILT_READ:
-			LOG(DEBUG, "client read event");
-			status = m_requestHandler.receiveRequest();
-			switch (status)
+		case RequestHandler::RECV_EVENT:
+			LOG(DEBUG, "[%d] registering write event", m_socket.m_fd);
+			ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
+					IoEventPoller::FILT_READ | IoEventPoller::FILT_WRITE, this);
+			break;
+
+		case RequestHandler::RECV_ERROR:
+			if (m_eventStatus == EVENT_EOF)
 			{
-				// NOTE: EOF can be sent even if there's data to read.
-				// use another poller flags
-				case RequestHandler::RECV_END:
-					return IoEventPoller::STAT_END;
-
-				case RequestHandler::RECV_EVENT:
-					LOG(DEBUG, "registering write event for fd=%d\n", m_socket.m_fd);
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
-							IoEventPoller::FILT_READWRITE, this);
-					break;
-
-				default:
-					;
+				return IoEventPoller::STAT_END;
 			}
 			break;
 
-		case IoEventPoller::FILT_WRITE:
-			status = m_requestHandler.sendResponse();
-			switch (status)
-			{
-				case RequestHandler::SEND_DONE:
-					LOG(DEBUG, "deleting write event for fd=%d\n", m_socket.m_fd);
-					// this can delete fd instead of modifying 
-					ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_MODIFY,
-							IoEventPoller::FILT_READ, this);
-					break;
-				case RequestHandler::SEND_ERROR:
-					LOG(DEBUG, "error write event for fd=%d\n", m_socket.m_fd);
-					return IoEventPoller::STAT_END;
-
-				default:
-					;
-			}
-			break;
 		default:
-			throw std::runtime_error("not handled event filter in Client::handleEvent()");
+			;
 	}
-	return (IoEventPoller::STAT_NORMAL);
+	return IoEventPoller::STAT_NORMAL;
+}
+
+// NOTE: connection: closed issue?
+Client::IoEventPoller::EventStatus
+Client::writeEventHandlerWork()
+{
+	int	status;
+
+	status = m_requestHandler.sendResponse();
+	switch (status)
+	{
+		case RequestHandler::SEND_END:
+			// this can delete fd instead of modifying 
+			LOG(DEBUG, "[%d] write event finished", m_socket.m_fd);
+			ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
+					IoEventPoller::FILT_WRITE, this);
+			break;
+
+		case RequestHandler::SEND_ERROR:
+			LOG(DEBUG, "[%d] error while write event", m_socket.m_fd);
+			return IoEventPoller::STAT_END;
+
+		default:
+			;
+	}
+	return IoEventPoller::STAT_NORMAL;
+}
+
+Client::IoEventPoller::EventStatus
+Client::errorEventHandlerWork()
+{
+	if (m_eventStatus == EVENT_EOF)
+		return IoEventPoller::STAT_END;
+	return IoEventPoller::STAT_ERROR;
 }
 
 // operators

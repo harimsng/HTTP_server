@@ -11,6 +11,8 @@
 
 using namespace std;
 
+extern string	g_tempDir;
+
 // constructors & destructor
 GetResponder::GetResponder(RequestHandler& requestHandler)
 :	AResponder(requestHandler)
@@ -45,7 +47,7 @@ GetResponder::respondWork()
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else if (m_request.m_isCgi == true)
 			{
-				string tmpFile = m_request.m_path + m_request.m_file + ".temp";
+				string tmpFile = g_tempDir + m_request.m_file + ".temp";
 				openFile(tmpFile);
 				constructCgi(readBody);
 				unlink(tmpFile.c_str());
@@ -78,7 +80,8 @@ GetResponder::constructCgi(std::string& readBody)
 
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
-	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(pipeSet[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody, m_request);
 	m_responseStatus = RES_DONE;

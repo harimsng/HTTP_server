@@ -6,7 +6,6 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "responder/Responder.hpp"
 #include "http/FindLocation.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "http/RequestHandler.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
@@ -63,10 +62,8 @@ RequestHandler::receiveRequest()
 	// LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count == 0 && m_sendBuffer.status() == Buffer::BUF_EOF)
-		return RECV_END;
-	else if (count == -1)
-		return RECV_SKIPPED;
+	if (count <= 0)
+		return RECV_ERROR;
 
 	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
@@ -132,8 +129,10 @@ RequestHandler::createResponseHeader()
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
-	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 	LOG(DEBUG, "[%d] status code = %d", m_socket->m_fd, statusCode);
+	LOG(DEBUG, "request header");
+	Logger::log(Logger::DEBUG, m_request);
+	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
 // NOTE
@@ -313,7 +312,7 @@ RequestHandler::sendResponse() try
 	{
 		LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
 		m_sendBuffer.status(Buffer::BUF_EOF);
-		return SEND_DONE;
+		return SEND_END;
 	}
 	if (count > 0)
 	{
@@ -337,9 +336,9 @@ operator<<(std::ostream& os, const Request& request)
 
 	os << "reqeust info\n";
 	os << "status line\n";
-	os << "\tmethod : " << request.m_method << endl;
-	os << "\ttarget : " << request.m_uri << endl;
-	os << "\tprotocol : " << request.m_protocol << endl;
+	os << "\tmethod : " << RequestHandler::s_methodRConvertTable[request.m_method] << '\n';
+	os << "\ttarget : " << request.m_uri << '\n';
+	os << "\tprotocol : " << request.m_protocol << '\n';
 	os << "header field";
 	for (mapIt = request.m_headerFieldsMap.begin();
 			mapIt != request.m_headerFieldsMap.end(); mapIt++)
@@ -349,6 +348,7 @@ operator<<(std::ostream& os, const Request& request)
 		for (; vecIt != mapIt->second.end(); vecIt++)
 			os << *vecIt << " ";
 	}
+	os << endl;
 	return (os);
 }
 

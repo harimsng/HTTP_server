@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE (8192 << 1)
+#define BUFFER_SIZE (8192 << 3)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
@@ -25,8 +25,7 @@ Buffer::operator=(const Buffer& buffer)
 // constructors & destructor
 Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0),
-	m_writePos(0),
-	// NOTE: initialize enum member
+//	m_writePos(0),
 	m_status(BUF_GOOD)
 {
 	resize(0);
@@ -66,14 +65,14 @@ Buffer::read(int fd)
 std::string::size_type
 Buffer::receive(int fd)
 {
-	const int		residue = size();
-	long int	count = 0;
+	const t_uint64	residue = size();
+	t_int64			count;
 
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		return count;
 
 	resize(residue + count, 0);
 	return count;
@@ -101,28 +100,28 @@ Buffer::write(int fd)
 std::string::size_type
 Buffer::send(int fd)
 {
-	long int	count = 0;
-	t_uint64	writeSize;
+	t_int64		count = 0;
+//	t_uint64	writeSize;
 
-	if (size() == 0)
-		return 0;
+//	writeSize = size() - m_writePos;
+	// NOTE: this if stetement and BUFFER_SIZE are important part.
+	// if Cgi has been fed with large size of write, write blocks.
+	// if BUFFER_SIZE not large enough (BUFFER_SIZE < (8192 << 3)), final stage of the test would block.
+//	if (size() - m_writePos > BUFFER_SIZE)
+//		writeSize = BUFFER_SIZE;
 
-	writeSize = size() - m_writePos;
-	// heuristic solution. consider to set the fd non-blocking
-	// NOTE: is this necessary?
-	if (size() - m_writePos > BUFFER_SIZE)
-		writeSize = BUFFER_SIZE;
-
-	count = ::write(fd, data() + m_writePos, writeSize);
-	if (count == -1)
-		throw std::runtime_error("write() fail in Buffer::send()");
-
-	m_writePos += count;
-	if (m_writePos == size())
-	{
-		m_writePos = 0;
-		clear();
-	}
+//	count = ::write(fd, data() + m_writePos, writeSize);
+	count = ::write(fd, data(), size());
+	if (count <= 0)
+		return count;
+	
+	erase(0, count);
+//	m_writePos += count;
+//	if (m_writePos == size())
+//	{
+//		m_writePos = 0;
+//		clear();
+//	}
 	return count;
 }
 

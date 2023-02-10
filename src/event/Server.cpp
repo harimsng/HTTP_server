@@ -5,7 +5,6 @@
 #include "event/Client.hpp"
 #include "event/Server.hpp"
 
-
 using namespace std;
 // deleted
 Server&
@@ -55,25 +54,33 @@ Server::initServer(uint32_t addr, uint16_t port)
 }
 
 Server::IoEventPoller::EventStatus
-Server::handleEventWork()
+Server::readEventHandlerWork()
 {
-	switch (m_filter)
-	{
-		case IoEventPoller::FILT_READ:
-			int		clientFd;
-			clientFd = m_socket.accept();
+	int		clientFd;
+	clientFd = m_socket.accept();
 
-			if (clientFd < 0)
-				throw std::runtime_error("accept error in Server::handleEvent()");
+	if (clientFd < 0)
+		throw std::runtime_error("accept error in Server::handleEvent()");
 
-			Client* client;
-			client = new Client(clientFd);
-			LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
-			ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
-					IoEventPoller::FILT_READ, client);
-			break;
-		default:
-			throw std::runtime_error("not handled event filter in Server::handleEvent()");
-	}
+	Client* client;
+	client = new Client(clientFd);
+	LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
+	// Epoll
+	ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
+			IoEventPoller::FILT_READ, client);
 	return IoEventPoller::STAT_NORMAL;
+}
+
+Server::IoEventPoller::EventStatus
+Server::writeEventHandlerWork()
+{
+	throw std::runtime_error("not handled event filter in Server::handleEvent()");
+	return IoEventPoller::STAT_ERROR;
+}
+
+Server::IoEventPoller::EventStatus
+Server::errorEventHandlerWork()
+{
+	throw std::runtime_error("not handled event filter in Server::handleEvent()");
+	return IoEventPoller::STAT_ERROR;
 }
