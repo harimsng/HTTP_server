@@ -164,6 +164,7 @@ RequestHandler::checkRequestMessage()
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
+
 void
 RequestHandler::checkIsCgi()
 {
@@ -317,7 +318,7 @@ RequestHandler::sendResponse() try
 	else if (count > 0)
 	{
 		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
-		// NOTE: is it guaranteed that error page reponse is fully sent?
+		// NOTE: is it guaranteed that error page response is fully sent?
 		if (m_request.m_status >= 300)
 			return SEND_ERROR;
 	}

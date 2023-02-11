@@ -62,11 +62,11 @@ protected:
 	Buffer				m_buffer;
 
 	e_responseStatus	m_responseStatus;
+
 	int					m_dataSize;
 	int					m_totalContentLentgh;
+
 	int					m_fileFd;
-	int					m_cgiWriteEnd;
-	int					m_cgiReadEnd;
 
 	int			(AResponder::*m_recvContentFunc)();
 	int			(AResponder::*m_sendContentFunc)();

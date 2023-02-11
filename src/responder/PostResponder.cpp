@@ -57,22 +57,16 @@ PostResponder::respondWork()
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
-			if (m_request.m_isCgi == false)
-			{
-				string	readBody;
-				readFile(readBody);
-				respondStatusLine(200);
-				respondHeader();
-				respondBody(readBody);
-				m_responseStatus = RES_DONE;
-			}
-			else
-			{
+			if (m_request.m_isCgi == true)
+				break;
+			readFile(readBody);
+			respondStatusLine(200);
+			respondHeader();
+			respondBody(readBody);
+			m_responseStatus = RES_DONE;
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes
-				break;
-			}
 			// fall through
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;

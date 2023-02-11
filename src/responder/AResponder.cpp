@@ -41,7 +41,7 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	else
 		m_recvContentFunc = &AResponder::receiveContentNormal;
 
-	if (m_request.m_isCgi == true && m_request.m_method == RequestHandler::POST)
+	if (m_request.m_isCgi == true) // && m_request.m_method == RequestHandler::POST)
 		m_procContentFunc = &AResponder::writeToBuffer;
 	else
 		m_procContentFunc = &AResponder::writeToFile;

@@ -17,7 +17,7 @@
 #  define LOG(type, fmt, ...)\
 	if (Logger::type >= Logger::DEBUG)\
 	{\
-		Logger::log(Logger::DEBUG, "%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
+		Logger::log(Logger::type, "%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__);\
 	}\
 	else\
 	{\

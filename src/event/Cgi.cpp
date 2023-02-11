@@ -189,6 +189,9 @@ Cgi::initEnv(const Request &request)
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
+	// NOTE: CONTENT_LENGTH=-1 is not compliant with RFC 3875. it defines it same as below
+	// CONTENT_LENGTH = "" | 1*digit
+	// digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
@@ -294,7 +297,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		// Parent process
 	close(pipe[0]);
 
-	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
+	// WARNING: if (request.m_bodySize > size of pipe buffer(65536 bytes)), written size = size of pipe buffer.
 	if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
 		return;
 	close(pipe[1]);
