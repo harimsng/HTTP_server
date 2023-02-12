@@ -47,10 +47,10 @@ public:
 		RECV_NORMAL,
 		RECV_SKIPPED, 
 		RECV_EVENT,
-		RECV_DONE,
 		SEND_ERROR,
 		SEND_NORMAL,
-		SEND_END
+		SEND_END,
+		CONN_CLOSE,
 	};
 
 // constructors & destructor
