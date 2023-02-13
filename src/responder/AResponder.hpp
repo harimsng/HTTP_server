@@ -2,6 +2,7 @@
 #define ARESPONDER_HPP
 
 #include "http/RequestHandler.hpp"
+#include "event/Cgi.hpp"
 
 class	AResponder
 {
@@ -66,6 +67,7 @@ protected:
 	int					m_fileFd;
 	int					m_cgiWriteEnd;
 	int					m_cgiReadEnd;
+	Cgi*				m_cgi;
 
 	int			(AResponder::*m_recvContentFunc)();
 	int			(AResponder::*m_sendContentFunc)();

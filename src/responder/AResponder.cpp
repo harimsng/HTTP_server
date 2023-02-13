@@ -44,6 +44,7 @@ AResponder::AResponder(RequestHandler& requestHandler)
 		m_procContentFunc = &AResponder::writeToBuffer;
 	else
 		m_procContentFunc = &AResponder::writeToFile;
+	m_cgi = NULL;
 }
 
 AResponder::~AResponder()

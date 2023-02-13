@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE (16384)
+#define BUFFER_SIZE (100000)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
@@ -111,6 +111,33 @@ Buffer::send(int fd)
 	// heuristic solution. consider to set the fd non-blocking
 	if (size() - m_writePos > BUFFER_SIZE)
 		writeSize = BUFFER_SIZE;
+
+	count = ::write(fd, data() + m_writePos, writeSize);
+	if (count == -1)
+		throw std::runtime_error("write() fail in Buffer::send()");
+
+	m_writePos += count;
+	if (m_writePos == size())
+	{
+		m_writePos = 0;
+		clear();
+	}
+	return count;
+}
+
+std::string::size_type
+Buffer::mysend(int fd)
+{
+	long int	count = 0;
+	t_uint64	writeSize;
+
+	if (size() == 0)
+		return 0;
+
+	writeSize = size() - m_writePos;
+	// heuristic solution. consider to set the fd non-blocking
+	if (size() - m_writePos > 8192)
+		writeSize = 8192;
 
 	count = ::write(fd, data() + m_writePos, writeSize);
 	if (count == -1)

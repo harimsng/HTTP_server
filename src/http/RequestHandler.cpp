@@ -63,7 +63,7 @@ RequestHandler::receiveRequest()
 	// // LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count == 0)
+	if (count == 0 && m_recvBuffer.size() == 0)
 		return RECV_END;
 	else if (count == -1)
 		return RECV_SKIPPED;

@@ -101,7 +101,6 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
-	usleep(100);
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	if (cnt == 0)
 	{
@@ -133,13 +132,8 @@ Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
 	
-	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
-	if (count != 0)
-	{
-//		// LOG(DEBUG, "sendCgiRequest() count = %d", count);
-		return count;
-	}
-	if (m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	int	count = m_toCgiBuffer->mysend(m_serverToCgi[1]);
+	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
 	{
 		close(m_serverToCgi[1]);
 		return -1;
