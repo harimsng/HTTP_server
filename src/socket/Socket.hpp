@@ -27,7 +27,7 @@ private:
 
 public:
 // member functions
-	int		listen(int backlog = 10000) throw();
+	int		listen(int backlog = 128) throw();
 	int		bind(SocketAddr* addr) throw();
 	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
 	int		connect(SocketAddr* addr) throw();

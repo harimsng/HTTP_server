@@ -15,10 +15,10 @@
 #include "event/Cgi.hpp"
 
 #ifndef TEMP_DIR
-# define TEMP_DIR "/tmp"
+# define TEMP_DIR "/tmp/"
 #endif
 
-#define FILE_BUFFER_SIZE (16384)
+#define FILE_BUFFER_SIZE (8192)
 
 extern const std::string	g_tempDir = TEMP_DIR;
 

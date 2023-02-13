@@ -26,12 +26,11 @@ public:
 // constructors & destructor
 	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
 	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
-	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write);
 	~Cgi();
 
 // member functions
 	void	initEnv(const Request& request);
-	void	executeCgi(int pipe[2], std::string& readBody, const Request &request);
+	void	executeCgi(int pipe[2], std::string& readBody);
 // #ifdef TEST
 	void	executeCgi();
 // #endif
@@ -57,7 +56,6 @@ public:
 		int				m_requestContentFileFd;
 
 		std::string		m_responseHeader;
-		std::string		m_responseBody;
 
 		int				m_serverToCgi[2];
 		int				m_cgiToServer[2];

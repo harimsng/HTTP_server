@@ -37,7 +37,7 @@ void
 PostResponder::respond() try
 {
 	std::string	readBody;
-	std::string tmpFile = g_tempDir + m_request.m_file;
+	std::string tmpFile = g_tempDir + m_request.m_path + m_request.m_file;
 
 	if (m_request.m_status >= 300)
 		throw (m_request.m_status);
@@ -61,8 +61,8 @@ PostResponder::respond() try
 				respondStatusLine(200);
 				respondHeader();
 				respondBody(readBody);
-				m_responseStatus = RES_DONE;
 				close(m_fileFd);
+				m_responseStatus = RES_DONE;
 			}
 			else
 			{

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE (200000)
+#define BUFFER_SIZE (100000)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)

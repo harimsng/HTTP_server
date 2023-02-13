@@ -44,21 +44,6 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_totalCnt = 0;
 }
 
-Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer, int for_write)
-:	EventObject(serverToCgi[1]),
-	m_requestHandler(&requestHandler),
-//	m_serverToCgi(serverToCgi),
-//	m_cgiToServer(cgiToServer),
-	m_toCgiBuffer(&toCgiBuffer),
-	m_status(CGI_HEADER)
-{
-	(void)for_write;
-	m_serverToCgi[0] = serverToCgi[0];
-	m_serverToCgi[1] = serverToCgi[1];
-	m_cgiToServer[0] = cgiToServer[0];
-	m_cgiToServer[1] = cgiToServer[1];
-}
-
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 :	m_requestHandler(&requestHandler),
 	m_requestContentFileFd(fileFd)
@@ -68,10 +53,10 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	//int	status;
+	int	status;
 
-	//close(m_fd);
-	//waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	close(m_fd);
+	waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -85,14 +70,12 @@ Cgi::handleEventWork()
 			{
 				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
 				// return IoEventPoller::STAT_END;
-				return IoEventPoller::STAT_NORMAL;
 			}
 			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
 			// LOG(INFO, "cgi write event at %d", m_fd);
 			// Cgi must be terminated when connection is lost
-			if (sendCgiRequest() == -1)
-				return IoEventPoller::STAT_NORMAL;
+			sendCgiRequest();
 			return IoEventPoller::STAT_NORMAL;
 		default:
 			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
@@ -105,18 +88,9 @@ Cgi::receiveCgiResponse()
 {
 	int cnt;
 	int statusCode;
-	// static int totalCnt = 0;
 
 	// LOG(INFO, "receiveCgiResponse() read before fromCgiBuffer size : %d", m_fromCgiBuffer.size());
-	// cnt = read(m_fd, &m_fromCgiBuffer[0], 60000);
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	// cout << m_fromCgiBuffer << endl;
-	m_totalCnt += cnt;
-	// LOG(INFO, "receiveCgiResponse() read after total count : %d cur count : %d", totalCnt, cnt);
-	// LOG(INFO, "m_status : %d", m_status);
-	// LOG(INFO, "cgi read event finished at %d", m_fd);
-	// totalCnt += cnt;
-	// LOG(INFO, "receiveCgiResponse() count = %d, cnt = %d", m_totalCnt, cnt);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -200,13 +174,13 @@ Cgi::parseCgiHeader()
 	string	fieldName;
 	string	fieldValue;
 
-	if (m_responseBody.find("\r\n\r\n") == string::npos)
+	if (m_fromCgiBuffer.find("\r\n\r\n") == string::npos)
 		return statusCode;
 
 	while (1)
 	{
-		end = m_responseBody.find(g_CRLF, start);
-		headerField = m_responseBody.substr(start, end - start);
+		end = m_fromCgiBuffer.find(g_CRLF, start);
+		headerField = m_fromCgiBuffer.substr(start, end - start);
 		if (headerField.empty())
 			break;
 		fieldName = headerField.substr(0, headerField.find(':'));
@@ -218,7 +192,7 @@ Cgi::parseCgiHeader()
 			m_responseHeader += headerField + g_CRLF;
 		start = end + 2;
 	}
-	m_responseBody.erase(0, end + 2);
+	m_fromCgiBuffer.erase(0, end + 2);
 	m_status = CGI_CONTENT;
 	return (statusCode);
 }
@@ -248,6 +222,10 @@ Cgi::initEnv(const Request &request)
     if (contentIt != request.m_headerFieldsMap.end())
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
+    }
+	if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
+    {
+        CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
@@ -306,7 +284,7 @@ Cgi::initEnv(const Request &request)
 }
 
 void
-Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
+Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
 //  TODO: close when cgi is done
 	struct stat st;
@@ -331,9 +309,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		// Parent process
 	close(pipe[0]);
 
-	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
-	if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
-		return;
 	close(pipe[1]);
 	int status;
 	pid_t wpid = waitpid(m_pid, &status, 0);
