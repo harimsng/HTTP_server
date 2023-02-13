@@ -60,7 +60,6 @@ RequestHandler::receiveRequest()
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
-	// // LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0 && m_recvBuffer.size() == 0)
@@ -301,10 +300,6 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	// if (!m_sendBuffer.empty())
-	// {
-	//     cout << "send buffer : "<< m_sendBuffer << endl;
-	// }
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
