@@ -85,6 +85,7 @@ Cgi::handleEventWork()
 			{
 				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
 				// return IoEventPoller::STAT_END;
+				return IoEventPoller::STAT_NORMAL;
 			}
 			return IoEventPoller::STAT_NORMAL;
 		case IoEventPoller::FILT_WRITE:
@@ -219,7 +220,6 @@ Cgi::parseCgiHeader()
 	}
 	m_responseBody.erase(0, end + 2);
 	m_status = CGI_CONTENT;
-	// cout << m_status << endl;
 	return (statusCode);
 }
 
@@ -249,12 +249,6 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
-	/*
-    if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
-    {
-        CONTENT_LENGTH += Util::toString(request.m_bodySize);
-    }
-	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
@@ -315,7 +309,6 @@ void
 Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 {
 //  TODO: close when cgi is done
-//	close(m_fd);
 	struct stat st;
 
 	m_pid = fork();
@@ -349,7 +342,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	lseek(m_requestContentFileFd, 0, SEEK_SET);
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;
-	// LOG(DEBUG, "filesize = %d", fileSize);
 	readBody.resize(fileSize, 0);
 	// FIX: casting const pointer to normal pointer is UB
 	read(m_requestContentFileFd, &readBody[0], fileSize);

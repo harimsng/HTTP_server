@@ -114,7 +114,6 @@ PostResponder::constructCgi()
 	m_serverToCgi = serverToCgi[1];
 	m_cgi = cgi;
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	// ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }
