@@ -130,7 +130,6 @@ Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
 	int	count = m_toCgiBuffer->mysend(m_serverToCgi[1]);
-	static int clearCnt = 0;
 
 	// static int totCnt = 0;
 	// int beforeSize = 0;
@@ -157,8 +156,6 @@ Cgi::sendCgiRequest()
 	// }
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
 	{
-		// LOG(INFO, "sendCgiRequest() send eof");
-		cout << ++clearCnt << endl;
 		close(m_serverToCgi[1]);
 		return (-1);
 	}
