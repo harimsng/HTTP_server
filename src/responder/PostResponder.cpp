@@ -37,7 +37,7 @@ void
 PostResponder::respond() try
 {
 	std::string	readBody;
-	std::string tmpFile = g_tempDir + m_request.m_path + m_request.m_file;
+	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp";
 
 	if (m_request.m_status >= 300)
 		throw (m_request.m_status);
@@ -61,7 +61,6 @@ PostResponder::respond() try
 				respondStatusLine(200);
 				respondHeader();
 				respondBody(readBody);
-				close(m_fileFd);
 				m_responseStatus = RES_DONE;
 			}
 			else
@@ -81,6 +80,11 @@ PostResponder::respond() try
 			break;
 		default:
 			;
+	}
+	if (m_request.m_isCgi == false)
+	{
+		unlink(tmpFile.c_str());
+		close(m_fileFd);
 	}
 }
 catch(int errorStatusCode)
