@@ -1,10 +1,7 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
-#include <unistd.h>
-#include <string>
-
-#include "SocketTypes.hpp"
+#include <sys/socket.h>
 
 template <typename SocketType>
 class	Socket
@@ -17,34 +14,33 @@ public:
 	typedef typename SocketType::SocketAddr	SocketAddr;
 
 // constructors & destructor
-	Socket() throw();
-	~Socket() throw();
-	Socket(const Socket & socket) throw();
-	Socket(int fd) throw();
+	Socket();
+	~Socket();
+	Socket(const Socket& socket);
+	Socket(int fd);
+	// const Socket&	operator=(const Socket& socket) = default;
 
 private:
-	void	init() throw();
+	void	init();
 
 public:
 // member functions
-	int		listen(int backlog = 10000) throw();
-	int		bind(SocketAddr* addr) throw();
-	int		accept(sockaddr* raddr = NULL, socklen_t* sockLen = NULL) const throw();
-	int		connect(SocketAddr* addr) throw();
+	int		listen(int backlog = 10000);
+	int		bind(SocketAddr* addr);
+	int		accept(sockaddr* raddr = 0, socklen_t* sockLen = 0) const;
+	int		connect(SocketAddr* addr);
 
-	SocketAddr	getAddress() const throw();
+	int		setsockopt(int level, int opt_name, const void* opt_value, socklen_t opt_len);
+
+	const SocketAddr&	getAddress() const;
 
 // member variables
 	const int	m_fd;
-
-// static members
-	static std::string	getFormattedAddress(uint32_t addr, uint16_t port);
-	static std::string	getFormattedAddress(sockaddr_in& addr);
-	static std::string	getFormattedAddress(int fd);
+	SocketAddr	m_addr;
 };
 
 template <typename SocketType>
-Socket<SocketType>::Socket() throw()
+Socket<SocketType>::Socket()
 :	m_fd(socket(SocketType::domain, SocketType::type, SocketType::protocol))
 {
 	init();
@@ -52,70 +48,83 @@ Socket<SocketType>::Socket() throw()
 }
 
 template <typename SocketType>
-Socket<SocketType>::Socket(int fd) throw()
+Socket<SocketType>::Socket(int fd)
 :	m_fd(fd)
 {
 	init();
 }
 
 template <typename SocketType>
-Socket<SocketType>::~Socket() throw()
+Socket<SocketType>::~Socket()
 {
-	::close(m_fd);
+	SocketType::removeSocket(m_fd, m_addr);
 }
 
 template <typename SocketType>
-Socket<SocketType>::Socket(Socket const& socket) throw()
+Socket<SocketType>::Socket(Socket const& socket)
 :	m_fd(dup(socket.m_fd))
 {
+	*this = socket;
 }
 
 template <typename SocketType>
 void
-Socket<SocketType>::init() throw()
+Socket<SocketType>::init()
 {
-	int socketOption = 1;
-
-	setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
+	SocketType::initSocket(m_fd);
 }
 
 template <typename SocketType>
 int
-Socket<SocketType>::bind(SocketAddr* addr) throw()
+Socket<SocketType>::bind(SocketAddr* addr)
 {
-	return ::bind(m_fd, reinterpret_cast<sockaddr*>(addr), SocketType::socketAddrLen);
+	int	ret = ::bind(m_fd, reinterpret_cast<sockaddr*>(addr), SocketType::socketAddrLen);
+	if (ret == 0)
+		m_addr = *addr;
+	return ret;
 }
 
 template <typename SocketType>
 int
-Socket<SocketType>::listen(int backlog) throw()
+Socket<SocketType>::listen(int backlog)
 {
 	return ::listen(m_fd, backlog);
 }
 
 template <typename SocketType>
 int
-Socket<SocketType>::accept(sockaddr* raddr, socklen_t* sockLen) const throw()
+Socket<SocketType>::accept(sockaddr* raddr, socklen_t* sockLen) const
 {
 	return ::accept(m_fd, raddr, sockLen);
 }
 
 template <typename SocketType>
 int
-Socket<SocketType>::connect(SocketAddr* addr) throw()
+Socket<SocketType>::connect(SocketAddr* addr)
 {
 	return ::connect(m_fd, addr, SocketType::socketAddrLen);
 }
 
 template <typename SocketType>
-typename Socket<SocketType>::SocketAddr
-Socket<SocketType>::getAddress() const throw()
+int	
+Socket<SocketType>::setsockopt(int level, int opt_name, const void* opt_value, socklen_t opt_len)
 {
-	SocketAddr	addr;
-	socklen_t	len = Tcp::socketAddrLen;
+	return ::setsockopt(m_fd, level, opt_name, opt_value, opt_len);
+}
 
-	getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
-	return addr;
+template <typename SocketType>
+const typename Socket<SocketType>::SocketAddr&
+Socket<SocketType>::getAddress() const
+{
+	if (0)
+	{
+		SocketAddr	addr;
+		socklen_t	len = SocketType::socketAddrLen;
+
+		getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
+		return addr;
+	}
+	return m_addr;
 }
 
 #endif
