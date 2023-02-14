@@ -15,7 +15,6 @@ public:
 
 // member functions
 	virtual void	respond();
-	// void			constructCgi(std::string& readBody);
 	void			constructCgi();
 
 private:
