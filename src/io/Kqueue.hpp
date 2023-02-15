@@ -4,6 +4,7 @@
 #include <sys/event.h>
 
 #include "IoMultiplex.hpp"
+#include "Types.hpp"
 
 class	EventObject;
 
@@ -20,7 +21,7 @@ public:
 	~Kqueue();
 
 // member functions
-	virtual void	addWork(int fd, e_operation op, e_filters filter, EventObject* userData = NULL);
+	virtual void	addWork(int fd, e_operation op, int filter, EventObject* userData = NULL);
 	Event			createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags = 0,
 							intptr_t data = 0, void* udata = NULL);
 	virtual int		pollWork();

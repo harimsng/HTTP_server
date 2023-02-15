@@ -8,6 +8,7 @@
 #include "parser/HttpRequestParser.hpp"
 #include "socket/Socket.hpp"
 #include "io/Buffer.hpp"
+#include "socket/Tcp.hpp"
 
 extern const char*	g_httpVersion;
 
@@ -43,15 +44,14 @@ public:
 
 	enum	e_ioStatus
 	{
-		RECV_END = 0,
-		RECV_ERROR = 1,
-		RECV_NORMAL = 2,
-		RECV_SKIPPED = 3,
-		RECV_EVENT = 4,
-		RECV_DONE = 5,
-		SEND_ERROR = 6,
-		SEND_NORMAL = 7,
-		SEND_DONE = 8
+		RECV_ERROR = 0,
+		RECV_NORMAL,
+		RECV_SKIPPED,
+		RECV_EVENT,
+		SEND_ERROR,
+		SEND_NORMAL,
+		SEND_END,
+		CONN_CLOSE,
 	};
 
 // constructors & destructor

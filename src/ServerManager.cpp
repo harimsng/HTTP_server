@@ -1,10 +1,9 @@
-#include "Webserv.hpp"
 #include "Logger.hpp"
+#include "exception/HttpErrorHandler.hpp"
+#include "parser/ConfigParser.hpp"
 #include "event/Server.hpp"
 #include "event/Client.hpp"
 #include "event/Cgi.hpp"
-#include "parser/ConfigParser.hpp"
-#include "exception/HttpErrorHandler.hpp"
 #include "ServerManager.hpp"
 
 // static member definitions
@@ -102,7 +101,18 @@ catch (...)
 
 void
 ServerManager::registerEvent(int fd, IoEventPoller::e_operation op,
-			IoEventPoller::e_filters filter, EventObject* object)
+			int filter, EventObject* object)
 {
 	s_ioEventPoller.add(fd, op, filter, object);
+}
+
+void
+ServerManager::closeListenServer()
+{
+	for (ListenServerTable::iterator itr = s_listenServerTable.begin();
+		 itr != s_listenServerTable.end();
+		 ++itr)
+	{
+		close(itr->second->m_fd);
+	}
 }

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#define TEST_BITMASK(a, b) ((a & b) == b)
+
 class	EventObject;
 
 template <typename T>
@@ -11,8 +13,8 @@ class	IoMultiplex
 public:
 	enum	e_eventStatus
 	{
-		STAT_NORMAL = 0x0,
-		STAT_END = 0x1,
+		STAT_END = 0x0,
+		STAT_NORMAL = 0x1,
 		STAT_NONBLOCK = 0x2,
 		STAT_ERROR = 0x4,
 	};
@@ -29,7 +31,6 @@ public:
 		FILT_NONE = 0x0,
 		FILT_READ = 0x1,
 		FILT_WRITE = 0x2,
-		FILT_READWRITE = 0x3,
 		FILT_ERROR = 0x4
 	};
 
@@ -44,13 +45,13 @@ protected:
 
 public:
 // member functions
-	void	add(int fd, e_operation op, e_filters filter, EventObject* userData)
+	void	add(int fd, e_operation op, int filter, EventObject* userData)
 	{addWork(fd, op, filter, userData);}
 
 	int		poll() {return pollWork();}
 
 private:
-	virtual void	addWork(int fd, e_operation op, e_filters filter, EventObject* userData) = 0;
+	virtual void	addWork(int fd, e_operation op, int filter, EventObject* userData) = 0;
 	virtual int		pollWork() = 0;
 };
 

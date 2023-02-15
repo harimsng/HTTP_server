@@ -14,7 +14,7 @@ public:
 	PutResponder	&operator=(const PutResponder& putResponder);
 
 // member functions
-	virtual void	respond();
+	virtual void	respondWork();
 };
 
 #endif

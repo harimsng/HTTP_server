@@ -34,7 +34,7 @@ PostResponder::operator=(const PostResponder& postResponder)
 }
 
 void
-PostResponder::respond() try
+PostResponder::respondWork()
 {
 	std::string	readBody;
 	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp";
@@ -54,24 +54,16 @@ PostResponder::respond() try
 				break;
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
-			if (m_request.m_isCgi == false)
-			{
-				string	readBody;
-				readFile(readBody);
-				respondStatusLine(200);
-				respondHeader();
-				respondBody(readBody);
-				close(m_fileFd);
-				m_responseStatus = RES_DONE;
-			}
-			else
-			{
-				ServerManager::registerEvent(m_serverToCgi, Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, m_cgi);
+			if (m_request.m_isCgi == true)
+				break;
+			readFile(readBody);
+			respondStatusLine(200);
+			respondHeader();
+			respondBody(readBody);
+			m_responseStatus = RES_DONE;
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes
-				break;
-			}
 			// fall through
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;
@@ -88,20 +80,6 @@ PostResponder::respond() try
 		close(m_fileFd);
 	}
 }
-catch(int errorStatusCode)
-{
-	string readBody;
-
-	m_request.m_status = errorStatusCode;
-	respondStatusLine(errorStatusCode);
-	respondHeader();
-	m_request.m_file.clear();
-	m_request.m_path = getErrorPage(readBody);
-	readFile(readBody);
-	respondBody(readBody);
-	close(m_fileFd);
-	endResponse();
-}
 
 void
 PostResponder::constructCgi()
@@ -114,11 +92,13 @@ PostResponder::constructCgi()
 		|| pipe(serverToCgi) < 0)
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
-	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
+	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
 
-	m_serverToCgi = serverToCgi[1];
-	m_cgi = cgi;
+//	m_fileFd = serverToCgi[1];
+
+	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }

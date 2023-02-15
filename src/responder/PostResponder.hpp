@@ -14,7 +14,7 @@ public:
 	PostResponder	&operator=(const PostResponder& postResponder);
 
 // member functions
-	virtual void	respond();
+	virtual void	respondWork();
 	// void			constructCgi(std::string& readBody);
 	void			constructCgi();
 

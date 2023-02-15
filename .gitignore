@@ -64,3 +64,4 @@ errlog.txt
 file_should_exist_after
 multiple_same
 compile_commands.json
+.vscode

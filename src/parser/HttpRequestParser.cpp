@@ -73,7 +73,6 @@ HttpRequestParser::parseMethod(Request &request)
 		request.m_method = RequestHandler::s_methodConvertTable[method];
 	else
 		UPDATE_REQUEST_ERROR(request.m_status, 400);
-	LOG(DEBUG, "request.m_method = %x", request.m_method);
 	m_readStatus = REQUEST_LINE;
 	m_tokenizer.flush();
 }
