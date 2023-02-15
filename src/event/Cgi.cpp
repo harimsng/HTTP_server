@@ -88,18 +88,9 @@ Cgi::receiveCgiResponse()
 {
 	int cnt;
 	int statusCode;
-	// static int totalCnt = 0;
 
 	// LOG(INFO, "receiveCgiResponse() read before fromCgiBuffer size : %d", m_fromCgiBuffer.size());
-	// cnt = read(m_fd, &m_fromCgiBuffer[0], 60000);
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	// cout << m_fromCgiBuffer << endl;
-	// m_totalCnt += cnt;
-	// LOG(INFO, "receiveCgiResponse() read after total count : %d cur count : %d", totalCnt, cnt);
-	// LOG(INFO, "m_status : %d", m_status);
-	// LOG(INFO, "cgi read event finished at %d", m_fd);
-	// totalCnt += cnt;
-	// LOG(INFO, "receiveCgiResponse() count = %d, cnt = %d", m_totalCnt, cnt);
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -139,7 +130,6 @@ Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
 	int	count = m_toCgiBuffer->mysend(m_serverToCgi[1]);
-	static int clearCnt = 0;
 
 	// static int totCnt = 0;
 	// int beforeSize = 0;
@@ -166,7 +156,6 @@ Cgi::sendCgiRequest()
 	// }
 	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
 	{
-		cout << ++clearCnt << endl;
 		close(m_serverToCgi[1]);
 		return (-1);
 	}
@@ -230,7 +219,7 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
-    if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
+	if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
@@ -291,10 +280,9 @@ Cgi::initEnv(const Request &request)
 }
 
 void
-Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
+Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
 //  TODO: close when cgi is done
-//	close(m_fd);
 	struct stat st;
 
 	m_pid = fork();
@@ -317,9 +305,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 		// Parent process
 	close(pipe[0]);
 
-	// WARNING: if (request.m_bodySize > size of pipe buffer(usually 65536 bytes)), written size = size of pipe buffer.
-	if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
-		return;
 	close(pipe[1]);
 	int status;
 	pid_t wpid = waitpid(m_pid, &status, 0);
@@ -328,7 +313,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody, const Request &request)
 	lseek(m_requestContentFileFd, 0, SEEK_SET);
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;
-	// LOG(DEBUG, "filesize = %d", fileSize);
 	readBody.resize(fileSize, 0);
 	// FIX: casting const pointer to normal pointer is UB
 	read(m_requestContentFileFd, &readBody[0], fileSize);

@@ -36,12 +36,8 @@ PostResponder::operator=(const PostResponder& postResponder)
 void
 PostResponder::respond() try
 {
-#ifndef TEST
 	std::string	readBody;
-	std::string tmpFile = m_request.m_path + m_request.m_file;
-
-#endif
-	// struct stat st;
+	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp";
 
 	if (m_request.m_status >= 300)
 		throw (m_request.m_status);
@@ -71,7 +67,6 @@ PostResponder::respond() try
 			else
 			{
 				ServerManager::registerEvent(m_serverToCgi, Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, m_cgi);
-				// m_cgi->executeCgi();
 				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
 				// close(m_fileFd);
 				// break here for cgi to finializes
@@ -86,6 +81,11 @@ PostResponder::respond() try
 			break;
 		default:
 			;
+	}
+	if (m_request.m_isCgi == false)
+	{
+		unlink(tmpFile.c_str());
+		close(m_fileFd);
 	}
 }
 catch(int errorStatusCode)
@@ -119,7 +119,6 @@ PostResponder::constructCgi()
 	m_serverToCgi = serverToCgi[1];
 	m_cgi = cgi;
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	// ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi();
 }

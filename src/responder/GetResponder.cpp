@@ -37,6 +37,8 @@ GetResponder::respond()
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
+			if (isAutoIndex())
+				m_request.m_status = 200;
 			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
@@ -80,7 +82,7 @@ GetResponder::constructCgi(std::string& readBody)
 
 	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
-	cgi->executeCgi(pipeSet, readBody, m_request);
+	cgi->executeCgi(pipeSet, readBody);
 	m_responseStatus = RES_DONE;
 }
 

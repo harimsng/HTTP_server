@@ -63,12 +63,7 @@ RequestHandler::receiveRequest()
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count == 0)
-	{
-		cout << "eof at request message" << endl;
-		cout << m_recvBuffer.size() << endl;
-		cout << m_recvBuffer << endl;
 		return RECV_END;
-	}
 	else if (count == -1)
 		return RECV_SKIPPED;
 
@@ -305,10 +300,6 @@ RequestHandler::resetStates()
 int
 RequestHandler::sendResponse() try
 {
-	// if (!m_sendBuffer.empty())
-	// {
-	//     cout << "send buffer : "<< m_sendBuffer << endl;
-	// }
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
 	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)

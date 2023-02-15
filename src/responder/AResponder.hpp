@@ -44,8 +44,8 @@ protected:
 
 	void			openFile(const std::string& path);
 	void			openFile();
-	void			writeToFile(size_t writeSize);
-	void			writeToBuffer(size_t writeSize);
+	int				writeToFile(size_t writeSize);
+	int				writeToBuffer(size_t writeSize);
 	void			readFile(std::string& readBody);
 
 	int				receiveContentNormal();
@@ -74,7 +74,7 @@ protected:
 	int			m_totalrecvBufferSize;
 	int			(AResponder::*m_recvContentFunc)();
 	int			(AResponder::*m_sendContentFunc)();
-	void		(AResponder::*m_procContentFunc)(size_t size);
+	int			(AResponder::*m_procContentFunc)(size_t size);
 };
 
 #endif
