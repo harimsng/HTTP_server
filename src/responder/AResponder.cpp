@@ -287,7 +287,7 @@ AResponder::receiveContentChunked()
 			// LOG(DEBUG, "dataSize updated = %d", m_dataSize);
 		}
 		// NOTE: clientMaxBodySize is equal to total content length, not size of a chunk
-		// NOTE: what if location is not found from request uri 
+		// NOTE: what if location is not found from request uri
 		if (m_totalContentLentgh > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
 			LOG(DEBUG, "content length sum = %d, max content size = %d",

@@ -121,7 +121,7 @@ Cgi::receiveCgiResponse()
 			if (cnt == 0)
 			{
 				m_requestHandler->resetStates();
-				delete this;
+				// delete this;
 			}
 			break;
 	}
