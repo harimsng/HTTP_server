@@ -28,7 +28,7 @@ Buffer::operator=(const Buffer& buffer)
 // constructors & destructor
 Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0),
-//	m_writePos(0),
+	m_writePos(0),
 	m_status(BUF_GOOD)
 {
 	resize(0);
@@ -145,7 +145,7 @@ Buffer::send(int fd)
 	count = ::write(fd, data() + m_writePos, writeSize);
 	if (count <= 0)
 		return count;
-	
+
 	m_writePos += count;
 	if (m_writePos == size())
 	{

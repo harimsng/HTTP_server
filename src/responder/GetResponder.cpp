@@ -51,7 +51,7 @@ GetResponder::respondWork()
 			{
 				// WARNING: /a/a.html and /b/a.html has same filename.
 				// if two request has same filename, later request will delete and rewrite it
-				// so that earlier request will lost 
+				// so that earlier request will lost
 				string tmpFile = g_tempDir + m_request.m_file + ".temp";
 				openFile(tmpFile);
 				constructCgi(readBody);
