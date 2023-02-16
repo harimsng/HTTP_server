@@ -3,6 +3,9 @@
 
 #include "http/RequestHandler.hpp"
 
+#define RESPONDER_TRANSITION(state)\
+	m_responseState = state; (this->*(s_transitionTable[state]))();
+
 class	AResponder
 {
 private:
@@ -10,12 +13,11 @@ private:
 	AResponder(const AResponder& method);
 
 public:
-	enum e_responseStatus{
+	enum e_responseState {
 		RES_HEADER = 0,
-		RES_CONTENT,
-		RES_CONTENT_FINISHED,
-		RES_SEND_CGI,
-		RES_RECV_CGI,
+		RES_RECV_CONTENT,
+		RES_RECV_CONTENT_DONE,
+		RES_SEND_TO_CGI,
 		RES_DONE
 	};
 
@@ -61,7 +63,7 @@ protected:
 	Buffer&				m_recvBuffer;
 	Buffer				m_buffer;
 
-	e_responseStatus	m_responseStatus;
+	e_responseState		m_responseState;
 
 	int					m_dataSize;
 	int					m_totalContentLentgh;

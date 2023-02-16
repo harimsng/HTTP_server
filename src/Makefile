@@ -47,7 +47,7 @@ SRC			+=	main.cpp\
 \
 				io/Buffer.cpp\
 \
-				socket/Socket.cpp\
+				socket/Tcp.cpp\
 \
 				util/Util.cpp\
 

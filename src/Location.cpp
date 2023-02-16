@@ -18,10 +18,10 @@ Location::~Location()
 void
 Location::setToDefault()
 {
-	m_autoindex = -1;
+	m_autoindex = autoindex;
 	m_limitExcept = limitExcept;
-	m_alias = "";
-	m_clientMaxBodySize = 0;
+	m_alias = alias;
+	m_clientMaxBodySize = clientMaxBodySize;
 }
 
 ostream&

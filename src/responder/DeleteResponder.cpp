@@ -78,19 +78,19 @@ DeleteResponder::respondWork()
 	string	readBody;
 	string	filePath = m_request.m_path + m_request.m_file;
 
-	switch (m_responseStatus)
+	switch (m_responseState)
 	{
 		case RES_HEADER:
 			respondHeader();
-			m_responseStatus = RES_CONTENT; // fall through
-		case RES_CONTENT:
+			m_responseState = RES_RECV_CONTENT; // fall through
+		case RES_RECV_CONTENT:
 			deleteFile(filePath, readBody);
 			m_sendBuffer.append("Content-Length: ");
 			m_sendBuffer.append(Util::toString(readBody.size()));
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(g_CRLF);
 			m_sendBuffer.append(readBody);
-			m_responseStatus = RES_DONE; // fall through
+			m_responseState = RES_DONE; // fall through
 		case RES_DONE:
 			endResponse();
 			break;

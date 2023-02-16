@@ -13,6 +13,15 @@ using namespace std;
 
 extern string	g_tempDir;
 
+const GetResponder::t_transition	GetResponder::s_transitionTable[5] = {
+	&GetResponder::header,
+	&GetResponder::recvContent,
+	NULL, // recvContentDone
+	NULL, // sendToCgi
+	&GetResponder::done,
+};
+
+
 // constructors & destructor
 GetResponder::GetResponder(RequestHandler& requestHandler)
 :	AResponder(requestHandler)
@@ -31,62 +40,70 @@ GetResponder::operator=(const GetResponder& getMethod)
 	return *this;
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 void
 GetResponder::respondWork()
 {
-	string readBody;
-
-	switch (m_responseStatus)
-	{
-		case RES_HEADER:
-			respondStatusLine(m_request.m_status);
-			respondHeader();
-			m_responseStatus = RES_CONTENT; // fall through
-		case RES_CONTENT:
-			if (isAutoIndex())
-				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
-			else if (m_request.m_isCgi == true)
-			{
-				// WARNING: /a/a.html and /b/a.html has same filename.
-				// if two request has same filename, later request will delete and rewrite it
-				// so that earlier request will lost 
-				string tmpFile = g_tempDir + m_request.m_file + ".temp";
-				openFile(tmpFile);
-				constructCgi(readBody);
-				unlink(tmpFile.c_str());
-			}
-			else if (m_request.m_status != 200)
-			{
-				m_request.m_path = getErrorPage(readBody);
-			}
-			readFile(readBody);
-			respondBody(readBody);
-			// TODO: change code to use swap instead of appen
-			m_responseStatus = RES_DONE; // fall through
-			// break;
-		case RES_DONE:
-		// method must know end of response(content length, chunked)
-			endResponse();
-			break;
-		default:
-			;
-	}
+	RESPONDER_TRANSITION(m_responseState);
 }
 
 void
-GetResponder::constructCgi(std::string& readBody)
+GetResponder::header()
 {
-	int	pipeSet[2];
+	// NOTE: add '&& m_request.m_status == 404'?
+	if (isAutoIndex() == true && m_request.m_status == 404)
+		m_request.m_status = 200;
+	respondStatusLine(m_request.m_status);
+	respondHeader();
+	RESPONDER_TRANSITION(RES_RECV_CONTENT);
+}
 
-	pipe(pipeSet);
+void
+GetResponder::recvContent()
+{
+	string	readBody;
 
-	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
+	if (m_request.m_isCgi == true)
+	{
+		constructCgi();
+		return;
+	}
+	if (isAutoIndex() == true)
+	{
+		readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
+	}
+	else if (m_request.m_status != 200)
+	{
+		m_request.m_path = getErrorPage(readBody);
+	}
+	readFile(readBody);
+	respondBody(readBody);
+	RESPONDER_TRANSITION(RES_DONE);
+}
 
-	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	ServerManager::registerEvent(pipeSet[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
-	cgi->initEnv(m_request);
-	cgi->executeCgi(pipeSet, readBody, m_request);
-	m_responseStatus = RES_DONE;
+void
+GetResponder::done()
+{
+	endResponse();
+	return;
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void
+GetResponder::constructCgi()
+{
+	int	cgiToServer[2];
+
+	if (pipe(cgiToServer) < 0)
+		throw std::runtime_error("pipe() fail in GetResponder::constructCgi()");
+
+	Cgi*	cgi = new Cgi(cgiToServer, m_requestHandler);
+
+	(void)cgi;
 }
 
 bool
@@ -100,3 +117,43 @@ GetResponder::isAutoIndex()
 	}
 	return (false);
 }
+
+/*
+void
+GetResponder::respondWork()
+{
+	string readBody;
+
+	switch (m_responseState)
+	{
+		case RES_HEADER:
+			respondStatusLine(m_request.m_status);
+			respondHeader();
+			m_responseState = RES_RECV_CONTENT; // fall through
+// fall through
+		case RES_RECV_CONTENT:
+			if (isAutoIndex())
+				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
+			else if (m_request.m_isCgi == true)
+			{
+				constructCgi();
+				break;
+			}
+			else if (m_request.m_status != 200)
+			{
+				m_request.m_path = getErrorPage(readBody);
+			}
+			readFile(readBody);
+			respondBody(readBody);
+			m_responseState = RES_DONE;
+			// break;
+// fall through
+		case RES_DONE:
+		// method must know end of response(content length, chunked)
+			endResponse();
+			break;
+		default:
+			;
+	}
+}
+*/

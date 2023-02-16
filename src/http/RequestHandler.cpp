@@ -58,14 +58,14 @@ RequestHandler::receiveRequest()
 
 	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
-		return RECV_SKIPPED;
+		return RECV_SKIP;
 	// LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
 	if (count <= 0)
 		return RECV_ERROR;
 
-	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
+	// LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -84,12 +84,14 @@ RequestHandler::receiveRequest()
 			if (m_parser.m_readStatus == HttpRequestParser::CONTENT)
 				break; // fall through
 		case HttpRequestParser::FINISHED:
+			LOG(DEBUG, "finished a request");
 			delete m_responder;
 			if (m_parser.m_readStatus != HttpRequestParser::ERROR)
 			{
 				resetStates();
 				break;
 			}
+			// if (m_parser.m_readStatus == HttpRequestParser::ERROR)
 		default:
 			;
 	}
@@ -179,13 +181,14 @@ RequestHandler::checkIsCgi()
 			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
-				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
+				m_request.m_cgiPath = m_request.m_virtualServer->m_cgiPass[m_ext];
 				// TODO
 				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
-			// TODO
+			// NOTE: if there's no preceding error, no need to assign 200.
+			// if there was preceding error, assignment to 200 is wrong?
 			m_request.m_status = 200;
 	}
 }
@@ -279,12 +282,12 @@ RequestHandler::checkResourceStatus()
 std::string
 RequestHandler::findContentType(std::string& content)
 {
-	std::string extension;
+	std::string 		extension;
+	string::size_type	pos = content.find('.');
 
-	// INFO: npos?
-	if (content.find('.') != std::string::npos)
+	if (pos != std::string::npos)
 	{
-		extension = content.substr(content.find('.') + 1);
+		extension = content.substr(pos + 1);
 		if (s_extensionTypeTable.count(extension) == 1)
 			return s_extensionTypeTable[extension];
 	}
@@ -353,8 +356,14 @@ operator<<(std::ostream& os, const Request& request)
 	return (os);
 }
 
-// NOTE: static functions below which are initializing table should be removed and
-// instead use initalizer list in C++11 or higher.
+
+const Request&
+RequestHandler::getRequest() const
+{
+	return m_request;
+}
+
+// NOTE: initializer list may be used in C++11 or later version.
 void
 RequestHandler::setMethodConvertTable()
 {

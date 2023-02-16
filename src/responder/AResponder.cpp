@@ -7,11 +7,11 @@
 #include <fstream>
 
 #include "Logger.hpp"
-#include "exception/HttpErrorHandler.hpp"
+#include "ServerManager.hpp"
 #include "VirtualServer.hpp"
-#include "http/RequestHandler.hpp"
-#include "io/Buffer.hpp"
+#include "exception/HttpErrorHandler.hpp"
 #include "util/Util.hpp"
+#include "event/Cgi.hpp"
 #include "AResponder.hpp"
 
 #ifndef TEMP_DIR
@@ -30,7 +30,7 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_request(m_requestHandler.m_request),
 	m_sendBuffer(m_requestHandler.m_sendBuffer),
 	m_recvBuffer(m_requestHandler.m_recvBuffer),
-	m_responseStatus(RES_HEADER),
+	m_responseState(RES_HEADER),
 	m_dataSize(-1),
 	m_totalContentLentgh(0)
 {
@@ -63,12 +63,16 @@ AResponder::operator=(const AResponder& aMethod)
 void
 AResponder::respond() try
 {
+	if (m_request.m_status >= 300)
+		throw (m_request.m_status);
+
 	respondWork();
 }
 catch (int errorStatusCode)
 {
 	string readBody;
 
+	// ERROR: code 201 is catched here.
 	LOG(DEBUG, "%d error while responding", errorStatusCode);
 	m_request.m_status = errorStatusCode;
 	respondStatusLine(errorStatusCode);

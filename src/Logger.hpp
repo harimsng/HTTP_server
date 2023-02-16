@@ -23,6 +23,16 @@
 	{\
 		Logger::log(Logger::type, fmt, ##__VA_ARGS__);\
 	}
+#  define LOG_OBJ(type, obj)\
+	if (Logger::type >= Logger::DEBUG)\
+	{\
+		Logger::log(Logger::type, "%s:%d: ", __FILE__, __LINE__);\
+		Logger::log(Logger::type, obj);\
+	}\
+	else\
+	{\
+		Logger::log(Logger::type, obj);\
+	}
 # endif
 
 class	Logger

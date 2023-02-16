@@ -20,7 +20,7 @@ VirtualServer::setToDefault()
 {
 	m_serverNames = vector<string>(1, "");
 	m_listen = GET_SOCKADDR_IN(listenIp, listenPort);
-	m_clientMaxBodySize = 1 << 13; // 8kb
+	m_clientMaxBodySize = clientMaxBodySize; // 8kb
 	m_addrKey.setAddrKey(listenIp, listenPort);
 }
 

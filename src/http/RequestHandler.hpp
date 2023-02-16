@@ -5,8 +5,10 @@
 #include <map>
 #include <vector>
 
+#include "Location.hpp"
+#include "Request.hpp"
 #include "parser/HttpRequestParser.hpp"
-#include "socket/Socket.hpp"
+#include "socket/Tcp.hpp"
 #include "io/Buffer.hpp"
 
 extern const char*	g_httpVersion;
@@ -45,12 +47,11 @@ public:
 	{
 		RECV_ERROR = 0,
 		RECV_NORMAL,
-		RECV_SKIPPED, 
+		RECV_SKIP, 
 		RECV_EVENT,
 		SEND_ERROR,
 		SEND_NORMAL,
 		SEND_END,
-		CONN_CLOSE,
 	};
 
 // constructors & destructor
@@ -58,6 +59,8 @@ public:
 	~RequestHandler();
 
 // member functions
+	const Request&	getRequest() const;
+
 	int		receiveRequest();
 	int		sendResponse();
 	void	resetStates();

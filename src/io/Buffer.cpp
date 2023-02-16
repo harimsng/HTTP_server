@@ -25,7 +25,7 @@ Buffer::operator=(const Buffer& buffer)
 // constructors & destructor
 Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0),
-//	m_writePos(0),
+	m_writePos(0),
 	m_status(BUF_GOOD)
 {
 	resize(0);
@@ -72,7 +72,7 @@ Buffer::receive(int fd)
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
 	if (residue == BUFFER_SIZE - 1 || count == -1)
-		return count;
+		return -1;
 
 	resize(residue + count, 0);
 	return count;

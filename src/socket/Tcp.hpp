@@ -46,10 +46,9 @@ struct	Tcp
 	static const int		type = SOCK_STREAM;
 	static const int		protocol = 0;
 
+	static std::string	getFormattedAddress(uint32_t addr, uint16_t port);
+	static std::string	getFormattedAddress(sockaddr_in& addr);
+	static std::string	getFormattedAddress(int fd);
 };
-
-std::string	getFormattedAddress(uint32_t addr, uint16_t port);
-std::string	getFormattedAddress(sockaddr_in& addr);
-std::string	getFormattedAddress(int fd);
 
 #endif

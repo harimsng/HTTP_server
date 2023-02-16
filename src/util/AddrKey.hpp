@@ -2,7 +2,7 @@
 #define ADDRKEY_HPP
 
 #include "Types.hpp"
-#include "socket/Socket.hpp"
+#include "socket/Tcp.hpp"
 
 struct	AddrKey
 {
@@ -20,7 +20,6 @@ struct	AddrKey
 		sockAddr.sin_port = value >> 32;
 		return sockAddr;
 	}
-	t_uint64	value;
 
 	bool	operator<(const AddrKey& rhs) const
 	{
@@ -46,6 +45,8 @@ struct	AddrKey
 	{
 		return !(*this > rhs);
 	}
+
+	t_uint64	value;
 };
 
 #endif

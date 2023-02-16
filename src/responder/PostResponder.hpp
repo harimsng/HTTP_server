@@ -5,6 +5,8 @@
 
 class	PostResponder : public AResponder
 {
+	typedef void	(PostResponder::*t_transition)();
+
 public:
 // constructors & destructor
 	PostResponder(RequestHandler& requestHandler);
@@ -15,10 +17,17 @@ public:
 
 // member functions
 	virtual void	respondWork();
-	// void			constructCgi(std::string& readBody);
-	void			constructCgi();
+
+	void	header();
+	void	recvContent();
+	void	recvContentDone();
+	void	sendToCgi();
+	void	done();
+
+	void	constructCgi();
 
 private:
+	static const t_transition	s_transitionTable[5];
 };
 
 #endif

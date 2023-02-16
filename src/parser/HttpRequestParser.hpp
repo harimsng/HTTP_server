@@ -1,41 +1,12 @@
 #ifndef HTTPREQUESTPARSER_HPP
 #define HTTPREQUESTPARSER_HPP
 
-#include <vector>
-#include <map>
-
-#include "Types.hpp"
 #include "parser/AParser.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
-#include "Location.hpp"
 
-#define UPDATE_REQUEST_ERROR(status, code) (status = status < 300 ? code : status)
-
-class	Server;
-class	VirtualServer;
 struct	Request;
 
-typedef std::map<std::string, std::vector<std::string> > HeaderFieldsMap;
-
-struct Request
-{
-	Request(): m_method(0), m_status(200), m_bodySize(0), m_locationBlock(NULL), m_virtualServer(NULL), m_isCgi(false) {};
-
-	int					m_method;
-	int					m_status;
-	std::string			m_uri;
-	std::string			m_queryString;
-	std::string			m_protocol;
-	std::string			m_path;
-	std::string			m_file;
-	std::string			m_cgi;
-	std::string			requestBodyBuf;
-	t_int64				m_bodySize;
-	Location*			m_locationBlock;
-	VirtualServer*		m_virtualServer;
-	HeaderFieldsMap		m_headerFieldsMap;
-	bool				m_isCgi;
-};
+#define UPDATE_REQUEST_ERROR(status, code) (status = status < 300 ? code : status)
 
 class	HttpRequestParser
 :	public AParser<HttpStreamTokenizer, Request>
@@ -67,10 +38,7 @@ public:
 
 	void	parseMethod(Request& request);
 	void	parseStatusLine(Request& request);
-	void	parseHeaderFields(HeaderFieldsMap& headerFieldsMap);
-
-	e_readStatus	checkStatusLine(Request& request);
-	bool			checkHeaderFields(HeaderFieldsMap& headerFieldsMap);
+	void	parseHeaderFields(Request& request);
 
 // member variables
 	e_readStatus		m_readStatus;

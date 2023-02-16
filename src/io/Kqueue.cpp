@@ -85,7 +85,7 @@ Kqueue::pollWork()
 	struct timespec	interval;
 
 	interval.tv_sec = 0;
-	interval.tv_nsec = 10 * 1000 * 1000;
+	interval.tv_nsec = 50 * 1000 * 1000;
 	m_eventList.resize(maxEvent);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
 				   m_eventList.data(), m_eventList.size(), &interval);

@@ -1,5 +1,6 @@
 #include "Logger.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "http/Request.hpp"
 #include "http/RequestHandler.hpp"
 #include "parser/HttpRequestParser.hpp"
 
@@ -46,7 +47,7 @@ HttpRequestParser::parse(Request& request)
 				parseStatusLine(request);
 				break;
 			case HEADER_FIELDS:
-				parseHeaderFields(request.m_headerFieldsMap);
+				parseHeaderFields(request);
 				break;
 			default:
 				;
@@ -105,9 +106,10 @@ HttpRequestParser::parseStatusLine(Request &request)
 }
 
 void
-HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
+HttpRequestParser::parseHeaderFields(Request& request)
 {
-	const string headerLine = m_tokenizer.getline();
+	HeaderFieldsMap&	headerFieldsMap = request.m_headerFieldsMap;
+	const string 		headerLine = m_tokenizer.getline();
 	string	field;
 	string	value;
 	size_t	pos;

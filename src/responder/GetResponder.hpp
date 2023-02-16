@@ -5,6 +5,8 @@
 
 class	GetResponder : public AResponder
 {
+	typedef void	(GetResponder::*t_transition)();
+
 public:
 // constructors & destructor
 	GetResponder(RequestHandler& requestHandler);
@@ -13,11 +15,18 @@ public:
 // operators
 	GetResponder	&operator=(const GetResponder& getMethod);
 
+// member functions
 	virtual void	respondWork();
 
-	void			constructCgi(std::string& readBody);
-	bool			isAutoIndex();
-// member functions
+	void	header();
+	void	recvContent();
+	void	done();
+
+	void	constructCgi();
+	bool	isAutoIndex();
+
+private:
+	static const t_transition	s_transitionTable[5];
 };
 
 #endif
