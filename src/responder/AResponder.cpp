@@ -330,7 +330,10 @@ AResponder::receiveContentNormal()
 {
 	if (m_dataSize == -1)
 	{
-		m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+		if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") == 0)
+			throw (204);
+		else
+			m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 			throw (413);
 	}
