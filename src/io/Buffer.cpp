@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE (100000)
+#define BUFFER_SIZE (65536)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
@@ -72,9 +72,11 @@ Buffer::receive(int fd)
 	t_int64			count;
 
 	resize(BUFFER_SIZE, 0);
+	if (residue == BUFFER_SIZE - 1)
+		return -2;
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (residue == BUFFER_SIZE - 1 || count == -1)
+	if (count == -1)
 		return count;
 
 	resize(residue + count, 0);
@@ -151,11 +153,6 @@ Buffer::send(int fd)
 	{
 		m_writePos = 0;
 		clear();
-	}
-	if (m_writePos > BUFFER_SIZE)
-	{
-		erase(0, m_writePos);
-		m_writePos = 0;
 	}
 	return count;
 }

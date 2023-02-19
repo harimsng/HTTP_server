@@ -19,7 +19,6 @@ Server::operator=(const Server& server)
 
 // constructors & destructor
 Server::Server()
-:	m_socket(Socket<Tcp>())
 {
 	m_fd = m_socket.m_fd;
 }
@@ -29,8 +28,7 @@ Server::~Server()
 }
 
 Server::Server(const Server& server)
-:	EventObject(server),
-	m_socket(server.m_socket)
+:	EventObject(server)
 {
 }
 

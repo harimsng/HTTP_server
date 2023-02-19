@@ -44,9 +44,7 @@ PostResponder::respondWork()
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			if (m_request.m_isCgi == true)
-				constructCgi();
-			else
+			if (m_request.m_isCgi != true)
 				openFile(tmpFile);
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
@@ -55,7 +53,10 @@ PostResponder::respondWork()
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
 			if (m_request.m_isCgi == true)
+			{
+				constructCgi();
 				break;
+			}
 			readFile(readBody);
 			respondStatusLine(200);
 			respondHeader();

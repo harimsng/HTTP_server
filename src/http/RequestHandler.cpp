@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "parser/HttpRequestParser.hpp"
 #include "responder/Responder.hpp"
 #include "http/FindLocation.hpp"
 #include "http/RequestHandler.hpp"
@@ -22,8 +23,8 @@ std::map<std::string, std::string>	RequestHandler::s_extensionTypeTable;
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_parser(m_recvBuffer),
-	m_responder(NULL),
-	m_socket(NULL)
+	m_socket(NULL),
+	m_responder(NULL)
 {
 	(void)requestHandler;
 }
@@ -38,8 +39,8 @@ RequestHandler::operator=(const RequestHandler& request)
 // constructors & destructor
 RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 :	m_parser(m_recvBuffer),
-	m_responder(NULL),
-	m_socket(&socket)
+	m_socket(&socket),
+	m_responder(NULL)
 {
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
@@ -61,8 +62,10 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count <= 0)
-		return RECV_ERROR;
+	if (count < 0)
+		return RECV_SKIPPED;
+	else if (count == 0)
+		return RECV_END;
 
 	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
@@ -304,18 +307,16 @@ RequestHandler::sendResponse() try
 {
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
-	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	if (count == 0 && (m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD || m_parser.m_readStatus == HttpRequestParser::ERROR))
 	{
 		LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
 		m_sendBuffer.status(Buffer::BUF_EOF);
-		return SEND_END;
+		return m_parser.m_readStatus == HttpRequestParser::ERROR ? SEND_ERROR : SEND_END;
 	}
 	else if (count > 0)
 	{
 		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
 		// NOTE: is it guaranteed that error page response is fully sent?
-		if (m_request.m_status >= 300)
-			return SEND_ERROR;
 	}
 	return SEND_NORMAL;
 }

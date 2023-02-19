@@ -20,11 +20,11 @@ Client::~Client()
 	static unsigned short	count = 0;
 
 	LOG(INFO, "[%5hu][%5d] client connection closed", count++, m_fd);
+	close(m_socket.m_fd);
 }
 
 Client::Client(Client const& client)
 :	EventObject(client),
-	m_socket(client.m_socket),
 	m_requestHandler(m_socket)
 {
 	m_fd = client.m_fd;
@@ -48,12 +48,12 @@ Client::handleReadEventWork()
 					IoEventPoller::FILT_READ | IoEventPoller::FILT_WRITE, this);
 			break;
 
-		case RequestHandler::RECV_ERROR:
-			if (m_eventStatus == EVENT_EOF)
-			{
-				return IoEventPoller::STAT_END;
-			}
-			break;
+		case RequestHandler::RECV_END:
+			m_eventStatus = EVENT_EOF;
+			if (TEST_BITMASK(m_filter, IoEventPoller::FILT_WRITE) == true)
+				return IoEventPoller::STAT_NORMAL;
+
+			return IoEventPoller::STAT_END;
 
 		default:
 			;
@@ -73,6 +73,8 @@ Client::handleWriteEventWork()
 		case RequestHandler::SEND_END:
 			// this can delete fd instead of modifying
 			LOG(DEBUG, "[%d] write event finished", m_socket.m_fd);
+			if (m_eventStatus == EVENT_EOF)
+				return IoEventPoller::STAT_END;
 			ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
 					IoEventPoller::FILT_WRITE, this);
 			break;

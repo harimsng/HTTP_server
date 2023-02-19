@@ -12,6 +12,7 @@
 #include "exception/HttpErrorHandler.hpp"
 #include "Cgi.hpp"
 #include "ServerManager.hpp"
+#include "responder/AResponder.hpp"
 
 using namespace std;
 
@@ -57,6 +58,8 @@ Cgi::~Cgi()
 {
 	static short unsigned int	count = 0;
 
+	delete m_requestHandler->m_responder;
+	m_requestHandler->resetStates();
 	close(m_fd);
 	waitpid(m_pid, NULL, 0);
 	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
@@ -118,11 +121,11 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_fromCgiBuffer.clear();
 			// LOG(INFO, "receiveCgiResponse cnt  %d", cnt);
-			if (cnt == 0)
-			{
-				m_requestHandler->resetStates();
-				// delete this;
-			}
+			// if (cnt == 0)
+			// {
+			//     delete m_requestHandler->m_responder;
+			//     m_requestHandler->resetStates();
+			// }
 			break;
 	}
 	return (cnt);

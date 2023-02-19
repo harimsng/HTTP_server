@@ -48,6 +48,7 @@ public:
 		RECV_NORMAL,
 		RECV_SKIPPED,
 		RECV_EVENT,
+		RECV_END,
 		SEND_ERROR,
 		SEND_NORMAL,
 		SEND_END,
@@ -83,12 +84,12 @@ private:
 // member variables
 	HttpRequestParser	m_parser;
 	Request				m_request;
-	AResponder*			m_responder;
 
 public:
 	const Socket<Tcp>*	m_socket;
 	Buffer				m_recvBuffer;
 	Buffer				m_sendBuffer;
+	AResponder*			m_responder;
 
 	static std::string			makeErrorPage(int status);
 // static members

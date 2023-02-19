@@ -14,12 +14,12 @@ class	Client: public EventObject
 
 // deleted
 	Client	&operator=(Client const& client);
+	Client(Client const& client);
 
 public:
 // constructors & destructor
 	Client(int fd);
 	virtual ~Client();
-	Client(Client const& client);
 
 // member functions
 	virtual IoEventPoller::EventStatus	handleReadEventWork();

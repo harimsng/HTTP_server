@@ -9,6 +9,7 @@ class	Socket
 {
 // deleted
 	Socket	&operator=(const Socket& socket) {(void)socket; return *this;}
+	Socket(const Socket& socket);
 
 public:
 // types
@@ -17,7 +18,6 @@ public:
 // constructors & destructor
 	Socket();
 	~Socket();
-	Socket(const Socket& socket);
 	Socket(int fd);
 	// const Socket&	operator=(const Socket& socket) = default;
 

@@ -41,7 +41,7 @@ Kqueue::addWork(int fd, e_operation op, int filter, EventObject* userData)
 
 	EV_SET(&event, fd, 0, 0, 0, 0, userData);
 	event.flags = operationTable[op - 1];
-	
+
 	// it assumes that events which have a same fd share a same EventObject instance.
 	// TODO: m_filter adjusting for epoll
 	switch (op)
@@ -82,13 +82,10 @@ Kqueue::pollWork()
 {
 	const int	maxEvent = 64;
 	int			count = 0;
-	struct timespec	interval;
 
-	interval.tv_sec = 0;
-	interval.tv_nsec = 10 * 1000 * 1000;
 	m_eventList.resize(maxEvent);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
-				   m_eventList.data(), m_eventList.size(), &interval);
+				   m_eventList.data(), m_eventList.size(), NULL);
 	m_changeList.clear();
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
@@ -100,10 +97,10 @@ Kqueue::pollWork()
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
 
 		// NOTE: add eof test for epoll
-		if (TEST_BITMASK(event.flags, EV_EOF))
-		{
-			object->m_eventStatus = EventObject::EVENT_EOF;
-		}
+		// if (TEST_BITMASK(event.flags, EV_EOF))
+		// {
+		//     object->m_eventStatus = EventObject::EVENT_EOF;
+		// }
 
 		EventStatus status;
 
@@ -113,6 +110,7 @@ Kqueue::pollWork()
 				status = object->handleReadEvent();
 				break;
 			case EVFILT_WRITE:
+				// LOG(INFO, "write event fd : %d", event.ident);
 				status = object->handleWriteEvent();
 				break;
 			case EVFILT_EXCEPT:
@@ -123,6 +121,7 @@ Kqueue::pollWork()
 		}
 		if (status == STAT_END)
 		{
+			addWork(event.ident, OP_DELETE, 0, object);
 			delete object;
 			break;
 		}
