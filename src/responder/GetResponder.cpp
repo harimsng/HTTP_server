@@ -1,15 +1,17 @@
 #include <fcntl.h>
 
-#include "responder/GetResponder.hpp"
+#include "Logger.hpp"
 #include "VirtualServer.hpp"
 #include "ServerManager.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
 #include "http/AutoIndex.hpp"
 #include "util/Util.hpp"
-#include "Logger.hpp"
+#include "responder/GetResponder.hpp"
 
 using namespace std;
+
+extern string	g_tempDir;
 
 // constructors & destructor
 GetResponder::GetResponder(RequestHandler& requestHandler)
@@ -30,7 +32,7 @@ GetResponder::operator=(const GetResponder& getMethod)
 }
 
 void
-GetResponder::respond()
+GetResponder::respondWork()
 {
 	string readBody;
 
@@ -47,7 +49,10 @@ GetResponder::respond()
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else if (m_request.m_isCgi == true)
 			{
-				string tmpFile = m_request.m_path + m_request.m_file + ".temp";
+				// WARNING: /a/a.html and /b/a.html has same filename.
+				// if two request has same filename, later request will delete and rewrite it
+				// so that earlier request will lost
+				string tmpFile = g_tempDir + m_request.m_file + ".temp";
 				openFile(tmpFile);
 				constructCgi(readBody);
 				unlink(tmpFile.c_str());
@@ -76,11 +81,11 @@ GetResponder::constructCgi(std::string& readBody)
 	int	pipeSet[2];
 
 	pipe(pipeSet);
-	m_cgiReadEnd = pipeSet[0];
 
 	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
 
-	//ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
+	ServerManager::registerEvent(pipeSet[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
 	cgi->initEnv(m_request);
 	cgi->executeCgi(pipeSet, readBody);
 	m_responseStatus = RES_DONE;

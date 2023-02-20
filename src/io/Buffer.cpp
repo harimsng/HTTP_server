@@ -4,9 +4,12 @@
 #include "Types.hpp"
 #include "Buffer.hpp"
 
+// for test
+#include <iostream>
+
 using namespace std;
 
-#define BUFFER_SIZE (100000)
+#define BUFFER_SIZE (65536)
 
 // deleted
 Buffer::Buffer(const Buffer& buffer)
@@ -26,7 +29,6 @@ Buffer::operator=(const Buffer& buffer)
 Buffer::Buffer()
 :	std::string(BUFFER_SIZE, 0),
 	m_writePos(0),
-	// NOTE: initialize enum member
 	m_status(BUF_GOOD)
 {
 	resize(0);
@@ -66,14 +68,16 @@ Buffer::read(int fd)
 std::string::size_type
 Buffer::receive(int fd)
 {
-	const int		residue = size();
-	long int	count = 0;
+	const t_uint64	residue = size();
+	t_int64			count;
 
 	resize(BUFFER_SIZE, 0);
+	if (residue == BUFFER_SIZE - 1)
+		return -2;
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
 	if (count == -1)
-		throw std::runtime_error("read() fail in Buffer::receive()");
+		return count;
 
 	resize(residue + count, 0);
 	return count;
@@ -128,20 +132,21 @@ Buffer::mysend(int fd)
 std::string::size_type
 Buffer::send(int fd)
 {
-	long int	count = 0;
+	t_int64		count = 0;
 	t_uint64	writeSize;
 
-	if (size() == 0)
-		return 0;
-
 	writeSize = size() - m_writePos;
-	// heuristic solution. consider to set the fd non-blocking
+	// NOTE: this if stetement and BUFFER_SIZE are important part.
+	// if Cgi has been fed with large size of write, write blocks.
+	// if BUFFER_SIZE not large enough (BUFFER_SIZE < (8192 << 3)), final stage of the test would block.
+	/*
 	if (size() - m_writePos > BUFFER_SIZE)
 		writeSize = BUFFER_SIZE;
+		*/
 
 	count = ::write(fd, data() + m_writePos, writeSize);
-	if (count == -1)
-		throw std::runtime_error("write() fail in Buffer::send()");
+	if (count <= 0)
+		return count;
 
 	m_writePos += count;
 	if (m_writePos == size())

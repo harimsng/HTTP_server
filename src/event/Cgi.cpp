@@ -6,13 +6,19 @@
 #include <unistd.h>
 
 #include "Logger.hpp"
+#include "ServerManager.hpp"
 #include "VirtualServer.hpp"
 #include "http/RequestHandler.hpp"
 #include "exception/HttpErrorHandler.hpp"
 #include "Cgi.hpp"
 #include "ServerManager.hpp"
+#include "responder/AResponder.hpp"
 
 using namespace std;
+
+std::vector<std::pair<int, int> >	Cgi::s_cgiPipeList;
+
+extern const string	g_webservDir;
 
 // deleted
 Cgi&	Cgi::operator=(Cgi const& cgi)
@@ -32,8 +38,6 @@ Cgi::Cgi(Cgi const& cgi)
 Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer)
 :	EventObject(cgiToServer[0]),
 	m_requestHandler(&requestHandler),
-//	m_serverToCgi(serverToCgi),
-//	m_cgiToServer(cgiToServer),
 	m_toCgiBuffer(&toCgiBuffer),
 	m_status(CGI_HEADER)
 {
@@ -41,7 +45,6 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_serverToCgi[1] = serverToCgi[1];
 	m_cgiToServer[0] = cgiToServer[0];
 	m_cgiToServer[1] = cgiToServer[1];
-	m_totalCnt = 0;
 }
 
 Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
@@ -53,34 +56,38 @@ Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	int	status;
+	static short unsigned int	count = 0;
 
+	delete m_requestHandler->m_responder;
+	m_requestHandler->resetStates();
 	close(m_fd);
-	waitpid(m_pid, &status, WNOHANG); // zero sized receive from pipe guarantee that cgi has exited.
+	waitpid(m_pid, NULL, 0);
+	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
 }
 
 Cgi::IoEventPoller::EventStatus
-Cgi::handleEventWork()
+Cgi::handleReadEventWork()
 {
-	switch (m_filter)
+	if (receiveCgiResponse() == 0)
 	{
-		case IoEventPoller::FILT_READ:
-			// LOG(INFO, "cgi read event at %d", m_fd);
-			if (receiveCgiResponse() == 0) // fall through
-			{
-				// LOG(DEBUG, "cgi(fd=%d) termination", m_fd);
-				// return IoEventPoller::STAT_END;
-			}
-			return IoEventPoller::STAT_NORMAL;
-		case IoEventPoller::FILT_WRITE:
-			// LOG(INFO, "cgi write event at %d", m_fd);
-			// Cgi must be terminated when connection is lost
-			sendCgiRequest();
-			return IoEventPoller::STAT_NORMAL;
-		default:
-			throw std::runtime_error("not handled event filter in Cgi::handleEvent()");
+		return IoEventPoller::STAT_END;
 	}
 	return IoEventPoller::STAT_NORMAL;
+}
+
+Cgi::IoEventPoller::EventStatus
+Cgi::handleWriteEventWork()
+{
+	sendCgiRequest();
+	return IoEventPoller::STAT_NORMAL;
+}
+
+Cgi::IoEventPoller::EventStatus
+Cgi::handleErrorEventWork()
+{
+	if (m_eventStatus == EVENT_EOF)
+		return IoEventPoller::STAT_END;
+	return IoEventPoller::STAT_ERROR; // STAT_ERROR is currently ignored.
 }
 
 int
@@ -89,8 +96,10 @@ Cgi::receiveCgiResponse()
 	int cnt;
 	int statusCode;
 
-	// LOG(INFO, "receiveCgiResponse() read before fromCgiBuffer size : %d", m_fromCgiBuffer.size());
 	cnt = m_fromCgiBuffer.receive(m_fd);
+	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
+	if (cnt == -1)
+		return -1;
 	switch (m_status)
 	{
 		case Cgi::CGI_HEADER:
@@ -102,7 +111,6 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append("Transfer-Encoding: chunked");
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
-			// NOTE: if buffer is empty after cgi header parsing, content start with 0\r\n\r\n
 			if (m_fromCgiBuffer.size() == 0)
 				break;
 			// fall through
@@ -113,12 +121,11 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_fromCgiBuffer.clear();
 			// LOG(INFO, "receiveCgiResponse cnt  %d", cnt);
-			if (cnt == 0)
-			{
-				// LOG(INFO, "cgi read EOF at %d", m_fd);
-				m_requestHandler->resetStates();
-				delete this;
-			}
+			// if (cnt == 0)
+			// {
+			//     delete m_requestHandler->m_responder;
+			//     m_requestHandler->resetStates();
+			// }
 			break;
 	}
 	return (cnt);
@@ -129,33 +136,15 @@ int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
-	int	count = m_toCgiBuffer->mysend(m_serverToCgi[1]);
+	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
 
-	// static int totCnt = 0;
-	// int beforeSize = 0;
-	// int writeSize = 65000;
-
-	// if (m_fd == 21 || m_fd == 22)
-		// cout << m_toCgiBuffer->size() << endl;
-	// if (m_toCgiBuffer->size() == 0)
-	//     return 0;
-	// LOG(INFO, "sendCgiRequest() write before size : %d", m_toCgiBuffer->size());
-	// beforeSize = m_toCgiBuffer->size();
-	// if (m_toCgiBuffer->size() <= 65000)
-	//     writeSize = m_toCgiBuffer->size();
-	// cout << m_toCgiBuffer->size() << endl;
-	// int count = write(m_serverToCgi[1], m_toCgiBuffer->c_str(), 8192);
-	// m_toCgiBuffer->erase(0, 8192);
-	// totCnt = totCnt + beforeSize - m_toCgiBuffer->size();
-	// cout << "cgi buffer : "<< m_toCgiBuffer->size() << " cout : " << count << " total cnt : " << totCnt << endl;
-	// m_toCgiBuffer->erase(0, count);
-	// if (count != 0)
-	// {
-	//     // LOG(DEBUG, "sendCgiRequest() count = %d", count);
-	//     return count;
-	// }
-	if (m_toCgiBuffer->status() == Buffer::BUF_EOF && m_toCgiBuffer->size() == 0)
+	if (count != 0)
 	{
+		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_fd, count);
+	}
+	if (m_toCgiBuffer->size() == 0 && m_toCgiBuffer->status() == Buffer::BUF_EOF)
+	{
+		LOG(DEBUG, "[%d] sendCgiRequest() end", m_fd);
 		close(m_serverToCgi[1]);
 		return (-1);
 	}
@@ -173,7 +162,6 @@ Cgi::parseCgiHeader()
 
 	if (m_fromCgiBuffer.find("\r\n\r\n") == string::npos)
 		return statusCode;
-
 	while (1)
 	{
 		end = m_fromCgiBuffer.find(g_CRLF, start);
@@ -206,6 +194,9 @@ Cgi::initEnv(const Request &request)
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
+	// NOTE: CONTENT_LENGTH=-1 is not compliant with RFC 3875. it defines it same as below
+	// CONTENT_LENGTH = "" | 1*digit
+	// digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
@@ -220,7 +211,8 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
-	if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
+	// NOTE: ...
+    if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
@@ -297,15 +289,19 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
+		close(pipe[0]);
 
 		dup2(m_requestContentFileFd, STDOUT_FILENO);
-		close(pipe[0]);
+		close(m_requestContentFileFd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
 	}
 		// Parent process
 	close(pipe[0]);
 
+	// WARNING: if (request.m_bodySize > size of pipe buffer(65536 bytes)), written size = size of pipe buffer.
+	// if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
+	//     return;
 	close(pipe[1]);
 	int status;
 	pid_t wpid = waitpid(m_pid, &status, 0);
@@ -333,7 +329,6 @@ Cgi::executeCgi()
 	{
 		// child process
 		// NOTE: do fd leaks block creating more cgi?
-		close(m_requestHandler->m_socket->m_fd);
 		close(m_serverToCgi[1]);
 		close(m_cgiToServer[0]);
 		if (dup2(m_serverToCgi[0], STDIN_FILENO) != STDIN_FILENO
@@ -343,11 +338,15 @@ Cgi::executeCgi()
 		}
 		close(m_serverToCgi[0]);
 		close(m_cgiToServer[1]);
+		ServerManager::closeListenServer();
+		Cgi::closePipeList();
+		close(m_requestHandler->m_socket->m_fd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
 	close(m_serverToCgi[0]);
 	close(m_cgiToServer[1]);
+	s_cgiPipeList.push_back(make_pair(m_serverToCgi[1], m_cgiToServer[0]));
 }
 
 void
@@ -370,4 +369,13 @@ Cgi::respondHeader()
 	m_requestHandler->m_sendBuffer.append(g_CRLF);
 	m_requestHandler->m_sendBuffer.append(m_responseHeader);
 }
-// #endif
+
+void
+Cgi::closePipeList()
+{
+	for (unsigned int i = 0; i < s_cgiPipeList.size(); ++i)
+	{
+		close(s_cgiPipeList[i].first);
+		close(s_cgiPipeList[i].second);
+	}
+}

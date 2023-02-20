@@ -8,6 +8,7 @@
 #include "event/Server.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
+#include "socket/Tcp.hpp"
 
 using namespace std;
 
@@ -132,7 +133,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
 	server.m_addrKey.setAddrKey(addr, port);
-	LOG(Logger::DEBUG, "addr/port : %s", Socket<Tcp>::getFormattedAddress(addr, port).c_str());
+	LOG(Logger::DEBUG, "addr/port : %s", getFormattedAddress(addr, port).c_str());
 	m_tokenizer.eat(";");
 }
 

@@ -7,20 +7,31 @@
 class	EventObject
 {
 public:
+	enum e_eventStatus
+	{
+		EVENT_NORMAL = 1,
+		EVENT_EOF = 0,
+	};
+
 	typedef	IO_EVENT_POLLER	IoEventPoller;
 
-	EventObject() {};
-	EventObject(int fd): m_fd(fd) {};
-	virtual ~EventObject() {};
+	EventObject();
+	EventObject(int fd);
+	virtual ~EventObject();
 
-	IoEventPoller::EventStatus	handleEvent() {return handleEventWork();}
+	IoEventPoller::EventStatus	handleReadEvent();
+	IoEventPoller::EventStatus	handleWriteEvent();
+	IoEventPoller::EventStatus	handleErrorEvent();
 
-private:
-	virtual IoEventPoller::EventStatus	handleEventWork() = 0;
+protected:
+	virtual IoEventPoller::EventStatus	handleReadEventWork() = 0;
+	virtual IoEventPoller::EventStatus	handleWriteEventWork() = 0;
+	virtual IoEventPoller::EventStatus	handleErrorEventWork() = 0;
 
 public:
-	int							m_fd;
-	IoEventPoller::e_filters	m_filter;
+	int				m_fd;
+	int				m_filter;
+	e_eventStatus	m_eventStatus;
 };
 
 #endif

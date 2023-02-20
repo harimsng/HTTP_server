@@ -21,7 +21,7 @@ PutResponder::operator=(const PutResponder& putResponder)
 }
 
 void
-PutResponder::respond() try
+PutResponder::respondWork()
 {
 	if (m_request.m_status >= 300)
 		throw (m_request.m_status);
@@ -39,22 +39,10 @@ PutResponder::respond() try
 		case RES_CONTENT_FINISHED:
 			throw (201); // fall through
 		case RES_DONE:
+			close(m_fileFd);
 			endResponse();
 			break;
 		default:
 			;
 	}
-}
-catch (int ErrorstatusCode)
-{
-	string readBody;
-
-	m_request.m_status = ErrorstatusCode;
-	respondStatusLine(ErrorstatusCode);
-	respondHeader();
-	m_request.m_file.clear();
-	m_request.m_path = getErrorPage(readBody);
-	readFile(readBody);
-	respondBody(readBody);
-	endResponse();
 }

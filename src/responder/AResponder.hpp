@@ -29,7 +29,8 @@ public:
 	AResponder	&operator=(const AResponder& aMethod);
 
 // member functions
-	virtual void	respond() = 0;
+	void			respond();
+	virtual	void	respondWork() = 0;
 	void			respondHeader();
 	void			endResponse();
 
@@ -64,11 +65,11 @@ protected:
 	Cgi*				m_cgi;
 
 	e_responseStatus	m_responseStatus;
+
 	int					m_dataSize;
 	int					m_totalContentLentgh;
+
 	int					m_fileFd;
-	int					m_cgiWriteEnd;
-	int					m_cgiReadEnd;
 
 	int					m_serverToCgi;
 	int			m_totalrecvBufferSize;

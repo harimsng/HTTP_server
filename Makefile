@@ -19,10 +19,11 @@ debug:
 	cp src/$(NAME) .
 
 clean:
+	$(RM) $(NAME)
 	$(MAKE) -C src clean
 
 fclean: clean
 	$(MAKE) -C src fclean
 
 re: fclean
-	$(MAKE) -C src all
+	$(MAKE) all

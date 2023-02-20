@@ -33,14 +33,30 @@ Kqueue::~Kqueue()
 }
 
 void
-Kqueue::addWork(int fd, e_operation op, e_filters filter, EventObject* userData)
+Kqueue::addWork(int fd, e_operation op, int filter, EventObject* userData)
 {
 	static const int16_t	filterTable[3] = {EVFILT_READ, EVFILT_WRITE, EVFILT_EXCEPT};
-	static const uint16_t	operationTable[3] = {EV_ADD | EV_ENABLE, EV_DELETE, EV_ADD | EV_ENABLE};
+	static const uint16_t	operationTable[3] = {EV_ADD, EV_DELETE, EV_ADD};
 	Kevent		event;
 
 	EV_SET(&event, fd, 0, 0, 0, 0, userData);
 	event.flags = operationTable[op - 1];
+
+	// it assumes that events which have a same fd share a same EventObject instance.
+	// TODO: m_filter adjusting for epoll
+	switch (op)
+	{
+		case OP_ADD:
+			userData->m_filter |= filter;
+			break;
+		case OP_DELETE:
+			userData->m_filter &= ~filter;
+			break;
+		case OP_MODIFY:
+			userData->m_filter = filter;
+			break;
+	}
+
 	for (uint64_t bitmask = 1, count = 0; count < 3; bitmask <<= 1, ++count)
 	{
 		if ((filter & bitmask) != 0)
@@ -64,12 +80,12 @@ Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags
 int
 Kqueue::pollWork()
 {
-	const int	maxEvent = 64;
+	const int	maxEvent = 256;
 	int			count = 0;
 
 	m_eventList.resize(maxEvent);
 	count = kevent(m_kqueue, m_changeList.data(), m_changeList.size(),
-				   m_eventList.data(), m_eventList.size(), 0);
+				   m_eventList.data(), m_eventList.size(), NULL);
 	m_changeList.clear();
 	if (count < 0)
 		throw std::runtime_error("kevent() error");
@@ -80,25 +96,41 @@ Kqueue::pollWork()
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
 
+		// LOG(INFO, "event size : %d cur event : %d event filter : %d", m_eventList.size(), event.ident, event.filter);
+		// NOTE: add eof test for epoll
+		// if (TEST_BITMASK(event.flags, EV_EOF))
+		// {
+		//     object->m_eventStatus = EventObject::EVENT_EOF;
+		// }
+
+		EventStatus status;
+
+		if (event.flags & EV_ERROR)
+		{
+			LOG(INFO, "event error, event.data : %d", event.data);
+			if (event.data == EBADF)
+			{
+				LOG(INFO, "invalid file descriptor");
+			}
+			break;
+		}
+
 		switch (event.filter)
 		{
 			case EVFILT_READ:
-				object->m_filter = FILT_READ;
+				status = object->handleReadEvent();
 				break;
 			case EVFILT_WRITE:
-				object->m_filter = FILT_WRITE;
+				status = object->handleWriteEvent();
 				break;
 			case EVFILT_EXCEPT:
-				object->m_filter = FILT_ERROR;
+				status = object->handleErrorEvent();
 				break;
 			default:
 				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");
 		}
-		// LOG(INFO, "an event(fd: %d) start! fileter : %d", object->m_fd, object->m_filter);
-		EventStatus status = object->handleEvent();
 		if (status == STAT_END)
 		{
-			LOG(INFO, "an event(fd: %d) has finished", object->m_fd);
 			delete object;
 			break;
 		}

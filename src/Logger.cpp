@@ -14,6 +14,7 @@ const char*	Logger::s_prefixTable[] = {
 	"[WARNING] ",
 	"[INFO]    ",
 	"[DEBUG]   ",
+	"[DEBUG]   ",
 };
 
 // const string
@@ -54,7 +55,8 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 		+ ERROR * (type == "ERROR")
 		+ WARNING * (type == "WARNING")
 		+ INFO * (type == "INFO")
-		+ DEBUG * (type == "DEBUG");
+		+ DEBUG * (type == "DEBUG")
+		+ VERBOSE * (type == "VERBOSE");
 	s_type = static_cast<e_types>(temp);
 	cout << s_prefixTable[INFO]
 		<< "vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
@@ -79,6 +81,9 @@ Logger::log(e_types type, const char* format, ...)
 		suffix = " (" + Util::toString(errno) + " "
 			+ std::strerror(errno) + ")";
 	}
-	prefix.append(Util::getDate("%F %T "));
+	if (type == VERBOSE)
+	{
+		prefix.append(Util::getDate("%F %T "));
+	}
 	*s_ostream << prefix << buffer << suffix << endl;
 }

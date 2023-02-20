@@ -1,7 +1,7 @@
 #include <cerrno>
 
-#include "DeleteResponder.hpp"
 #include "util/Util.hpp"
+#include "DeleteResponder.hpp"
 
 using namespace std;
 
@@ -73,7 +73,7 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 }
 
 void
-DeleteResponder::respond()
+DeleteResponder::respondWork()
 {
 	string	readBody;
 	string	filePath = m_request.m_path + m_request.m_file;

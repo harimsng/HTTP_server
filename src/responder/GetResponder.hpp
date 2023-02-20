@@ -13,7 +13,7 @@ public:
 // operators
 	GetResponder	&operator=(const GetResponder& getMethod);
 
-	virtual void	respond();
+	virtual void	respondWork();
 
 	void			constructCgi(std::string& readBody);
 	bool			isAutoIndex();
