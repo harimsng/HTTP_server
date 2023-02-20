@@ -2,7 +2,7 @@
 #define ADDRKEY_HPP
 
 #include "Types.hpp"
-#include "socket/Socket.hpp"
+#include "socket/Tcp.hpp"
 
 struct	AddrKey
 {

@@ -2,6 +2,7 @@
 #define SOCKET_HPP
 
 #include <sys/socket.h>
+#include <unistd.h>
 
 template <typename SocketType>
 class	Socket
@@ -33,6 +34,7 @@ public:
 	int		setsockopt(int level, int opt_name, const void* opt_value, socklen_t opt_len);
 
 	const SocketAddr&	getAddress() const;
+	void				setAddress();
 
 // member variables
 	const int	m_fd;
@@ -116,15 +118,16 @@ template <typename SocketType>
 const typename Socket<SocketType>::SocketAddr&
 Socket<SocketType>::getAddress() const
 {
-	if (0)
-	{
-		SocketAddr	addr;
-		socklen_t	len = SocketType::socketAddrLen;
-
-		getsockname(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
-		return addr;
-	}
 	return m_addr;
+}
+
+template <typename SocketType>
+void
+Socket<SocketType>::setAddress()
+{
+	socklen_t	len = SocketType::socketAddrLen;
+
+	getsockname(m_fd, reinterpret_cast<sockaddr*>(&m_addr), &len);
 }
 
 #endif

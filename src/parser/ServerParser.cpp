@@ -132,7 +132,7 @@ ServerParser::setListenAddress(VirtualServer& server)
 	}
 	server.m_listen = GET_SOCKADDR_IN(addr, port);
 	server.m_addrKey.setAddrKey(addr, port);
-	LOG(Logger::DEBUG, "addr/port : %s", Socket<Tcp>::getFormattedAddress(addr, port).c_str());
+	LOG(Logger::DEBUG, "addr/port : %s", Tcp::getFormattedAddress(addr, port).c_str());
 	m_tokenizer.eat(";");
 }
 

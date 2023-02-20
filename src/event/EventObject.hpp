@@ -9,8 +9,9 @@ class	EventObject
 public:
 	enum e_eventStatus
 	{
-		EVENT_NORMAL = 1,
 		EVENT_EOF = 0,
+		EVENT_NORMAL,
+		EVENT_ERROR
 	};
 
 	typedef	IO_EVENT_POLLER	IoEventPoller;

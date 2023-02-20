@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "parser/HttpRequestParser.hpp"
-#include "socket/Socket.hpp"
+#include "socket/Tcp.hpp"
 #include "io/Buffer.hpp"
 
 extern const char*	g_httpVersion;

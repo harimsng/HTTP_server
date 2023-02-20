@@ -13,6 +13,7 @@ Client::Client(int fd)
 	m_socket(fd),
 	m_requestHandler(m_socket)
 {
+	LOG(DEBUG, "[%d] client connected", m_fd);
 }
 
 Client::~Client()

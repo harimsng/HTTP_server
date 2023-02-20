@@ -40,7 +40,7 @@ Server::initServer(uint32_t addr, uint16_t port)
 
 	Tcp::SocketAddr	sockaddr = GET_SOCKADDR_IN(addr, port);
 	LOG(DEBUG, "listen server trying to bind and listen on: %s",
-			Socket<Tcp>::getFormattedAddress(addr, port).data());
+			Tcp::getFormattedAddress(addr, port).data());
 	if (m_socket.bind(&sockaddr) < 0)
 	{
 		close(m_socket.m_fd);
@@ -62,9 +62,9 @@ Server::handleReadEventWork()
 	if (clientFd < 0)
 		throw std::runtime_error("accept error in Server::handleEvent()");
 
+	LOG(DEBUG, "read event to server toward %s", Tcp::getFormattedAddress(clientFd).data());
 	Client* client;
 	client = new Client(clientFd);
-	LOG(DEBUG, "read event to server toward %s", Socket<Tcp>::getFormattedAddress(clientFd).data());
 	// Epoll
 	ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
 			IoEventPoller::FILT_READ, client);

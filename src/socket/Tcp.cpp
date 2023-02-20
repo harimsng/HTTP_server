@@ -6,7 +6,7 @@
 using namespace	std;
 
 string
-getFormattedAddress(uint32_t addr, uint16_t port)
+Tcp::getFormattedAddress(uint32_t addr, uint16_t port)
 {
 	stringstream	ss;
 	uint32_t		bitshift = 24;
@@ -23,13 +23,13 @@ getFormattedAddress(uint32_t addr, uint16_t port)
 }
 
 string
-getFormattedAddress(sockaddr_in& addr)
+Tcp::getFormattedAddress(sockaddr_in& addr)
 {
 	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 }
 
 string
-getFormattedAddress(int fd)
+Tcp::getFormattedAddress(int fd)
 {
 	sockaddr_in		addr;
 	socklen_t		addrLen = Tcp::socketAddrLen;
