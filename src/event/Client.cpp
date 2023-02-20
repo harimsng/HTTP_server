@@ -19,7 +19,7 @@ Client::~Client()
 {
 	static unsigned short	count = 0;
 
-	LOG(INFO, "[%5hu][%5d] client connection closed", count++, m_fd);
+	LOG(INFO, "[%5hu][%5d] client connection closed socket fd : %d", count++, m_fd);
 	close(m_socket.m_fd);
 }
 
@@ -49,11 +49,12 @@ Client::handleReadEventWork()
 			break;
 
 		case RequestHandler::RECV_END:
+			// LOG(INFO, "[%d] event eof", m_socket.m_fd);
 			m_eventStatus = EVENT_EOF;
 			if (TEST_BITMASK(m_filter, IoEventPoller::FILT_WRITE) == true)
 				return IoEventPoller::STAT_NORMAL;
-
 			return IoEventPoller::STAT_END;
+			// return IoEventPoller::STAT_NORMAL;
 
 		default:
 			;

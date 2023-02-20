@@ -80,7 +80,7 @@ Kqueue::createEvent(intptr_t fd, int16_t filter, uint16_t flags, uint32_t fflags
 int
 Kqueue::pollWork()
 {
-	const int	maxEvent = 64;
+	const int	maxEvent = 256;
 	int			count = 0;
 
 	m_eventList.resize(maxEvent);
@@ -96,6 +96,7 @@ Kqueue::pollWork()
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
 
+		// LOG(INFO, "event size : %d cur event : %d event filter : %d", m_eventList.size(), event.ident, event.filter);
 		// NOTE: add eof test for epoll
 		// if (TEST_BITMASK(event.flags, EV_EOF))
 		// {
@@ -104,13 +105,22 @@ Kqueue::pollWork()
 
 		EventStatus status;
 
+		if (event.flags & EV_ERROR)
+		{
+			LOG(INFO, "event error, event.data : %d", event.data);
+			if (event.data == EBADF)
+			{
+				LOG(INFO, "invalid file descriptor");
+			}
+			break;
+		}
+
 		switch (event.filter)
 		{
 			case EVFILT_READ:
 				status = object->handleReadEvent();
 				break;
 			case EVFILT_WRITE:
-				// LOG(INFO, "write event fd : %d", event.ident);
 				status = object->handleWriteEvent();
 				break;
 			case EVFILT_EXCEPT:
@@ -121,7 +131,6 @@ Kqueue::pollWork()
 		}
 		if (status == STAT_END)
 		{
-			addWork(event.ident, OP_DELETE, 0, object);
 			delete object;
 			break;
 		}

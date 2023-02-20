@@ -66,7 +66,6 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 	else if (count == 0)
 		return RECV_END;
-
 	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
 	{
@@ -309,7 +308,7 @@ RequestHandler::sendResponse() try
 
 	if (count == 0 && (m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD || m_parser.m_readStatus == HttpRequestParser::ERROR))
 	{
-		LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
+		// LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
 		m_sendBuffer.status(Buffer::BUF_EOF);
 		return m_parser.m_readStatus == HttpRequestParser::ERROR ? SEND_ERROR : SEND_END;
 	}
