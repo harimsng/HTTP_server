@@ -18,6 +18,7 @@ SRC			+=	main.cpp\
 				VirtualServer.cpp\
 				Location.cpp\
 \
+				event/EventObject.cpp\
 				event/Client.cpp\
 				event/Server.cpp\
 				event/Cgi.cpp\
@@ -46,9 +47,9 @@ SRC			+=	main.cpp\
 \
 				io/Buffer.cpp\
 \
-				socket/Socket.cpp\
-\
 				util/Util.cpp\
+\
+				socket/Tcp.cpp\
 
 
 OBJ			:=	$(SRC:%.cpp=%.o)

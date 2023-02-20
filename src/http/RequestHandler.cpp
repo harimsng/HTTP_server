@@ -4,9 +4,9 @@
 #include "Logger.hpp"
 #include "ServerManager.hpp"
 #include "exception/HttpErrorHandler.hpp"
+#include "parser/HttpRequestParser.hpp"
 #include "responder/Responder.hpp"
 #include "http/FindLocation.hpp"
-#include "parser/HttpRequestParser.hpp"
 #include "http/RequestHandler.hpp"
 
 #define CHECK_PERMISSION(mode, mask) (((mode) & (mask)) == (mask))
@@ -23,8 +23,8 @@ std::map<std::string, std::string>	RequestHandler::s_extensionTypeTable;
 // forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_parser(m_recvBuffer),
-	m_responder(NULL),
-	m_socket(NULL)
+	m_socket(NULL),
+	m_responder(NULL)
 {
 	(void)requestHandler;
 }
@@ -39,8 +39,8 @@ RequestHandler::operator=(const RequestHandler& request)
 // constructors & destructor
 RequestHandler::RequestHandler(const Socket<Tcp>& socket)
 :	m_parser(m_recvBuffer),
-	m_responder(NULL),
-	m_socket(&socket)
+	m_socket(&socket),
+	m_responder(NULL)
 {
 	m_recvBuffer.setFd(m_socket->m_fd);
 	m_sendBuffer.setFd(m_socket->m_fd);
@@ -62,12 +62,11 @@ RequestHandler::receiveRequest()
 		return RECV_SKIPPED;
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count == 0)
-		return RECV_END;
-	else if (count == -1)
+	if (count < 0)
 		return RECV_SKIPPED;
-
-	// LOG(DEBUG, "receiveRequest() count = %d", count);
+	else if (count == 0)
+		return RECV_END;
+	LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
 	{
 		case HttpRequestParser::REQUEST_LINE_METHOD: // fall through
@@ -131,6 +130,9 @@ RequestHandler::createResponseHeader()
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
+	LOG(DEBUG, "[%d] status code = %d", m_socket->m_fd, statusCode);
+	LOG(DEBUG, "request header");
+	Logger::log(Logger::DEBUG, m_request);
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
 
@@ -163,6 +165,7 @@ RequestHandler::checkRequestMessage()
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
+
 void
 RequestHandler::checkIsCgi()
 {
@@ -225,6 +228,7 @@ RequestHandler::resolveVirtualServer(const string& host)
 void
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
+//	LOG(DEBUG, "allowed = %x, method = %x", allowed, m_request.m_method);
 	if (!(m_request.m_method & allowed))
 	{
 		// LOG(DEBUG, "method not allowed");
@@ -302,15 +306,16 @@ RequestHandler::sendResponse() try
 {
 	int		count = m_sendBuffer.send(m_socket->m_fd);
 
-	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	if (count == 0 && (m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD || m_parser.m_readStatus == HttpRequestParser::ERROR))
 	{
-		return SEND_DONE;
+		// LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
+		m_sendBuffer.status(Buffer::BUF_EOF);
+		return m_parser.m_readStatus == HttpRequestParser::ERROR ? SEND_ERROR : SEND_END;
 	}
-	if (count > 0)
+	else if (count > 0)
 	{
-		// LOG(DEBUG, "write event to client(fd=%d), written %d octets", m_socket->m_fd, count);
-		if (m_request.m_status >= 300)
-			return SEND_ERROR;
+		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
+		// NOTE: is it guaranteed that error page response is fully sent?
 	}
 	return SEND_NORMAL;
 }
@@ -327,9 +332,9 @@ operator<<(std::ostream& os, const Request& request)
 
 	os << "reqeust info\n";
 	os << "status line\n";
-	os << "\tmethod : " << request.m_method << endl;
-	os << "\ttarget : " << request.m_uri << endl;
-	os << "\tprotocol : " << request.m_protocol << endl;
+	os << "\tmethod : " << RequestHandler::s_methodRConvertTable[request.m_method] << '\n';
+	os << "\ttarget : " << request.m_uri << '\n';
+	os << "\tprotocol : " << request.m_protocol << '\n';
 	os << "header field";
 	for (mapIt = request.m_headerFieldsMap.begin();
 			mapIt != request.m_headerFieldsMap.end(); mapIt++)
@@ -339,6 +344,7 @@ operator<<(std::ostream& os, const Request& request)
 		for (; vecIt != mapIt->second.end(); vecIt++)
 			os << *vecIt << " ";
 	}
+	os << endl;
 	return (os);
 }
 

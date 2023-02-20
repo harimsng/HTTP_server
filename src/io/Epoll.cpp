@@ -6,8 +6,6 @@
 #include "event/EventObject.hpp"
 #include "Epoll.hpp"
 
-#define MATCH_EVENT(events, event) (((events) & (event)) == (event))
-
 // deleted
 Epoll::Epoll(Epoll const& epoll)
 {
@@ -66,12 +64,12 @@ Epoll::pollWork()
 		throw std::runtime_error("epoll() error");
 	m_eventList.resize(count);
 
-	/*
-	if (m_eventList.size() > 0)
+/*	if (m_eventList.size() > 0)
 	{
 		LOG(DEBUG, "%d events polled", m_eventList.size());
 	}
-	*/
+*/
+
 
 	for (size_t i = 0; i < m_eventList.size(); ++i)
 	{
@@ -79,24 +77,26 @@ Epoll::pollWork()
 		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
 		int				status = STAT_NORMAL;
 
-		if (MATCH_EVENT(event.events, EPOLLIN))
+		if (TEST_BITMASK(event.flags, EV_EOF))
+			object->m_eventStatus = EventObject::EVENT_EOF;
+
+		if (TEST_BITMASK(event.events, EPOLLIN))
 		{
 			object->m_filter = FILT_READ;
 			status |= object->handleEvent();
 		}
-		if (MATCH_EVENT(event.events, EPOLLOUT))
+		if (TEST_BITMASK(event.events, EPOLLOUT))
 		{
 			object->m_filter = FILT_WRITE;
 			status |= object->handleEvent();
 		}
-		if (MATCH_EVENT(event.events, EPOLLERR))
+		if (TEST_BITMASK(event.events, EPOLLERR))
 		{
 			object->m_filter = FILT_ERROR;
 			status |= object->handleEvent();
 		}
 		if (status == STAT_END)
 		{
-			LOG(DEBUG, "event(fd:%d) ends", object->m_fd);
 			delete object;
 		}
 	}

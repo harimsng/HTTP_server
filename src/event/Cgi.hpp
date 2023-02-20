@@ -40,31 +40,35 @@ public:
 	void	respondStatusLine(int statusCode);
 	void	respondHeader();
 
-	IoEventPoller::EventStatus	handleEventWork();
-
+	virtual IoEventPoller::EventStatus	handleReadEventWork();
+	virtual IoEventPoller::EventStatus	handleWriteEventWork();
+	virtual IoEventPoller::EventStatus	handleErrorEventWork();
 // member variables;
-		pid_t						m_pid;
-
-		std::vector<std::string>	m_env;
-		std::vector<char*>			m_envp;
-		std::vector<std::string>	m_argvBase;
-		std::vector<char*>			m_argv;
-		std::string					m_cgiPath;
-
-		RequestHandler*	m_requestHandler;
-
-		int				m_requestContentFileFd;
-
-		std::string		m_responseHeader;
-
-		int				m_serverToCgi[2];
-		int				m_cgiToServer[2];
-
-		Buffer			m_fromCgiBuffer;
-		Buffer*			m_toCgiBuffer;
-		e_status		m_status;
-		int				m_totalCnt;
 private:
+	pid_t						m_pid;
+
+	std::vector<std::string>	m_env;
+	std::vector<char*>			m_envp;
+	std::vector<std::string>	m_argvBase;
+	std::vector<char*>			m_argv;
+	std::string					m_cgiPath;
+
+	RequestHandler*	m_requestHandler;
+
+	int				m_requestContentFileFd;
+
+	std::string		m_responseHeader;
+
+	int				m_serverToCgi[2];
+	int				m_cgiToServer[2];
+
+	Buffer			m_fromCgiBuffer;
+	Buffer*			m_toCgiBuffer;
+	e_status		m_status;
+
+	static std::vector<std::pair<int, int> >	s_cgiPipeList;
+
+	static void		closePipeList();
 };
 
 #endif

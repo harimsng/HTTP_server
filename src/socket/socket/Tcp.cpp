@@ -1,12 +1,12 @@
 #include <sstream>
 
-#include "Socket.hpp"
+#include "socket/Socket.hpp"
+#include "socket/Tcp.hpp"
 
 using namespace	std;
 
-template <>
 string
-Socket<Tcp>::getFormattedAddress(uint32_t addr, uint16_t port)
+Tcp::getFormattedAddress(uint32_t addr, uint16_t port)
 {
 	stringstream	ss;
 	uint32_t		bitshift = 24;
@@ -22,16 +22,14 @@ Socket<Tcp>::getFormattedAddress(uint32_t addr, uint16_t port)
 	return ss.str();
 }
 
-template <>
 string
-Socket<Tcp>::getFormattedAddress(sockaddr_in& addr)
+Tcp::getFormattedAddress(sockaddr_in& addr)
 {
 	return getFormattedAddress(ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port));
 }
 
-template <>
 string
-Socket<Tcp>::getFormattedAddress(int fd)
+Tcp::getFormattedAddress(int fd)
 {
 	sockaddr_in		addr;
 	socklen_t		addrLen = Tcp::socketAddrLen;

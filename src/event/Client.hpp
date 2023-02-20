@@ -14,16 +14,17 @@ class	Client: public EventObject
 
 // deleted
 	Client	&operator=(Client const& client);
+	Client(Client const& client);
 
 public:
 // constructors & destructor
 	Client(int fd);
 	virtual ~Client();
-	Client(Client const& client);
 
 // member functions
-	IoEventPoller::EventStatus	handleEventWork();
-
+	virtual IoEventPoller::EventStatus	handleReadEventWork();
+	virtual IoEventPoller::EventStatus	handleWriteEventWork();
+	virtual IoEventPoller::EventStatus	handleErrorEventWork();
 // member variables
 private:
 	Socket<Tcp>		m_socket;
