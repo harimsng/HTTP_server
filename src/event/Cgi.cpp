@@ -229,9 +229,9 @@ Cgi::initEnv(const Request &request)
     std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method]; // 실제 메소드 이름으로 수정 필요
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
-    std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + g_webservDir + "cgi-bin/cgi_tester"; // request.m_path + request.m_file;
+    std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
     std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file; //+ request.m_locationBlock->m_cgiPass;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + g_webservDir + "cgi-bin/cgi_tester"; // request.m_path + request.m_file; // path of cgi script in file-system
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // path of cgi script in file-system
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
