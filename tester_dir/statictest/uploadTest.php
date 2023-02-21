@@ -11,7 +11,7 @@
 <main class="container">
   <div class="cc">
     <?php
-      $target_dir = "/Users/gson/webserv/tester_dir/uploads/";
+      $target_dir = "/Users/soum/goinfre/webserv_1/webserv/tester_dir/put_test2/";
       $target_file = $target_dir.basename($_FILES["fileToUpload"]["name"]);
       if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file))
       {

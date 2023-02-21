@@ -17,9 +17,6 @@ const char*	Logger::s_prefixTable[] = {
 	"[DEBUG]   ",
 };
 
-// const string
-// Util::getDate(const char* format);
-
 Logger::e_types		Logger::s_type = ERROR;
 ostream*			Logger::s_ostream = NULL;
 

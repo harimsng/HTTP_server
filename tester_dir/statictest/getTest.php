@@ -11,7 +11,7 @@
 <main class="container">
   <div>
     <h2>
-    Welcome <?php echo $_GET["name"]; ?><br>
+    Welcome <?php while (1) {echo 1;} ?><br>
     Your email address is: <?php echo $_GET["email"]; ?><br>
     The sum of your numbers is <?php
       $sum = (int)$_GET["one"] + (int)$_GET["two"];

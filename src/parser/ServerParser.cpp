@@ -81,11 +81,9 @@ ServerParser::setIndex(VirtualServer& server)
 void
 ServerParser::setServerNames(VirtualServer& server)
 {
-	// INFO: it would be better if token type is added for the token data.
 	server.m_serverNames.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		// if (checkServerName(m_tokenizer.peek()) == false) check "."
 		server.m_serverNames.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
@@ -100,7 +98,6 @@ ServerParser::setListenAddress(VirtualServer& server)
 	uint64_t			addr = 0;
 	uint16_t			port = 0;
 
-	// TODO: we can simplify this function by using getaddrinfo(), not necessary though.
 	if (colonPos != string::npos || count(listenField.begin(), listenField.end(), '.') > 0)
 	{
 		uint16_t	addrPart = 0;
@@ -165,8 +162,6 @@ ServerParser::setErrorPage(VirtualServer& server)
 void
 ServerParser::setClientMaxBodySize(VirtualServer& server)
 {
-	// NOTE
-	// support 1k or 1m
 	server.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }

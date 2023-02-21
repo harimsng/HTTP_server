@@ -30,7 +30,6 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 	string	responseText = "File is deleted.";
 
 	deleteStatus = unlink(filePath.c_str());
-	// NOTE: referencing errno when there's no error is UB
 	if (deleteStatus < 0)
 	{
 		switch (errno)
@@ -50,7 +49,6 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 			case EPERM:
 				responseText = "Path is a directory";
 				break;
-			// NOTE: there're other errors except those above. they will directed here.
 			default:
 				responseText = "unlink error.";
 				break;

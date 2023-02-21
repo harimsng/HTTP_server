@@ -62,9 +62,6 @@ PostResponder::respondWork()
 			respondHeader();
 			respondBody(readBody);
 			m_responseStatus = RES_DONE;
-				// early close possiblity. m_fileFd is closed right after receiving request content has finished.
-				// close(m_fileFd);
-				// break here for cgi to finializes
 			// fall through
 		case RES_RECV_CGI:
 			m_responseStatus = RES_DONE;
@@ -85,8 +82,8 @@ PostResponder::respondWork()
 void
 PostResponder::constructCgi()
 {
-	int cgiToServer[2];// cgi의 stdout
-	int serverToCgi[2]; // cgi의 stdin
+	int cgiToServer[2];
+	int serverToCgi[2];
 
 
 	if (pipe(cgiToServer) < 0
@@ -94,8 +91,6 @@ PostResponder::constructCgi()
 		throw runtime_error("pipe fail in PostRedponder::contructCgi()");
 
 	fcntl(serverToCgi[1], F_SETFL, O_NONBLOCK);
-
-//	m_fileFd = serverToCgi[1];
 
 	Cgi*	cgi = new Cgi(cgiToServer, serverToCgi, m_requestHandler, m_buffer);
 	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);

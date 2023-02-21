@@ -1,7 +1,6 @@
 #ifndef OSDEPENDENCY_HPP
 #define OSDEPENDENCY_HPP
 
-// May need header files for socket?
 
 # ifdef __APPLE__
 

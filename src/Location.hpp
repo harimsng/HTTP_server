@@ -15,9 +15,6 @@ public:
 	Location();
 	~Location();
 
-//	Location(const Location& location) = default;
-//	Location&	operator=(const Location& location) = default;
-
 // member functions
 
 private:
@@ -33,8 +30,6 @@ public:
 	std::string							m_alias;
 	std::vector<std::string>			m_index;
 	std::map<int, std::string>			m_errorPageTable;
-
-	//std::vector<std::string>	m_cgiExt;
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };

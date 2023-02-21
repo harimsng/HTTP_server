@@ -39,8 +39,10 @@ GetResponder::respondWork()
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
-			if (isAutoIndex())
+			if (isAutoIndex() && m_request.m_status == 404)
 				m_request.m_status = 200;
+			else if (m_request.m_status >= 300)
+				throw (m_request.m_status);
 			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
@@ -49,25 +51,19 @@ GetResponder::respondWork()
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
 			else if (m_request.m_isCgi == true)
 			{
-				// WARNING: /a/a.html and /b/a.html has same filename.
-				// if two request has same filename, later request will delete and rewrite it
-				// so that earlier request will lost
 				string tmpFile = g_tempDir + m_request.m_file + ".temp";
 				openFile(tmpFile);
 				constructCgi(readBody);
 				unlink(tmpFile.c_str());
 			}
-			else if (m_request.m_status != 200)
+			else if (m_request.m_status >= 300)
 			{
-				m_request.m_path = getErrorPage(readBody);
+				throw m_request.m_status;
 			}
 			readFile(readBody);
 			respondBody(readBody);
-			// TODO: change code to use swap instead of appen
 			m_responseStatus = RES_DONE; // fall through
-			// break;
 		case RES_DONE:
-		// method must know end of response(content length, chunked)
 			endResponse();
 			break;
 		default:

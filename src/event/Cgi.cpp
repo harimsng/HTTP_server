@@ -87,7 +87,7 @@ Cgi::handleErrorEventWork()
 {
 	if (m_eventStatus == EVENT_EOF)
 		return IoEventPoller::STAT_END;
-	return IoEventPoller::STAT_ERROR; // STAT_ERROR is currently ignored.
+	return IoEventPoller::STAT_ERROR;
 }
 
 int
@@ -120,22 +120,14 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append(m_fromCgiBuffer);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_fromCgiBuffer.clear();
-			// LOG(INFO, "receiveCgiResponse cnt  %d", cnt);
-			// if (cnt == 0)
-			// {
-			//     delete m_requestHandler->m_responder;
-			//     m_requestHandler->resetStates();
-			// }
 			break;
 	}
 	return (cnt);
 }
 
-// if output is slower than input, the buffer grows up indefinitely.
 int
 Cgi::sendCgiRequest()
 {
-	// NOTE: there's chance for blocking because we don't know pipe memory left.
 	int	count = m_toCgiBuffer->send(m_serverToCgi[1]);
 
 	if (count != 0)
@@ -190,13 +182,9 @@ Cgi::initEnv(const Request &request)
 	std::string					m_query;
 	std::string					ext;
 
-	// INFO: dangerous
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
-	// NOTE: CONTENT_LENGTH=-1 is not compliant with RFC 3875. it defines it same as below
-	// CONTENT_LENGTH = "" | 1*digit
-	// digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
     std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
@@ -211,13 +199,12 @@ Cgi::initEnv(const Request &request)
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
-	// NOTE: ...
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
-    std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
+    std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1";
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
 
     std::string SERVER_PORT = "SERVER_PORT=";
@@ -225,13 +212,13 @@ Cgi::initEnv(const Request &request)
     std::string REMOTE_ADDR = "REMOTE_ADDR=";
     std::string REMOTE_HOST = "REMOTE_HOST=";
 
-    std::string REDIRECT_STATUS = "REDIRECT_STATUS=200"; // php-cgi direct exec
-    std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method]; // 실제 메소드 이름으로 수정 필요
+    std::string REDIRECT_STATUS = "REDIRECT_STATUS=200";
+    std::string REQUEST_METHOD = "REQUEST_METHOD=" + RequestHandler::s_methodRConvertTable[request.m_method];
     std::string REQUEST_URI = "REQUEST_URI=" + request.m_uri;
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
-    std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file; //+ request.m_locationBlock->m_cgiPass;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // path of cgi script in file-system
+    std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file;
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file;
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
@@ -275,7 +262,6 @@ Cgi::initEnv(const Request &request)
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
-//  TODO: close when cgi is done
 	struct stat st;
 
 	m_pid = fork();
@@ -285,7 +271,6 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 	}
 	if (m_pid == 0)
 	{
-		// Child process
 		lseek(m_requestContentFileFd, 0, SEEK_SET);
 		close(pipe[1]);
 		dup2(pipe[0], STDIN_FILENO);
@@ -296,12 +281,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::Cgi() execve failed");
 	}
-		// Parent process
 	close(pipe[0]);
-
-	// WARNING: if (request.m_bodySize > size of pipe buffer(65536 bytes)), written size = size of pipe buffer.
-	// if (request.m_bodySize != 0 && write(pipe[1], request.requestBodyBuf.c_str(), request.m_bodySize) <= 0)
-	//     return;
 	close(pipe[1]);
 	int status;
 	pid_t wpid = waitpid(m_pid, &status, 0);
@@ -311,8 +291,8 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 	fstat(m_requestContentFileFd, &st);
 	off_t fileSize = st.st_size;
 	readBody.resize(fileSize, 0);
-	// FIX: casting const pointer to normal pointer is UB
-	read(m_requestContentFileFd, &readBody[0], fileSize);
+	if (read(m_requestContentFileFd, &readBody[0], fileSize) == -1)
+		throw std::runtime_error("Cgi::executeCgi() read() fail");
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }
@@ -327,8 +307,6 @@ Cgi::executeCgi()
 	}
 	else if (m_pid == 0)
 	{
-		// child process
-		// NOTE: do fd leaks block creating more cgi?
 		close(m_serverToCgi[1]);
 		close(m_cgiToServer[0]);
 		if (dup2(m_serverToCgi[0], STDIN_FILENO) != STDIN_FILENO

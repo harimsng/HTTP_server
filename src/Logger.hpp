@@ -13,7 +13,6 @@
 #  define LOG(type, fmt, ...)\
 		Logger::log(Logger::type, fmt, ##__VA_ARGS__);
 # else
-// VERBOSE DEBUG
 #  define LOG(type, fmt, ...)\
 	if (Logger::type >= Logger::DEBUG)\
 	{\
@@ -27,7 +26,6 @@
 
 class	Logger
 {
-// hidden
 	Logger();
 	Logger(Logger const& logger);
 	Logger	&operator=(Logger const& logger);
@@ -43,10 +41,8 @@ public:
 		VERBOSE = 5
 	};
 
-// constructors & destructor
 	~Logger();
 
-// member functions
 	template <typename T>
 	static void	log(e_types type, const T& object);
 	static void	log(e_types type, const char* format, ...);
@@ -58,9 +54,6 @@ private:
 	static const char*		s_prefixTable[];
 };
 
-/*
- * note: sync code with void Logger::log(e_types type, const char* format, ...)
- */
 template <typename T>
 void
 Logger::log(e_types type, const T& object)

@@ -83,7 +83,6 @@ LocationParser::setRoot(Location& location)
 {
 	string	root;
 
-//	static const string	workingDir = WORKING_DIR;
 	if (location.m_alias != "")
 		throw ConfigParser::ConfigParserException("alias is already setted");
 	root = m_tokenizer.get();

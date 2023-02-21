@@ -22,7 +22,7 @@ VirtualServer::setToDefault()
 	m_index = vector<string>(1, http_index);
 	m_autoindex = autoindex;
 	m_listen = GET_SOCKADDR_IN(listenIp, listenPort);
-	m_clientMaxBodySize = 1 << 13; // 8kb
+	m_clientMaxBodySize = 1 << 13;
 	m_addrKey.setAddrKey(listenIp, listenPort);
 }
 

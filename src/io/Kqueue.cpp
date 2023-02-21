@@ -42,8 +42,6 @@ Kqueue::addWork(int fd, e_operation op, int filter, EventObject* userData)
 	EV_SET(&event, fd, 0, 0, 0, 0, userData);
 	event.flags = operationTable[op - 1];
 
-	// it assumes that events which have a same fd share a same EventObject instance.
-	// TODO: m_filter adjusting for epoll
 	switch (op)
 	{
 		case OP_ADD:
@@ -95,15 +93,7 @@ Kqueue::pollWork()
 	{
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
-
-		// LOG(INFO, "event size : %d cur event : %d event filter : %d", m_eventList.size(), event.ident, event.filter);
-		// NOTE: add eof test for epoll
-		// if (TEST_BITMASK(event.flags, EV_EOF))
-		// {
-		//     object->m_eventStatus = EventObject::EVENT_EOF;
-		// }
-
-		EventStatus status;
+		EventStatus 	status;
 
 		if (event.flags & EV_ERROR)
 		{

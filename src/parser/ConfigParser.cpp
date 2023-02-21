@@ -52,7 +52,7 @@ ConfigParser::parse() try
 		parseServer();
 	}
 	if (m_tokenizer.empty() == false)
-		m_tokenizer.eat("server");	// this will always throw.
+		m_tokenizer.eat("server");
 }
 catch (exception& e)
 {
@@ -97,7 +97,6 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 	{
 		if (table.count(names[i]) == 1)
 			throw (make_pair(names[i], &server));
-			// throw names[i];
 	}
 }
 catch (pair<string, VirtualServer*> e)

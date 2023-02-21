@@ -34,7 +34,7 @@ PutResponder::respondWork()
 			if (!(this->*m_recvContentFunc)())
 				break;
 			close(m_fileFd);
-			m_responseStatus = RES_CONTENT_FINISHED;// -> client_max_body_size error
+			m_responseStatus = RES_CONTENT_FINISHED;
 		// fall through
 		case RES_CONTENT_FINISHED:
 			throw (201); // fall through
