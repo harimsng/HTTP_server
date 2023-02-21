@@ -147,6 +147,14 @@ RequestHandler::checkRequestMessage()
 	checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	if (m_request.m_file != "")
 		checkResourceStatus();
+	checkRedirection();
+}
+
+void
+RequestHandler::checkRedirection()
+{
+	if (!m_request.m_locationBlock->m_return.empty())
+		UPDATE_REQUEST_ERROR(m_request.m_status, 301);
 }
 
 void

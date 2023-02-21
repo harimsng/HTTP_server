@@ -76,6 +76,7 @@ private:
 	void	checkHeaderFields();
 	void	checkAllowedMethod(uint16_t allowed);
 	void	checkIsCgi();
+	void	checkRedirection();
 
 	void	makeErrorResponse(const std::string& errorMessage);
 

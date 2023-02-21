@@ -188,6 +188,14 @@ AResponder::endResponse()
 void
 AResponder::respondHeader()
 {
+	if (m_request.m_status == 301)
+	{
+		m_sendBuffer.append("Location: " + m_request.m_locationBlock->m_return);
+		m_sendBuffer.append(g_CRLF);
+		LOG(DEBUG, "response header");
+		Logger::log(Logger::DEBUG, m_sendBuffer);
+		return;
+	}
 	m_sendBuffer.append("Server: webserv/2.0");
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
