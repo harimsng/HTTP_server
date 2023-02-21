@@ -35,7 +35,7 @@ Epoll::~Epoll()
 }
 
 void
-Epoll::addWork(int fd, e_operation op, e_filters filter, EventObject* object)
+Epoll::addWork(int fd, e_operation op, int filter, EventObject* object)
 {
 	static const int	operationTable[3] = {EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 	static const uint32_t	filterTable[3] = {EPOLLIN, EPOLLOUT, EPOLLERR};
@@ -47,6 +47,18 @@ Epoll::addWork(int fd, e_operation op, e_filters filter, EventObject* object)
 	{
 		if (filter & bitmask)
 			newEvent.events |= filterTable[count];
+	}
+	switch(op)
+	{
+		case OP_ADD:
+			object->m_filter = filter;
+			break;
+		case OP_DELETE:
+			object->m_filter &= ~filter; // 0 instead of ~filter?
+			break;
+		case OP_MODIFY:
+			object->m_filter = filter;
+			break;
 	}
 	if (epoll_ctl(m_epoll, operationTable[op - 1], fd, reinterpret_cast<epoll_event*>(&newEvent)) < 0)
 		throw std::runtime_error("epoll_ctl fail");
@@ -77,25 +89,25 @@ Epoll::pollWork()
 		EventObject*	object = reinterpret_cast<EventObject*>(event.data.ptr);
 		int				status = STAT_NORMAL;
 
-		if (TEST_BITMASK(event.flags, EV_EOF))
+		if (TEST_BITMASK(event.events, EPOLLERR))
 			object->m_eventStatus = EventObject::EVENT_EOF;
 
 		if (TEST_BITMASK(event.events, EPOLLIN))
 		{
 			object->m_filter = FILT_READ;
-			status |= object->handleEvent();
+			status |= object->handleReadEvent();
 		}
 		if (TEST_BITMASK(event.events, EPOLLOUT))
 		{
 			object->m_filter = FILT_WRITE;
-			status |= object->handleEvent();
+			status |= object->handleWriteEvent();
 		}
 		if (TEST_BITMASK(event.events, EPOLLERR))
 		{
 			object->m_filter = FILT_ERROR;
-			status |= object->handleEvent();
+			status |= object->handleErrorEvent();
 		}
-		if (status == STAT_END)
+		if (TEST_BITMASK(status, STAT_END) == true)
 		{
 			delete object;
 		}

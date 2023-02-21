@@ -21,7 +21,7 @@ public:
 	~Epoll();
 
 // member functions
-	virtual void	addWork(int fd, e_operation op, e_filters filter, EventObject* object);
+	virtual void	addWork(int fd, e_operation op, int filter, EventObject* object);
 	virtual int		pollWork();
 
 private:

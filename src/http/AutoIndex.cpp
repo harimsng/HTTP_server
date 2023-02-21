@@ -39,7 +39,7 @@ AutoIndex::autoIndex(const std::string& path, const std::string& uri) {
 
 	directory = opendir(path.c_str());
 	page_content.reserve(2048);
-	if (uri.back() != '/')
+	if (*(uri.end() - 1) != '/')
 	{
 		new_uri += "/";
 	}
