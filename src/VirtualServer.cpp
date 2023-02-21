@@ -18,6 +18,7 @@ VirtualServer::~VirtualServer()
 void
 VirtualServer::setToDefault()
 {
+	m_root = defaultRoot;
 	m_serverNames = vector<string>(1, "");
 	m_index = vector<string>(1, defaultHttpIndex);
 	m_autoindex = defaultAutoindex;

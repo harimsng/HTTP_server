@@ -92,7 +92,7 @@
                 </a>
               </div>
               <h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Simple webserver for 42 Seoul</h1>
-              <p class="mt-6 text-lg leading-8 text-gray-600">you are on <?php $_SERVER['SERVER_NAME']; ?> server</p>
+              <p class="mt-6 text-lg leading-8 text-gray-600">you are on <?php echo $_ENV['SERVER_NAME']; ?> server</p>
               <div class="mt-10 flex items-center gap-x-6">
                 <a href="https://intra.42.fr" class="rounded-md bg-indigo-600 px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">42 Intra</a>
                 <a href="https://github.com/harimsng/webserv" class="text-base font-semibold leading-7 text-gray-900">View on GitHub <span aria-hidden="true">→</span></a>

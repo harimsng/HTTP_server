@@ -18,6 +18,7 @@ Location::~Location()
 void
 Location::setToDefault()
 {
+	m_root = defaultRoot;
 	m_autoindex = -1;
 	m_limitExcept = defaultLimitExcept;
 	m_alias = defaultAlias;
