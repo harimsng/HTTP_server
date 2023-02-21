@@ -19,9 +19,10 @@ void
 Location::setToDefault()
 {
 	m_autoindex = -1;
-	m_limitExcept = limitExcept;
+	m_limitExcept = defaultLimitExcept;
 	m_alias = "";
 	m_clientMaxBodySize = 0;
+	m_return = defaultReturn;
 }
 
 ostream&
