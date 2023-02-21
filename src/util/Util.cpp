@@ -153,3 +153,9 @@ Util::toHex(unsigned int num)
 	ss << num;
 	return ss.str();
 }
+
+bool
+Util::checkUrl(const std::string& str)
+{
+	return str.compare(0, 7, "http://", 7) == 0;
+}
