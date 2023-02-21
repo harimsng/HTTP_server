@@ -34,6 +34,7 @@ public:
 	void		setAlias(Location& location);
 	void		setClientMaxBodySize(Location& location);
 	void		setErrorPage(Location& location);
+	void		setReturn(Location& location);
 
 private:
 // member variables

@@ -30,6 +30,7 @@ private:
 	bool								m_autoindex;
 	int32_t								m_clientMaxBodySize;
 	std::string							m_root;
+	std::string							m_return;
 	std::vector<std::string>			m_index;
 	std::vector<std::string>			m_serverNames;
 	std::map<int, std::string>			m_errorPageTable;
