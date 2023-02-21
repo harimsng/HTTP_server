@@ -154,7 +154,10 @@ void
 RequestHandler::checkRedirection()
 {
 	if (!m_request.m_locationBlock->m_return.empty())
-		UPDATE_REQUEST_ERROR(m_request.m_status, 301);
+	{
+		LOG(INFO, "root location block %s", m_request.m_locationBlock->m_return.c_str());
+		m_request.m_status = 301;
+	}
 }
 
 void
