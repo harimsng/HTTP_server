@@ -24,13 +24,13 @@ class	Cgi: public EventObject
 
 public:
 // constructors & destructor
-	Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler);
+	Cgi(int cgiToServer[2], RequestHandler& requestHandler);
 	Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler, Buffer& toCgiBuffer);
 	~Cgi();
 
 // member functions
 	void	initEnv(const Request& request);
-	void	executeCgi(int pipe[2], std::string& readBody);
+	void	executeCgi(int pipe[2]);
 	void	executeCgi();
 	int		receiveCgiResponse();
 	int		sendCgiRequest();
@@ -52,8 +52,6 @@ private:
 	std::string					m_cgiPath;
 
 	RequestHandler*	m_requestHandler;
-
-	int				m_requestContentFileFd;
 
 	std::string		m_responseHeader;
 

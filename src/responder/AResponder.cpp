@@ -88,16 +88,8 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
-	if (m_request.m_locationBlock == NULL)
-	{
-		error_page = &m_request.m_virtualServer->m_errorPageTable;
-		root = m_request.m_virtualServer->m_root;
-	}
-	else
-	{
-		error_page = &m_request.m_locationBlock->m_errorPageTable;
-		root = m_request.m_locationBlock->m_root;
-	}
+	error_page = &m_request.m_locationBlock->m_errorPageTable;
+	root = m_request.m_locationBlock->m_root;
 	if(error_page->count(m_request.m_status) != 0)
 	{
 		filePath = root + (*error_page)[m_request.m_status];
@@ -204,11 +196,7 @@ AResponder::respondHeader()
 	m_sendBuffer.append(g_CRLF);
 	if (m_request.m_status == 405)
 	{
-		if (m_request.m_locationBlock != NULL)
-			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(m_request.m_locationBlock->m_limitExcept));
-		else
-			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(0x1f));
-
+		m_sendBuffer.append("Allow:" + RequestHandler::methodToString(m_request.m_locationBlock->m_limitExcept));
 		m_sendBuffer.append(g_CRLF);
 	}
 	if (m_request.m_status >= 300)
@@ -322,10 +310,7 @@ AResponder::receiveContentNormal()
 			throw (204);
 		else
 			m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
-		if ((m_request.m_locationBlock != NULL
-			&& m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
-			|| (m_request.m_locationBlock == NULL
-			&& m_dataSize > m_request.m_virtualServer->m_clientMaxBodySize))
+		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 			throw (413);
 	}
 	if (m_dataSize == 0)

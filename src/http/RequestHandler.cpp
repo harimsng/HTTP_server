@@ -141,12 +141,10 @@ RequestHandler::checkRequestMessage()
 	checkHeaderFields();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
+	m_request.m_locationBlock = &virtualServer->m_locationTable["/"];
 	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	checkIsCgi();
-	if (m_request.m_locationBlock != NULL)
-	{
-		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	}
+	checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	if (m_request.m_file != "")
 		checkResourceStatus();
 }
@@ -182,10 +180,17 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
+	size_t	pos;
+
 	if (m_request.m_headerFieldsMap.count("HOST") == 0)
 	{
 		m_request.m_headerFieldsMap["HOST"].push_back("");
 		return;
+	}
+	pos = m_request.m_headerFieldsMap["HOST"][0].find(":");
+	if (pos != string::npos)
+	{
+		m_request.m_headerFieldsMap["HOST"][0].erase(pos);
 	}
 }
 

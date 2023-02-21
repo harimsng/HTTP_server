@@ -195,6 +195,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 {
 	map<string, Location>& locationTable = server.m_locationTable;
 
+	server.m_locationTable["/"];
 	map<string, Location>::iterator mapIt = locationTable.begin();
 	for (; mapIt != locationTable.end(); ++mapIt)
 	{

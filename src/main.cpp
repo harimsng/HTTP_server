@@ -17,7 +17,6 @@ int	main(int argc, char **argv)
 	try
 	{
 		serverManager.parseConfig(argv[argc - 1]);
-
 		serverManager.run();
 	}
 	catch (std::exception& e)

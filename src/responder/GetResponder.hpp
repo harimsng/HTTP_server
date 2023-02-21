@@ -13,7 +13,7 @@ public:
 
 	virtual void	respondWork();
 
-	void			constructCgi(std::string& readBody);
+	void			constructCgi();
 	bool			isAutoIndex();
 };
 

@@ -47,11 +47,11 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_cgiToServer[1] = cgiToServer[1];
 }
 
-Cgi::Cgi(int fileFd, int writeEnd, RequestHandler& requestHandler)
-:	m_requestHandler(&requestHandler),
-	m_requestContentFileFd(fileFd)
+Cgi::Cgi(int cgiToServer[2], RequestHandler& requestHandler)
+:	EventObject(cgiToServer[0]),
+	m_requestHandler(&requestHandler),
+	m_status(CGI_HEADER)
 {
-	(void) writeEnd;
 }
 
 Cgi::~Cgi()
@@ -98,7 +98,7 @@ Cgi::receiveCgiResponse()
 
 	cnt = m_fromCgiBuffer.receive(m_fd);
 	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
-	if (cnt == -1)
+	if (cnt <= -1)
 		return -1;
 	switch (m_status)
 	{
@@ -185,7 +185,7 @@ Cgi::initEnv(const Request &request)
 	ext = request.m_file.substr(request.m_file.rfind("."));
 	m_cgiPath = request.m_virtualServer->m_cgiPass[ext];
 	m_path = request.m_path + request.m_file;
-    std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
+	std::string CONTENT_LENGTH = "CONTENT_LENGTH=-1";
     std::string CONTENT_TYPE = "CONTENT_TYPE=";
     std::map<std::string, std::vector<std::string> >::const_iterator contentIt;
     contentIt = request.m_headerFieldsMap.find("CONTENT-TYPE");
@@ -198,10 +198,6 @@ Cgi::initEnv(const Request &request)
     if (contentIt != request.m_headerFieldsMap.end())
     {
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
-    }
-    if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
-    {
-        CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1";
@@ -228,7 +224,8 @@ Cgi::initEnv(const Request &request)
 	m_envp.reserve(32);
 	m_argv.reserve(32);
     m_env.push_back(REDIRECT_STATUS);
-    m_env.push_back(CONTENT_LENGTH);
+	if (request.m_method != RequestHandler::GET)
+    	m_env.push_back(CONTENT_LENGTH);
     m_env.push_back(CONTENT_TYPE);
     m_env.push_back(SERVER_PROTOCOL);
     m_env.push_back(GATEWAY_INTERFACE);
@@ -259,6 +256,27 @@ Cgi::initEnv(const Request &request)
 	m_argv.push_back(NULL);
 }
 
+void
+Cgi::executeCgi(int cgiToServer[2])
+{
+	m_pid = fork();
+	if (m_pid < 0)
+	{
+		throw std::runtime_error("Cgi::Cgi() fork failed");
+	}
+	if (m_pid == 0)
+	{
+		close(cgiToServer[0]);
+		dup2(cgiToServer[1], STDOUT_FILENO);
+		close(cgiToServer[1]);
+
+		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
+		throw std::runtime_error("Cgi::Cgi() execve failed");
+	}
+	close(cgiToServer[1]);
+}
+
+#ifdef TEST
 void
 Cgi::executeCgi(int pipe[2], std::string& readBody)
 {
@@ -296,6 +314,7 @@ Cgi::executeCgi(int pipe[2], std::string& readBody)
 	close(m_requestContentFileFd);
 	readBody = readBody.substr(readBody.find("\r\n\r\n") + 4);
 }
+#endif
 
 void
 Cgi::executeCgi()

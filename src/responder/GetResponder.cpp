@@ -43,19 +43,17 @@ GetResponder::respondWork()
 				m_request.m_status = 200;
 			else if (m_request.m_status >= 300)
 				throw (m_request.m_status);
+			else if (m_request.m_isCgi == true)
+			{
+				constructCgi();
+				break;
+			}
 			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
 			if (isAutoIndex())
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
-			else if (m_request.m_isCgi == true)
-			{
-				string tmpFile = g_tempDir + m_request.m_file + ".temp";
-				openFile(tmpFile);
-				constructCgi(readBody);
-				unlink(tmpFile.c_str());
-			}
 			else if (m_request.m_status >= 300)
 			{
 				throw m_request.m_status;
@@ -72,18 +70,17 @@ GetResponder::respondWork()
 }
 
 void
-GetResponder::constructCgi(std::string& readBody)
+GetResponder::constructCgi()
 {
 	int	pipeSet[2];
 
 	pipe(pipeSet);
 
-	Cgi*	cgi = new Cgi(m_fileFd, pipeSet[1], m_requestHandler);
+	Cgi*	cgi = new Cgi(pipeSet, m_requestHandler);
 
-	ServerManager::registerEvent(pipeSet[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
-	ServerManager::registerEvent(pipeSet[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, cgi);
+	ServerManager::registerEvent(pipeSet[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, cgi);
 	cgi->initEnv(m_request);
-	cgi->executeCgi(pipeSet, readBody);
+	cgi->executeCgi(pipeSet);
 	m_responseStatus = RES_DONE;
 }
 
@@ -92,9 +89,7 @@ GetResponder::isAutoIndex()
 {
 	if (m_request.m_file == "")
 	{
-		if (m_request.m_locationBlock != NULL)
-			return (m_request.m_locationBlock->m_autoindex);
-		return (m_request.m_virtualServer->m_autoindex);
+		return (m_request.m_locationBlock->m_autoindex);
 	}
 	return (false);
 }
