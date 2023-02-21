@@ -228,7 +228,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 			location.m_index = server.m_index;
 		if (location.m_errorPageTable.empty())
 			location.m_errorPageTable = server.m_errorPageTable;
-		if (location.m_return == "")
+		if (location.m_return.empty())
 			location.m_return = server.m_return;
 	}
 }
