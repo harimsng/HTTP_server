@@ -6,9 +6,9 @@
 #include "util/Util.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "event/Server.hpp"
+#include "socket/Tcp.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
-#include "socket/Tcp.hpp"
 
 using namespace std;
 
@@ -27,6 +27,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
+	s_serverSetterMap["return"] = &ServerParser::setReturn;
 }
 
 // constructors & destructor
@@ -187,6 +188,13 @@ ServerParser::setCgiPass(VirtualServer& server)
 	cgiPath = cgiPath[0] == '/' ? cgiPath : g_webservDir + cgiPath;
 	for (size_t i = 0; i < token.size() - 1; ++i)
 		server.m_cgiPass[token[i]] = cgiPath;
+	m_tokenizer.eat(";");
+}
+
+void
+ServerParser::setReturn(VirtualServer& server)
+{
+	server.m_return = m_tokenizer.get();
 	m_tokenizer.eat(";");
 }
 
