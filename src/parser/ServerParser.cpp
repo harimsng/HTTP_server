@@ -195,6 +195,8 @@ void
 ServerParser::setReturn(VirtualServer& server)
 {
 	server.m_return = m_tokenizer.get();
+	if (Util::checkUrl(server.m_return) == false)
+		throw ConfigParser::ConfigParserException("invalid URL in return field");
 	m_tokenizer.eat(";");
 }
 
@@ -219,5 +221,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 			location.m_index = server.m_index;
 		if (location.m_errorPageTable.empty())
 			location.m_errorPageTable = server.m_errorPageTable;
+		if (location.m_return == "")
+			location.m_return = server.m_return;
 	}
 }

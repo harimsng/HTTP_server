@@ -147,6 +147,17 @@ RequestHandler::checkRequestMessage()
 	checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	if (m_request.m_file != "")
 		checkResourceStatus();
+	checkRedirection();
+}
+
+void
+RequestHandler::checkRedirection()
+{
+	if (!m_request.m_locationBlock->m_return.empty())
+	{
+		LOG(INFO, "root location block %s", m_request.m_locationBlock->m_return.c_str());
+		m_request.m_status = 301;
+	}
 }
 
 void
