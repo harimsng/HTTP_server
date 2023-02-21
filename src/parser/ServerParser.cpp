@@ -170,7 +170,14 @@ ServerParser::setClientMaxBodySize(VirtualServer& server)
 void
 ServerParser::setAutoIndex(VirtualServer& server)
 {
-	server.m_autoindex = m_tokenizer.get() == "on" ? true : false;
+	string	token = m_tokenizer.get();
+	if (token == "on")
+		server.m_autoindex = true;
+	else if (token == "off")
+		server.m_autoindex = false;
+	else
+		throw ConfigParser::ConfigParserException("invalid value \"" + token + "\" in \"autoindex\" directive, it must be \"on\" or \"off\".");
+
 	m_tokenizer.eat(";");
 }
 
@@ -213,7 +220,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 
 		if (location.m_autoindex == -1)
 			location.m_autoindex = server.m_autoindex;
-		if (location.m_clientMaxBodySize == 0)
+		if (location.m_clientMaxBodySize == -1)
 			location.m_clientMaxBodySize = server.m_clientMaxBodySize;
 		if (location.m_root == "" && location.m_alias == "")
 			location.m_root = server.m_root;

@@ -18,7 +18,7 @@ static const uint16_t		defaultLimitExcept = 0x1f;
 static const std::string	defaultRoot = "html";
 static const std::string	defaultAlias = "";
 
-static const int64_t		defaultClientMaxBodySize = 10000000;
+static const int32_t		defaultClientMaxBodySize = INT32_MAX;
 
 static const std::string	defaultErrorPagePath = "";
 

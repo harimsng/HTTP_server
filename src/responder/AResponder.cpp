@@ -277,8 +277,8 @@ AResponder::receiveContentChunked()
 		}
 		if (m_totalContentLentgh > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
-			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d",
-				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize, m_requestHandler.m_socket->m_fd);
+			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d", m_requestHandler.m_socket->m_fd,
+				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize);
 			throw (413);
 		}
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
@@ -320,8 +320,8 @@ AResponder::receiveContentNormal()
 			m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
-			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d",
-				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize, m_requestHandler.m_socket->m_fd);
+			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d", m_requestHandler.m_socket->m_fd,
+				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize);
 			throw (413);
 		}
 	}

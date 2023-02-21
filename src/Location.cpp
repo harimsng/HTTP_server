@@ -20,8 +20,8 @@ Location::setToDefault()
 {
 	m_autoindex = -1;
 	m_limitExcept = defaultLimitExcept;
-	m_alias = "";
-	m_clientMaxBodySize = 0;
+	m_alias = defaultAlias;
+	m_clientMaxBodySize = -1;
 	m_return = defaultReturn;
 }
 

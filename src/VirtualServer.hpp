@@ -23,7 +23,6 @@ public:
 
 // member functions
 	std::map<std::string, std::string>	m_cgiPass;
-private:
 	void	setToDefault();
 
 // member variales - config
@@ -36,6 +35,7 @@ private:
 	std::map<int, std::string>			m_errorPageTable;
 	std::map<std::string, Location>		m_locationTable;
 
+private:
 	AddrKey				m_addrKey;
 	sockaddr_in			m_listen;
 // friends
