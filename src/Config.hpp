@@ -6,24 +6,26 @@
 #include <string>
 #include <vector>
 
-static const std::string	expires = "off";
+static const std::string	defaultExpires = "off";
 
-static const std::string	http_index = "index.html";
+static const std::string	defaultHttpIndex = "index.html";
 
-static const bool			autoindex = false;
+static const bool			defaultAutoindex = false;
 
-static const std::string	cgiPass = "";
+static const std::string	defaultCgiPass = "";
 
-static const uint16_t		limitExcept = 0x1f;
-static const std::string	root = "html";
-static const std::string	alias = "";
+static const uint16_t		defaultLimitExcept = 0x1f;
+static const std::string	defaultRoot = "html";
+static const std::string	defaultAlias = "";
 
-static const int64_t		clientMaxBodySize = 10000000;
+static const int64_t		defaultClientMaxBodySize = 10000000;
 
-static const std::string	errorPagePath = "";
+static const std::string	defaultErrorPagePath = "";
 
-static const int32_t		listenIp = 0;
-static const int32_t		listenPort = 8000;
-static const int32_t		uriBufferSize = 8192;
+static const int32_t		defaultListenIp = 0;
+static const int32_t		defaultListenPort = 8000;
+static const int32_t		defaultUriBufferSize = 8192;
+
+static const std::string	defaultReturn= "";
 
 #endif
