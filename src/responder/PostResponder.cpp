@@ -5,6 +5,7 @@
 
 #include "Logger.hpp"
 #include "ServerManager.hpp"
+#include "VirtualServer.hpp"
 #include "io/IoMultiplex.hpp"
 #include "event/Cgi.hpp"
 #include "tokenizer/HttpStreamTokenizer.hpp"
@@ -37,17 +38,21 @@ void
 PostResponder::respondWork()
 {
 	std::string	readBody;
-	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp";
+	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp" + Util::toString(m_requestHandler.m_socket->m_fd);
 
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
 			if (m_request.m_isCgi != true)
 				openFile(tmpFile);
+			else if (access(m_request.m_virtualServer->m_cgiPass[m_request.m_file.substr(m_request.m_file.rfind("."))].c_str(), X_OK) < 0)
+				throw 500;
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:
 			if (!(this->*m_recvContentFunc)())
+			{
 				break;
+			}
 			m_responseStatus = RES_CONTENT_FINISHED; // fall through
 		case RES_CONTENT_FINISHED:
 			if (m_request.m_isCgi == true)

@@ -248,12 +248,13 @@ RequestHandler::checkResourceStatus()
 		case HEAD:
 			permission = R_OK; break;
 		case POST:
-			return;
+			if (m_request.m_isCgi == true)
+				return;
+			permission = R_OK; break;
 		case PUT:
 			return;
 		case DELETE:
-			permission = W_OK;
-			break;
+			permission = W_OK; break;
 	}
 	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode)
 		&& access((m_request.m_path + m_request.m_file).c_str(), permission) == 0)

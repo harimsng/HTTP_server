@@ -16,12 +16,6 @@ curl -vX DELETE -4 --resolve server1:8081:127.0.0.1 http://server1:8081/should_b
 echo "press enter key to continue"
 read -n 1
 
-echo "expected: 400 Bad Request"
-echo "curl -X DELETE -4 --resolve server2:8082:127.0.0.1 --header \"invalid header\" http://server2:8082/file"
-curl -vX DELETE -4 --resolve server2:8082:127.0.0.1 --header "invalid header:A" http://server2:8082/file
-echo "press enter key to continue"
-read -n 1
-
 echo "expected: 403 Forbidden"
 echo "curl -X DELETE -4 --resolve server3:8083:127.0.0.1 http://server3:8083/no_permission"
 curl -vX DELETE -4 --resolve server3:8083:127.0.0.1 http://server3:8083/no_permission

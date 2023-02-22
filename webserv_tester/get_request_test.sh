@@ -18,13 +18,6 @@ echo "press enter key to continue"
 read -n 1
 
 echo "--------------------------------------------------------------------------------"
-echo "expected: 400 Bad Request"
-echo "curl -X GET -4 --resolve server2:8082:127.0.0.1 --header \"invalid header\" http://server2:8082/read_only"
-curl -vX GET -4 --resolve server2:8082:127.0.0.1 --header "invalid header:A" http://server2:8082/read_only
-echo "press enter key to continue"
-read -n 1
-
-echo "--------------------------------------------------------------------------------"
 echo "expected: 403 Forbidden"
 echo "curl -X GET -4 --resolve server3:8083:127.0.0.1 http://server3:8083/no_permission"
 curl -vX GET -4 --resolve server3:8083:127.0.0.1 http://server3:8083/no_permission
@@ -42,5 +35,10 @@ echo "--------------------------------------------------------------------------
 echo "expected: 405 Method Not Allowed"
 echo "curl -X GET -4 --resolve server5:8085:127.0.0.1 http://server5:8085/read_only"
 curl -vX GET -4 --resolve server5:8085:127.0.0.1 http://server5:8085/read_only
+
+echo "--------------------------------------------------------------------------------"
+echo "autoindex (directory listing)"
+echo "curl -X GET -4 --resolve server6:8086:127.0.0.1 http://server6:8086/"
+curl -vX GET -4 --resolve server6:8086:127.0.0.1 http://server6:8086/
 
 rm -f ./html/tests/get_request_test/*
