@@ -3,7 +3,7 @@ NAME		=	webserv
 CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -MMD
 CPPFLAGS	=	
-DEBUGFLAGS	=	-g -fsanitize=address -fsanitize=undefined
+DEBUGFLAGS	=	-g3 -fsanitize=address -fsanitize=undefined
 RM			=	rm -f
 
 ifeq ($(shell uname), Linux)
@@ -83,7 +83,7 @@ CPPFLAGS	+=	-DTEMP_DIR='"$(TEMP_DIR)/"'
 .PHONY: all debug release clean fclean re
 
 all: $(COMPILE_MODE)
-	$(MAKE) $(NAME)
+	$(MAKE) $(NAME) -j8
 
 release: RELEASE.mode
 	$(MAKE) all

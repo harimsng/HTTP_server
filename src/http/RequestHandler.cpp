@@ -62,8 +62,10 @@ RequestHandler::receiveRequest()
 	// LOG(DEBUG, "not skipped");
 
 	count = m_recvBuffer.receive(m_socket->m_fd);
-	if (count <= 0)
+	if (count <= -1)
 		return RECV_ERROR;
+	else if (count == 0)
+		return RECV_END;
 
 	// LOG(DEBUG, "[%d] receiveRequest() count = %d", m_socket->m_fd, count);
 	switch (m_parser.m_readStatus)
@@ -85,6 +87,7 @@ RequestHandler::receiveRequest()
 				break; // fall through
 		case HttpRequestParser::FINISHED:
 			LOG(DEBUG, "finished a request");
+			// TODO: delete for Cgi
 			delete m_responder;
 			if (m_parser.m_readStatus != HttpRequestParser::ERROR)
 			{
@@ -310,20 +313,22 @@ RequestHandler::sendResponse() try
 	// {
 	//     cout << "send buffer : "<< m_sendBuffer << endl;
 	// }
+	cerr << m_sendBuffer;
 	int		count = m_sendBuffer.send(m_socket->m_fd);
+	LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
 
-	if (count == 0 && m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD)
+	if (count == 0 && 
+		(m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD
+		 || m_parser.m_readStatus == HttpRequestParser::ERROR))
 	{
 		LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
 		m_sendBuffer.status(Buffer::BUF_EOF);
-		return SEND_END;
+		return m_parser.m_readStatus == HttpRequestParser::ERROR ? SEND_ERROR : SEND_END;
 	}
 	else if (count > 0)
 	{
-		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
+		// LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
 		// NOTE: is it guaranteed that error page response is fully sent?
-		if (m_request.m_status >= 300)
-			return SEND_ERROR;
 	}
 	return SEND_NORMAL;
 }

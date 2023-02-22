@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <cstring>
 #include <string>
 
@@ -32,6 +33,7 @@ struct	Tcp
 	{
 		int socketOption = 1;
 
+		fcntl(fd, F_SETFL, O_NONBLOCK);
 		return ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(socketOption));
 	}
 

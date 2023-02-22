@@ -91,21 +91,15 @@ Kqueue::pollWork()
 				   m_eventList.data(), m_eventList.size(), &interval);
 	m_changeList.clear();
 	if (count < 0)
+	{
 		throw std::runtime_error("kevent() error");
+	}
 	m_eventList.resize(count);
-
 	for (size_t i = 0; i < m_eventList.size(); ++i)
 	{
 		Event&			event = m_eventList[i];
 		EventObject*	object = reinterpret_cast<EventObject*>(event.udata);
-
-		// NOTE: add eof test for epoll
-		if (TEST_BITMASK(event.flags, EV_EOF))
-		{
-			object->m_eventStatus = EventObject::EVENT_EOF;
-		}
-
-		EventStatus status;
+		EventStatus		status;
 
 		switch (event.filter)
 		{
@@ -121,7 +115,6 @@ Kqueue::pollWork()
 			default:
 				throw std::runtime_error("not handled event filter in Kqueue::pollWork()");
 		}
-
 		if (status == STAT_END)
 		{
 			delete object;

@@ -58,8 +58,6 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 		+ DEBUG * (type == "DEBUG")
 		+ VERBOSE * (type == "VERBOSE");
 	s_type = static_cast<e_types>(temp);
-	cout << s_prefixTable[INFO]
-		<< "vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
 }
 
 void

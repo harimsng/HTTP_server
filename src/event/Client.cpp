@@ -19,7 +19,7 @@ Client::~Client()
 {
 	static unsigned short	count = 0;
 
-	LOG(INFO, "[%5hu][%5d] client connection closed", count++, m_fd);
+	LOG(INFO, "[%5hu][%5d] client connection closed", ++count, m_fd);
 }
 
 Client::Client(Client const& client)
@@ -30,15 +30,14 @@ Client::Client(Client const& client)
 	m_fd = client.m_fd;
 }
 
-// how poller distinguish events
-// kqueue: fd, filter, filter options
+// how pollers distinguish events
+// kqueue: fd, filter
 // epoll: fd
 Client::IoEventPoller::EventStatus
 Client::handleReadEventWork()
 {
 	int	status;
 
-	// there are fd leaks. if second tester execution on running webserv.
 	status = m_requestHandler.receiveRequest();
 	switch (status)
 	{
@@ -48,12 +47,11 @@ Client::handleReadEventWork()
 					IoEventPoller::FILT_READ | IoEventPoller::FILT_WRITE, this);
 			break;
 
-		case RequestHandler::RECV_ERROR:
-			if (m_eventStatus == EVENT_EOF)
-			{
-				return IoEventPoller::STAT_END;
-			}
-			break;
+		case RequestHandler::RECV_END:
+			m_eventStatus = EVENT_EOF;
+			return TEST_BITMASK(m_filter, IoEventPoller::FILT_WRITE) == true
+				? IoEventPoller::STAT_NORMAL
+				: IoEventPoller::STAT_END;
 
 		default:
 			;
@@ -75,7 +73,9 @@ Client::handleWriteEventWork()
 			LOG(DEBUG, "[%d] write event finished", m_socket.m_fd);
 			ServerManager::registerEvent(m_socket.m_fd, IoEventPoller::OP_DELETE,
 					IoEventPoller::FILT_WRITE, this);
-			break;
+			return m_eventStatus == EVENT_EOF
+				? IoEventPoller::STAT_END
+				: IoEventPoller::STAT_NORMAL;
 
 		case RequestHandler::SEND_ERROR:
 			LOG(DEBUG, "[%d] error while write event", m_socket.m_fd);
@@ -90,8 +90,9 @@ Client::handleWriteEventWork()
 Client::IoEventPoller::EventStatus
 Client::handleErrorEventWork()
 {
-	if (m_eventStatus == EVENT_EOF)
-		return IoEventPoller::STAT_END;
+//	half-close would send EOF
+//	if (m_eventStatus == EVENT_EOF)
+//		return IoEventPoller::STAT_END;
 	return IoEventPoller::STAT_ERROR;
 }
 

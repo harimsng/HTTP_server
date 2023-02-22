@@ -68,11 +68,13 @@ Buffer::receive(int fd)
 	const t_uint64	residue = size();
 	t_int64			count;
 
+	if (residue == BUFFER_SIZE - 1)
+		return -2;
 	resize(BUFFER_SIZE, 0);
 	count = ::read(fd, &(*this)[0] + residue,
 			size() - residue - 1);
-	if (residue == BUFFER_SIZE - 1 || count == -1)
-		return -1;
+	if (count <= 0)
+		return count;
 
 	resize(residue + count, 0);
 	return count;
@@ -97,6 +99,8 @@ Buffer::write(int fd)
 	return written;
 }
 
+#include "Logger.hpp"
+
 std::string::size_type
 Buffer::send(int fd)
 {
@@ -107,12 +111,11 @@ Buffer::send(int fd)
 	// NOTE: this if stetement and BUFFER_SIZE are important part.
 	// if Cgi has been fed with large size of write, write blocks.
 	// if BUFFER_SIZE not large enough (BUFFER_SIZE < (8192 << 3)), final stage of the test would block.
-	/*
-	if (size() - m_writePos > BUFFER_SIZE)
-		writeSize = BUFFER_SIZE;
-		*/
+	// if (size() - m_writePos > BUFFER_SIZE)
+	//	writeSize = BUFFER_SIZE;
 
 	count = ::write(fd, data() + m_writePos, writeSize);
+//	LOG(DEBUG, "write writesize = %ld, count = %ld", writeSize, count);
 	if (count <= 0)
 		return count;
 	
@@ -121,11 +124,6 @@ Buffer::send(int fd)
 	{
 		m_writePos = 0;
 		clear();
-	}
-	if (m_writePos > BUFFER_SIZE)
-	{
-		erase(0, m_writePos);
-		m_writePos = 0;
 	}
 	return count;
 }

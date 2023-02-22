@@ -97,7 +97,6 @@ ConfigParser::checkDuplicateServerName(VirtualServer& server) try
 	{
 		if (table.count(names[i]) == 1)
 			throw (make_pair(names[i], &server));
-			// throw names[i];
 	}
 }
 catch (pair<string, VirtualServer*> e)

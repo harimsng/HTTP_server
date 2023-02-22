@@ -5,7 +5,6 @@
 #include <vector>
 #include <sys/stat.h>
 
-#include "socket/Unix.hpp"
 #include "event/EventObject.hpp"
 #include "io/Buffer.hpp"
 
@@ -50,6 +49,8 @@ private:
 	int			m_serverToCgi;
 	pid_t		m_pid;
 
+	std::vector<std::string>	m_envpBase;
+	std::vector<std::string>	m_argvBase;
 	std::vector<char*>			m_envp;
 	std::vector<char*>			m_argv;
 	std::string					m_cgiPath;

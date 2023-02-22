@@ -1,5 +1,6 @@
 #include <sys/wait.h>
 
+#include <fcntl.h>
 #include <functional>
 #include <stdexcept>
 #include <unistd.h>
@@ -39,14 +40,16 @@ Cgi::Cgi(int cgiToServer[2], int serverToCgi[2], RequestHandler& requestHandler,
 	m_toCgiBuffer(&toCgiBuffer),
 	m_state(CGI_HEADER)
 {
-	initialize(requestHandler.getRequest());
-	executeCgi(cgiToServer, serverToCgi);
-	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, this);
-	ServerManager::registerEvent(serverToCgi[1], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_WRITE, this);
-	LOG(DEBUG, "[%d] registering cgi read event", cgiToServer[0]);
-	LOG(DEBUG, "[%d] registering cgi write event", serverToCgi[1]);
 	m_fd = cgiToServer[0];
 	m_serverToCgi = serverToCgi[1];
+	fcntl(m_serverToCgi, F_SETFL, O_NONBLOCK);
+	fcntl(m_fd, F_SETFL, O_NONBLOCK);
+	initialize(requestHandler.getRequest());
+	executeCgi(cgiToServer, serverToCgi);
+	ServerManager::registerEvent(cgiToServer[0], IoEventPoller::OP_ADD, IoEventPoller::FILT_READ, this);
+	ServerManager::registerEvent(serverToCgi[1], IoEventPoller::OP_ADD, IoEventPoller::FILT_WRITE, this);
+	LOG(DEBUG, "[%d] registered cgi read event", cgiToServer[0]);
+	LOG(DEBUG, "[%d] registered cgi write event", serverToCgi[1]);
 }
 
 Cgi::Cgi(int cgiToServer[2], RequestHandler& requestHandler)
@@ -54,11 +57,12 @@ Cgi::Cgi(int cgiToServer[2], RequestHandler& requestHandler)
 	m_requestHandler(&requestHandler),
 	m_state(CGI_HEADER)
 {
+	m_fd = cgiToServer[0];
+	fcntl(m_fd, F_SETFL, O_NONBLOCK);
 	initialize(requestHandler.getRequest());
 	executeCgi(cgiToServer);
-	ServerManager::registerEvent(cgiToServer[0], Cgi::IoEventPoller::OP_ADD, Cgi::IoEventPoller::FILT_READ, this);
-	LOG(DEBUG, "[%d] registering cgi read event", cgiToServer[0]);
-	m_fd = cgiToServer[0];
+	ServerManager::registerEvent(cgiToServer[0], IoEventPoller::OP_ADD, IoEventPoller::FILT_READ, this);
+	LOG(DEBUG, "[%d] registered cgi read event", cgiToServer[0]);
 }
 
 Cgi::~Cgi()
@@ -66,19 +70,18 @@ Cgi::~Cgi()
 	static short unsigned int	count = 0;
 
 	close(m_fd);
+	close(m_serverToCgi);
 	waitpid(m_pid, NULL, 0);
-	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
+	// TODO: delete responder
+	m_requestHandler->resetStates();
+	LOG(INFO, "[%5hu][%5d] cgi exited", ++count, m_fd);
 }
 
 // event handlers called by event poller
 Cgi::IoEventPoller::EventStatus
 Cgi::handleReadEventWork()
 {
-	if (receiveCgiResponse() == 0)
-	{
-		return IoEventPoller::STAT_END;
-	}
-	return IoEventPoller::STAT_NORMAL;
+	return receiveCgiResponse() == 0 ? IoEventPoller::STAT_END : IoEventPoller::STAT_NORMAL ;
 }
 
 Cgi::IoEventPoller::EventStatus
@@ -91,9 +94,10 @@ Cgi::handleWriteEventWork()
 Cgi::IoEventPoller::EventStatus
 Cgi::handleErrorEventWork()
 {
-	if (m_eventStatus == EVENT_EOF)
-		return IoEventPoller::STAT_END;
-	return IoEventPoller::STAT_ERROR; // STAT_ERROR is currently ignored.
+//	half-close would send EOF
+//	if (m_eventStatus == EVENT_EOF)
+//		return IoEventPoller::STAT_END;
+	return IoEventPoller::STAT_ERROR;
 }
 
 // member functions
@@ -104,8 +108,7 @@ Cgi::receiveCgiResponse()
 	int statusCode;
 
 	cnt = m_fromCgiBuffer.receive(m_fd);
-	LOG(DEBUG, "[%d] receiveCgiResponse() count = %d", m_fd, cnt);
-	if (cnt == -1 || (cnt == 0 && m_eventStatus != EventObject::EVENT_EOF))
+	if (cnt <= -1) // || (cnt == 0 && m_eventStatus != EventObject::EVENT_EOF))
 		return -1;
 	switch (m_state)
 	{
@@ -129,25 +132,27 @@ Cgi::receiveCgiResponse()
 			m_requestHandler->m_sendBuffer.append(m_fromCgiBuffer);
 			m_requestHandler->m_sendBuffer.append(g_CRLF);
 			m_fromCgiBuffer.clear();
-			if (cnt == 0)
-			{
-				m_requestHandler->resetStates();
-			}
 			break;
+	}
+	LOG(DEBUG, "[%d] receiveCgiResponse count = %d", cnt);
+	if (cnt == 0)
+	{
+		LOG(DEBUG, "[%d] receiveCgiResponse end", m_fd);
 	}
 	return (cnt);
 }
 
-// if output is slower than input, the buffer grows up indefinitely.
+// if output speed is slower than input, the buffer grows up indefinitely.
 int
 Cgi::sendCgiRequest()
 {
 	// NOTE: there's chance for blocking because we don't know pipe memory left.
+	// nonblock?
 	int	count = m_toCgiBuffer->send(m_serverToCgi);
 
-//	if (count != 0)
+	if (count >= 0)
 	{
-		LOG(DEBUG, "[%d] sendCgiRequest() count = %d", m_serverToCgi, count);
+		// LOG(DEBUG, "[%d] sendCgiRequest() count = %d", count);
 	}
 	if (m_toCgiBuffer->size() == 0 && m_toCgiBuffer->status() == Buffer::BUF_EOF)
 	{
@@ -193,8 +198,6 @@ Cgi::parseCgiHeader()
 void
 Cgi::initialize(const Request &request)
 {
-	std::vector<std::string>	envBase;
-	std::vector<std::string>	argvBase;
 	std::string 				path;
 	std::string					scriptPath;
 	std::string					queryString;
@@ -222,12 +225,10 @@ Cgi::initialize(const Request &request)
     	HTTP_X_SECRET_HEADER_FOR_TEST += "HTTP_X_SECRET_HEADER_FOR_TEST=" + contentIt->second[0];
     }
 	// NOTE: ...
-	/*
     if (request.m_method == RequestHandler::POST && request.m_bodySize > 0)
     {
         CONTENT_LENGTH += Util::toString(request.m_bodySize);
     }
-	*/
     std::string SERVER_SOFTWARE = "SERVER_SOFTWARE=webserv/2.0";
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1"; // different GET POST
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
@@ -243,43 +244,43 @@ Cgi::initialize(const Request &request)
     std::string PATH_INFO = "PATH_INFO=" + request.m_uri;
     std::string PATH_TRANSLATED = "PATH_TRANSLATED=" + request.m_path + request.m_file;
     std::string SCRIPT_NAME = "SCRIPT_NAME=" + request.m_file;
-    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file; // supposed to be path of cgi script in file-system
+    std::string SCRIPT_FILENAME = "SCRIPT_FILENAME=" + request.m_path + request.m_file;
     std::string QUERY_STRING = "QUERY_STRING=";
     if (request.m_method == RequestHandler::GET)
     {
         QUERY_STRING += request.m_queryString;
 	}
-	envBase.reserve(32);
+	m_envpBase.reserve(32);
 	m_envp.reserve(32);
 	m_argv.reserve(32);
-    envBase.push_back(REDIRECT_STATUS);
-    envBase.push_back(CONTENT_LENGTH);
-    envBase.push_back(CONTENT_TYPE);
-    envBase.push_back(SERVER_PROTOCOL);
-    envBase.push_back(GATEWAY_INTERFACE);
-    envBase.push_back(REQUEST_METHOD);
-    envBase.push_back(REQUEST_URI);
-    envBase.push_back(PATH_INFO);
-    envBase.push_back(PATH_TRANSLATED);
-    envBase.push_back(SCRIPT_NAME);
-    envBase.push_back(SCRIPT_FILENAME);
-    envBase.push_back(QUERY_STRING);
-    envBase.push_back(SERVER_NAME);
-    envBase.push_back(SERVER_PORT);
-    envBase.push_back(REMOTE_ADDR);
-    envBase.push_back(REMOTE_HOST);
-    envBase.push_back(SERVER_SOFTWARE);
-	envBase.push_back(HTTP_X_SECRET_HEADER_FOR_TEST);
+    m_envpBase.push_back(REDIRECT_STATUS);
+    m_envpBase.push_back(CONTENT_LENGTH);
+    m_envpBase.push_back(CONTENT_TYPE);
+    m_envpBase.push_back(SERVER_PROTOCOL);
+    m_envpBase.push_back(GATEWAY_INTERFACE);
+    m_envpBase.push_back(REQUEST_METHOD);
+    m_envpBase.push_back(REQUEST_URI);
+    m_envpBase.push_back(PATH_INFO);
+    m_envpBase.push_back(PATH_TRANSLATED);
+    m_envpBase.push_back(SCRIPT_NAME);
+    m_envpBase.push_back(SCRIPT_FILENAME);
+    m_envpBase.push_back(QUERY_STRING);
+    m_envpBase.push_back(SERVER_NAME);
+    m_envpBase.push_back(SERVER_PORT);
+    m_envpBase.push_back(REMOTE_ADDR);
+    m_envpBase.push_back(REMOTE_HOST);
+    m_envpBase.push_back(SERVER_SOFTWARE);
+	m_envpBase.push_back(HTTP_X_SECRET_HEADER_FOR_TEST);
 
-    for (size_t i = 0; i < envBase.size(); i++)
+    for (size_t i = 0; i < m_envpBase.size(); i++)
 	{
-		m_envp.push_back(&envBase[i][0]);
+		m_envp.push_back(&m_envpBase[i][0]);
 	}
     m_envp.push_back(NULL);
-	argvBase.push_back(path);
-    for (size_t i = 0; i < argvBase.size(); i++)
+	m_argvBase.push_back(path);
+    for (size_t i = 0; i < m_argvBase.size(); i++)
 	{
-		m_argv.push_back(&argvBase[i][0]);
+		m_argv.push_back(&m_argvBase[i][0]);
 	}
 	m_argv.push_back(NULL);
 }
@@ -304,16 +305,16 @@ Cgi::executeCgi(int cgiToServer[2], int serverToCgi[2])
 		}
 		close(serverToCgi[0]);
 		close(cgiToServer[1]);
-		ServerManager::closeListenServer();
-		Cgi::closePipeList();
+//		ServerManager::closeListenServer();
+//		Cgi::closePipeList();
 		close(m_requestHandler->m_socket->m_fd);
 		execve(m_cgiPath.c_str(), m_argv.data(), m_envp.data());
 		throw std::runtime_error("Cgi::executeCgi() execve() fail");
 	}
 	close(serverToCgi[0]);
 	close(cgiToServer[1]);
-	s_cgiPipeList.push_back(serverToCgi[1]);
-	s_cgiPipeList.push_back(cgiToServer[0]);
+//	s_cgiPipeList.push_back(serverToCgi[1]);
+//	s_cgiPipeList.push_back(cgiToServer[0]);
 }
 
 void

@@ -1,1 +1,3 @@
 set OCCF functions for vector reallocation
+
+writing to widowed pipe causes the program crashes without any error message. return code is 141 (Broken pipe).

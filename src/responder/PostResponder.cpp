@@ -84,7 +84,7 @@ void
 PostResponder::sendToCgi()
 {
 	(this->*m_recvContentFunc)();
-	return;
+	return; // Cgi determine end of response.
 }
 
 void
