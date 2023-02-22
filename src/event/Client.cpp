@@ -17,9 +17,9 @@ Client::Client(int fd)
 
 Client::~Client()
 {
-	static unsigned short	count = 0;
+//	static unsigned short	count = 0;
 
-	LOG(INFO, "[%5hu][%5d] client connection closed socket", count++, m_fd);
+//	LOG(INFO, "[%5hu][%5d] client connection closed socket", count++, m_fd);
 	close(m_socket.m_fd);
 }
 
