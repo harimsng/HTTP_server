@@ -11,13 +11,14 @@
 <main class="container">
   <div class="cc">
     <?php
-      $target_dir = "/Users/soum/goinfre/webserv_1/webserv/tester_dir/put_test2/";
+      $target_dir = $_ENV["PWD"];
+	  $target_dir = $target_dir."upload/";
       $target_file = $target_dir.basename($_FILES["fileToUpload"]["name"]);
       if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file))
       {
         echo '<div id="note">
             You can delete the file with:<br>
-            curl -vX DELETE localhost:8080/uploads/'. htmlspecialchars(basename($_FILES["fileToUpload"]["name"])) .'
+            curl -vX DELETE localhost:'.$_SERVER["SERVER_PORT"].'/upload/'. htmlspecialchars(basename($_FILES["fileToUpload"]["name"])) .'
             </div>';
 
         echo '<h2>The file '. htmlspecialchars(basename($_FILES["fileToUpload"]["name"])). ' has been uploaded.</h2>';
