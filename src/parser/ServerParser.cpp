@@ -72,6 +72,7 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
+	server.m_index.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
 		server.m_index.push_back(m_tokenizer.get());
