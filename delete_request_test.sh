@@ -1,10 +1,10 @@
 #!/bin/bash
 
 echo "creating test files"
-echo "should_be_deleted" > ./html/delete_request_test/should_be_deleted
-echo "file" > ./html/delete_request_test/file
-echo "no_permission" > ./html/delete_request_test/no_permission
-chmod 555 ./html/delete_request_test/no_permission
+echo "should_be_deleted" > ./html/tests/delete_request_test/should_be_deleted
+echo "file" > ./html/tests/delete_request_test/file
+echo "no_permission" > ./html/tests/delete_request_test/no_permission
+chmod 555 ./html/tests/delete_request_test/no_permission
 echo "press enter key to continue"
 read -n 1
 
@@ -37,3 +37,5 @@ read -n 1
 echo "expected: 405 Method Not Allowed"
 echo "curl -X DELETE -4 --resolve server5:8085:127.0.0.1 http://server5:8085/file"
 curl -vX DELETE -4 --resolve server5:8085:127.0.0.1 http://server5:8085/file
+
+rm -f ./html/tests/delete_request_test/*

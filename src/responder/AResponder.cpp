@@ -113,7 +113,7 @@ void
 AResponder::readFile(std::string& readBody)
 {
 	struct stat		fileStatus;
-	std::fstream	file;
+	std::ifstream	file;
 	std::string		fileBuffer;
 	std::string 	filePath = m_request.m_path + m_request.m_file;
 

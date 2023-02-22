@@ -54,10 +54,6 @@ GetResponder::respondWork()
 		case RES_CONTENT:
 			if (isAutoIndex())
 				readBody = AutoIndex::autoIndex(m_request.m_path, m_request.m_uri);
-			else if (m_request.m_status >= 300)
-			{
-				throw m_request.m_status;
-			}
 			readFile(readBody);
 			respondBody(readBody);
 			m_responseStatus = RES_DONE; // fall through
@@ -87,7 +83,7 @@ GetResponder::constructCgi()
 bool
 GetResponder::isAutoIndex()
 {
-	if (m_request.m_file == "")
+	if (m_request.m_file == "" && m_request.m_locationBlock != NULL)
 	{
 		return (m_request.m_locationBlock->m_autoindex);
 	}
