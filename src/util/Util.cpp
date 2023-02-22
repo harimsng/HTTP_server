@@ -157,5 +157,5 @@ Util::toHex(unsigned int num)
 bool
 Util::checkUrl(const std::string& str)
 {
-	return str.compare(0, 7, "http://", 7) == 0;
+	return str.compare(0, 7, "http://", 7) == 0 || str.compare(0, 8, "https://", 8) == 0;
 }

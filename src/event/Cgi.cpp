@@ -56,13 +56,13 @@ Cgi::Cgi(int cgiToServer[2], RequestHandler& requestHandler)
 
 Cgi::~Cgi()
 {
-	static short unsigned int	count = 0;
+//	static short unsigned int	count = 0;
 
 	delete m_requestHandler->m_responder;
 	m_requestHandler->resetStates();
 	close(m_fd);
 	waitpid(m_pid, NULL, 0);
-	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
+//	LOG(INFO, "[%5hu][%5d] cgi exited", count++, m_fd);
 }
 
 Cgi::IoEventPoller::EventStatus

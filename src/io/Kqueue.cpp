@@ -97,7 +97,6 @@ Kqueue::pollWork()
 
 		if (event.flags & EV_ERROR)
 		{
-			LOG(DEBUG, "event error, event.data : %d", event.data);
 			if (event.data == EBADF)
 			{
 				LOG(INFO, "invalid file descriptor");

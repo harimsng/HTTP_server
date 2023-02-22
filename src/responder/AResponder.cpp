@@ -142,9 +142,9 @@ AResponder::openFile()
 void
 AResponder::openFile(const string& path)
 {
-	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH);
+	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (m_fileFd < 0)
-		throw runtime_error("AResponder::openFile() open error");
+		throw 500;
 }
 
 int
@@ -322,9 +322,13 @@ AResponder::receiveContentNormal()
 	if (m_dataSize == -1)
 	{
 		if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") == 0)
-			throw (204);
+		{
+			m_dataSize = 0;
+		}
 		else
+		{
 			m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+		}
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
 			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d", m_requestHandler.m_socket->m_fd,

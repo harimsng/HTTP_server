@@ -36,4 +36,9 @@ echo "expected: 405 Method Not Allowed"
 echo "curl -X GET -4 --resolve server5:8084:127.0.0.1 http://server5:8084/read_only"
 curl -vX GET -4 --resolve server5:8084:127.0.0.1 http://server5:8084/read_only
 
+echo "--------------------------------------------------------------------------------"
+echo "autoindex (directory listing)"
+echo "curl -X GET -4 --resolve server6:8086:127.0.0.1 http://server6:8086/"
+curl -vX GET -4 --resolve server6:8086:127.0.0.1 http://server6:8086/
+
 rm -f ./html/tests/get_request_test/*
