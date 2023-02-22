@@ -64,6 +64,10 @@ AResponder::operator=(const AResponder& aMethod)
 void
 AResponder::respond() try
 {
+	if (m_request.m_method != RequestHandler::HEAD
+		&& m_request.m_method != RequestHandler::GET
+		&& m_request.m_status >= 300)
+		throw (m_request.m_status);
 	respondWork();
 }
 catch (int errorStatusCode)
@@ -88,11 +92,14 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
-	error_page = &m_request.m_locationBlock->m_errorPageTable;
-	root = m_request.m_locationBlock->m_root;
-	if(error_page->count(m_request.m_status) != 0)
+	if (m_request.m_locationBlock != NULL)
 	{
-		filePath = root + (*error_page)[m_request.m_status];
+		error_page = &m_request.m_locationBlock->m_errorPageTable;
+		root = m_request.m_locationBlock->m_root;
+		if(error_page->count(m_request.m_status) != 0)
+		{
+			filePath = root + (*error_page)[m_request.m_status];
+		}
 	}
 	if (Util::checkFileStat(filePath.c_str()) == false)
 	{

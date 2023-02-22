@@ -9,7 +9,8 @@
 #include "tokenizer/HttpStreamTokenizer.hpp"
 #include "Location.hpp"
 
-#define UPDATE_REQUEST_ERROR(status, code) (status = status < 300 ? code : status)
+#define UPDATE_REQUEST_ERROR(status, code)\
+	status = status < 300 ? code : status; LOG(DEBUG, "error update = %d", status);
 
 class	Server;
 class	VirtualServer;

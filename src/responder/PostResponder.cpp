@@ -39,8 +39,6 @@ PostResponder::respondWork()
 	std::string	readBody;
 	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp";
 
-	if (m_request.m_status >= 300)
-		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
