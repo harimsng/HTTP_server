@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <unistd.h>
 #include <stdexcept>
 
 #include "Logger.hpp"
@@ -99,7 +100,8 @@ RequestHandler::createResponseHeader()
 {
 	int&			statusCode = m_request.m_status;
 
-	checkRequestMessage();
+	if (statusCode < 400)
+		checkRequestMessage();
 	if (statusCode >= 400)
 	{
 		m_request.m_isCgi = false;
@@ -243,23 +245,24 @@ RequestHandler::checkResourceStatus()
 	switch (m_request.m_method)
 	{
 		case GET: // fall through
-		case HEAD: // fall through
-			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
+		case HEAD:
+			permission = R_OK; break;
 		case POST:
 			return;
 		case PUT:
 			return;
 		case DELETE:
-			permission = S_IWUSR | S_IWGRP | S_IWOTH;
+			permission = W_OK;
 			break;
 	}
 	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode)
-		&& CHECK_PERMISSION(status.st_mode, permission))
+		&& access((m_request.m_path + m_request.m_file).c_str(), permission) == 0)
 		return;
 
 	switch (errno)
 	{
-		case EACCES: // fall through
+		case EACCES:
+			statusCode = 403; break;
 		case ENOENT: // fall through
 		case ENOTDIR:
 			statusCode = 404; break;

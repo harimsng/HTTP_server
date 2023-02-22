@@ -84,6 +84,7 @@ DeleteResponder::respondWork()
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
+			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:

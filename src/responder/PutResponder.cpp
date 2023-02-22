@@ -23,8 +23,6 @@ PutResponder::operator=(const PutResponder& putResponder)
 void
 PutResponder::respondWork()
 {
-	if (m_request.m_status >= 300)
-		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
