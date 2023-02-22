@@ -29,7 +29,7 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 	int		deleteStatus;
 	string	responseText = "File is deleted.";
 
-	deleteStatus = unlink(filePath.c_str());
+	deleteStatus = access(filePath.c_str(), W_OK);
 	if (deleteStatus < 0)
 	{
 		switch (errno)
@@ -55,7 +55,10 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 		}
 	}
 	else
+	{
+		unlink(filePath.c_str());
 		responseText = "File is deleted.";
+	}
 	readBody =
 	"<!DOCTYPE html>\n"
 	"<html>\n"
@@ -76,6 +79,8 @@ DeleteResponder::respondWork()
 	string	readBody;
 	string	filePath = m_request.m_path + m_request.m_file;
 
+	if (m_request.m_status >= 300)
+		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
