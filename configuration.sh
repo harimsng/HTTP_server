@@ -41,17 +41,9 @@ echo "--------------------------------------------------------------------------
 echo ""
 
 echo "method_except test - limit_except"
-echo "curl -vX DELETE --header "ABC" http://localhost:8086/permission.txt"
+echo "curl -vX DELETE http://localhost:8086/index.txt"
 echo "press enter key to run"
 read
-curl -vX DELETE http://localhost:8086/permission.txt
-echo "------------------------------------------------------------------------------------------"
-echo ""
-
-echo "method_except test - permission"
-echo "curl -vX DELETE http://localhost:8087/permission.txt"
-echo "press enter key to run"
-read
-curl -vX DELETE http://localhost:8087/permission.txt
+curl -vX DELETE http://localhost:8086/index.txt
 echo "------------------------------------------------------------------------------------------"
 echo ""
