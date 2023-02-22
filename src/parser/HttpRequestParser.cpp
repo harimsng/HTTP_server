@@ -128,7 +128,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	if (headerLine.size() != 0 && headerLine[0] == ' ')
 		return ;
 	curPos = 0;
-	pos = headerLine.find(": ");
+	pos = headerLine.find(":");
 	if (pos == string::npos)
 	{
 		throw 400;

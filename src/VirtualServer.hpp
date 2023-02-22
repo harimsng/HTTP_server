@@ -34,10 +34,10 @@ public:
 	std::vector<std::string>			m_serverNames;
 	std::map<int, std::string>			m_errorPageTable;
 	std::map<std::string, Location>		m_locationTable;
+	sockaddr_in							m_listen;
 
 private:
 	AddrKey				m_addrKey;
-	sockaddr_in			m_listen;
 // friends
 	friend class			ConfigParser;
 	friend class			ServerParser;

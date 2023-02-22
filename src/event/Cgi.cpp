@@ -203,8 +203,8 @@ Cgi::initEnv(const Request &request)
     std::string SERVER_PROTOCOL = "SERVER_PROTOCOL=HTTP/1.1";
     std::string GATEWAY_INTERFACE = "GATEWAY_INTERFACE=CGI/1.1";
 
-    std::string SERVER_PORT = "SERVER_PORT=";
-    std::string SERVER_NAME = "SERVER_NAME=" + request.m_virtualServer->m_serverNames[0];
+    std::string SERVER_PORT = "SERVER_PORT=" + Util::toString(ntohs(request.m_virtualServer->m_listen.sin_port));
+    std::string SERVER_NAME = "SERVER_NAME=" + Util::toString(ntohl(request.m_virtualServer->m_listen.sin_addr.s_addr));
     std::string REMOTE_ADDR = "REMOTE_ADDR=";
     std::string REMOTE_HOST = "REMOTE_HOST=";
 
