@@ -35,7 +35,7 @@ PostResponder::operator=(const PostResponder& postResponder)
 }
 
 void
-PostResponder::respondWork()
+PostResponder::respondWork() try
 {
 	std::string	readBody;
 	std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp" + Util::toString(m_requestHandler.m_socket->m_fd);
@@ -75,11 +75,21 @@ PostResponder::respondWork()
 		default:
 			;
 	}
-	if (m_request.m_isCgi == false)
+	if (m_request.m_isCgi != true)
 	{
 		unlink(tmpFile.c_str());
 		close(m_fileFd);
 	}
+}
+catch (int errorStatusCode)
+{
+	if (m_request.m_isCgi != true)
+	{
+		std::string tmpFile = m_request.m_path + m_request.m_file + ".tmp" + Util::toString(m_requestHandler.m_socket->m_fd);
+		unlink(tmpFile.c_str());
+		close(m_fileFd);
+	}
+	throw errorStatusCode;
 }
 
 void

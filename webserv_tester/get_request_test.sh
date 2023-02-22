@@ -35,6 +35,7 @@ echo "--------------------------------------------------------------------------
 echo "expected: 405 Method Not Allowed"
 echo "curl -X GET -4 --resolve server5:8084:127.0.0.1 http://server5:8084/read_only"
 curl -vX GET -4 --resolve server5:8084:127.0.0.1 http://server5:8084/read_only
+read -n 1
 
 echo "--------------------------------------------------------------------------------"
 echo "autoindex (directory listing)"
