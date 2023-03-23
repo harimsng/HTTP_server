@@ -23,7 +23,6 @@ Util::parseArgument(int argc, char **argv)
 		string::size_type	pos;
 
 		if (!(arg[0] == '-' && arg[1] == '-'))
-			// TODO: argument error handling
 			return false;
 		pos = arg.find('=');
 		if (arg.substr(2, pos - 2) == "log")
@@ -70,7 +69,6 @@ Util::toInt(const string& str)
 	stringstream	ss(str);
 	int				num = 0;
 
-	// TODO: interpret 1m2k3 as 1002003
 	ss >> num;
 	return num;
 }
@@ -116,7 +114,6 @@ Util::toLower(string str)
 	return str;
 }
 
-// TODO: extend and throw
 bool
 Util::checkFileStat(const char* path)
 {
@@ -155,4 +152,10 @@ Util::toHex(unsigned int num)
 	ss.flags(ios_base::hex);
 	ss << num;
 	return ss.str();
+}
+
+bool
+Util::checkUrl(const std::string& str)
+{
+	return str.compare(0, 7, "http://", 7) == 0 || str.compare(0, 8, "https://", 8) == 0;
 }

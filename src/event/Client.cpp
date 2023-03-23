@@ -17,9 +17,9 @@ Client::Client(int fd)
 
 Client::~Client()
 {
-	static unsigned short	count = 0;
+//	static unsigned short	count = 0;
 
-	LOG(INFO, "[%5hu][%5d] client connection closed socket fd : %d", count++, m_fd);
+//	LOG(INFO, "[%5hu][%5d] client connection closed socket", count++, m_fd);
 	close(m_socket.m_fd);
 }
 
@@ -30,15 +30,11 @@ Client::Client(Client const& client)
 	m_fd = client.m_fd;
 }
 
-// how poller distinguish events
-// kqueue: fd, filter, filter options
-// epoll: fd
 Client::IoEventPoller::EventStatus
 Client::handleReadEventWork()
 {
 	int	status;
 
-	// there are fd leaks. if second tester execution on running webserv.
 	status = m_requestHandler.receiveRequest();
 	switch (status)
 	{
@@ -49,12 +45,10 @@ Client::handleReadEventWork()
 			break;
 
 		case RequestHandler::RECV_END:
-			// LOG(INFO, "[%d] event eof", m_socket.m_fd);
 			m_eventStatus = EVENT_EOF;
 			if (TEST_BITMASK(m_filter, IoEventPoller::FILT_WRITE) == true)
 				return IoEventPoller::STAT_NORMAL;
 			return IoEventPoller::STAT_END;
-			// return IoEventPoller::STAT_NORMAL;
 
 		default:
 			;
@@ -62,7 +56,6 @@ Client::handleReadEventWork()
 	return IoEventPoller::STAT_NORMAL;
 }
 
-// NOTE: connection: closed issue?
 Client::IoEventPoller::EventStatus
 Client::handleWriteEventWork()
 {
@@ -72,7 +65,6 @@ Client::handleWriteEventWork()
 	switch (status)
 	{
 		case RequestHandler::SEND_END:
-			// this can delete fd instead of modifying
 			LOG(DEBUG, "[%d] write event finished", m_socket.m_fd);
 			if (m_eventStatus == EVENT_EOF)
 				return IoEventPoller::STAT_END;

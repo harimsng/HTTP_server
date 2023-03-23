@@ -85,7 +85,6 @@ ServerManager::run() try
 	}
 	Logger::log(Logger::INFO, "%zu listen servers exited\n", s_listenServerTable.size());
 }
-// TODO: cleanup
 catch (std::runtime_error& e)
 {
 	LOG(ERROR, "runtime_error: %s", e.what());

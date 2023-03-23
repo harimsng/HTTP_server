@@ -4,9 +4,6 @@
 #include "Types.hpp"
 #include "Buffer.hpp"
 
-// for test
-#include <iostream>
-
 using namespace std;
 
 #define BUFFER_SIZE (65536)
@@ -112,7 +109,6 @@ Buffer::mysend(int fd)
 		return 0;
 
 	writeSize = size() - m_writePos;
-	// heuristic solution. consider to set the fd non-blocking
 	if (size() - m_writePos > 8192)
 		writeSize = 8192;
 
@@ -136,14 +132,6 @@ Buffer::send(int fd)
 	t_uint64	writeSize;
 
 	writeSize = size() - m_writePos;
-	// NOTE: this if stetement and BUFFER_SIZE are important part.
-	// if Cgi has been fed with large size of write, write blocks.
-	// if BUFFER_SIZE not large enough (BUFFER_SIZE < (8192 << 3)), final stage of the test would block.
-	/*
-	if (size() - m_writePos > BUFFER_SIZE)
-		writeSize = BUFFER_SIZE;
-		*/
-
 	count = ::write(fd, data() + m_writePos, writeSize);
 	if (count <= 0)
 		return count;

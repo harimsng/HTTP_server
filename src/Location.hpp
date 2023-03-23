@@ -15,9 +15,6 @@ public:
 	Location();
 	~Location();
 
-//	Location(const Location& location) = default;
-//	Location&	operator=(const Location& location) = default;
-
 // member functions
 
 private:
@@ -25,16 +22,15 @@ private:
 
 // member variables
 public:
-	int									m_autoindex;
-	t_uint16							m_limitExcept;
-	t_int32								m_clientMaxBodySize;
-	std::string							m_path;
-	std::string							m_root;
-	std::string							m_alias;
-	std::vector<std::string>			m_index;
-	std::map<int, std::string>			m_errorPageTable;
-
-	//std::vector<std::string>	m_cgiExt;
+	int							m_autoindex;
+	t_uint16					m_limitExcept;
+	t_int32						m_clientMaxBodySize;
+	std::string					m_path;
+	std::string					m_root;
+	std::string					m_alias;
+	std::string					m_return;
+	std::vector<std::string>	m_index;
+	std::map<int, std::string>	m_errorPageTable;
 
 	friend std::ostream&	operator<<(std::ostream& os, const Location& location);
 };

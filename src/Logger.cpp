@@ -4,7 +4,7 @@
 #include "ServerManager.hpp"
 #include "Logger.hpp"
 
-#define	MAX_BUFFER_LEN (128)
+#define	MAX_BUFFER_LEN (256)
 
 using namespace std;
 
@@ -16,9 +16,6 @@ const char*	Logger::s_prefixTable[] = {
 	"[DEBUG]   ",
 	"[DEBUG]   ",
 };
-
-// const string
-// Util::getDate(const char* format);
 
 Logger::e_types		Logger::s_type = ERROR;
 ostream*			Logger::s_ostream = NULL;
@@ -58,8 +55,6 @@ Logger::initLogger(const std::string& type, std::ostream& os)
 		+ DEBUG * (type == "DEBUG")
 		+ VERBOSE * (type == "VERBOSE");
 	s_type = static_cast<e_types>(temp);
-	cout << s_prefixTable[INFO]
-		<< "vsnprintf() in Logger::log(e_Types, const char*, ...) is C99 feature. should be removed later.\n";
 }
 
 void

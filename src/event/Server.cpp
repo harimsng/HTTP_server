@@ -8,6 +8,7 @@
 #include "socket/Tcp.hpp"
 
 using namespace std;
+
 // deleted
 Server&
 Server::operator=(const Server& server)
@@ -65,7 +66,6 @@ Server::handleReadEventWork()
 	Client* client;
 	client = new Client(clientFd);
 	LOG(DEBUG, "read event to server toward %s", getFormattedAddress(clientFd).data());
-	// Epoll
 	ServerManager::registerEvent(clientFd, IoEventPoller::OP_ADD,
 			IoEventPoller::FILT_READ, client);
 	return IoEventPoller::STAT_NORMAL;

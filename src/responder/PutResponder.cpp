@@ -23,8 +23,6 @@ PutResponder::operator=(const PutResponder& putResponder)
 void
 PutResponder::respondWork()
 {
-	if (m_request.m_status >= 300)
-		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
@@ -34,7 +32,7 @@ PutResponder::respondWork()
 			if (!(this->*m_recvContentFunc)())
 				break;
 			close(m_fileFd);
-			m_responseStatus = RES_CONTENT_FINISHED;// -> client_max_body_size error
+			m_responseStatus = RES_CONTENT_FINISHED;
 		// fall through
 		case RES_CONTENT_FINISHED:
 			throw (201); // fall through

@@ -34,14 +34,13 @@ AResponder::AResponder(RequestHandler& requestHandler)
 	m_dataSize(-1),
 	m_totalContentLentgh(0)
 {
-	// TODO: condition is not complete.
 	if (m_request.m_headerFieldsMap.count("TRANSFER-ENCODING") == 1
 		&& m_request.m_headerFieldsMap["TRANSFER-ENCODING"].back() == "chunked")
 		m_recvContentFunc = &AResponder::receiveContentChunked;
 	else
 		m_recvContentFunc = &AResponder::receiveContentNormal;
 
-	if (m_request.m_isCgi == true) // && m_request.m_method == RequestHandler::POST)
+	if (m_request.m_isCgi == true)
 		m_procContentFunc = &AResponder::writeToBuffer;
 	else
 		m_procContentFunc = &AResponder::writeToFile;
@@ -65,6 +64,10 @@ AResponder::operator=(const AResponder& aMethod)
 void
 AResponder::respond() try
 {
+	if (m_request.m_method != RequestHandler::HEAD
+		&& m_request.m_method != RequestHandler::GET
+		&& m_request.m_status >= 300)
+		throw (m_request.m_status);
 	respondWork();
 }
 catch (int errorStatusCode)
@@ -89,22 +92,16 @@ AResponder::getErrorPage(string& readBody)
 	string				root;
 	string				filePath = "";
 
-	// TODO: resourceLocation
-	if (m_request.m_locationBlock == NULL)
-	{
-		error_page = &m_request.m_virtualServer->m_errorPageTable;
-		root = m_request.m_virtualServer->m_root;
-	}
-	else
+	if (m_request.m_locationBlock != NULL)
 	{
 		error_page = &m_request.m_locationBlock->m_errorPageTable;
 		root = m_request.m_locationBlock->m_root;
+		if(error_page->count(m_request.m_status) != 0)
+		{
+			filePath = root + (*error_page)[m_request.m_status];
+		}
 	}
-	if(error_page->count(m_request.m_status) != 0)
-	{
-		filePath = root + (*error_page)[m_request.m_status];
-	}
-	else
+	if (Util::checkFileStat(filePath.c_str()) == false)
 	{
 		readBody = RequestHandler::makeErrorPage(m_request.m_status);
 	}
@@ -116,7 +113,7 @@ void
 AResponder::readFile(std::string& readBody)
 {
 	struct stat		fileStatus;
-	std::fstream	file;
+	std::ifstream	file;
 	std::string		fileBuffer;
 	std::string 	filePath = m_request.m_path + m_request.m_file;
 
@@ -145,10 +142,9 @@ AResponder::openFile()
 void
 AResponder::openFile(const string& path)
 {
-	// TODO: check permission
-	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH);
+	m_fileFd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (m_fileFd < 0)
-		throw runtime_error("AResponder::openFile() open error");
+		throw 500;
 }
 
 int
@@ -199,6 +195,14 @@ AResponder::endResponse()
 void
 AResponder::respondHeader()
 {
+	if (m_request.m_status == 301)
+	{
+		m_sendBuffer.append("Location: " + m_request.m_locationBlock->m_return);
+		m_sendBuffer.append(g_CRLF);
+		LOG(DEBUG, "response header");
+		Logger::log(Logger::DEBUG, m_sendBuffer);
+		return;
+	}
 	m_sendBuffer.append("Server: webserv/2.0");
 	m_sendBuffer.append(g_CRLF);
 	m_sendBuffer.append("Date: " + Util::getDate("%a, %d %b %Y %X %Z"));
@@ -207,14 +211,9 @@ AResponder::respondHeader()
 	m_sendBuffer.append(g_CRLF);
 	if (m_request.m_status == 405)
 	{
-		if (m_request.m_locationBlock != NULL)
-			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(m_request.m_locationBlock->m_limitExcept));
-		else
-			m_sendBuffer.append("Allow:" + RequestHandler::methodToString(0x1f));
-
+		m_sendBuffer.append("Allow:" + RequestHandler::methodToString(m_request.m_locationBlock->m_limitExcept));
 		m_sendBuffer.append(g_CRLF);
 	}
-	// INFO: is reconnecting right when responding with redirection?
 	if (m_request.m_status >= 300)
 	{
 		m_sendBuffer.append("Connection: close");
@@ -262,7 +261,6 @@ AResponder::parseChunkSize()
 	string hex;
 	size_t crlfPos = m_recvBuffer.find(g_CRLF);
 
-	// TODO: update buffer
 	if (crlfPos == string::npos)
 		return ("");
 	if (crlfPos == 0)
@@ -278,31 +276,24 @@ AResponder::parseChunkSize()
 int
 AResponder::receiveContentChunked()
 {
-	// cout << m_buffer.size() << endl;
 	while (m_recvBuffer.size() != 0)
 	{
 		if (m_dataSize == -1)
 		{
 			m_dataSize = Util::hexToDecimal(parseChunkSize());
-			// LOG(DEBUG, "dataSize updated = %d", m_dataSize);
 		}
-		// NOTE: clientMaxBodySize is equal to total content length, not size of a chunk
-		// NOTE: what if location is not found from request uri
 		if (m_totalContentLentgh > m_request.m_locationBlock->m_clientMaxBodySize)
 		{
-			LOG(DEBUG, "content length sum = %d, max content size = %d",
+			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d", m_requestHandler.m_socket->m_fd,
 				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize);
 			throw (413);
 		}
 		if (m_dataSize == 0 && m_recvBuffer.size() == 2)
 		{
-			// LOG(INFO, "read finished");
-			// NOTE: PostResponder closes m_fileFd twice
 			m_buffer.status(Buffer::BUF_EOF);
 			m_recvBuffer.clear();
 			return (1);
 		}
-		// LOG(DEBUG, "dataSize = %d, buffersize = %zu", m_dataSize, m_recvBuffer.size());
 		if (m_dataSize > 0 && m_dataSize + 2 <= static_cast<int>(m_recvBuffer.size()))
 		{
 			m_totalContentLentgh += m_dataSize;
@@ -331,11 +322,19 @@ AResponder::receiveContentNormal()
 	if (m_dataSize == -1)
 	{
 		if (m_request.m_headerFieldsMap.count("CONTENT-LENGTH") == 0)
-			throw (204);
+		{
+			m_dataSize = 0;
+		}
 		else
+		{
 			m_dataSize = Util::toInt(m_request.m_headerFieldsMap["CONTENT-LENGTH"][0]);
+		}
 		if (m_dataSize > m_request.m_locationBlock->m_clientMaxBodySize)
+		{
+			LOG(DEBUG, "[%d] content length sum = %d, max content size = %d", m_requestHandler.m_socket->m_fd,
+				m_totalContentLentgh, m_request.m_locationBlock->m_clientMaxBodySize);
 			throw (413);
+		}
 	}
 	if (m_dataSize == 0)
 	{

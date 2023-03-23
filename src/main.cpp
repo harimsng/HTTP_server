@@ -5,7 +5,6 @@
 
 using namespace	std;
 
-// use char **environ for environment variables
 int	main(int argc, char **argv)
 {
 	ServerManager	serverManager;

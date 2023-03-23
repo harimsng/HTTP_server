@@ -10,7 +10,7 @@ public:
 	enum e_eventStatus
 	{
 		EVENT_NORMAL = 1,
-		EVENT_EOF = 0,
+		EVENT_EOF = 0
 	};
 
 	typedef	IO_EVENT_POLLER	IoEventPoller;

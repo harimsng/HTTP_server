@@ -31,7 +31,7 @@ HttpRequestParser::~HttpRequestParser()
 }
 
 void
-HttpRequestParser::parse(Request& request)
+HttpRequestParser::parse(Request& request) try
 {
 	string::size_type	pos;
 
@@ -56,6 +56,11 @@ HttpRequestParser::parse(Request& request)
 		pos = m_tokenizer.updateBuffer();
 	}
 }
+catch (int statusCode)
+{
+	UPDATE_REQUEST_ERROR(request.m_status, statusCode);
+	m_readStatus = HEADER_FIELDS_END;
+}
 
 void
 HttpRequestParser::parseMethod(Request &request)
@@ -72,7 +77,7 @@ HttpRequestParser::parseMethod(Request &request)
 	if (RequestHandler::s_methodConvertTable.count(method) != 0)
 		request.m_method = RequestHandler::s_methodConvertTable[method];
 	else
-		UPDATE_REQUEST_ERROR(request.m_status, 400);
+		throw 400;
 	m_readStatus = REQUEST_LINE;
 	m_tokenizer.flush();
 }
@@ -85,13 +90,11 @@ HttpRequestParser::parseStatusLine(Request &request)
 	size_t			spacePos;
 	size_t			queryStringPos;
 
-	LOG(DEBUG, "status line \"%s\"", statusLine.c_str());
 	m_readStatus = HEADER_FIELDS;
 	spacePos = statusLine.find(" ");
 	if (spacePos == string::npos)
 	{
-		UPDATE_REQUEST_ERROR(request.m_status, 400);
-		return;
+		throw 400;
 	}
 	request.m_uri = statusLine.substr(0, spacePos);
 	queryStringPos = request.m_uri.find("?");
@@ -104,6 +107,8 @@ HttpRequestParser::parseStatusLine(Request &request)
 	m_tokenizer.flush();
 }
 
+#include "Logger.hpp"
+
 void
 HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 {
@@ -113,6 +118,7 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	size_t	pos;
 	size_t	curPos;
 
+	LOG(DEBUG, "%s", headerLine.c_str());
 	if (headerLine == g_CRLF)
 	{
 		m_readStatus = HEADER_FIELDS_END;
@@ -122,7 +128,11 @@ HttpRequestParser::parseHeaderFields(HeaderFieldsMap& headerFieldsMap)
 	if (headerLine.size() != 0 && headerLine[0] == ' ')
 		return ;
 	curPos = 0;
-	pos = headerLine.find(": ");
+	pos = headerLine.find(":");
+	if (pos == string::npos)
+	{
+		throw 400;
+	}
 	field = Util::toUpper(headerLine.substr(curPos, pos));
 	curPos = pos + 2;
 	while (pos != string::npos)

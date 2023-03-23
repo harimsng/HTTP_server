@@ -3,7 +3,6 @@
 
 EventObject::~EventObject()
 {
-//	LOG(DEBUG, "[%d] event destructed", m_fd);
 }
 
 EventObject::EventObject()

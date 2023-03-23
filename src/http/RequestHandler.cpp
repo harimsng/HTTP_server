@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <unistd.h>
 #include <stdexcept>
 
 #include "Logger.hpp"
@@ -20,7 +21,6 @@ map<uint16_t, string>	RequestHandler::s_methodRConvertTable;
 std::map<std::string, std::string>	RequestHandler::s_extensionTypeTable;
 
 
-// forbidden
 RequestHandler::RequestHandler(const RequestHandler& requestHandler)
 :	m_parser(m_recvBuffer),
 	m_socket(NULL),
@@ -50,14 +50,12 @@ RequestHandler::~RequestHandler()
 {
 }
 
-// TODO: runtime error to server error
 int
 RequestHandler::receiveRequest()
 {
 	int		count;
 	int		receiveStatus = RECV_NORMAL;
 
-	// TODO: dangerous case: if Cgi output speed is slow, m_sendBuffer can be empty.
 	if (m_sendBuffer.size() != 0)
 		return RECV_SKIPPED;
 
@@ -102,10 +100,10 @@ RequestHandler::createResponseHeader()
 {
 	int&			statusCode = m_request.m_status;
 
-	checkRequestMessage();
+	if (statusCode < 400)
+		checkRequestMessage();
 	if (statusCode >= 400)
 	{
-		// LOG(DEBUG, "error response to fd=%d, status code=%d", m_socket->m_fd, statusCode);
 		m_request.m_isCgi = false;
 	}
 	switch (m_request.m_method)
@@ -126,7 +124,6 @@ RequestHandler::createResponseHeader()
 			m_responder = new DeleteResponder(*this);
 			break;
 		default:
-			// INFO: for OPTION, CONNECT, TRACE
 			UPDATE_REQUEST_ERROR(statusCode, 405);
 			m_responder = new GetResponder(*this);
 	}
@@ -135,15 +132,6 @@ RequestHandler::createResponseHeader()
 	Logger::log(Logger::DEBUG, m_request);
 	m_parser.m_readStatus = HttpRequestParser::CONTENT;
 }
-
-// NOTE
-// check for
-// 1. http version								-> 505
-// 2. request header field is "host" or not
-// 3. find location block
-// 4. request need cgi or not
-// 5. allowed method of location block			-> 405
-// 6. file exists or not and file's permisson	-> 404, 414 500
 
 void
 RequestHandler::checkRequestMessage()
@@ -155,15 +143,23 @@ RequestHandler::checkRequestMessage()
 	checkHeaderFields();
 	virtualServer = resolveVirtualServer(m_request.m_headerFieldsMap["HOST"][0]);
 	m_request.m_virtualServer = virtualServer;
+	m_request.m_locationBlock = &virtualServer->m_locationTable["/"];
 	findLocation.saveRealPath(m_request, virtualServer->m_locationTable, virtualServer);
 	checkIsCgi();
-	if (m_request.m_locationBlock != NULL)
-	{
-		// LOG(DEBUG, "location = %s", m_request.m_locationBlock->m_path.c_str());
-		checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
-	}
+	checkAllowedMethod(m_request.m_locationBlock->m_limitExcept);
 	if (m_request.m_file != "")
 		checkResourceStatus();
+	checkRedirection();
+}
+
+void
+RequestHandler::checkRedirection()
+{
+	if (!m_request.m_locationBlock->m_return.empty())
+	{
+		LOG(INFO, "root location block %s", m_request.m_locationBlock->m_return.c_str());
+		m_request.m_status = 301;
+	}
 }
 
 void
@@ -173,20 +169,16 @@ RequestHandler::checkIsCgi()
 	if (m_request.m_file != "" && (m_request.m_method == GET || m_request.m_method == POST))
 	{
 		string m_ext = "";
-		if (m_request.m_file.find(".") != string::npos)
+		if (m_request.m_file.rfind(".") != string::npos)
 		{
-			// QUESTION: what is extension of abc.def.ghi? ghi or def.ghi
-			// 			usually the extension is the substring which follows the last occurrence, if any, of the dot character.
-			m_ext = m_request.m_file.substr(m_request.m_file.find("."));
+			m_ext = m_request.m_file.substr(m_request.m_file.rfind("."));
 			if (m_request.m_virtualServer->m_cgiPass.count(m_ext) == true)
 			{
 				m_request.m_cgi = m_request.m_virtualServer->m_cgiPass[m_ext];
-				// TODO
 				m_request.m_isCgi = m_request.m_method == RequestHandler::GET && m_ext == ".bla" ? false : true;
 			}
 		}
 		if (m_request.m_isCgi == true && (m_request.m_method == POST || m_request.m_method == PUT))
-			// TODO
 			m_request.m_status = 200;
 	}
 }
@@ -201,10 +193,17 @@ RequestHandler::checkStatusLine()
 void
 RequestHandler::checkHeaderFields()
 {
+	size_t	pos;
+
 	if (m_request.m_headerFieldsMap.count("HOST") == 0)
 	{
 		m_request.m_headerFieldsMap["HOST"].push_back("");
 		return;
+	}
+	pos = m_request.m_headerFieldsMap["HOST"][0].find(":");
+	if (pos != string::npos)
+	{
+		m_request.m_headerFieldsMap["HOST"][0].erase(pos);
 	}
 }
 
@@ -228,10 +227,8 @@ RequestHandler::resolveVirtualServer(const string& host)
 void
 RequestHandler::checkAllowedMethod(uint16_t allowed)
 {
-//	LOG(DEBUG, "allowed = %x, method = %x", allowed, m_request.m_method);
 	if (!(m_request.m_method & allowed))
 	{
-		// LOG(DEBUG, "method not allowed");
 		if (m_request.m_status == 404)
 			m_request.m_status = 405;
 		UPDATE_REQUEST_ERROR(m_request.m_status, 405);
@@ -248,23 +245,25 @@ RequestHandler::checkResourceStatus()
 	switch (m_request.m_method)
 	{
 		case GET: // fall through
-		case HEAD: // fall through
-			permission = S_IRUSR | S_IRGRP | S_IROTH; break;
+		case HEAD:
+			permission = R_OK; break;
 		case POST:
-			return;
+			if (m_request.m_isCgi == true)
+				return;
+			permission = R_OK; break;
 		case PUT:
 			return;
 		case DELETE:
-			permission = S_IWUSR | S_IWGRP | S_IWOTH;
-			break;
+			permission = W_OK; break;
 	}
 	if (stat((m_request.m_path + m_request.m_file).c_str(), &status) == 0 && S_ISREG(status.st_mode)
-		&& CHECK_PERMISSION(status.st_mode, permission))
+		&& access((m_request.m_path + m_request.m_file).c_str(), permission) == 0)
 		return;
 
 	switch (errno)
 	{
-		case EACCES: // fall through
+		case EACCES:
+			statusCode = 403; break;
 		case ENOENT: // fall through
 		case ENOTDIR:
 			statusCode = 404; break;
@@ -274,7 +273,6 @@ RequestHandler::checkResourceStatus()
 			statusCode = 500; break;
 	}
 	UPDATE_REQUEST_ERROR(m_request.m_status, statusCode);
-	// LOG(WARNING, "couldn't find requested resource. status Code = %d", m_request.m_status);
 }
 
 std::string
@@ -282,7 +280,6 @@ RequestHandler::findContentType(std::string& content)
 {
 	std::string extension;
 
-	// INFO: npos?
 	if (content.find('.') != std::string::npos)
 	{
 		extension = content.substr(content.find('.') + 1);
@@ -308,20 +305,18 @@ RequestHandler::sendResponse() try
 
 	if (count == 0 && (m_parser.m_readStatus == HttpRequestParser::REQUEST_LINE_METHOD || m_parser.m_readStatus == HttpRequestParser::ERROR))
 	{
-		// LOG(DEBUG, "[%d] sendResponse() end", m_socket->m_fd);
 		m_sendBuffer.status(Buffer::BUF_EOF);
 		return m_parser.m_readStatus == HttpRequestParser::ERROR ? SEND_ERROR : SEND_END;
 	}
 	else if (count > 0)
 	{
 		LOG(DEBUG, "[%d] sendResponse() count = %d", m_socket->m_fd, count);
-		// NOTE: is it guaranteed that error page response is fully sent?
 	}
 	return SEND_NORMAL;
 }
 catch (runtime_error& e)
 {
-	// LOG(ERROR, "%s", e.what());
+	LOG(ERROR, "%s", e.what());
 	return SEND_ERROR;
 }
 
@@ -348,8 +343,6 @@ operator<<(std::ostream& os, const Request& request)
 	return (os);
 }
 
-// NOTE: static functions below which are initializing table should be removed and
-// instead use initalizer list in C++11 or higher.
 void
 RequestHandler::setMethodConvertTable()
 {

@@ -6,9 +6,9 @@
 #include "util/Util.hpp"
 #include "exception/ConfigParserException.hpp"
 #include "event/Server.hpp"
+#include "socket/Tcp.hpp"
 #include "parser/LocationParser.hpp"
 #include "parser/ServerParser.hpp"
-#include "socket/Tcp.hpp"
 
 using namespace std;
 
@@ -27,6 +27,7 @@ void	ServerParser::setServerSetterMap()
 	s_serverSetterMap["client_max_body_size"] = &ServerParser::setClientMaxBodySize;
 	s_serverSetterMap["autoindex"] = &ServerParser::setAutoIndex;
 	s_serverSetterMap["cgi_pass"] = &ServerParser::setCgiPass;
+	s_serverSetterMap["return"] = &ServerParser::setReturn;
 }
 
 // constructors & destructor
@@ -71,6 +72,7 @@ ServerParser::parseLocation(VirtualServer& server)
 void
 ServerParser::setIndex(VirtualServer& server)
 {
+	server.m_index.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
 		server.m_index.push_back(m_tokenizer.get());
@@ -81,11 +83,9 @@ ServerParser::setIndex(VirtualServer& server)
 void
 ServerParser::setServerNames(VirtualServer& server)
 {
-	// INFO: it would be better if token type is added for the token data.
 	server.m_serverNames.clear();
 	while (m_tokenizer.empty() == false && m_tokenizer.peek() != ";")
 	{
-		// if (checkServerName(m_tokenizer.peek()) == false) check "."
 		server.m_serverNames.push_back(m_tokenizer.get());
 	}
 	m_tokenizer.eat(";");
@@ -100,7 +100,6 @@ ServerParser::setListenAddress(VirtualServer& server)
 	uint64_t			addr = 0;
 	uint16_t			port = 0;
 
-	// TODO: we can simplify this function by using getaddrinfo(), not necessary though.
 	if (colonPos != string::npos || count(listenField.begin(), listenField.end(), '.') > 0)
 	{
 		uint16_t	addrPart = 0;
@@ -165,8 +164,6 @@ ServerParser::setErrorPage(VirtualServer& server)
 void
 ServerParser::setClientMaxBodySize(VirtualServer& server)
 {
-	// NOTE
-	// support 1k or 1m
 	server.m_clientMaxBodySize = Util::toInt(m_tokenizer.get());
 	m_tokenizer.eat(";");
 }
@@ -174,7 +171,14 @@ ServerParser::setClientMaxBodySize(VirtualServer& server)
 void
 ServerParser::setAutoIndex(VirtualServer& server)
 {
-	server.m_autoindex = m_tokenizer.get() == "on" ? true : false;
+	string	token = m_tokenizer.get();
+	if (token == "on")
+		server.m_autoindex = true;
+	else if (token == "off")
+		server.m_autoindex = false;
+	else
+		throw ConfigParser::ConfigParserException("invalid value \"" + token + "\" in \"autoindex\" directive, it must be \"on\" or \"off\".");
+
 	m_tokenizer.eat(";");
 }
 
@@ -196,10 +200,20 @@ ServerParser::setCgiPass(VirtualServer& server)
 }
 
 void
+ServerParser::setReturn(VirtualServer& server)
+{
+	server.m_return = m_tokenizer.get();
+	if (Util::checkUrl(server.m_return) == false)
+		throw ConfigParser::ConfigParserException("invalid URL in return field");
+	m_tokenizer.eat(";");
+}
+
+void
 ServerParser::setInheritedAttr(VirtualServer& server)
 {
 	map<string, Location>& locationTable = server.m_locationTable;
 
+	server.m_locationTable["/"];
 	map<string, Location>::iterator mapIt = locationTable.begin();
 	for (; mapIt != locationTable.end(); ++mapIt)
 	{
@@ -207,7 +221,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 
 		if (location.m_autoindex == -1)
 			location.m_autoindex = server.m_autoindex;
-		if (location.m_clientMaxBodySize == 0)
+		if (location.m_clientMaxBodySize == -1)
 			location.m_clientMaxBodySize = server.m_clientMaxBodySize;
 		if (location.m_root == "" && location.m_alias == "")
 			location.m_root = server.m_root;
@@ -215,5 +229,7 @@ ServerParser::setInheritedAttr(VirtualServer& server)
 			location.m_index = server.m_index;
 		if (location.m_errorPageTable.empty())
 			location.m_errorPageTable = server.m_errorPageTable;
+		if (location.m_return.empty())
+			location.m_return = server.m_return;
 	}
 }

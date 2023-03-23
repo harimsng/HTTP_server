@@ -6,37 +6,26 @@
 #include <string>
 #include <vector>
 
-// reference nginx index for more information.
-// these variables are not taken directly from config file. they are processed to handle easier.
+static const std::string	defaultExpires = "off";
 
-// ngx_http_headers_module
-static const std::string	expires = "off";
+static const std::string	defaultHttpIndex = "index.html";
 
-// ngx_http_index_module
-static const std::string	http_index = "index.html";
+static const bool			defaultAutoindex = false;
 
-// ngx_http_autoindex_module
-static const bool			autoindex = false;
+static const std::string	defaultCgiPass = "";
 
-// ngx_http_proxy_module
-// static const std::string	proxyPass = "";
+static const uint16_t		defaultLimitExcept = 0x1f;
+static const std::string	defaultRoot = "html";
+static const std::string	defaultAlias = "";
 
-// ngx_http_scgi_module
-static const std::string	cgiPass = "";
+static const int32_t		defaultClientMaxBodySize = INT32_MAX;
 
-// ngx_http_core_module
-static const uint16_t		limitExcept = 0x1f;
-static const std::string	root = "html";
-static const std::string	alias = "";
+static const std::string	defaultErrorPagePath = "";
 
-// if clientMaxBodySize = 0, it's unlimited.
-static const int64_t		clientMaxBodySize = 1000000;	// not necessary?
+static const int32_t		defaultListenIp = 0;
+static const int32_t		defaultListenPort = 8000;
+static const int32_t		defaultUriBufferSize = 8192;
 
-// static const std::vector<int16_t>	errorCode;
-static const std::string	errorPagePath = "";
-
-static const int32_t		listenIp = 0;
-static const int32_t		listenPort = 8000;
-static const int32_t		uriBufferSize = 8192;	// not necessary?
+static const std::string	defaultReturn= "";
 
 #endif

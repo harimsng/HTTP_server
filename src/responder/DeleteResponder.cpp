@@ -29,8 +29,7 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 	int		deleteStatus;
 	string	responseText = "File is deleted.";
 
-	deleteStatus = unlink(filePath.c_str());
-	// NOTE: referencing errno when there's no error is UB
+	deleteStatus = access(filePath.c_str(), W_OK);
 	if (deleteStatus < 0)
 	{
 		switch (errno)
@@ -50,14 +49,16 @@ DeleteResponder::deleteFile(const string& filePath, string& readBody)
 			case EPERM:
 				responseText = "Path is a directory";
 				break;
-			// NOTE: there're other errors except those above. they will directed here.
 			default:
 				responseText = "unlink error.";
 				break;
 		}
 	}
 	else
+	{
+		unlink(filePath.c_str());
 		responseText = "File is deleted.";
+	}
 	readBody =
 	"<!DOCTYPE html>\n"
 	"<html>\n"
@@ -78,9 +79,12 @@ DeleteResponder::respondWork()
 	string	readBody;
 	string	filePath = m_request.m_path + m_request.m_file;
 
+	if (m_request.m_status >= 300)
+		throw (m_request.m_status);
 	switch (m_responseStatus)
 	{
 		case RES_HEADER:
+			respondStatusLine(m_request.m_status);
 			respondHeader();
 			m_responseStatus = RES_CONTENT; // fall through
 		case RES_CONTENT:

@@ -18,12 +18,14 @@ VirtualServer::~VirtualServer()
 void
 VirtualServer::setToDefault()
 {
+	m_root = defaultRoot;
 	m_serverNames = vector<string>(1, "");
-	m_index = vector<string>(1, http_index);
-	m_autoindex = autoindex;
-	m_listen = GET_SOCKADDR_IN(listenIp, listenPort);
-	m_clientMaxBodySize = 1 << 13; // 8kb
-	m_addrKey.setAddrKey(listenIp, listenPort);
+	m_index = vector<string>(1, defaultHttpIndex);
+	m_autoindex = defaultAutoindex;
+	m_listen = GET_SOCKADDR_IN(defaultListenIp, defaultListenPort);
+	m_clientMaxBodySize = defaultClientMaxBodySize;
+	m_addrKey.setAddrKey(defaultListenIp, defaultListenPort);
+	m_return = defaultReturn;
 }
 
 std::ostream&
